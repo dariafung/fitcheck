@@ -110,6 +110,7 @@ describe("color rule", () => {
     expect(checkRules(named, bottom({ colorFamily: "red" })).pass).toBe(true);
     const unknown = top({ colorFamily: "fuchsia" });
     expect(unknown.colorFamily).toBeUndefined();
+    expect(unknown.tags.colorFamily).toBeUndefined();
     expect(checkRules(unknown, bottom({ colorFamily: "red" })).pass).toBe(true);
   });
 });

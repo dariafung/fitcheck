@@ -35,6 +35,16 @@ describe("itemTags", () => {
     const tags = itemTags({ category: "top", ai_tags: AI_TAGS, user_tags: { fit: "baggy" } });
     expect(tags.fit).toBe("regular");
   });
+
+  it("drops an invalid color family or temperature range but keeps the rest", () => {
+    const tags = itemTags({
+      category: "top",
+      ai_tags: { ...AI_TAGS, colorFamily: "rainbow", tempRangeF: { min: 50, max: 80 } },
+      user_tags: { fit: "relaxed", tempRangeF: { min: 90, max: 10 } },
+    });
+    expect(tags).toMatchObject({ fit: "relaxed", materials: ["cotton"], tempRangeF: { min: 50, max: 80 } });
+    expect(tags.colorFamily).toBeUndefined();
+  });
 });
 
 describe("tagGroups", () => {

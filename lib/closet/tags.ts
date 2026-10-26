@@ -18,6 +18,18 @@ export function categoryLabel(category: string): string {
   return CATEGORY_LABELS[category as Category] ?? category;
 }
 
+// Drops an invalid colorFamily or tempRangeF, so one bad value doesn't
+// throw away the rest of the tags.
+function withoutInvalidExtras(tags: unknown): unknown {
+  if (typeof tags !== "object" || tags === null) return tags;
+  const { colorFamily, tempRangeF, ...rest } = tags as Record<string, unknown>;
+  return {
+    ...rest,
+    ...(UserTags.shape.colorFamily.safeParse(colorFamily).success && { colorFamily }),
+    ...(UserTags.shape.tempRangeF.safeParse(tempRangeF).success && { tempRangeF }),
+  };
+}
+
 // Tags as the closet shows them: AI tags with user corrections on top. Items
 // without valid AI tags (e.g. entered by hand) still get their category.
 export function itemTags(row: {
@@ -25,8 +37,8 @@ export function itemTags(row: {
   ai_tags: unknown;
   user_tags: unknown;
 }): ItemTags {
-  const ai = ItemTags.safeParse(row.ai_tags);
-  const user = UserTags.safeParse(row.user_tags);
+  const ai = ItemTags.safeParse(withoutInvalidExtras(row.ai_tags));
+  const user = UserTags.safeParse(withoutInvalidExtras(row.user_tags));
   // Parsed rather than typed out, so the fallback survives schema changes
   // (keys the schema does not know are dropped).
   const base: ItemTags = ai.success

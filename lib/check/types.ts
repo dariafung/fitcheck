@@ -28,6 +28,18 @@ export function readColorFamily(rawTags: unknown): ColorFamily | undefined {
   return COLOR_FAMILIES.find((family) => family === value);
 }
 
+// Drops an invalid tempRangeF or colorFamily, so one bad value doesn't
+// invalidate the rest of the tags.
+function withoutInvalidExtras(rawTags: unknown): unknown {
+  if (typeof rawTags !== "object" || rawTags === null) return rawTags;
+  const { tempRangeF, colorFamily, ...rest } = rawTags as Record<string, unknown>;
+  return {
+    ...rest,
+    ...(readTempRange(rawTags) && { tempRangeF }),
+    ...(readColorFamily(rawTags) && { colorFamily }),
+  };
+}
+
 // Null when the tags don't validate (e.g. extraction not finished).
 export function toClosetItem(
   id: string,
@@ -35,13 +47,14 @@ export function toClosetItem(
   rawTags: unknown,
   updatedAt?: string,
 ): ClosetItem | null {
-  const parsed = ItemTags.safeParse(rawTags);
+  const cleaned = withoutInvalidExtras(rawTags);
+  const parsed = ItemTags.safeParse(cleaned);
   if (!parsed.success) return null;
   return {
     id,
     title,
     // Keep keys ItemTags doesn't know yet, so they round-trip.
-    tags: { ...(rawTags as object), ...parsed.data },
+    tags: { ...(cleaned as object), ...parsed.data },
     tempRangeF: readTempRange(rawTags),
     colorFamily: readColorFamily(rawTags),
     updatedAt,
