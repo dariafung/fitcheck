@@ -1,0 +1,29 @@
+{
+  "fn": "judgePairing",
+  "promptVersion": "judge-pairing@1",
+  "inputHash": "8fdce529198da676f1c86b435b9be835bbfa3f8071a72287ffddcecb2362ebed",
+  "inputPreview": "{\"pairs\":[{\"a\":{\"id\":\"852c8e3d-abf7-4955-ab65-9d83194a02ae\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White cotton button-down\"},\"b\":{\"id\":\"c",
+  "output": {
+    "results": [
+      {
+        "aId": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
+        "bId": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+        "pairs": true,
+        "reason": "Classic crisp white shirt balances dark denim perfectly."
+      },
+      {
+        "aId": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
+        "bId": "23c59091-9b18-4c24-92c3-1072a5581d8e",
+        "pairs": true,
+        "reason": "Fresh white sneakers echo crisp shirt nicely."
+      },
+      {
+        "aId": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+        "bId": "23c59091-9b18-4c24-92c3-1072a5581d8e",
+        "pairs": true,
+        "reason": "Clean white sneakers lighten dark denim effortlessly."
+      }
+    ]
+  },
+  "recordedAt": "2026-10-26T23:44:39.393Z"
+}

@@ -1,0 +1,26 @@
+{
+  "fn": "parseFeeling",
+  "promptVersion": "parse-feeling@1",
+  "inputHash": "7140182107b335d84d0c0da30284d9c60d0c694ac40922ade6f584476a69bf29",
+  "inputPreview": "{\"item\":{\"id\":\"852c8e3d-abf7-4955-ab65-9d83194a02ae\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White cotton button-down\"},\"text\":\"版型很好，显瘦，就是领",
+  "output": {
+    "flattering": "yes",
+    "liked": "unknown",
+    "bodyAreas": [
+      {
+        "area": "overall",
+        "sentiment": "positive"
+      },
+      {
+        "area": "neckline",
+        "sentiment": "negative"
+      }
+    ],
+    "occasions": [
+      "work"
+    ],
+    "mood": [],
+    "summary": "Flattering slim fit with tight neckline, ideal for work."
+  },
+  "recordedAt": "2026-10-26T23:46:17.298Z"
+}
