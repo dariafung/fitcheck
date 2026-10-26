@@ -4,7 +4,7 @@ Last updated: 2026-10-26
 
 ## Overview
 
-fitcheck is an AI wardrobe web app. Before you buy a piece, it tells you whether it suits you, how many items in your closet it pairs with, and whether it closes a gap or creates one. The demo flow: add clothes by link or screenshot → write or say how each piece feels → check an item you want to buy → see the score, the reasons and an outfit preview.
+fitcheck is an AI wardrobe web app. Before you buy a piece, it tells you whether it suits you, how many items in your closet it pairs with, and whether it closes a gap or creates one. The demo flow: add clothes from screenshots → write or say how each piece feels → check an item you want to buy → see the score, the reasons and an outfit preview.
 
 - **Event**: Meta Global AI Developer Hackathon, Indie track, solo
 - **Deadline**: 2026-11-04 9:00 PM ET (8:00 PM CT); target submission 5:00 PM CT that day
@@ -18,10 +18,10 @@ With all of P0 done and deployed, judges can walk through "add clothes → feeli
 | # | Feature | What it does | Done when | Model |
 | --- | --- | --- | --- | --- |
 | P0-1 | Profile | Body measurements, body shape, lifestyle mix (work / social / sport / home) | Can be saved and edited; used by the purchase check | — |
-| P0-2 | Add items: link + screenshot | Shopify stores and Amazon: paste a link and we fetch the page. Large retailers (e.g. lululemon): upload a screenshot of the product page → Spark identifies the product → `web_search` fills in material, fit, etc. → user confirms. Produces an item card | All 15–20 items of the demo persona added; 3–5 lululemon items added from screenshots with mostly correct attributes; user can edit tags | Spark 1.3 + web_search |
+| P0-2 | Add items: screenshot | Upload a screenshot of the product page → Spark identifies the product and points at the product photo → `web_search` fills in material, fit, etc. → user confirms or edits. The product photo is cropped out of the screenshot. Produces an item card | All 15–20 items of the demo persona added from screenshots with mostly correct attributes; user can edit tags | Spark 1.3 + web_search |
 | P0-3 | Free-text feelings | One text box per item, write anything; the backend extracts flattering, liked, body areas, occasions, mood | Raw text saved; structured fields generated without the user seeing or filling them | Spark 1.3 |
 | P0-4 | Wardrobe grid | Grid of all items; open one to see details and feelings | Works in mobile and desktop browsers | — |
-| P0-5 | Pairing | Rule pre-filter (complementary categories, formality, season, obvious color clashes) → Spark judges pairs in batches, results cached → code enumerates complete outfits: top + bottom + shoes, or one-piece + shoes; outerwear optional by season; accessories don't count | Spot checks of the persona's pairings look mostly right | Spark 1.3 |
+| P0-5 | Pairing | Rule pre-filter (complementary categories, formality, overlapping temperature ranges, obvious color clashes) → Spark judges pairs in batches, results cached → code enumerates complete outfits: top + bottom + shoes, or one-piece + shoes; outerwear optional by temperature; accessories don't count | Spot checks of the persona's pairings look mostly right | Spark 1.3 |
 | P0-6 | **Purchase check** | Four gap metrics computed in code: how many existing items it revives, how many outfits the new item forms, whether the gap for frequent occasions shrinks, whether it duplicates something owned (tuned during testing). Match score 0–100 computed in code; the model only answers yes/no questions and writes the reasons. Main signal: items the user marked as flattering or liked; body-shape rules get low weight and only feed the reasons | Two demo items give stable results: one closes a gap, one creates a gap; three runs on the same item agree (cache + deterministic scoring) | Spark 1.3 |
 | P0-7 | Demo data + deploy | Fictional demo persona; demo items preloaded; seed data read-only; visitor data isolated with one-click reset; rate limits + daily budget | Judges can use it from the link; a full run shows no console errors | — |
 
@@ -42,7 +42,7 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 | # | Feature | What it does | Model |
 | --- | --- | --- | --- |
 | P2-1 | SAM cutout | While reading product images, Spark also classifies them as flat-lay or on-model; only on-model images go to SAM, prompted with the category (e.g. "jacket"), producing a transparent cutout | Spark 1.3 + SAM 3.1 |
-| P2-2 | Photo entry | Older clothes with no link: upload a photo, SAM cuts it out, Spark tags it | Spark 1.3 + SAM 3.1 |
+| P2-2 | Photo entry | Older clothes with no product page: upload a photo, SAM cuts it out, Spark tags it | Spark 1.3 + SAM 3.1 |
 | P2-3 | Gap recommendations | When a gap is found, suggest the type of item that would fill it; mention the affiliate-commission model in the pitch, no real integration | Spark 1.3 |
 
 Rule: once P0 and P1 are done and at least half a day remains, build P2-1 → P2-2 → P2-3 in that order.
@@ -52,7 +52,7 @@ Rule: once P0 and P1 are done and at least half a day remains, build P2-1 → P2
 - Multi-user sign-up and full auth: one demo account only
 - Resale transactions, payments, shipping
 - Real affiliate-network or Amazon Creators API integration
-- Site-wide crawling: we only fetch the one page a user pastes
+- Fetching store pages: items are added from screenshots only
 - Native mobile app and app store release
 
 ## Tech plan
@@ -67,18 +67,17 @@ All AI goes through the Meta Model API (`https://api.meta.ai/v1`). No contributo
 | Database + storage | Supabase; no ORM, supabase-js + SQL migration files; secret key used server-side only; RLS on for every table with no policies; a daily scheduled ping keeps the free project from pausing |
 | Deploy | Vercel Hobby (functions up to 300 s; request body up to 4.5 MB, so large files upload straight to storage) |
 | Model calls | `openai` SDK + Responses API; `zod` for output schemas, one retry when validation fails |
-| Web pages and images | `cheerio` to parse pages, `turndown` to turn page content into text, `sharp` for server-side image processing |
+| Images | `sharp` for server-side image processing (cropping product photos out of screenshots) |
 | SAM mask decoding | `@meta-sam/parser` (added in P2) |
 
-**Item entry** (results from all steps are merged, not first-success-wins)
+**Item entry** (screenshot only)
 
-1. Shopify: when the response has `powered-by: Shopify`, append `.json` to the product URL for product data
-2. JSON-LD and Open Graph tags on the page
-3. Embedded page JSON (e.g. `__NEXT_DATA__`), trimmed and passed straight to Spark
-4. Cleaned page text + 1–3 product images
-5. Large retailers that block fetching (tested: Zara, Uniqlo, H&M, ASOS, Shein, lululemon): the user uploads a screenshot → Spark identifies the product → `web_search` fills in attributes with sources
+1. The user uploads a screenshot of the product page; the browser narrows it to 1600 px wide and keeps it under 4 MB (the request limit is 4.5 MB); the screenshot itself is not stored
+2. Spark identifies the product, says where the product photo sits in the screenshot, picks one color family from a fixed list (the store's color names are kept too), estimates the temperatures (°F) it is comfortable in from type and material, and `web_search` fills in attributes with sources
+3. Code checks that box and crops the product photo (WebP in storage); a box that is off falls back to the whole screenshot and is flagged for the user to check
+4. The user confirms or edits the card, then saves
 
-Whatever fields the first steps return, Spark always runs once: it treats known fields as facts and fills in fit, formality and season. Pasted URLs get an SSRF check, re-validated after redirects. Once deployed we fetch from data-center IPs, which is even harder, so all demo items are preloaded.
+We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M, ASOS, Shein, lululemon), and data-center IPs after deploy fare even worse. All demo items are preloaded.
 
 **AI layer**: every model call goes through one module with fixed JSON inputs and outputs (enforced with Spark structured output). Start with a mock implementation to get the UI working, then switch to real models.
 
@@ -122,8 +121,8 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 
 | Date | Tasks | Features |
 | --- | --- | --- |
-| Mon 10/26 | Confirm API access; scaffold Next.js, create tables; fetch test script on 10–15 links | Setup |
-| Tue 10/27 | Link + screenshot entry + `extractItem`; small test: screenshot + search, outfit image fidelity (1–2 hours) | P0-2, P1-2 |
+| Mon 10/26 | Confirm API access; scaffold Next.js, create tables; fetch test script on 10–15 links (led to screenshot-only entry) | Setup |
+| Tue 10/27 | Screenshot entry + `extractItem`; small test: screenshot + search, outfit image fidelity (1–2 hours) | P0-2, P1-2 |
 | Wed 10/28 | Typed and voice feelings, profile, wardrobe grid; enter the demo persona's wardrobe | P0-1/3/4, P1-1 |
 | Thu 10/29 | Pairing: rules + Spark, build the pairings table | P0-5 |
 | Fri 10/30 | Purchase check: score, gaps, pairing count | P0-6 |
@@ -137,14 +136,14 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 
 | Risk | Mitigation |
 | --- | --- |
-| Large retailers block fetching, worse from data-center IPs after deploy | Large retailers go through screenshot + search; demo items preloaded |
+| Store pages block fetching, worse from data-center IPs after deploy | Entry is screenshot + search only; demo items preloaded |
 | Screenshot + search misses details such as material | Verify in the small test; if missing, the user pastes that block of text |
 | Muse Image fidelity too low | Verify in the small test; otherwise show the collage only |
 | Purchase check results unstable | Code-computed scores, model only answers yes/no and writes reasons; caching; 10/31 checkpoint |
 | Charges go to the card once credits run out | In-app daily budget + rate limits; watch usage |
 | Supabase free project pauses after a week idle | Daily scheduled ping |
 | Judges break the demo data | Read-only seed data; visitor isolation + reset |
-| Scraping compliance | Fetch one page only when the user pastes a link; images shown only to that user; keep the source link |
+| Screenshot content | Only the cropped product photo is kept, shown only to that user |
 
 **Open items**
 
@@ -153,5 +152,5 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 - [x] Voice entry: P1, up to 3 minutes
 - [x] Meta API credits received
 - [ ] Small test: screenshot + search coverage, flat-lay outfit image fidelity (under $0.50; waiting on assets and key)
-- [ ] The demo persona's 15–20 items (links or screenshots)
+- [ ] The demo persona's 15–20 items (screenshots)
 - [ ] How long the judging period lasts (check the event page)
