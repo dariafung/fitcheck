@@ -88,7 +88,7 @@ Whatever fields the first steps return, Spark always runs once: it treats known 
 | `parseFeeling` | Free text → structured feelings | Spark 1.3 |
 | `transcribe` | Recording → text | Voice Transcribe |
 | `judgePairing` | Two items → pairs or not + reason | Spark 1.3 |
-| `scorePurchase` | New item + profile + wardrobe → match score, gaps, pairing count, reasons | Spark 1.3 |
+| `scorePurchase` | New item + profile + flattering/liked anchor items → yes/no answers with reasons (score, gaps and outfit count are computed in code) | Spark 1.3 |
 | `renderOutfit` | 3 item images → one outfit image | Muse Image |
 | `buildProfile` | All items + feelings → style profile | Spark 1.3 |
 | `segmentGarment` | On-model image + category word → transparent cutout (P2) | SAM 3.1 |
