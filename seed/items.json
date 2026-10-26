@@ -8,10 +8,11 @@
     "ai_tags": {
       "category": "top",
       "colors": [{ "name": "white" }],
+      "colorFamily": "white",
       "materials": ["cotton"],
       "fit": "regular",
       "formality": 3,
-      "seasons": ["spring", "summer", "fall"],
+      "tempRangeF": { "min": 55, "max": 85 },
       "occasions": ["work", "social"]
     }
   },
@@ -24,10 +25,11 @@
     "ai_tags": {
       "category": "bottom",
       "colors": [{ "name": "indigo" }],
+      "colorFamily": "denim",
       "materials": ["denim"],
       "fit": "regular",
       "formality": 2,
-      "seasons": ["spring", "fall", "winter"],
+      "tempRangeF": { "min": 40, "max": 80 },
       "occasions": ["work", "social"]
     }
   },
@@ -40,9 +42,10 @@
     "ai_tags": {
       "category": "shoes",
       "colors": [{ "name": "white" }],
+      "colorFamily": "white",
       "materials": ["leather"],
       "formality": 2,
-      "seasons": ["spring", "summer", "fall"],
+      "tempRangeF": { "min": 40, "max": 90 },
       "occasions": ["social", "home"]
     }
   }

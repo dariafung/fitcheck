@@ -16,7 +16,6 @@ const ITEM = {
     colors: [{ name: "white" }],
     materials: ["cotton"],
     formality: 3,
-    seasons: ["spring" as const],
     occasions: ["work" as const],
   },
 };

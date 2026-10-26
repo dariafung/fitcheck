@@ -47,7 +47,6 @@ describe("database + AI mock round trip", () => {
           colors: [],
           materials: [],
           formality: 2,
-          seasons: [],
           occasions: ["social"],
         },
       },

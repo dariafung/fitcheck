@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { COLOR_FAMILIES } from "@/lib/color-families";
+import { TempRangeF } from "@/lib/temperature";
 
 // An image or audio file passed to a model. Inline data is hashed by content
 // for replay keys, never stored whole.
@@ -23,7 +25,6 @@ export const Category = z.enum([
 ]);
 export type Category = z.infer<typeof Category>;
 
-export const Season = z.enum(["spring", "summer", "fall", "winter"]);
 export const Occasion = z.enum(["work", "social", "sport", "home"]);
 export type Occasion = z.infer<typeof Occasion>;
 export const Fit = z.enum(["slim", "regular", "relaxed", "oversized"]);
@@ -32,11 +33,15 @@ export const ItemTags = z.object({
   category: Category,
   subcategory: z.string().optional(),
   colors: z.array(z.object({ name: z.string(), hex: z.string().optional() })),
+  // One family from the shared list, for swatches and pairing color rules;
+  // `colors` keeps the store's own names.
+  colorFamily: z.enum(COLOR_FAMILIES).optional(),
   pattern: z.string().optional(),
   materials: z.array(z.string()),
   fit: Fit.optional(),
   formality: z.int().min(1).max(5),
-  seasons: z.array(Season),
+  // Comfortable temperatures in °F; replaces seasons.
+  tempRangeF: TempRangeF.optional(),
   occasions: z.array(Occasion),
   notes: z.string().optional(),
 });
