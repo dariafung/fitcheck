@@ -98,6 +98,22 @@ describe("POST /api/pairings", () => {
     expect(second.summary).toEqual(first.summary);
   });
 
+  it("stamps each verdict with the later updated_at of its two items, not the app clock", async () => {
+    await outfits();
+    const { data: items } = await db.from("items").select("id, updated_at").eq("user_id", userId).throwOnError();
+    const updatedAt = new Map(items.map((i) => [i.id, Date.parse(i.updated_at)]));
+    const { data: rows } = await db
+      .from("pairings")
+      .select("item_a_id, item_b_id, created_at")
+      .eq("user_id", userId)
+      .throwOnError();
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const later = Math.max(updatedAt.get(row.item_a_id)!, updatedAt.get(row.item_b_id)!);
+      expect(Date.parse(row.created_at)).toBe(later);
+    }
+  });
+
   it("only re-asks pairs of an item whose tags changed", async () => {
     const first = await outfits();
     const jeans = byTitle("Dark straight-leg jeans");

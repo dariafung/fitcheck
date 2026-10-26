@@ -25,8 +25,9 @@ export interface CachedPairing {
   created_at: string;
 }
 
-// A cached AI verdict is reused only for the current prompt and only if it
-// was made after both items last changed (e.g. the user edited a tag).
+// A cached AI verdict is reused only for the current prompt and only if
+// neither item changed since the version that was judged (created_at, see
+// saveVerdicts in pairings.ts), e.g. the user edited a tag.
 export function isFresh(
   row: CachedPairing,
   items: ReadonlyMap<string, ClosetItem>,

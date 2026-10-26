@@ -82,9 +82,22 @@ async function loadCachedPairings(db: Db, userId: string): Promise<CachedPairing
   }
 }
 
-async function saveVerdicts(db: Db, userId: string, verdicts: PairVerdict[]) {
-  // created_at doubles as "judged at" for the freshness check.
-  const judgedAt = new Date().toISOString();
+// pairings.created_at holds the version of the tags that was judged: the later
+// updated_at of the two items as read, not the time of judging. Both sides of
+// the freshness check then come from the database clock, so app and database
+// clocks drifting apart can't make a verdict look stale or fresh by mistake.
+function judgedVersion(a: ClosetItem | undefined, b: ClosetItem | undefined): string {
+  const stamps = [a?.updatedAt, b?.updatedAt].filter((s): s is string => Boolean(s));
+  if (stamps.length === 0) return new Date().toISOString();
+  return stamps.reduce((x, y) => (Date.parse(y) > Date.parse(x) ? y : x));
+}
+
+async function saveVerdicts(
+  db: Db,
+  userId: string,
+  verdicts: PairVerdict[],
+  byId: ReadonlyMap<string, ClosetItem>,
+) {
   await db
     .from("pairings")
     .upsert(
@@ -96,7 +109,7 @@ async function saveVerdicts(db: Db, userId: string, verdicts: PairVerdict[]) {
         reason: v.reason,
         source: "ai",
         prompt_version: PROMPT_VERSION,
-        created_at: judgedAt,
+        created_at: judgedVersion(byId.get(v.aId), byId.get(v.bId)),
       })),
       { onConflict: "item_a_id,item_b_id" },
     )
@@ -159,7 +172,7 @@ export async function resolveCompatibility(
   const toJudge = [...needed].filter(([key]) => !verdicts.has(key)).map(([, pair]) => pair);
   const judged = await judgeInBatches(toJudge, judge, async (batch) => {
     const keep = batch.filter((v) => cacheable(v.aId, v.bId));
-    if (keep.length > 0) await saveVerdicts(db, userId, keep);
+    if (keep.length > 0) await saveVerdicts(db, userId, keep, byId);
   });
   for (const [key, verdict] of judged.verdicts) verdicts.set(key, verdict.pairs);
 
