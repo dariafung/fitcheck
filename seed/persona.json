@@ -1,0 +1,14 @@
+{
+  "id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+  "display_name": "Demo Persona",
+  "height_cm": 165,
+  "weight_kg": 58,
+  "bust_cm": 86,
+  "waist_cm": 70,
+  "hip_cm": 94,
+  "inseam_cm": 76,
+  "body_shape": "pear",
+  "lifestyle_mix": { "work": 50, "social": 20, "sport": 15, "home": 15 },
+  "resale_opt_in": true,
+  "is_seed": true
+}

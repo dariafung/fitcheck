@@ -1,0 +1,49 @@
+[
+  {
+    "id": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
+    "status": "active",
+    "entry_method": "manual",
+    "title": "White cotton button-down",
+    "category": "top",
+    "ai_tags": {
+      "category": "top",
+      "colors": [{ "name": "white" }],
+      "materials": ["cotton"],
+      "fit": "regular",
+      "formality": 3,
+      "seasons": ["spring", "summer", "fall"],
+      "occasions": ["work", "social"]
+    }
+  },
+  {
+    "id": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+    "status": "active",
+    "entry_method": "manual",
+    "title": "Dark straight-leg jeans",
+    "category": "bottom",
+    "ai_tags": {
+      "category": "bottom",
+      "colors": [{ "name": "indigo" }],
+      "materials": ["denim"],
+      "fit": "regular",
+      "formality": 2,
+      "seasons": ["spring", "fall", "winter"],
+      "occasions": ["work", "social"]
+    }
+  },
+  {
+    "id": "23c59091-9b18-4c24-92c3-1072a5581d8e",
+    "status": "active",
+    "entry_method": "manual",
+    "title": "White leather sneakers",
+    "category": "shoes",
+    "ai_tags": {
+      "category": "shoes",
+      "colors": [{ "name": "white" }],
+      "materials": ["leather"],
+      "formality": 2,
+      "seasons": ["spring", "summer", "fall"],
+      "occasions": ["social", "home"]
+    }
+  }
+]
