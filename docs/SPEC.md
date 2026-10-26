@@ -107,10 +107,9 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 | Table | Main fields | Priority |
 | --- | --- | --- |
 | `users` | Measurements, body shape, lifestyle mix, resale opt-in | P0 |
-| `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / idle / passing on) | P0 |
+| `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / passing on) | P0 |
 | `item_feelings` | Raw text, source (typed / voice), structured fields | P0 |
 | `pairings` | Item A, item B, pairs or not, reason, source (rule / AI) | P0 |
-| `purchase_checks` | Product, match score, gap result, paired items, reasons, outfit image | P0 |
 | `style_profiles` | Suits, avoid, frequent occasions, generated at | P1 |
 | `outfit_logs` | Date, items, occasion | P1 |
 | `resale_buyers` | Preset buyer profiles and preferences | P1 |

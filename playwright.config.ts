@@ -27,6 +27,6 @@ export default defineConfig({
     command: `node node_modules/next/dist/bin/next start --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,
-    env: { ...readLocalSupabase(), AI_MODE: "mock", NEXT_TELEMETRY_DISABLED: "1" },
+    env: { ...readLocalSupabase(), AI_MODE: "mock", WEATHER_MODE: "fixed", NEXT_TELEMETRY_DISABLED: "1" },
   },
 });

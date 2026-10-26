@@ -121,32 +121,6 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"purchase_checks": {
-                  Row: {
-                    "candidate_item_id": string,"created_at": string,"gap_result": Json | null,"id": string,"input_hash": string,"match_score": number | null,"outfit_image_path": string | null,"paired_item_ids": (string)[],"reasons": Json | null,"scoring_version": string,"user_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "candidate_item_id": string,"created_at"?: string,"gap_result"?: Json | null,"id"?: string,"input_hash": string,"match_score"?: number | null,"outfit_image_path"?: string | null,"paired_item_ids"?: (string)[],"reasons"?: Json | null,"scoring_version": string,"user_id": string
-                  }
-                  Update: {
-                    "candidate_item_id"?: string,"created_at"?: string,"gap_result"?: Json | null,"id"?: string,"input_hash"?: string,"match_score"?: number | null,"outfit_image_path"?: string | null,"paired_item_ids"?: (string)[],"reasons"?: Json | null,"scoring_version"?: string,"user_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "purchase_checks_candidate_item_id_fkey"
-      columns: ["candidate_item_id"]
-isOneToOne: false
-      referencedRelation: "items"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "purchase_checks_user_id_fkey"
-      columns: ["user_id"]
-isOneToOne: false
-      referencedRelation: "users"
-      referencedColumns: ["id"]
-    }
-                  ]
                 },"resale_buyers": {
                   Row: {
                     "created_at": string,"id": string,"name": string,"preferences": NonNullable<Json>,"profile": NonNullable<Json>
