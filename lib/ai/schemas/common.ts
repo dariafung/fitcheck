@@ -25,7 +25,7 @@ export const Category = z.enum([
 ]);
 export type Category = z.infer<typeof Category>;
 
-export const Occasion = z.enum(["work", "social", "sport", "home"]);
+export const Occasion = z.enum(["work", "school", "social", "sport", "home"]);
 export type Occasion = z.infer<typeof Occasion>;
 export const Fit = z.enum(["slim", "regular", "relaxed", "oversized"]);
 
@@ -74,12 +74,18 @@ export const FeelingStructured = z.object({
 });
 export type FeelingStructured = z.infer<typeof FeelingStructured>;
 
-// Percentages per occasion; the profile form keeps them summing to 100.
+// Most different outfits one occasion can want in a season.
+export const MAX_OUTFITS_WANTED = 30;
+
+const OutfitsWanted = z.int().min(0).max(MAX_OUTFITS_WANTED);
+
+// How many different outfits the user wants per season for each occasion.
 export const LifestyleMix = z.object({
-  work: z.number().min(0).max(100),
-  social: z.number().min(0).max(100),
-  sport: z.number().min(0).max(100),
-  home: z.number().min(0).max(100),
+  work: OutfitsWanted,
+  school: OutfitsWanted,
+  social: OutfitsWanted,
+  sport: OutfitsWanted,
+  home: OutfitsWanted,
 });
 export type LifestyleMix = z.infer<typeof LifestyleMix>;
 

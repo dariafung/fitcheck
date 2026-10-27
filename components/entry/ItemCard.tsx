@@ -18,7 +18,7 @@ const CATEGORIES: [Category, string][] = [
 ];
 const FITS = ["slim", "regular", "relaxed", "oversized"] as const;
 const FORMALITY = ["Lounge", "Casual", "Smart casual", "Business", "Formal"];
-const OCCASIONS: Occasion[] = ["work", "social", "sport", "home"];
+const OCCASIONS: Occasion[] = ["work", "school", "social", "sport", "home"];
 
 const FIELD =
   "w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 dark:border-white/20";
