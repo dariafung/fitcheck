@@ -3,6 +3,8 @@ import { readLocalSupabase } from "./scripts/lib/local-supabase.mjs";
 
 // Serves the existing production build: run `pnpm build` first.
 const PORT = 5129;
+const PROFILE_SPEC = /closet\/profile\.spec\.ts$/;
+const CHROME = { ...devices["Desktop Chrome"], launchOptions: { args: ["--mute-audio"] } };
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -17,10 +19,16 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: {
-        ...devices["Desktop Chrome"],
-        launchOptions: { args: ["--mute-audio"] },
-      },
+      testIgnore: PROFILE_SPEC,
+      use: CHROME,
+    },
+    // Writes the shared demo persona's profile, so it runs after everything
+    // else that reads it.
+    {
+      name: "profile",
+      testMatch: PROFILE_SPEC,
+      dependencies: ["chromium"],
+      use: CHROME,
     },
   ],
   webServer: {
