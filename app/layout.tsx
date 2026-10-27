@@ -18,11 +18,6 @@ export const metadata: Metadata = {
   description: "Check if a piece works with your closet before you buy it.",
 };
 
-const NAV = [
-  { href: "/closet", label: "Closet" },
-  { href: "/profile", label: "Profile" },
-];
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -31,20 +26,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <header className="border-b border-black/10 dark:border-white/15">
-          <nav className="mx-auto flex max-w-3xl items-center gap-4 overflow-x-auto px-4 py-3 text-sm">
+          <nav className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3 text-sm">
             <Link href="/" className="font-semibold">
               fitcheck
             </Link>
-            {NAV.map((item) => (
-              <Link key={item.href} href={item.href} className="hover:underline">
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              href="/check"
-              className="ml-auto shrink-0 rounded-full bg-foreground px-3 py-1.5 font-medium text-background"
-            >
-              Should I buy this?
+            <span aria-hidden="true" className="text-foreground/40">
+              ·
+            </span>
+            <Link href="/closet" className="hover:underline">
+              Closet
+            </Link>
+            <Link href="/profile" className="ml-auto hover:underline">
+              Profile
             </Link>
           </nav>
         </header>
