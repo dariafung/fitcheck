@@ -18,7 +18,7 @@ const CATEGORIES: [Category, string][] = [
 ];
 const FITS = ["slim", "regular", "relaxed", "oversized"] as const;
 const FORMALITY = ["Lounge", "Casual", "Smart casual", "Business", "Formal"];
-const OCCASIONS: Occasion[] = ["work", "social", "sport", "home"];
+const OCCASIONS: Occasion[] = ["work", "school", "social", "sport", "home"];
 
 const FIELD =
   "w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 dark:border-white/20";
@@ -66,10 +66,16 @@ export function ItemCard({
   draft,
   saving,
   onSave,
+  submitLabel = "Save to closet",
+  busyLabel = "Saving…",
+  hint = "Fix anything that's off, then save.",
 }: {
   draft: ItemDraft;
   saving: boolean;
   onSave: (item: EditedItem) => void;
+  submitLabel?: string;
+  busyLabel?: string;
+  hint?: string;
 }) {
   const [title, setTitle] = useState(draft.title);
   const [brand, setBrand] = useState(draft.brand ?? "");
@@ -165,7 +171,7 @@ export function ItemCard({
       <div className="flex min-w-0 flex-col gap-4">
         <div>
           <h2 className="text-lg font-semibold">Look right?</h2>
-          <p className="text-sm opacity-70">Fix anything that&apos;s off, then save.</p>
+          <p className="text-sm opacity-70">{hint}</p>
         </div>
 
         <Field label="Name" unsure={unsure.has("title")}>
@@ -302,7 +308,7 @@ export function ItemCard({
           disabled={saving || !title.trim() || !!temp.problem}
           className="mt-2 rounded-full bg-foreground px-5 py-2.5 font-medium text-background disabled:opacity-50 sm:self-start"
         >
-          {saving ? "Saving…" : "Save to closet"}
+          {saving ? busyLabel : submitLabel}
         </button>
       </div>
     </form>

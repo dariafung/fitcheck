@@ -132,6 +132,9 @@ export interface PairingStats {
 
 export interface Compatibility {
   compatible: Compatible;
+  // Passes the rules and the model didn't say no. Pairs outside every
+  // possible outfit are never judged, so this is the most we know of them.
+  mightPair: Compatible;
   stats: PairingStats;
 }
 
@@ -178,6 +181,7 @@ export async function resolveCompatibility(
 
   return {
     compatible: (a, b) => passesRules(a, b) && verdicts.get(pairKey(a.id, b.id)) === true,
+    mightPair: (a, b) => passesRules(a, b) && verdicts.get(pairKey(a.id, b.id)) !== false,
     stats: {
       rulePairs: rulePass.size,
       ruleRejected,
@@ -209,4 +213,43 @@ export async function computeClosetOutfits(
   const uncached = new Set(candidate ? [CANDIDATE_ITEM_ID] : []);
   const { compatible, stats } = await resolveCompatibility(db, userId, all, judge, uncached);
   return { ...enumerateOutfits(all, compatible), stats, skippedItemIds };
+}
+
+export interface CandidateComparison {
+  candidate: ClosetItem;
+  compatible: Compatible;
+  mightPair: Compatible;
+  // The closet's outfits without and with the candidate. The closet doesn't
+  // change in between, so every outfit `after` adds contains the candidate.
+  before: OutfitSet;
+  after: OutfitSet;
+  stats: PairingStats;
+}
+
+// Before and after for one candidate from a single round of judging: the
+// pairs needed with the candidate are a superset of those needed without it.
+export async function compareWithCandidate(
+  db: Db,
+  userId: string,
+  closet: readonly ClosetItem[],
+  judge: JudgeFn,
+  candidate: CandidateItem,
+): Promise<CandidateComparison> {
+  const added: ClosetItem = { ...candidate, id: CANDIDATE_ITEM_ID };
+  const all = [...closet, added];
+  const { compatible, mightPair, stats } = await resolveCompatibility(
+    db,
+    userId,
+    all,
+    judge,
+    new Set([CANDIDATE_ITEM_ID]),
+  );
+  return {
+    candidate: added,
+    compatible,
+    mightPair,
+    before: enumerateOutfits(closet, compatible),
+    after: enumerateOutfits(all, compatible),
+    stats,
+  };
 }
