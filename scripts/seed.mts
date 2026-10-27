@@ -1,4 +1,4 @@
-// Loads the fictional demo persona and items into the local database.
+// Loads the fictional demo persona, items and feelings into the local database.
 // Idempotent: rows have fixed ids and are upserted. Refuses non-local URLs.
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
@@ -19,6 +19,9 @@ const persona = readJson("persona.json") as { id: string };
 const items = (readJson("items.json") as Record<string, unknown>[]).map(
   (item) => ({ ...item, user_id: persona.id }),
 );
+const feelings = (readJson("feelings.json") as Record<string, unknown>[]).map(
+  (feeling) => ({ ...feeling, user_id: persona.id }),
+);
 
 const db = createClient(url, key, { auth: { persistSession: false } });
 
@@ -26,5 +29,7 @@ const users = await db.from("users").upsert(persona);
 if (users.error) throw users.error;
 const upserted = await db.from("items").upsert(items);
 if (upserted.error) throw upserted.error;
+const felt = await db.from("item_feelings").upsert(feelings);
+if (felt.error) throw felt.error;
 
-console.log(`Seeded 1 persona and ${items.length} items.`);
+console.log(`Seeded 1 persona, ${items.length} items and ${feelings.length} feelings.`);
