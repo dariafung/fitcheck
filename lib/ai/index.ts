@@ -1,6 +1,9 @@
 // The only entry point for model calls. Import from Route Handlers only.
 import { defineAiFunction } from "./define";
+import { liveExtractItem } from "./live/extract-item";
+import { liveJudgePairing } from "./live/judge-pairing";
 import { notImplemented } from "./live/not-implemented";
+import { liveParseFeeling } from "./live/parse-feeling";
 import { mockBuildProfile } from "./mock/build-profile";
 import { mockExtractItem } from "./mock/extract-item";
 import { mockJudgePairing } from "./mock/judge-pairing";
@@ -24,7 +27,7 @@ export const extractItem = defineAiFunction({
   input: extractItemSchema.ExtractItemInput,
   output: extractItemSchema.ExtractItemOutput,
   mock: mockExtractItem,
-  live: notImplemented("extractItem"),
+  live: liveExtractItem,
 });
 
 export const parseFeeling = defineAiFunction({
@@ -33,7 +36,7 @@ export const parseFeeling = defineAiFunction({
   input: parseFeelingSchema.ParseFeelingInput,
   output: parseFeelingSchema.ParseFeelingOutput,
   mock: mockParseFeeling,
-  live: notImplemented("parseFeeling"),
+  live: liveParseFeeling,
 });
 
 export const transcribe = defineAiFunction({
@@ -51,7 +54,7 @@ export const judgePairing = defineAiFunction({
   input: judgePairingSchema.JudgePairingInput,
   output: judgePairingSchema.JudgePairingOutput,
   mock: mockJudgePairing,
-  live: notImplemented("judgePairing"),
+  live: liveJudgePairing,
 });
 
 export const scorePurchase = defineAiFunction({

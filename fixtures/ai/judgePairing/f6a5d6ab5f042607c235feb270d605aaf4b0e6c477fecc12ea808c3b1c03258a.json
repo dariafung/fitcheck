@@ -1,0 +1,131 @@
+{
+  "fn": "judgePairing",
+  "promptVersion": "judge-pairing@1",
+  "inputHash": "f6a5d6ab5f042607c235feb270d605aaf4b0e6c477fecc12ea808c3b1c03258a",
+  "inputPreview": "{\"pairs\":[{\"a\":{\"id\":\"0ac227eb-d87c-4edc-bd99-815e88993365\",\"tags\":{\"category\":\"shoes\",\"colorFamily\":\"black\",\"colors\":[{\"name\":\"black\"}],\"formality\":3,\"materials\":[],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":60,\"min\":10}},\"title\":\"Black ankle boots\"},\"b\":{\"id\":\"16816343-a0f6-4a25-b1df-f763b6",
+  "output": {
+    "results": [
+      {
+        "aId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "bId": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "pairs": true,
+        "reason": "Classic black boots and light denim contrast nicely."
+      },
+      {
+        "aId": "2fbebb8f-3099-4889-af8b-346cc7de573d",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Dark denim and black boots create sleek casual balance."
+      },
+      {
+        "aId": "41d1f581-0108-4997-a3e9-5c06feafd0ef",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Sleek boots complement feminine wrap dress silhouette well."
+      },
+      {
+        "aId": "432a90cd-60bd-4366-ac59-26c059c7e8cf",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Casual gray tee grounds edgy black boots nicely."
+      },
+      {
+        "aId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "bId": "5d7f0eaf-8e55-46fc-a528-cede369a2fd1",
+        "pairs": true,
+        "reason": "Monochrome black pairing feels modern and cohesive."
+      },
+      {
+        "aId": "7abdf754-db3a-49f5-91cf-a8f8988ed975",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Black leggings and boots create sleek streamlined look."
+      },
+      {
+        "aId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "bId": "93cf3279-cbb5-4b82-a81d-a3b3223db846",
+        "pairs": true,
+        "reason": "Camel coat and black boots are timeless chic combination."
+      },
+      {
+        "aId": "ad173eac-0b0b-4ef7-8505-421a7a8b1613",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "All-black sweater and boots look sleek and intentional."
+      },
+      {
+        "aId": "ad372297-ddda-4065-a206-3d4896daed1c",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Tailored trousers pair sharply with sleek ankle boots."
+      },
+      {
+        "aId": "d8fc4d41-fd8b-4d02-befb-2acfa5026406",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Black boots ground bold red pleated skirt perfectly."
+      },
+      {
+        "aId": "f06222fb-82ba-483b-8359-3f0d12337f88",
+        "bId": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "pairs": true,
+        "reason": "Crisp white shirt pops nicely against black boots."
+      },
+      {
+        "aId": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "bId": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "pairs": true,
+        "reason": "Light denim jacket layers perfectly over cream sundress."
+      },
+      {
+        "aId": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "bId": "5d7f0eaf-8e55-46fc-a528-cede369a2fd1",
+        "pairs": false,
+        "reason": "Bulky sporty puffer overwhelms delicate airy sundress."
+      },
+      {
+        "aId": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "bId": "644bf735-edcc-4ef8-ae1d-b9721829d1e0",
+        "pairs": true,
+        "reason": "Tan sandals and cream dress feel light and summery."
+      },
+      {
+        "aId": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "bId": "93cf3279-cbb5-4b82-a81d-a3b3223db846",
+        "pairs": true,
+        "reason": "Camel coat adds polished warmth to cream dress."
+      },
+      {
+        "aId": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "bId": "a6963ef8-8fc6-4d5b-af0b-4f7d6ceaa21a",
+        "pairs": false,
+        "reason": "Athletic running shoes clash with delicate sundress vibe."
+      },
+      {
+        "aId": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "bId": "dda762cd-90be-4e73-9a53-696319f9b220",
+        "pairs": true,
+        "reason": "White sneakers keep cream sundress fresh and casual."
+      },
+      {
+        "aId": "2fbebb8f-3099-4889-af8b-346cc7de573d",
+        "bId": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "pairs": true,
+        "reason": "Mixed-wash denim pairing feels balanced and modern."
+      },
+      {
+        "aId": "3462b3ea-a8a6-41da-9eb5-704d37a8656a",
+        "bId": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "pairs": false,
+        "reason": "Performance athletic tank clashes with casual denim jacket style."
+      },
+      {
+        "aId": "41d1f581-0108-4997-a3e9-5c06feafd0ef",
+        "bId": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "pairs": true,
+        "reason": "Casual denim jacket softens elegant navy wrap dress."
+      }
+    ]
+  },
+  "recordedAt": "2026-10-26T23:44:52.328Z"
+}

@@ -39,6 +39,22 @@ export class AiReplayMissError extends AiError {
   }
 }
 
+export class AiBudgetError extends AiError {
+  constructor(fn: string) {
+    super(`${fn}: daily AI budget reached`, fn, 429);
+  }
+}
+
+// The model API itself failed (after the SDK's retry): network, 4xx or 5xx.
+export class AiUpstreamError extends AiError {
+  constructor(
+    fn: string,
+    readonly upstreamStatus: number | undefined,
+  ) {
+    super(`${fn}: model API request failed (${upstreamStatus ?? "no response"})`, fn, 502);
+  }
+}
+
 export class AiNotConfiguredError extends AiError {
   constructor(fn: string, reason: string) {
     super(`${fn}: ${reason}`, fn, 503);

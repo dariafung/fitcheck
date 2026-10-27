@@ -1,0 +1,24 @@
+{
+  "fn": "parseFeeling",
+  "promptVersion": "parse-feeling@1",
+  "inputHash": "4a5f6612d8d53259848b1eeab7f0df4add575f7f9acfb81379b5d4759df407f8",
+  "inputPreview": "{\"item\":{\"id\":\"c81b2b56-1f62-4284-83b6-7307a6355ac5\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"denim\",\"colors\":[{\"name\":\"indigo\"}],\"fit\":\"regular\",\"formality\":2,\"materials\":[\"denim\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":80,\"min\":40}},\"title\":\"Dark straight-leg jeans\"},\"text\":\"Never wea",
+  "output": {
+    "flattering": "no",
+    "liked": "no",
+    "bodyAreas": [
+      {
+        "area": "waist",
+        "sentiment": "negative"
+      },
+      {
+        "area": "legs",
+        "sentiment": "negative"
+      }
+    ],
+    "occasions": [],
+    "mood": [],
+    "summary": "Unworn jeans dig at the waist and shorten the legs."
+  },
+  "recordedAt": "2026-10-26T23:46:03.826Z"
+}
