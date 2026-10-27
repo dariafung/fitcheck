@@ -1,18 +1,18 @@
 {
   "fn": "parseFeeling",
-  "promptVersion": "parse-feeling@1",
-  "inputHash": "b1eb78976a79ead66c3779e304d94c0b5b8f684a83a1ce41a550d0a1aa1ddf27",
+  "promptVersion": "parse-feeling@2",
+  "inputHash": "45a70834d908c8c09f33150993a0524ab2c2d2cb14e2c610a8d5fa9865628884",
   "inputPreview": "{\"item\":{\"id\":\"23c59091-9b18-4c24-92c3-1072a5581d8e\",\"tags\":{\"category\":\"shoes\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"formality\":2,\"materials\":[\"leather\"],\"occasions\":[\"social\",\"home\"],\"tempRangeF\":{\"max\":90,\"min\":40}},\"title\":\"White leather sneakers\"},\"text\":\"Wore them to brunch and a ",
   "output": {
     "flattering": "unknown",
-    "liked": "unknown",
+    "liked": "yes",
     "bodyAreas": [],
     "occasions": [
       "social",
       "sport"
     ],
     "mood": [],
-    "summary": "White leather sneakers worn for brunch and long walk without issues."
+    "summary": "White leather sneakers worn to brunch and long walk with no complaints."
   },
-  "recordedAt": "2026-10-26T23:46:09.106Z"
+  "recordedAt": "2026-10-27T00:26:39.483Z"
 }
