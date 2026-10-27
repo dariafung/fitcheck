@@ -48,6 +48,7 @@ describe("mock mode", () => {
       () => ai.parseFeeling({ text: "Love it", item: ITEM }),
       () => ai.transcribe({ audio: IMAGE }),
       () => ai.judgePairing({ pairs: [{ a: ITEM, b: OTHER }] }),
+      () => ai.judgeRepeat({ candidate: ITEM, closet: [OTHER] }),
       () =>
         ai.scorePurchase({
           candidate: ITEM,

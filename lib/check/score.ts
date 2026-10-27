@@ -1,6 +1,7 @@
-// The 0–100 match score: five parts, all computed in code. Values are
-// exported so they can be tuned during testing.
-import type { DuplicateTier } from "./gaps";
+// The 0–100 match score: five parts, added up in code. The model scores
+// "suits you" and "not a repeat"; the other three are counted here. Values
+// are exported so they can be tuned during testing.
+import { FIT_SCORE_MAX } from "../ai/schemas/score-purchase";
 
 export const MAX_POINTS = {
   suitsYou: 40,
@@ -10,10 +11,10 @@ export const MAX_POINTS = {
   notRepeat: 10,
 } as const;
 
-// Suits you: each "yes" earns this; a question with nothing to compare
-// against earns half.
-export const POINTS_PER_YES = 8;
-export const NO_DATA_POINTS = POINTS_PER_YES / 2;
+// Suits you: the model scores each question 0–8; a question with nothing to
+// compare against earns half.
+export const POINTS_PER_QUESTION = FIT_SCORE_MAX;
+export const NO_DATA_POINTS = POINTS_PER_QUESTION / 2;
 
 // Each outfit the candidate forms; 8 outfits fill the part.
 export const POINTS_PER_OUTFIT = 2.5;
@@ -25,12 +26,6 @@ export const POINTS_PER_REVIVED = 4;
 // times how short it was (short / wanted, before the candidate). Outfits past
 // the shortfall earn nothing; occasions add up to the part's max.
 export const GAP_POINTS_PER_OUTFIT = 5;
-
-export const DUPLICATE_POINTS: Record<DuplicateTier, number> = {
-  near_identical: 0,
-  similar: 5,
-  none: 10,
-};
 
 export function countPoints(count: number, perEach: number, max: number): number {
   return Math.min(count * perEach, max);

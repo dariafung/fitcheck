@@ -2,13 +2,12 @@ import { describe, expect, it } from "vitest";
 import { FIT_QUESTIONS } from "./fit-questions";
 import {
   countPoints,
-  DUPLICATE_POINTS,
   GAP_POINTS_PER_OUTFIT,
   MAX_POINTS,
   NO_DATA_POINTS,
   occasionPoints,
   POINTS_PER_OUTFIT,
-  POINTS_PER_YES,
+  POINTS_PER_QUESTION,
   POINTS_PER_REVIVED,
   roundPart,
 } from "./score";
@@ -16,7 +15,7 @@ import {
 describe("score parts", () => {
   it("adds up to 100", () => {
     expect(Object.values(MAX_POINTS).reduce((a, b) => a + b, 0)).toBe(100);
-    expect(FIT_QUESTIONS.length * POINTS_PER_YES).toBe(MAX_POINTS.suitsYou);
+    expect(FIT_QUESTIONS.length * POINTS_PER_QUESTION).toBe(MAX_POINTS.suitsYou);
     expect(NO_DATA_POINTS).toBe(4);
   });
 
@@ -48,10 +47,6 @@ describe("score parts", () => {
     // Nothing added, or nothing wanted.
     expect(occasionPoints(2, 2, 4)).toBe(0);
     expect(occasionPoints(0, 2, 0)).toBe(0);
-  });
-
-  it("repeat tiers top out at the part's max", () => {
-    expect(Math.max(...Object.values(DUPLICATE_POINTS))).toBe(MAX_POINTS.notRepeat);
   });
 
   it("keeps one decimal per part", () => {

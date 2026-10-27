@@ -67,41 +67,6 @@ export function revivedItemIds(
   );
 }
 
-export type DuplicateTier = "none" | "similar" | "near_identical";
-
-// "T-Shirt", "t shirt" and "tshirt" compare equal.
-function normalize(text: string | undefined): string | undefined {
-  const plain = text?.toLowerCase().replace(/[^a-z0-9]/g, "");
-  return plain || undefined;
-}
-
-// Same category and color family is similar; with the same fit and no
-// conflicting subcategory too, it's near identical. No color family, no match.
-export function duplicateTier(candidate: ClosetItem, owned: ClosetItem): DuplicateTier {
-  if (categoryOf(candidate) !== categoryOf(owned)) return "none";
-  if (!candidate.colorFamily || candidate.colorFamily !== owned.colorFamily) return "none";
-  const fitA = candidate.tags.fit;
-  const subA = normalize(candidate.tags.subcategory);
-  const subB = normalize(owned.tags.subcategory);
-  const sameFit = fitA !== undefined && fitA === owned.tags.fit;
-  const subConflict = subA !== undefined && subB !== undefined && subA !== subB;
-  return sameFit && !subConflict ? "near_identical" : "similar";
-}
-
-// The closest owned item; on a tie, the first in the list.
-export function findDuplicate(
-  candidate: ClosetItem,
-  closet: readonly ClosetItem[],
-): { tier: DuplicateTier; item: ClosetItem | null } {
-  let best: { tier: DuplicateTier; item: ClosetItem | null } = { tier: "none", item: null };
-  for (const item of closet) {
-    const tier = duplicateTier(candidate, item);
-    if (tier === "near_identical") return { tier, item };
-    if (tier === "similar" && best.tier === "none") best = { tier, item };
-  }
-  return best;
-}
-
 // The slots an outfit around a candidate of this category needs filled, as
 // alternatives: shoes go with a top and bottom, or with a one-piece.
 export const SLOTS_NEEDED: Record<Exclude<Category, "accessory">, Category[][]> = {

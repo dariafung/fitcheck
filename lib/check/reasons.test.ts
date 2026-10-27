@@ -3,7 +3,6 @@ import {
   fillsGapReason,
   gapReason,
   NO_LIFESTYLE_REASON,
-  notRepeatReason,
   outfitsReason,
   revivesReason,
   suitsYouReason,
@@ -19,9 +18,10 @@ describe("reasons", () => {
     );
   });
 
-  it("counts yes answers, leaving out unasked ones", () => {
-    expect(suitsYouReason([{ answer: true }, { answer: false }, { answer: null }])).toBe("Yes to 1 of 2.");
-    expect(suitsYouReason([{ answer: null }])).toBe("Not enough to go on yet.");
+  it("says how many questions had nothing to go on", () => {
+    expect(suitsYouReason([{ score: 6 }, { score: 0 }])).toBe("Scored on what you said about your clothes.");
+    expect(suitsYouReason([{ score: 6 }, { score: null }, { score: null }])).toBe("Half marks on 2 with nothing to go on.");
+    expect(suitsYouReason([{ score: null }])).toBe("Not enough to go on yet.");
   });
 
   it("explains the occasion gap", () => {
@@ -34,10 +34,6 @@ describe("reasons", () => {
     expect(fillsGapReason("already_enough", [sport], true)).toBe("Adds 2 for sport, but you already have enough.");
     expect(fillsGapReason("none", [], true)).toBe("Doesn't add outfits for any occasion.");
     expect(fillsGapReason("none", [], false)).toBe(NO_LIFESTYLE_REASON);
-  });
-
-  it("names the duplicate", () => {
-    expect(notRepeatReason("similar", "Black flats")).toBe("A lot like your Black flats.");
   });
 
   it("says which slot is missing", () => {

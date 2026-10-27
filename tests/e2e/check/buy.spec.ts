@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { MOCK_INCOMPLETE_TITLE } from "../../../lib/ai/mock/score-purchase";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { CANDIDATE_ITEM_ID } from "../../../lib/check/pairings";
+import { INCOMPLETE_NOTICE } from "../../../lib/check/reasons";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
@@ -49,10 +51,15 @@ test("check an item: screenshot, confirm, score, check another", async ({ page }
   await card.getByRole("button", { name: "Check it" }).click();
   const result = page.getByRole("region", { name: "Result" });
   await expect(result.getByRole("heading", { name: "Black loafers" })).toBeVisible();
-  await expect(result.getByTestId("score")).toHaveText(/^\d{1,3}$/);
+  await expect(result.getByTestId("score")).toHaveText(/^\d{1,3}(\.\d)?$/);
   for (const part of ["Suits you", "Outfits", "Revives", "Fills a gap", "Not a repeat"]) {
     await expect(result.getByText(part, { exact: true })).toBeVisible();
   }
+  // Each fit question shows its own score out of 8.
+  await result.getByText("Why", { exact: true }).click();
+  const why = result.locator("details li");
+  await expect(why).toHaveCount(5);
+  for (const row of await why.all()) await expect(row).toHaveText(/^\d\/8/);
 
   // Nothing about the item was kept.
   expect(await itemsTitled("Black loafers")).toEqual([]);
@@ -66,6 +73,26 @@ test("check an item: screenshot, confirm, score, check another", async ({ page }
   await result.getByRole("button", { name: "Check another" }).click();
   await expect(result).toBeHidden();
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
+});
+
+test("when the AI doesn't finish, try again sends the same item", async ({ page }) => {
+  const sent: string[] = [];
+  page.on("request", (r) => {
+    if (r.method() === "POST" && new URL(r.url()).pathname === "/api/checks") sent.push(r.postData() ?? "");
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Name").fill(MOCK_INCOMPLETE_TITLE);
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+
+  await expect(page.getByRole("status")).toContainText(INCOMPLETE_NOTICE);
+  await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect.poll(() => sent.length).toBe(2);
+  expect(sent[1]).toBe(sent[0]);
+  await expect(page.getByRole("status")).toContainText(INCOMPLETE_NOTICE);
+  await expect(page.getByRole("button", { name: "Try again" })).toBeEnabled();
 });
 
 test("accessories aren't scored yet", async ({ page }) => {

@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Category, LifestyleMix, Occasion } from "../ai/schemas/common";
-import { SAMPLE_CLOSET } from "./fixtures";
 import {
-  duplicateTier,
-  findDuplicate,
   missingSlots,
   occasionGap,
   occasionTier,
@@ -86,41 +83,6 @@ describe("revivedItemIds", () => {
     const before = { a: 0, b: 2, c: 0 };
     const after = { a: 1, b: 3, c: 0, [CANDIDATE_ITEM_ID]: 4 };
     expect(revivedItemIds(before, after)).toEqual(["a"]);
-  });
-});
-
-describe("duplicates", () => {
-  it("near identical: same category, color family and fit", () => {
-    const owned = item("top", { colorFamily: "white", fit: "regular", subcategory: "T-shirt" });
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "regular", subcategory: "t shirt" }), owned)).toBe("near_identical");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "regular" }), owned)).toBe("near_identical");
-  });
-
-  it("similar: same category and color family only", () => {
-    const owned = item("top", { colorFamily: "white", fit: "regular", subcategory: "t-shirt" });
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "slim" }), owned)).toBe("similar");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "regular", subcategory: "blouse" }), owned)).toBe("similar");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white" }), owned)).toBe("similar");
-  });
-
-  it("none: other category or color, or no color family", () => {
-    const owned = item("top", { colorFamily: "white", fit: "regular" });
-    expect(duplicateTier(candidateOf("bottom", { colorFamily: "white", fit: "regular" }), owned)).toBe("none");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "black", fit: "regular" }), owned)).toBe("none");
-    expect(duplicateTier(candidateOf("top", { fit: "regular" }), item("top", { fit: "regular" }))).toBe("none");
-  });
-
-  it("finds the closest owned item", () => {
-    const similar = item("top", { colorFamily: "white" });
-    const same = item("top", { colorFamily: "white", fit: "slim" });
-    const result = findDuplicate(candidateOf("top", { colorFamily: "white", fit: "slim" }), [similar, same]);
-    expect(result).toEqual({ tier: "near_identical", item: same });
-    expect(findDuplicate(candidateOf("shoes", { colorFamily: "white" }), [similar]).tier).toBe("none");
-  });
-
-  it("flags the sample closet's white sneakers", () => {
-    const sneakers = candidateOf("shoes", { colorFamily: "white" });
-    expect(findDuplicate(sneakers, SAMPLE_CLOSET).item?.title).toBe("White leather sneakers");
   });
 });
 

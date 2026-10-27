@@ -1,0 +1,12 @@
+{
+  "fn": "judgeRepeat",
+  "promptVersion": "judge-repeat@1",
+  "inputHash": "7433c360c980425929a31efa61541bf03eceb083ac8910e5f9569550e1309387",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"navy\",\"colors\":[{\"name\":\"navy\"}],\"fit\":\"relaxed\",\"formality\":3,\"materials\":[\"wool blend\"],\"notes\":\"elastic back waist, full-length\",\"occasions\":[\"school\",\"work\"],\"subcategory\":\"trousers\",\"tempRangeF\"",
+  "output": {
+    "score": 7,
+    "closestId": "ad372297-ddda-4065-a206-3d4896daed1c",
+    "reason": "You already own black tailored trousers, but these are navy and more relaxed."
+  },
+  "recordedAt": "2026-10-27T18:11:33.802Z"
+}

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { ExtractWire } from "./extract-item";
 import { PairingWire } from "./judge-pairing";
+import { RepeatWire } from "./judge-repeat";
 import { FeelingWire } from "./parse-feeling";
+import { ScoreWire } from "./score-purchase";
 import { strictJsonSchema } from "./strict-schema";
 
 // Meta's strict subset (dev.meta.ai/docs/structured-output): closed, fully
@@ -39,6 +41,8 @@ describe("strictJsonSchema", () => {
     ["feeling", FeelingWire],
     ["pairings", PairingWire],
     ["item", ExtractWire],
+    ["fit_answers", ScoreWire],
+    ["repeat", RepeatWire],
   ])("%s fits the strict subset", (_, schema) => {
     expect(strictProblems(strictJsonSchema(schema))).toEqual([]);
   });

@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { aiErrorResponse, judgePairing, scorePurchase } from "@/lib/ai";
+import { aiErrorResponse, judgePairing, judgeRepeat, scorePurchase } from "@/lib/ai";
 import { ItemTags } from "@/lib/ai/schemas/common";
-import { runBuyCheck } from "@/lib/check/buy-check";
+import { isIncomplete, runBuyCheck } from "@/lib/check/buy-check";
+import { INCOMPLETE_ERROR, INCOMPLETE_NOTICE } from "@/lib/check/reasons";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 
@@ -10,7 +11,8 @@ const CheckRequest = z.object({
   tags: ItemTags,
 });
 
-// POST { title, tags } → { result } or { unsupported, message }. Checks one
+// POST { title, tags } → { result }, { unsupported, message } or, when the
+// model never finished scoring, { error: "incomplete", message }. Checks one
 // item against the current user's closet. Nothing about the item is stored
 // or cached, so every call asks the model again; the score itself is
 // computed in code. Other body fields (price included) are ignored.
@@ -23,10 +25,12 @@ export async function POST(request: Request) {
     const check = await runBuyCheck(createServerClient(), currentUserId(), parsed.data, {
       judge: judgePairing,
       score: scorePurchase,
+      repeat: judgeRepeat,
     });
     if (!check) return Response.json({ error: "User not found" }, { status: 404 });
     return Response.json(check);
   } catch (err) {
+    if (isIncomplete(err)) return Response.json({ error: INCOMPLETE_ERROR, message: INCOMPLETE_NOTICE });
     return aiErrorResponse(err);
   }
 }

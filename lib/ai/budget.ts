@@ -16,6 +16,7 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   extractItem: 0.05,
   parseFeeling: 0.015,
   judgePairing: 0.035,
+  judgeRepeat: 0.02,
   transcribe: 0.05,
   scorePurchase: 0.05,
   renderOutfit: 0.05,
