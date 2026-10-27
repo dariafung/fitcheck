@@ -1,0 +1,12 @@
+{
+  "fn": "judgeRepeat",
+  "promptVersion": "judge-repeat@1",
+  "inputHash": "9bb0647fe8ae10b008de606160b4cf2709921db5d156fde6e1bf4620ceb6fa44",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"yellow\",\"colors\":[{\"name\":\"mustard\"}],\"fit\":\"slim\",\"formality\":2,\"materials\":[\"polyester\",\"elastane\"],\"notes\":\"cropped above the waist\",\"occasions\":[\"social\"],\"pattern\":\"ribbed\",\"tempRangeF\":{\"max\":85,\"",
+  "output": {
+    "score": 8,
+    "closestId": "432a90cd-60bd-4366-ac59-26c059c7e8cf",
+    "reason": "Your gray crewneck tee is closest, but this mustard cropped cut feels quite different."
+  },
+  "recordedAt": "2026-10-27T18:11:53.156Z"
+}

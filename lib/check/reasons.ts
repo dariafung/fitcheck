@@ -1,6 +1,6 @@
 // Result-page copy for the parts computed in code. Same numbers, same words.
 import type { Category, Occasion } from "../ai/schemas/common";
-import type { DuplicateTier, MissingSlot, OccasionChange, OccasionGapTier } from "./gaps";
+import type { MissingSlot, OccasionChange, OccasionGapTier } from "./gaps";
 
 const PLURAL: Record<Category, string> = {
   top: "tops",
@@ -25,10 +25,11 @@ function list(words: string[]): string {
     : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
 }
 
-export function suitsYouReason(answers: { answer: boolean | null }[]): string {
-  const asked = answers.filter((a) => a.answer !== null);
-  if (asked.length === 0) return "Not enough to go on yet.";
-  return `Yes to ${asked.filter((a) => a.answer).length} of ${asked.length}.`;
+export function suitsYouReason(answers: { score: number | null }[]): string {
+  const unasked = answers.filter((a) => a.score === null).length;
+  if (unasked === answers.length) return "Not enough to go on yet.";
+  if (unasked === 0) return "Scored on what you said about your clothes.";
+  return `Half marks on ${unasked} with nothing to go on.`;
 }
 
 export function outfitsReason(count: number): string {
@@ -66,11 +67,8 @@ export function fillsGapReason(
     .join(" ");
 }
 
-export function notRepeatReason(tier: DuplicateTier, title: string | null): string {
-  if (tier === "near_identical") return `Almost the same as your ${title}.`;
-  if (tier === "similar") return `A lot like your ${title}.`;
-  return "Nothing quite like it in your closet.";
-}
+// Not a repeat, when there's nothing in the closet to ask the model about.
+export const EMPTY_CLOSET_REPEAT_REASON = "Nothing in your closet to repeat.";
 
 // Shown when the candidate forms no outfit at all.
 export function gapReason(slots: MissingSlot[]): string {
@@ -85,3 +83,8 @@ export function gapReason(slots: MissingSlot[]): string {
 }
 
 export const ACCESSORY_NOTICE = "Accessories aren't supported yet. Try clothes or shoes.";
+
+// Sent with a 200 when the model never finished scoring; the page offers to
+// try again.
+export const INCOMPLETE_ERROR = "incomplete";
+export const INCOMPLETE_NOTICE = "The AI didn't finish this time.";

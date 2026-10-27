@@ -1,5 +1,6 @@
 // "Should I buy this?" for one candidate: compare the closet's outfits with
-// and without it, ask the model the fit questions, score it all in code.
+// and without it, have the model score the fit questions and how much it
+// repeats the closet, add it all up in code.
 // The candidate is never stored: not in items, not in pairings, not cached.
 import {
   FeelingStructured,
@@ -8,6 +9,8 @@ import {
   type ItemTags,
   type ProfileSummary,
 } from "../ai/schemas/common";
+import { AiOutputError } from "../ai/errors";
+import type { JudgeRepeatInput, JudgeRepeatOutput } from "../ai/schemas/judge-repeat";
 import type { ScorePurchaseInput, ScorePurchaseOutput } from "../ai/schemas/score-purchase";
 import { imageUrls } from "../closet/images";
 import type { Db } from "../db/server";
@@ -22,11 +25,9 @@ import {
   type FitAnswer,
 } from "./fit-questions";
 import {
-  findDuplicate,
   missingSlots,
   occasionGap,
   revivedItemIds,
-  type DuplicateTier,
   type MissingSlot,
   type OccasionChange,
   type OccasionGapTier,
@@ -40,24 +41,24 @@ import {
 } from "./pairings";
 import {
   ACCESSORY_NOTICE,
+  EMPTY_CLOSET_REPEAT_REASON,
   fillsGapReason,
   gapReason,
-  notRepeatReason,
   outfitsReason,
   revivesReason,
   suitsYouReason,
 } from "./reasons";
 import {
-  DUPLICATE_POINTS,
+  countPoints,
   MAX_POINTS,
-  OCCASION_GAP_POINTS,
-  OUTFIT_TIERS,
-  REVIVE_TIERS,
-  tierPoints,
+  POINTS_PER_OUTFIT,
+  POINTS_PER_REVIVED,
+  roundPart,
 } from "./score";
 import { categoryOf, toClosetItem, type ClosetItem } from "./types";
 
 export type ScoreFn = (input: ScorePurchaseInput) => Promise<ScorePurchaseOutput>;
+export type RepeatFn = (input: JudgeRepeatInput) => Promise<JudgeRepeatOutput>;
 
 // Example outfits shown with the result.
 export const SAMPLE_OUTFITS = 3;
@@ -85,7 +86,8 @@ export interface BuyCheckResult {
     outfits: Part & { count: number };
     revives: Part & { items: { id: string; title: string }[] };
     fillsGap: Part & { tier: OccasionGapTier; occasions: OccasionChange[] };
-    notRepeat: Part & { tier: DuplicateTier; item: { id: string; title: string } | null };
+    // The owned item it's most like, per the model.
+    notRepeat: Part & { item: { id: string; title: string } | null };
   };
   // Set only when the candidate forms no outfit at all.
   gap: { slots: MissingSlot[]; reason: string } | null;
@@ -96,6 +98,12 @@ export interface BuyCheckResult {
 export type BuyCheck =
   | { result: BuyCheckResult }
   | { unsupported: Extract<Category, "accessory">; message: string };
+
+// The scoring models still left something out after every retry: the check
+// has no score, and the page offers to try again.
+export function isIncomplete(err: unknown): boolean {
+  return err instanceof AiOutputError && (err.fn === "scorePurchase" || err.fn === "judgeRepeat");
+}
 
 export interface Candidate {
   title: string;
@@ -173,6 +181,21 @@ async function askFit(
   return { answers: fitAnswers(asked, output), summary: output.summary };
 }
 
+async function askRepeat(
+  repeat: RepeatFn,
+  candidate: ClosetItem,
+  closet: readonly ClosetItem[],
+): Promise<{ points: number; reason: string; item: { id: string; title: string } | null }> {
+  if (closet.length === 0) return { points: MAX_POINTS.notRepeat, reason: EMPTY_CLOSET_REPEAT_REASON, item: null };
+  const output = await repeat({ candidate: toItemSummary(candidate), closet: closet.map(toItemSummary) });
+  const closest = closet.find((i) => i.id === output.closestId);
+  return {
+    points: output.score,
+    reason: output.reason,
+    item: closest ? { id: closest.id, title: closest.title } : null,
+  };
+}
+
 async function sampleOutfits(
   db: Db,
   itemIdLists: string[][],
@@ -205,7 +228,7 @@ export async function runBuyCheck(
   db: Db,
   userId: string,
   input: Candidate,
-  ai: { judge: JudgeFn; score: ScoreFn },
+  ai: { judge: JudgeFn; score: ScoreFn; repeat: RepeatFn },
 ): Promise<BuyCheck | null> {
   const candidate = toClosetItem(CANDIDATE_ITEM_ID, input.title, input.tags);
   if (!candidate) throw new Error("Invalid candidate tags");
@@ -220,10 +243,11 @@ export async function runBuyCheck(
   if (!profile) return null;
   const feelings = await loadFeelings(db, userId, new Set(closet.map((i) => i.id)));
 
-  // The model never sees the gap numbers, so both calls can run at once.
-  const [comparison, fit] = await Promise.all([
+  // The model never sees the gap numbers, so all the calls can run at once.
+  const [comparison, fit, repeat] = await Promise.all([
     compareWithCandidate(db, userId, closet, ai.judge, candidate),
     askFit(ai.score, candidate, closet, feelings, profile.summary),
+    askRepeat(ai.repeat, candidate, closet),
   ]);
   const { before, after } = comparison;
 
@@ -234,8 +258,6 @@ export async function runBuyCheck(
     title: titles.get(id) ?? "",
   }));
   const gapByOccasion = occasionGap(profile.mix, before.summary.byOccasion, after.summary.byOccasion);
-  const duplicate = findDuplicate(candidate, closet);
-  const duplicateOf = duplicate.item && { id: duplicate.item.id, title: duplicate.item.title };
 
   const parts: BuyCheckResult["parts"] = {
     suitsYou: {
@@ -245,30 +267,24 @@ export async function runBuyCheck(
       answers: fit.answers,
     },
     outfits: {
-      points: tierPoints(outfitCount, OUTFIT_TIERS),
+      points: roundPart(countPoints(outfitCount, POINTS_PER_OUTFIT, MAX_POINTS.outfits)),
       max: MAX_POINTS.outfits,
       reason: outfitsReason(outfitCount),
       count: outfitCount,
     },
     revives: {
-      points: tierPoints(revived.length, REVIVE_TIERS),
+      points: roundPart(countPoints(revived.length, POINTS_PER_REVIVED, MAX_POINTS.revives)),
       max: MAX_POINTS.revives,
       reason: revivesReason(revived.map((r) => r.title)),
       items: revived,
     },
     fillsGap: {
-      points: OCCASION_GAP_POINTS[gapByOccasion.tier],
+      ...gapByOccasion,
+      points: roundPart(gapByOccasion.points),
       max: MAX_POINTS.fillsGap,
       reason: fillsGapReason(gapByOccasion.tier, gapByOccasion.occasions, profile.mix !== null),
-      ...gapByOccasion,
     },
-    notRepeat: {
-      points: DUPLICATE_POINTS[duplicate.tier],
-      max: MAX_POINTS.notRepeat,
-      reason: notRepeatReason(duplicate.tier, duplicateOf?.title ?? null),
-      tier: duplicate.tier,
-      item: duplicateOf,
-    },
+    notRepeat: { ...repeat, max: MAX_POINTS.notRepeat },
   };
 
   const slots = outfitCount === 0 ? missingSlots(candidate, closet, comparison.mightPair) : null;
@@ -279,7 +295,7 @@ export async function runBuyCheck(
 
   return {
     result: {
-      score: Object.values(parts).reduce((sum, p) => sum + p.points, 0),
+      score: roundPart(Object.values(parts).reduce((sum, p) => sum + p.points, 0)),
       summary: fit.summary,
       parts,
       gap: slots && { slots, reason: gapReason(slots) },

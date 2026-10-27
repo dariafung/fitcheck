@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { AiOutputError } from "../ai/errors";
 import type { Category, FeelingAspect, FeelingStructured } from "../ai/schemas/common";
 import {
   FIT_QUESTIONS,
   fitAnswers,
   hasBasis,
-  NO_ANSWER_REASON,
   NO_DATA_REASON,
   pickFeltItems,
   toFeltItem,
@@ -12,7 +12,7 @@ import {
 } from "./fit-questions";
 import { makeItem } from "./fixtures";
 import { CANDIDATE_ITEM_ID } from "./pairings";
-import { NO_DATA_POINTS, POINTS_PER_YES } from "./score";
+import { NO_DATA_POINTS, POINTS_PER_QUESTION } from "./score";
 
 let next = 0;
 function item(category: Category) {
@@ -114,24 +114,30 @@ describe("toFeltItem", () => {
 });
 
 describe("fitAnswers", () => {
-  it("scores yes, no, missing answers and unasked questions", () => {
-    const [cut, trouble, color] = FIT_QUESTIONS;
-    const answers = fitAnswers([cut, trouble, color], {
+  it("takes the model's scores and gives half to unasked questions", () => {
+    const [cut, trouble] = FIT_QUESTIONS;
+    const answers = fitAnswers([cut, trouble], {
       answers: [
-        { id: cut.id, answer: true, reason: "Same wide leg." },
-        { id: trouble.id, answer: false, reason: "Clings at the hips." },
+        { id: cut.id, score: 7, reason: "Same wide leg." },
+        { id: trouble.id, score: 1, reason: "Clings at the hips." },
       ],
       summary: "",
     });
-    expect(answers.map((a) => [a.id, a.answer, a.points])).toEqual([
-      [cut.id, true, POINTS_PER_YES],
-      [trouble.id, false, 0],
-      [color.id, false, 0],
+    expect(answers.map((a) => [a.id, a.score, a.points])).toEqual([
+      [cut.id, 7, 7],
+      [trouble.id, 1, 1],
+      ["color_liked", null, NO_DATA_POINTS],
       ["style_liked", null, NO_DATA_POINTS],
       ["feel_liked", null, NO_DATA_POINTS],
     ]);
-    expect(answers[2].reason).toBe(NO_ANSWER_REASON);
-    expect(answers[3].reason).toBe(NO_DATA_REASON);
+    expect(answers.every((a) => a.max === POINTS_PER_QUESTION)).toBe(true);
+    expect(answers[2].reason).toBe(NO_DATA_REASON);
+  });
+
+  it("gives no score at all when an asked question has no answer", () => {
+    const [cut, trouble] = FIT_QUESTIONS;
+    const output = { answers: [{ id: cut.id, score: 7, reason: "Same wide leg." }], summary: "" };
+    expect(() => fitAnswers([cut, trouble], output)).toThrow(AiOutputError);
   });
 
   it("gives half points everywhere when nothing was asked", () => {

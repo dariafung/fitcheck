@@ -2,11 +2,13 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/checks/route";
 import * as ai from "@/lib/ai";
+import { MOCK_INCOMPLETE_TITLE } from "@/lib/ai/mock/score-purchase";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import type { BuyCheck, BuyCheckResult } from "@/lib/check/buy-check";
 import { FIT_QUESTIONS } from "@/lib/check/fit-questions";
 import { CANDIDATE_ITEM_ID } from "@/lib/check/pairings";
-import { NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
+import { INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
+import { roundPart } from "@/lib/check/score";
 import { createServerClient } from "@/lib/db/server";
 
 // Spies on the model calls while keeping the mock answers.
@@ -15,6 +17,7 @@ vi.mock("@/lib/ai", async (importOriginal) => {
   return {
     ...actual,
     judgePairing: vi.fn(actual.judgePairing),
+    judgeRepeat: vi.fn(actual.judgeRepeat),
     scorePurchase: vi.fn(actual.scorePurchase),
   };
 });
@@ -129,17 +132,19 @@ afterAll(async () => {
 
 beforeEach(() => {
   vi.mocked(ai.judgePairing).mockClear();
+  vi.mocked(ai.judgeRepeat).mockClear();
   vi.mocked(ai.scorePurchase).mockClear();
 });
 
 describe("POST /api/checks", () => {
   it("scores an item that closes a gap", async () => {
     const r = await result(LOAFERS);
-    expect(r.parts.outfits).toMatchObject({ count: 1, points: 8 });
+    expect(r.parts.outfits).toMatchObject({ count: 1, points: 2.5 });
     expect(r.parts.revives.items.map((i) => i.id).sort()).toEqual([shirtId, trousersId].sort());
-    expect(r.parts.revives.points).toBe(10);
-    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 15, reason: "Work: 3 short, this adds 1." });
-    expect(r.parts.notRepeat).toMatchObject({ tier: "none", points: 10 });
+    expect(r.parts.revives.points).toBe(8);
+    // Work: 3 of 3 short, adds 1.
+    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 5, reason: "Work: 3 short, this adds 1." });
+    expect(r.parts.notRepeat).toMatchObject({ points: 10, item: null });
     expect(r.gap).toBeNull();
     expect(r.sampleOutfits).toHaveLength(1);
     expect(r.sampleOutfits[0].pieces.map((p) => [p.title, p.isCandidate])).toEqual([
@@ -147,11 +152,11 @@ describe("POST /api/checks", () => {
       ["Black trousers", false],
       ["Black loafers", true],
     ]);
-    expect(r.score).toBe(Object.values(r.parts).reduce((s, p) => s + p.points, 0));
+    expect(r.score).toBe(roundPart(Object.values(r.parts).reduce((s, p) => s + p.points, 0)));
 
     // Every question had something to compare against.
     expect(r.parts.suitsYou.answers).toHaveLength(FIT_QUESTIONS.length);
-    expect(r.parts.suitsYou.answers.every((a) => a.answer !== null)).toBe(true);
+    expect(r.parts.suitsYou.answers.every((a) => a.score !== null)).toBe(true);
     const [input] = vi.mocked(ai.scorePurchase).mock.calls[0];
     expect(input.troubleAreas).toEqual(["hips"]);
     // Every felt item goes in, the one they dislike too.
@@ -166,6 +171,9 @@ describe("POST /api/checks", () => {
       ]),
     );
     expect(input.profile).toMatchObject({ bodyShape: "pear", lifestyleMix: MIX });
+    // The repeat check sees the whole closet.
+    const [repeatInput] = vi.mocked(ai.judgeRepeat).mock.calls[0];
+    expect(repeatInput.closet.map((i) => i.id).sort()).toEqual([shirtId, trousersId].sort());
   });
 
   it("scores an item that creates a gap and says what's missing", async () => {
@@ -193,13 +201,14 @@ describe("POST /api/checks", () => {
     expect(runs.map((r) => r.stats.cached)).toEqual([1, 1, 1]);
     expect(runs.every((r) => r.stats.judged === 2)).toBe(true);
     expect(vi.mocked(ai.scorePurchase)).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(ai.judgeRepeat)).toHaveBeenCalledTimes(3);
     // Mock answers depend only on the input, so the score repeats.
     expect(new Set(runs.map((r) => r.score)).size).toBe(1);
   });
 
   it("finds near duplicates", async () => {
     const r = await result({ title: "Another white shirt", tags: tags({ category: "top", colorFamily: "white" }) });
-    expect(r.parts.notRepeat).toMatchObject({ tier: "similar", points: 5, item: { id: shirtId, title: "White shirt" } });
+    expect(r.parts.notRepeat).toMatchObject({ points: 4, item: { id: shirtId, title: "White shirt" } });
   });
 
   it("doesn't score accessories", async () => {
@@ -207,6 +216,12 @@ describe("POST /api/checks", () => {
     expect(json).toEqual({ unsupported: "accessory", message: expect.stringContaining("Accessories") });
     expect(ai.judgePairing).not.toHaveBeenCalled();
     expect(ai.scorePurchase).not.toHaveBeenCalled();
+    expect(ai.judgeRepeat).not.toHaveBeenCalled();
+  });
+
+  it("gives no score when the model never answers every question", async () => {
+    const json = await check({ title: MOCK_INCOMPLETE_TITLE, tags: LOAFERS.tags });
+    expect(json).toEqual({ error: INCOMPLETE_ERROR, message: INCOMPLETE_NOTICE });
   });
 
   it("rejects an invalid item", async () => {

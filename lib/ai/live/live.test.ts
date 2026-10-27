@@ -3,7 +3,7 @@ import type { Response } from "openai/resources/responses/responses";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetBudget, spentTodayUsd } from "../budget";
 import { AiNotConfiguredError, AiOutputError, AiUpstreamError } from "../errors";
-import { extractItem, judgePairing, parseFeeling } from "../index";
+import { extractItem, judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "../index";
 import { MODEL } from "./respond";
 
 const create = vi.fn();
@@ -227,5 +227,152 @@ describe("extractItem", () => {
       extractItem({ knownFields: {}, images: [{ kind: "storage", path: "a/b.webp" }], allowWebSearch: false }, LIVE),
     ).rejects.toBeInstanceOf(AiNotConfiguredError);
     expect(create).not.toHaveBeenCalled();
+  });
+});
+
+describe("scorePurchase", () => {
+  const LIFESTYLE = { work: 0, school: 3, social: 2, sport: 3, home: 3 };
+  const QUESTIONS = [
+    { id: "cut", text: "Is the cut like the flattering ones?" },
+    { id: "color", text: "Is the color liked?" },
+    { id: "feel", text: "Does it feel right?" },
+  ];
+  const input = {
+    candidate: { ...SHIRT, id: "00000000-0000-4000-8000-000000000000", title: "Slim boat-neck top" },
+    profile: { bodyShape: "pear", heightCm: 165, lifestyleMix: LIFESTYLE },
+    feltItems: [
+      {
+        ...SHIRT,
+        feeling: {
+          flattering: "yes" as const,
+          liked: "yes" as const,
+          aspects: [
+            { aspect: "feel" as const, sentiment: "positive" as const, said: "comfortable", means: "comfortable" },
+            { aspect: "fit" as const, sentiment: "negative" as const, area: "shoulders", said: "tight", means: "narrow shoulders" },
+          ],
+          mood: [],
+          summary: "",
+        },
+      },
+      {
+        ...JEANS,
+        feeling: {
+          flattering: "no" as const,
+          liked: "no" as const,
+          aspects: [
+            { aspect: "fit" as const, sentiment: "negative" as const, area: "waist", said: "digs in", means: "needs a roomier waist" },
+          ],
+          mood: [],
+          summary: "Never worn.",
+        },
+      },
+    ],
+    troubleAreas: ["shoulders", "waist"],
+    questions: QUESTIONS,
+  };
+  const ALL_ANSWERED = {
+    answers: QUESTIONS.map((_, i) => ({ question: i + 1, reason: "r", score: 4 })),
+    summary: "s",
+  };
+
+  it("sends felt items good and bad, trouble areas and numbered questions", async () => {
+    create.mockResolvedValue(reply(ALL_ANSWERED));
+    await scorePurchase(input, LIVE);
+    const [body] = create.mock.calls[0];
+    expect(body).toMatchObject({ max_output_tokens: 4000, text: { format: { name: "fit_answers", strict: true } } });
+    const text: string = body.input[0].content[0].text;
+    expect(text).toContain("Candidate: Slim boat-neck top: top;");
+    expect(text).toContain("Owner: body shape pear; height 165 cm");
+    expect(text).toContain("Trouble areas (fit felt bad here): shoulders, waist");
+    expect(text).toContain("F1: White shirt:");
+    expect(text).toContain("feeling: flattering yes, liked yes | + feel: comfortable -> comfortable; - fit (shoulders):");
+    expect(text).toContain("F2: Jeans:");
+    expect(text).toContain("feeling: flattering no, liked no | - fit (waist): digs in -> needs a roomier waist | summary Never worn.");
+    expect(text).toContain("Q1: Is the cut like the flattering ones?\nQ2: Is the color liked?\nQ3: Does it feel right?");
+  });
+
+  it("says so when there are no felt items or owner details", async () => {
+    create.mockResolvedValue(reply(ALL_ANSWERED));
+    await scorePurchase({ ...input, profile: { lifestyleMix: LIFESTYLE }, feltItems: [], troubleAreas: [] }, LIVE);
+    const text: string = create.mock.calls[0][0].input[0].content[0].text;
+    expect(text).toContain("Owner: not given\nTrouble areas (fit felt bad here): none");
+    expect(text).toContain("Felt items:\nnone");
+  });
+
+  it("maps numbers back to ids in question order and drops repeats and unknown numbers", async () => {
+    create.mockResolvedValue(
+      reply({
+        answers: [
+          { question: 3, reason: "c", score: 1 },
+          { question: 1, reason: "a", score: 7 },
+          { question: 1, reason: "again", score: 0 },
+          { question: 7, reason: "made up", score: 8 },
+          { question: 2, reason: "b", score: 4 },
+        ],
+        summary: "Mostly suits you.",
+      }),
+    );
+    await expect(scorePurchase(input, LIVE)).resolves.toEqual({
+      answers: [
+        { id: "cut", score: 7, reason: "a" },
+        { id: "color", score: 4, reason: "b" },
+        { id: "feel", score: 1, reason: "c" },
+      ],
+      summary: "Mostly suits you.",
+    });
+  });
+
+  it("asks again when a question is left out, up to 4 calls in all", async () => {
+    const partial = reply({ answers: [{ question: 1, reason: "a", score: 7 }], summary: "s" });
+    create.mockResolvedValueOnce(partial).mockResolvedValueOnce(reply(ALL_ANSWERED));
+    await expect(scorePurchase(input, LIVE)).resolves.toMatchObject({ answers: [{ id: "cut" }, { id: "color" }, { id: "feel" }] });
+    expect(create).toHaveBeenCalledTimes(2);
+
+    create.mockClear();
+    create.mockResolvedValue(partial);
+    await expect(scorePurchase(input, LIVE)).rejects.toBeInstanceOf(AiOutputError);
+    expect(create).toHaveBeenCalledTimes(4);
+  });
+
+  it("asks again after a score above 8", async () => {
+    const tooHigh = reply({ ...ALL_ANSWERED, answers: [{ question: 1, reason: "a", score: 9 }, ...ALL_ANSWERED.answers.slice(1)] });
+    create.mockResolvedValueOnce(tooHigh).mockResolvedValueOnce(tooHigh).mockResolvedValueOnce(reply(ALL_ANSWERED));
+    await expect(scorePurchase(input, LIVE)).resolves.toMatchObject({ summary: "s" });
+    expect(create).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("judgeRepeat", () => {
+  const candidate = { ...SHIRT, id: "00000000-0000-4000-8000-000000000000", title: "Another white shirt" };
+  const input = { candidate, closet: [JEANS, SHIRT, SHOES] };
+
+  it("sends the candidate and numbered closet items", async () => {
+    create.mockResolvedValue(reply({ reason: "Like your shirt.", closest: 2, score: 2 }));
+    await expect(judgeRepeat(input, LIVE)).resolves.toEqual({ score: 2, closestId: SHIRT.id, reason: "Like your shirt." });
+    const [body] = create.mock.calls[0];
+    expect(body).toMatchObject({ max_output_tokens: 3000, text: { format: { name: "repeat", strict: true } } });
+    const text: string = body.input[0].content[0].text;
+    expect(text).toContain("Candidate: Another white shirt: top;");
+    expect(text).toContain("Closet:\nI1: Jeans: bottom;");
+    expect(text).toContain("I2: White shirt: top;");
+    expect(text).toContain("I3: Sneakers: shoes;");
+  });
+
+  it("allows no closest item", async () => {
+    create.mockResolvedValue(reply({ reason: "Nothing like it.", closest: null, score: 10 }));
+    await expect(judgeRepeat(input, LIVE)).resolves.toEqual({ score: 10, closestId: null, reason: "Nothing like it." });
+  });
+
+  it("asks again when the closest number isn't in the closet, up to 4 calls in all", async () => {
+    create
+      .mockResolvedValueOnce(reply({ reason: "r", closest: 9, score: 3 }))
+      .mockResolvedValueOnce(reply({ reason: "r", closest: 1, score: 9 }));
+    await expect(judgeRepeat(input, LIVE)).resolves.toMatchObject({ closestId: JEANS.id, score: 9 });
+    expect(create).toHaveBeenCalledTimes(2);
+
+    create.mockClear();
+    create.mockResolvedValue(reply({ reason: "r", closest: 2 }));
+    await expect(judgeRepeat(input, LIVE)).rejects.toBeInstanceOf(AiOutputError);
+    expect(create).toHaveBeenCalledTimes(4);
   });
 });

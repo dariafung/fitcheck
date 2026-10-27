@@ -5,6 +5,7 @@ import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
 import { extractErrorMessage, OFFLINE } from "@/components/entry/messages";
 import { shrinkScreenshot } from "@/components/entry/shrink";
 import type { BuyCheck as BuyCheckResponse, BuyCheckResult } from "@/lib/check/buy-check";
+import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
 import { BuyResult } from "./BuyResult";
 
@@ -23,6 +24,8 @@ export function BuyCheck() {
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
   const [round, setRound] = useState(0);
+  // The item to send again when the model didn't finish scoring it.
+  const [retry, setRetry] = useState<EditedItem>();
   const inputRef = useRef<HTMLInputElement>(null);
   const busy = step.kind === "loading" || (step.kind === "draft" && step.checking);
 
@@ -62,6 +65,7 @@ export function BuyCheck() {
 
   async function check(draft: ItemDraft, edited: EditedItem) {
     setProblem(undefined);
+    setRetry(undefined);
     setStep({ kind: "draft", draft, checking: true });
     try {
       const res = await fetch("/api/checks", {
@@ -69,11 +73,12 @@ export function BuyCheck() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ title: edited.title, tags: edited.tags }),
       });
-      const json = (await res.json().catch(() => ({}))) as Partial<BuyCheckResponse>;
+      const json = (await res.json().catch(() => ({}))) as Partial<BuyCheckResponse> & { error?: string };
       if (res.ok && "result" in json && json.result) {
         setStep({ kind: "result", title: edited.title, photo: draft.imageUrls[0] ?? null, result: json.result });
         return;
       }
+      if (res.ok && json.error === INCOMPLETE_ERROR) setRetry(edited);
       setProblem(res.ok && "message" in json ? json.message : CHECK_FAILED);
     } catch {
       setProblem(OFFLINE);
@@ -83,6 +88,7 @@ export function BuyCheck() {
 
   function checkAnother() {
     setProblem(undefined);
+    setRetry(undefined);
     setStep({ kind: "idle" });
   }
 
@@ -141,6 +147,15 @@ export function BuyCheck() {
         )}
       </div>
 
+      {step.kind === "draft" && retry && (
+        <button
+          type="button"
+          onClick={() => check(step.draft, retry)}
+          className="self-start rounded-full bg-foreground px-5 py-2.5 font-medium text-background"
+        >
+          Try again
+        </button>
+      )}
       {step.kind === "draft" && (
         <button
           type="button"

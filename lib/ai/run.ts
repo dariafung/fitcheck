@@ -13,9 +13,10 @@ export interface RunOptions {
 }
 
 const PREVIEW_LENGTH = 300;
+const DEFAULT_LIVE_ATTEMPTS = 2;
 
 // Validate input, dispatch by mode, validate output. In live mode an output
-// that fails validation is retried once before giving up.
+// that fails validation is tried again, up to def.liveAttempts calls in all.
 export async function runAi<I extends z.ZodType, O extends z.ZodType>(
   def: AiFunctionDef<I, O>,
   rawInput: unknown,
@@ -40,7 +41,9 @@ export async function runAi<I extends z.ZodType, O extends z.ZodType>(
   }
 
   let result = await callLive(def, input);
-  if (!result.success) result = await callLive(def, input);
+  for (let attempt = 2; !result.success && attempt <= (def.liveAttempts ?? DEFAULT_LIVE_ATTEMPTS); attempt++) {
+    result = await callLive(def, input);
+  }
   if (!result.success) throw new AiOutputError(def.name, result.error.issues);
 
   if (options.record ?? recordEnabled()) {

@@ -1,9 +1,10 @@
-// "Suits you": fixed yes/no questions for the model, asked against every
-// owned item the user wrote a feeling about, good and bad. "Yes" is always
-// the good answer; the model never scores.
+// "Suits you": fixed questions the model scores 0–8, asked against every
+// owned item the user wrote a feeling about, good and bad. Higher is always
+// better. A question with nothing to compare against isn't asked.
 import type { FeelingAspectKind, FeelingStructured, ItemSummary } from "../ai/schemas/common";
+import { AiOutputError } from "../ai/errors";
 import type { FeltItem, ScorePurchaseOutput } from "../ai/schemas/score-purchase";
-import { NO_DATA_POINTS, POINTS_PER_YES } from "./score";
+import { NO_DATA_POINTS, POINTS_PER_QUESTION } from "./score";
 import { categoryOf, type ClosetItem } from "./types";
 
 // What a question compares against; with none of it, the question isn't
@@ -56,7 +57,6 @@ export const FIT_QUESTIONS: readonly FitQuestion[] = [
 ];
 
 export const NO_DATA_REASON = "Not enough to go on yet.";
-export const NO_ANSWER_REASON = "No answer this time.";
 
 export interface FeltRow {
   item: ClosetItem;
@@ -118,14 +118,16 @@ export function toFeltItem({ item, feeling }: FeltRow): FeltItem {
 export interface FitAnswer {
   id: string;
   question: string;
-  // null: not asked, for lack of data.
-  answer: boolean | null;
+  // The model's score; null: not asked, for lack of data.
+  score: number | null;
   reason: string;
   points: number;
+  max: number;
 }
 
-// One answer per question, in FIT_QUESTIONS order. A question the model
-// skipped counts as "no".
+// One answer per question, in FIT_QUESTIONS order. The live model is asked
+// again until it answers every question; if one is still missing, the check
+// gets no score at all rather than a partial one.
 export function fitAnswers(
   asked: readonly FitQuestion[],
   output: ScorePurchaseOutput | null,
@@ -133,11 +135,10 @@ export function fitAnswers(
   const askedIds = new Set(asked.map((q) => q.id));
   const byId = new Map(output?.answers.map((a) => [a.id, a]));
   return FIT_QUESTIONS.map((q) => {
-    if (!askedIds.has(q.id)) {
-      return { id: q.id, question: q.label, answer: null, reason: NO_DATA_REASON, points: NO_DATA_POINTS };
-    }
+    const base = { id: q.id, question: q.label, max: POINTS_PER_QUESTION };
+    if (!askedIds.has(q.id)) return { ...base, score: null, reason: NO_DATA_REASON, points: NO_DATA_POINTS };
     const a = byId.get(q.id);
-    if (!a) return { id: q.id, question: q.label, answer: false, reason: NO_ANSWER_REASON, points: 0 };
-    return { id: q.id, question: q.label, answer: a.answer, reason: a.reason, points: a.answer ? POINTS_PER_YES : 0 };
+    if (!a) throw new AiOutputError("scorePurchase", []);
+    return { ...base, score: a.score, reason: a.reason, points: a.score };
   });
 }
