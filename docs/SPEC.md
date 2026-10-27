@@ -17,7 +17,7 @@ With all of P0 done and deployed, judges can walk through "add clothes → feeli
 
 | # | Feature | What it does | Done when | Model |
 | --- | --- | --- | --- | --- |
-| P0-1 | Profile | Body measurements, body shape, lifestyle mix (outfits wanted per season for each occasion: work / school / social / sport / home) | Can be saved and edited; used by the purchase check | — |
+| P0-1 | Profile | Body measurements (height and weight required; shown in in / lb or cm / kg, stored in cm / kg), body shape (one of five, required), lifestyle mix (outfits wanted per season for each occasion: work / school / social / sport / home), weather location for home's "Good for today" (device location by default, or a picked city) | Can be saved and edited; used by the purchase check | — |
 | P0-2 | Add items: screenshot | Upload a screenshot of the product page → Spark identifies the product and points at the product photo → `web_search` fills in material, fit, etc. → user confirms or edits. The product photo is cropped out of the screenshot. Produces an item card | All 15–20 items of the demo persona added from screenshots with mostly correct attributes; user can edit tags | Spark 1.3 + web_search |
 | P0-3 | Free-text feelings | One text box per item, write anything; the backend extracts flattering, liked, occasions, mood, and one entry per aspect the text mentions (color, feel, fit with body area, length, style, other): good or bad, what was said, and what it means | Raw text saved; structured fields generated without the user seeing or filling them | Spark 1.3 |
 | P0-4 | Wardrobe grid | Grid of all items; open one to see details and feelings | Works in mobile and desktop browsers | — |
@@ -102,6 +102,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 - The Meta console has no hard spending cap: the app keeps a daily budget counter and rate-limits by IP
 - Muse Image requests turn off `enable_web_search` and `enable_image_search`; generated images are copied to our storage right away and cached by "item ids + prompt version"
 - Secrets live only in the keychain, `.env.local` and Vercel environment variables, never in git
+- Weather: Open-Meteo forecast and geocoding (free, no key, credited on the page). Location order: picked city → device location → Vercel IP headers → Madison. The location and the unit choice live in browser cookies, never in the database; automated tests use `WEATHER_MODE=fixed` and never call Open-Meteo
 
 ## Data model
 

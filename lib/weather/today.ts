@@ -1,4 +1,5 @@
 import { resolveLocation } from "./location";
+import { readLocationCookie, toWeatherLocation } from "./location-cookie";
 import { fetchTodayTemps, type TodayTemps } from "./open-meteo";
 
 export interface TodayWeather extends TodayTemps {
@@ -6,7 +7,8 @@ export interface TodayWeather extends TodayTemps {
 }
 
 // WEATHER_MODE: "live" (default) asks Open-Meteo; "fixed" returns
-// FIXED_WEATHER and "off" acts as if the weather is unavailable, both without
+// FIXED_WEATHER's temps (named after the browser's location cookie when there
+// is one) and "off" acts as if the weather is unavailable, both without
 // touching the network (for automated tests).
 export const FIXED_WEATHER: TodayWeather = { date: "2026-10-26", city: "Testville", lowF: 50, highF: 65 };
 
@@ -27,7 +29,10 @@ export async function todayWeather(
   { fetchImpl, now = Date.now }: Options = {},
 ): Promise<TodayWeather | null> {
   const mode = process.env.WEATHER_MODE || "live";
-  if (mode === "fixed") return FIXED_WEATHER;
+  if (mode === "fixed") {
+    const stored = readLocationCookie(headers);
+    return stored ? { ...FIXED_WEATHER, city: toWeatherLocation(stored).city } : FIXED_WEATHER;
+  }
   if (mode === "off") return null;
 
   const location = await resolveLocation(userId, headers);
