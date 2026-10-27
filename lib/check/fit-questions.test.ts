@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { Category, FeelingStructured } from "../ai/schemas/common";
+import type { Category, FeelingAspect, FeelingStructured } from "../ai/schemas/common";
 import {
   FIT_QUESTIONS,
   fitAnswers,
   hasBasis,
-  MAX_ANCHORS,
   NO_ANSWER_REASON,
   NO_DATA_REASON,
-  pickAnchors,
-  toAnchor,
+  pickFeltItems,
+  toFeltItem,
   troubleAreas,
 } from "./fit-questions";
 import { makeItem } from "./fixtures";
@@ -26,56 +25,91 @@ function feeling(over: Partial<FeelingStructured> = {}): FeelingStructured {
   return { flattering: "unknown", liked: "unknown", aspects: [], occasions: [], mood: [], summary: "", ...over };
 }
 
-describe("pickAnchors", () => {
-  it("keeps flattering or liked items, same category first, then by id", () => {
-    const [shoe, top1, top2, meh] = [item("shoes"), item("top"), item("top"), item("top")];
+function aspect(over: Partial<FeelingAspect> & Pick<FeelingAspect, "aspect">): FeelingAspect {
+  return { sentiment: "negative", said: "", means: "", ...over };
+}
+
+const [cutQ, troubleQ, colorQ, styleQ, feelQ] = FIT_QUESTIONS;
+
+describe("pickFeltItems", () => {
+  it("keeps every item with a feeling: same category first, then ones with aspects, then by id", () => {
+    const [shoe, top1, top2, top3, none] = [item("shoes"), item("top"), item("top"), item("top"), item("top")];
     const feelings = new Map([
       [shoe.id, feeling({ liked: "yes" })],
-      [top2.id, feeling({ flattering: "yes" })],
-      [top1.id, feeling({ liked: "yes" })],
-      [meh.id, feeling({ liked: "mixed" })],
+      [top3.id, feeling({ aspects: [aspect({ aspect: "color" })] })],
+      [top2.id, feeling({ flattering: "no" })],
+      [top1.id, feeling({ liked: "mixed" })],
     ]);
     const candidate = { ...item("top"), id: CANDIDATE_ITEM_ID };
-    expect(pickAnchors([shoe, top1, top2, meh], feelings, candidate).map((a) => a.item.id)).toEqual([
+    expect(pickFeltItems([shoe, top1, top2, top3, none], feelings, candidate).map((r) => r.item.id)).toEqual([
+      top3.id,
       top1.id,
       top2.id,
       shoe.id,
     ]);
   });
 
-  it(`sends at most ${MAX_ANCHORS}`, () => {
-    const items = Array.from({ length: MAX_ANCHORS + 3 }, () => item("top"));
-    const feelings = new Map(items.map((i) => [i.id, feeling({ liked: "yes" })]));
-    expect(pickAnchors(items, feelings, item("top"))).toHaveLength(MAX_ANCHORS);
+  it("has no cap", () => {
+    const items = Array.from({ length: 80 }, () => item("top"));
+    const feelings = new Map(items.map((i) => [i.id, feeling()]));
+    expect(pickFeltItems(items, feelings, item("top"))).toHaveLength(80);
   });
 });
 
 describe("troubleAreas", () => {
   it("collects areas of bad fit aspects once, alphabetically", () => {
-    const fit = (area: string | undefined, sentiment: "positive" | "negative" = "negative", aspect: "fit" | "color" = "fit") =>
-      ({ aspect, sentiment, area, said: "", means: "" });
     const areas = troubleAreas([
-      feeling({ aspects: [fit("Hips"), fit("waist", "positive"), fit(undefined)] }),
-      feeling({ aspects: [fit("hips "), fit("Arms"), fit("neckline", "negative", "color")] }),
+      feeling({
+        aspects: [
+          aspect({ aspect: "fit", area: "Hips" }),
+          aspect({ aspect: "fit", area: "waist", sentiment: "positive" }),
+          aspect({ aspect: "fit" }),
+        ],
+      }),
+      feeling({
+        aspects: [
+          aspect({ aspect: "fit", area: "hips " }),
+          aspect({ aspect: "fit", area: "Arms" }),
+          aspect({ aspect: "color", area: "neckline" }),
+        ],
+      }),
     ]);
     expect(areas).toEqual(["Arms", "Hips"]);
   });
 });
 
 describe("hasBasis", () => {
-  it("needs anchors of the right kind, or trouble areas", () => {
-    const anchors = [{ item: item("top"), feeling: feeling({ liked: "yes" }) }];
-    expect(hasBasis("liked", anchors, [])).toBe(true);
-    expect(hasBasis("flattering", anchors, [])).toBe(false);
-    expect(hasBasis("troubleAreas", anchors, [])).toBe(false);
-    expect(hasBasis("troubleAreas", [], ["hips"])).toBe(true);
+  const rows = (f: FeelingStructured) => [{ item: item("top"), feeling: f }];
+
+  it("counts any verdict but unknown, good or bad", () => {
+    expect(hasBasis(colorQ.basis, rows(feeling({ liked: "no" })), [])).toBe(true);
+    expect(hasBasis(cutQ.basis, rows(feeling({ flattering: "mixed" })), [])).toBe(true);
+    expect(hasBasis(cutQ.basis, rows(feeling({ liked: "yes" })), [])).toBe(false);
+  });
+
+  it("counts aspects of the question's kind", () => {
+    const f = feeling({ aspects: [aspect({ aspect: "length" }), aspect({ aspect: "feel", sentiment: "positive" })] });
+    expect(hasBasis(cutQ.basis, rows(f), [])).toBe(true);
+    expect(hasBasis(feelQ.basis, rows(f), [])).toBe(true);
+    expect(hasBasis(colorQ.basis, rows(f), [])).toBe(false);
+    expect(hasBasis(styleQ.basis, rows(f), [])).toBe(false);
+  });
+
+  it("asks about trouble areas only when there are some", () => {
+    expect(hasBasis(troubleQ.basis, rows(feeling({ flattering: "no" })), [])).toBe(false);
+    expect(hasBasis(troubleQ.basis, [], ["hips"])).toBe(true);
   });
 });
 
-describe("toAnchor", () => {
-  it("passes the feeling without the verdicts", () => {
-    const anchor = toAnchor({ item: item("top"), feeling: feeling({ flattering: "yes", mood: ["calm"], summary: "Fits well" }) });
-    expect(anchor).toMatchObject({ flattering: true, liked: false, feeling: { aspects: [], mood: ["calm"], summary: "Fits well" } });
+describe("toFeltItem", () => {
+  it("passes the verdicts as they are, with aspects, mood and summary", () => {
+    const shoulders = aspect({ aspect: "fit", area: "shoulders", said: "tight", means: "narrow shoulders" });
+    const felt = toFeltItem({
+      item: item("top"),
+      feeling: feeling({ flattering: "no", liked: "mixed", aspects: [shoulders], mood: ["calm"], summary: "Tight" }),
+    });
+    expect(felt.feeling).toEqual({ flattering: "no", liked: "mixed", aspects: [shoulders], mood: ["calm"], summary: "Tight" });
+    expect(felt).not.toHaveProperty("flattering");
   });
 });
 
