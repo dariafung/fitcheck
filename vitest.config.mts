@@ -33,6 +33,18 @@ export default defineConfig({
           setupFiles: ["tests/integration/env-setup.ts"],
         },
       },
+      {
+        // Real, paid model calls that record replay fixtures. Never part of
+        // test or test:integration; run by hand with `--project record`.
+        extends: true,
+        test: {
+          name: "record",
+          include: ["tests/record/**/*.record.ts"],
+          environment: "node",
+          fileParallelism: false,
+          testTimeout: 180_000,
+        },
+      },
     ],
   },
 });

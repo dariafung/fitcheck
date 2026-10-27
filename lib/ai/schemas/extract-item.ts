@@ -3,7 +3,7 @@ import { COLOR_FAMILIES } from "@/lib/color-families";
 import { TempRangeF } from "@/lib/temperature";
 import { ItemTags, MediaRef } from "./common";
 
-export const PROMPT_VERSION = "extract-item@3";
+export const PROMPT_VERSION = "extract-item@4";
 
 export const ExtractItemInput = z.object({
   sourceUrl: z.url().optional(),

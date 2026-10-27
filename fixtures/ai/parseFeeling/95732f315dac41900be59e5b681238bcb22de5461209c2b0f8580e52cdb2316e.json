@@ -1,0 +1,26 @@
+{
+  "fn": "parseFeeling",
+  "promptVersion": "parse-feeling@2",
+  "inputHash": "95732f315dac41900be59e5b681238bcb22de5461209c2b0f8580e52cdb2316e",
+  "inputPreview": "{\"item\":{\"id\":\"852c8e3d-abf7-4955-ab65-9d83194a02ae\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White cotton button-down\"},\"text\":\"版型很好，显瘦，就是领",
+  "output": {
+    "flattering": "yes",
+    "liked": "unknown",
+    "bodyAreas": [
+      {
+        "area": "overall",
+        "sentiment": "positive"
+      },
+      {
+        "area": "neckline",
+        "sentiment": "negative"
+      }
+    ],
+    "occasions": [
+      "work"
+    ],
+    "mood": [],
+    "summary": "Well-cut slimming shirt with tight neckline, suitable for work."
+  },
+  "recordedAt": "2026-10-27T00:26:46.901Z"
+}

@@ -17,12 +17,12 @@ With all of P0 done and deployed, judges can walk through "add clothes → feeli
 
 | # | Feature | What it does | Done when | Model |
 | --- | --- | --- | --- | --- |
-| P0-1 | Profile | Body measurements, body shape, lifestyle mix (work / social / sport / home) | Can be saved and edited; used by the purchase check | — |
+| P0-1 | Profile | Body measurements, body shape, lifestyle mix (outfits wanted per season for each occasion: work / school / social / sport / home) | Can be saved and edited; used by the purchase check | — |
 | P0-2 | Add items: screenshot | Upload a screenshot of the product page → Spark identifies the product and points at the product photo → `web_search` fills in material, fit, etc. → user confirms or edits. The product photo is cropped out of the screenshot. Produces an item card | All 15–20 items of the demo persona added from screenshots with mostly correct attributes; user can edit tags | Spark 1.3 + web_search |
 | P0-3 | Free-text feelings | One text box per item, write anything; the backend extracts flattering, liked, body areas, occasions, mood | Raw text saved; structured fields generated without the user seeing or filling them | Spark 1.3 |
 | P0-4 | Wardrobe grid | Grid of all items; open one to see details and feelings | Works in mobile and desktop browsers | — |
 | P0-5 | Pairing | Rule pre-filter (complementary categories, formality, overlapping temperature ranges, obvious color clashes) → Spark judges pairs in batches, results cached → code enumerates complete outfits: top + bottom + shoes, or one-piece + shoes; outerwear optional by temperature; accessories don't count | Spot checks of the persona's pairings look mostly right | Spark 1.3 |
-| P0-6 | **Purchase check** | Four gap metrics computed in code: how many existing items it revives, how many outfits the new item forms, whether the gap for frequent occasions shrinks, whether it duplicates something owned (tuned during testing). Match score 0–100 computed in code; the model only answers yes/no questions and writes the reasons. Main signal: items the user marked as flattering or liked; body-shape rules get low weight and only feed the reasons | Two demo items give stable results: one closes a gap, one creates a gap; three runs on the same item agree (cache + deterministic scoring) | Spark 1.3 |
+| P0-6 | **Purchase check** | Four gap metrics computed in code: how many existing items it revives, how many outfits the new item forms, whether it adds outfits to an occasion that has fewer than the user wants, whether it duplicates something owned (tuned during testing). Match score 0–100 computed in code; the model only answers yes/no questions and writes the reasons. Main signal: items the user marked as flattering or liked; body-shape rules get low weight and only feed the reasons. One item at a time; accessories are not checked yet (P2-4) | Two demo items give stable results: one closes a gap, one creates a gap. The item being checked is never stored or cached; each check asks the model again, so its yes/no answers may differ slightly between runs, but the scoring rules are deterministic code | Spark 1.3 |
 | P0-7 | Demo data + deploy | Fictional demo persona; demo items preloaded; seed data read-only; visitor data isolated with one-click reset; rate limits + daily budget | Judges can use it from the link; a full run shows no console errors | — |
 
 ## P1: bonus
@@ -44,8 +44,9 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 | P2-1 | SAM cutout | While reading product images, Spark also classifies them as flat-lay or on-model; only on-model images go to SAM, prompted with the category (e.g. "jacket"), producing a transparent cutout | Spark 1.3 + SAM 3.1 |
 | P2-2 | Photo entry | Older clothes with no product page: upload a photo, SAM cuts it out, Spark tags it | Spark 1.3 + SAM 3.1 |
 | P2-3 | Gap recommendations | When a gap is found, suggest the type of item that would fill it; mention the affiliate-commission model in the pitch, no real integration | Spark 1.3 |
+| P2-4 | Accessories support | Check accessories before buying, and count them in outfits | Spark 1.3 |
 
-Rule: once P0 and P1 are done and at least half a day remains, build P2-1 → P2-2 → P2-3 in that order.
+Rule: once P0 and P1 are done and at least half a day remains, build P2-1 → P2-2 → P2-3 → P2-4 in that order.
 
 ## Out of scope
 
@@ -92,7 +93,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 | `buildProfile` | All items + feelings → style profile | Spark 1.3 |
 | `segmentGarment` | On-model image + category word → transparent cutout (P2) | SAM 3.1 |
 
-**Gap algorithm**: keep an "item → items it pairs with" table and let code enumerate complete outfits. Four metrics for a new item: how many existing items that couldn't form an outfit it revives (the new item itself is not counted), how many outfits the new item forms, whether the gap for frequent occasions shrinks, and whether it duplicates an owned item. If it forms no outfit at all, it creates a gap, and we say which slot is missing. Thresholds get tuned during testing.
+**Gap algorithm**: keep an "item → items it pairs with" table and let code enumerate complete outfits. Four metrics for a new item: how many existing items that couldn't form an outfit it revives (the new item itself is not counted), how many outfits the new item forms, whether it adds outfits to an occasion that has fewer than the user wants (every occasion is checked), and whether it duplicates an owned item. If it forms no outfit at all, it creates a gap, and we say which slot is missing. Thresholds get tuned during testing.
 
 **Engineering conventions**
 

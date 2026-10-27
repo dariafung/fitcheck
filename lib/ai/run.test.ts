@@ -51,7 +51,9 @@ describe("mock mode", () => {
       () =>
         ai.scorePurchase({
           candidate: ITEM,
-          profile: { lifestyleMix: { work: 50, social: 20, sport: 15, home: 15 } },
+          profile: {
+            lifestyleMix: { work: 0, school: 3, social: 2, sport: 3, home: 3 },
+          },
           anchors: [OTHER],
           questions: [{ id: "fit", text: "Is the fit like the flattering pieces?" }],
         }),

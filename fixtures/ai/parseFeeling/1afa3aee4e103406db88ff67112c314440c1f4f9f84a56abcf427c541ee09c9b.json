@@ -1,0 +1,20 @@
+{
+  "fn": "parseFeeling",
+  "promptVersion": "parse-feeling@2",
+  "inputHash": "1afa3aee4e103406db88ff67112c314440c1f4f9f84a56abcf427c541ee09c9b",
+  "inputPreview": "{\"item\":{\"id\":\"852c8e3d-abf7-4955-ab65-9d83194a02ae\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White cotton button-down\"},\"text\":\"Love this s",
+  "output": {
+    "flattering": "yes",
+    "liked": "mixed",
+    "bodyAreas": [
+      {
+        "area": "shoulders",
+        "sentiment": "negative"
+      }
+    ],
+    "occasions": [],
+    "mood": [],
+    "summary": "Comfy white shirt looks brightening but tight across shoulders."
+  },
+  "recordedAt": "2026-10-27T00:26:32.384Z"
+}

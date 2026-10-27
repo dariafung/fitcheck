@@ -1,111 +1,90 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { connection } from "next/server";
-import { groupForToday } from "@/lib/closet/fit-today";
 import { listClosetItems, type ClosetCard } from "@/lib/closet/items";
+import { CLOSET_TABS, inTab, type ClosetTab } from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
-import { ATTRIBUTION } from "@/lib/weather/open-meteo";
-import { todayWeather } from "@/lib/weather/today";
 import { ItemImage } from "./item-image";
 
 const GRID = "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3";
 
-export async function ClosetGrid() {
+export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> }) {
   await connection();
-  const userId = currentUserId();
-  const [items, weather] = await Promise.all([
-    listClosetItems(createServerClient(), userId),
-    headers().then((h) => todayWeather(userId, h)),
+  const [items, tab] = await Promise.all([
+    listClosetItems(createServerClient(), currentUserId()),
+    tabParam,
   ]);
 
-  if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
-        <p className="font-medium">Your closet is empty.</p>
-        <p className="text-sm text-foreground/60">Add a few things you own to get started.</p>
-        <Link
-          href="/closet/add"
-          className="mt-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
-        >
-          Add your first piece
-        </Link>
-      </div>
-    );
-  }
+  if (items.length === 0) return <EmptyCloset />;
 
-  const groups = groupForToday(items, weather && { min: weather.lowF, max: weather.highF });
-
+  const shown = inTab(items, tab);
   return (
-    <div className="flex flex-col gap-10">
-      {weather ? (
-        <>
-          <Group
-            id="good-for-today"
-            title="Good for today"
-            note={`${weather.city ?? "Today"} · ${weather.lowF}–${weather.highF}°F`}
-            items={groups.good}
-            emptyText="Nothing here fits today's weather."
-          />
-          <Group id="not-for-today" title="Not for today" items={groups.notToday} />
-        </>
+    <div className="flex flex-col gap-6">
+      <ClosetTabs
+        active={tab}
+        counts={{ all: inTab(items, "all").length, "passing-on": inTab(items, "passing-on").length }}
+      />
+      {shown.length > 0 ? (
+        <ItemList items={shown} />
+      ) : tab === "passing-on" ? (
+        <Empty title="Nothing to pass on." text="Clothes you plan to sell or give away show up here." />
       ) : (
-        <div className="flex flex-col gap-4">
-          <p className="text-sm text-foreground/60">
-            Couldn&apos;t get today&apos;s weather, so here&apos;s everything.
-          </p>
-          <ItemList items={groups.good} />
-        </div>
-      )}
-      <Group id="passing-on" title="Passing on" items={groups.passingOn} />
-      {weather && (
-        <p className="text-xs text-foreground/50">
-          <a href={ATTRIBUTION.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-            {ATTRIBUTION.text}
-          </a>
-        </p>
+        <Empty title="Nothing you're wearing right now." text="Add something new to fill it back up." />
       )}
     </div>
   );
 }
 
-function Group({
-  id,
-  title,
-  note,
-  items,
-  emptyText,
-}: {
-  id: string;
-  title: string;
-  note?: string;
-  items: ClosetCard[];
-  // Without it, an empty group is not shown at all.
-  emptyText?: string;
-}) {
-  if (items.length === 0 && !emptyText) return null;
+const TAB = "-mb-px border-b-2 px-3 py-2 text-sm font-medium";
+
+function ClosetTabs({ active, counts }: { active: ClosetTab; counts: Record<ClosetTab, number> }) {
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-4">
-      <div className="flex items-baseline gap-2">
-        <h2 id={id} className="text-lg font-semibold">
-          {title}
-        </h2>
-        <span className="text-sm text-foreground/50">
-          {note ? `${note} · ` : ""}
-          {items.length}
-        </span>
-      </div>
-      {items.length > 0 ? (
-        <ItemList items={items} />
-      ) : (
-        <p className="text-sm text-foreground/60">{emptyText}</p>
-      )}
-    </section>
+    <div className="flex gap-2 border-b border-black/10 dark:border-white/15">
+      {CLOSET_TABS.map((tab) => (
+        <Link
+          key={tab.id}
+          href={tab.href}
+          scroll={false}
+          aria-current={tab.id === active ? "page" : undefined}
+          className={`${TAB} ${
+            tab.id === active
+              ? "border-foreground"
+              : "border-transparent text-foreground/60 hover:text-foreground"
+          }`}
+        >
+          {tab.label} <span className="font-normal text-foreground/50">{counts[tab.id]}</span>
+        </Link>
+      ))}
+    </div>
   );
 }
 
-function ItemList({ items }: { items: ClosetCard[] }) {
+function Empty({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
+      <p className="font-medium">{title}</p>
+      <p className="text-sm text-foreground/60">{text}</p>
+    </div>
+  );
+}
+
+export function EmptyCloset() {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
+      <p className="font-medium">Your closet is empty.</p>
+      <p className="text-sm text-foreground/60">Add a few things you own to get started.</p>
+      <Link
+        href="/closet/add"
+        className="mt-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
+      >
+        Add your first piece
+      </Link>
+    </div>
+  );
+}
+
+export function ItemList({ items }: { items: ClosetCard[] }) {
   return (
     <ul className={GRID}>
       {items.map((item, i) => (
@@ -130,8 +109,8 @@ function ItemList({ items }: { items: ClosetCard[] }) {
   );
 }
 
-export function ClosetGridSkeleton() {
-  return (
+export function ClosetGridSkeleton({ tabs = false }: { tabs?: boolean }) {
+  const list = (
     <ul className={GRID} aria-busy="true" aria-label="Loading your closet">
       {Array.from({ length: 6 }, (_, i) => (
         <li key={i}>
@@ -140,5 +119,19 @@ export function ClosetGridSkeleton() {
         </li>
       ))}
     </ul>
+  );
+  if (!tabs) return list;
+  // Same height as the tab bar, so the grid does not jump when it loads.
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex gap-2 border-b border-black/10 dark:border-white/15">
+        {CLOSET_TABS.map((tab) => (
+          <span key={tab.id} className={`${TAB} border-transparent text-foreground/40`}>
+            {tab.label}
+          </span>
+        ))}
+      </div>
+      {list}
+    </div>
   );
 }

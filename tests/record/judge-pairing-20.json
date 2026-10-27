@@ -1,0 +1,954 @@
+{
+  "pairs": [
+    {
+      "a": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "title": "Denim jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "light blue"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 45,
+            "max": 68
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "2fbebb8f-3099-4889-af8b-346cc7de573d",
+        "title": "Dark straight-leg jeans",
+        "tags": {
+          "category": "bottom",
+          "colors": [
+            {
+              "name": "indigo"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 20,
+            "max": 80
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "41d1f581-0108-4997-a3e9-5c06feafd0ef",
+        "title": "Navy wrap dress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "navy"
+            }
+          ],
+          "colorFamily": "navy",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 55,
+            "max": 85
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "432a90cd-60bd-4366-ac59-26c059c7e8cf",
+        "title": "Gray crewneck tee",
+        "tags": {
+          "category": "top",
+          "colors": [
+            {
+              "name": "heather gray"
+            }
+          ],
+          "colorFamily": "gray",
+          "materials": [],
+          "formality": 1,
+          "tempRangeF": {
+            "min": 60,
+            "max": 95
+          },
+          "occasions": [
+            "home",
+            "sport",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "5d7f0eaf-8e55-46fc-a528-cede369a2fd1",
+        "title": "Black puffer jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": -10,
+            "max": 40
+          },
+          "occasions": [
+            "home",
+            "sport"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "7abdf754-db3a-49f5-91cf-a8f8988ed975",
+        "title": "Black leggings",
+        "tags": {
+          "category": "bottom",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 1,
+          "occasions": [
+            "sport",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "93cf3279-cbb5-4b82-a81d-a3b3223db846",
+        "title": "Camel wool coat",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "camel"
+            }
+          ],
+          "colorFamily": "brown",
+          "materials": [],
+          "formality": 4,
+          "tempRangeF": {
+            "min": 0,
+            "max": 50
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "ad173eac-0b0b-4ef7-8505-421a7a8b1613",
+        "title": "Black knit sweater",
+        "tags": {
+          "category": "top",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 30,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "ad372297-ddda-4065-a206-3d4896daed1c",
+        "title": "Black tailored trousers",
+        "tags": {
+          "category": "bottom",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 4,
+          "tempRangeF": {
+            "min": 30,
+            "max": 75
+          },
+          "occasions": [
+            "work"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "d8fc4d41-fd8b-4d02-befb-2acfa5026406",
+        "title": "Red pleated midi skirt",
+        "tags": {
+          "category": "bottom",
+          "colors": [
+            {
+              "name": "red"
+            }
+          ],
+          "colorFamily": "red",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 50,
+            "max": 85
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "f06222fb-82ba-483b-8359-3f0d12337f88",
+        "title": "White cotton button-down",
+        "tags": {
+          "category": "top",
+          "colors": [
+            {
+              "name": "white"
+            }
+          ],
+          "colorFamily": "white",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 55,
+            "max": 85
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "0ac227eb-d87c-4edc-bd99-815e88993365",
+        "title": "Black ankle boots",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 10,
+            "max": 60
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "title": "Cream linen sundress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "cream"
+            }
+          ],
+          "colorFamily": "cream",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 72,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "title": "Denim jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "light blue"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 45,
+            "max": 68
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "title": "Cream linen sundress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "cream"
+            }
+          ],
+          "colorFamily": "cream",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 72,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "5d7f0eaf-8e55-46fc-a528-cede369a2fd1",
+        "title": "Black puffer jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "black"
+            }
+          ],
+          "colorFamily": "black",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": -10,
+            "max": 40
+          },
+          "occasions": [
+            "home",
+            "sport"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "title": "Cream linen sundress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "cream"
+            }
+          ],
+          "colorFamily": "cream",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 72,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "644bf735-edcc-4ef8-ae1d-b9721829d1e0",
+        "title": "Tan block-heel sandals",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "tan"
+            }
+          ],
+          "colorFamily": "brown",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 70,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "work"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "title": "Cream linen sundress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "cream"
+            }
+          ],
+          "colorFamily": "cream",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 72,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "93cf3279-cbb5-4b82-a81d-a3b3223db846",
+        "title": "Camel wool coat",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "camel"
+            }
+          ],
+          "colorFamily": "brown",
+          "materials": [],
+          "formality": 4,
+          "tempRangeF": {
+            "min": 0,
+            "max": 50
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "title": "Cream linen sundress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "cream"
+            }
+          ],
+          "colorFamily": "cream",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 72,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "a6963ef8-8fc6-4d5b-af0b-4f7d6ceaa21a",
+        "title": "Running shoes",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "gray"
+            }
+          ],
+          "colorFamily": "gray",
+          "materials": [],
+          "formality": 1,
+          "occasions": [
+            "sport"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "12ec02a3-1581-4b27-bc7f-7d61388a0227",
+        "title": "Cream linen sundress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "cream"
+            }
+          ],
+          "colorFamily": "cream",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 72,
+            "max": 100
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      },
+      "b": {
+        "id": "dda762cd-90be-4e73-9a53-696319f9b220",
+        "title": "White leather sneakers",
+        "tags": {
+          "category": "shoes",
+          "colors": [
+            {
+              "name": "white"
+            }
+          ],
+          "colorFamily": "white",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 40,
+            "max": 90
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "2fbebb8f-3099-4889-af8b-346cc7de573d",
+        "title": "Dark straight-leg jeans",
+        "tags": {
+          "category": "bottom",
+          "colors": [
+            {
+              "name": "indigo"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 20,
+            "max": 80
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "title": "Denim jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "light blue"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 45,
+            "max": 68
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "3462b3ea-a8a6-41da-9eb5-704d37a8656a",
+        "title": "Navy sports tank",
+        "tags": {
+          "category": "top",
+          "colors": [
+            {
+              "name": "navy"
+            }
+          ],
+          "colorFamily": "navy",
+          "materials": [],
+          "formality": 1,
+          "tempRangeF": {
+            "min": 65,
+            "max": 95
+          },
+          "occasions": [
+            "sport"
+          ]
+        }
+      },
+      "b": {
+        "id": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "title": "Denim jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "light blue"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 45,
+            "max": 68
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      }
+    },
+    {
+      "a": {
+        "id": "41d1f581-0108-4997-a3e9-5c06feafd0ef",
+        "title": "Navy wrap dress",
+        "tags": {
+          "category": "one_piece",
+          "colors": [
+            {
+              "name": "navy"
+            }
+          ],
+          "colorFamily": "navy",
+          "materials": [],
+          "formality": 3,
+          "tempRangeF": {
+            "min": 55,
+            "max": 85
+          },
+          "occasions": [
+            "work",
+            "social"
+          ]
+        }
+      },
+      "b": {
+        "id": "16816343-a0f6-4a25-b1df-f763b64a9897",
+        "title": "Denim jacket",
+        "tags": {
+          "category": "outerwear",
+          "colors": [
+            {
+              "name": "light blue"
+            }
+          ],
+          "colorFamily": "denim",
+          "materials": [],
+          "formality": 2,
+          "tempRangeF": {
+            "min": 45,
+            "max": 68
+          },
+          "occasions": [
+            "social",
+            "home"
+          ]
+        }
+      }
+    }
+  ]
+}

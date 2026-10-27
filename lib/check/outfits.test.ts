@@ -202,7 +202,7 @@ describe("occasions: more than half the pieces", () => {
     const items = [item("top", both), item("bottom", both), item("shoes", { occasions: ["social"] })];
     const { outfits, summary } = enumerateOutfits(items, always);
     expect(outfits[0].occasions).toEqual(["work", "social"]);
-    expect(summary.byOccasion).toEqual({ work: 1, social: 1, sport: 0, home: 0 });
+    expect(summary.byOccasion).toEqual({ work: 1, school: 0, social: 1, sport: 0, home: 0 });
   });
 });
 

@@ -8,7 +8,7 @@
   "hip_cm": 94,
   "inseam_cm": 76,
   "body_shape": "pear",
-  "lifestyle_mix": { "work": 50, "social": 20, "sport": 15, "home": 15 },
+  "lifestyle_mix": { "work": 0, "school": 3, "social": 2, "sport": 3, "home": 3 },
   "resale_opt_in": true,
   "is_seed": true
 }
