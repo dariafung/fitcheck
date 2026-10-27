@@ -91,7 +91,11 @@ describe("POST /api/items/[id]/feelings", () => {
 
     await post(closet.itemId, { text: "Too tight now, I hate it." });
     await flushAfter();
-    expect((await feelings())[0].structured).toMatchObject({ flattering: "no", liked: "no" });
+    expect((await feelings())[0].structured).toMatchObject({
+      flattering: "no",
+      liked: "no",
+      aspects: [{ aspect: "fit", sentiment: "negative", said: "tight", means: "tight" }],
+    });
   });
 
   it("does not let a stale parse overwrite a newer edit", async () => {

@@ -1,16 +1,17 @@
-// "Suits you": fixed yes/no questions for the model, asked against the items
-// the user said flatter them or that they like. "Yes" is always the good
-// answer; the model never scores.
-import type { FeelingStructured, ItemSummary } from "../ai/schemas/common";
-import type { Anchor, ScorePurchaseOutput } from "../ai/schemas/score-purchase";
+// "Suits you": fixed yes/no questions for the model, asked against every
+// owned item the user wrote a feeling about, good and bad. "Yes" is always
+// the good answer; the model never scores.
+import type { FeelingAspectKind, FeelingStructured, ItemSummary } from "../ai/schemas/common";
+import type { FeltItem, ScorePurchaseOutput } from "../ai/schemas/score-purchase";
 import { NO_DATA_POINTS, POINTS_PER_YES } from "./score";
 import { categoryOf, type ClosetItem } from "./types";
 
-// Most anchors sent per check; same category first, then by id.
-export const MAX_ANCHORS = 10;
-
-// What a question compares against; with none of it, the question isn't asked.
-type Basis = "flattering" | "liked" | "troubleAreas";
+// What a question compares against; with none of it, the question isn't
+// asked. A verdict other than "unknown" counts too, so feelings parsed
+// before aspects existed still give a basis.
+type Basis =
+  | { verdict: "flattering" | "liked"; aspects: readonly FeelingAspectKind[] }
+  | "troubleAreas";
 
 export interface FitQuestion {
   id: string;
@@ -24,9 +25,9 @@ export interface FitQuestion {
 export const FIT_QUESTIONS: readonly FitQuestion[] = [
   {
     id: "cut_flatters",
-    text: "Is its cut and fit like the anchors the user marked as flattering?",
+    text: "Is its cut, fit and length like the felt items the user says flatter them or fit well, and unlike the ones that don't?",
     label: "Cut like the ones that flatter you",
-    basis: "flattering",
+    basis: { verdict: "flattering", aspects: ["fit", "length"] },
   },
   {
     id: "spares_trouble_areas",
@@ -36,83 +37,82 @@ export const FIT_QUESTIONS: readonly FitQuestion[] = [
   },
   {
     id: "color_liked",
-    text: "Is its color within the range of colors of the anchors the user likes?",
+    text: "Is its color like the colors the user felt good about, and unlike the ones they felt bad about?",
     label: "A color you like",
-    basis: "liked",
+    basis: { verdict: "liked", aspects: ["color"] },
   },
   {
     id: "style_liked",
-    text: "Is its style (formality, pattern, kind of piece) in line with the anchors the user likes?",
+    text: "Is its style (formality, pattern, kind of piece) like the felt items the user likes, and unlike the ones they don't?",
     label: "Your kind of style",
-    basis: "liked",
+    basis: { verdict: "liked", aspects: ["style"] },
   },
   {
     id: "feel_liked",
-    text: "Would its material and feel likely suit how the user describes the anchors they like?",
+    text: "Would its material and feel likely suit what the user says about how their clothes feel, good and bad?",
     label: "Feels like your favorites",
-    basis: "liked",
+    basis: { verdict: "liked", aspects: ["feel"] },
   },
 ];
 
 export const NO_DATA_REASON = "Not enough to go on yet.";
 export const NO_ANSWER_REASON = "No answer this time.";
 
-export interface FeelingAnchor {
+export interface FeltRow {
   item: ClosetItem;
   feeling: FeelingStructured;
 }
 
-const flatters = (f: FeelingStructured) => f.flattering === "yes";
-const liked = (f: FeelingStructured) => f.liked === "yes";
-
-// Owned items whose feeling says flattering or liked.
-export function pickAnchors(
+// Every owned item with a feeling: same category first, then ones with
+// aspects, then by id, so the same closet always sends the same table.
+export function pickFeltItems(
   closet: readonly ClosetItem[],
   feelings: ReadonlyMap<string, FeelingStructured>,
   candidate: ClosetItem,
-): FeelingAnchor[] {
+): FeltRow[] {
   const sameCategory = (item: ClosetItem) => (categoryOf(item) === categoryOf(candidate) ? 0 : 1);
+  const noAspects = (f: FeelingStructured) => (f.aspects.length > 0 ? 0 : 1);
   return closet
     .flatMap((item) => {
       const feeling = feelings.get(item.id);
-      return feeling && (flatters(feeling) || liked(feeling)) ? [{ item, feeling }] : [];
+      return feeling ? [{ item, feeling }] : [];
     })
     .sort(
       (a, b) =>
         sameCategory(a.item) - sameCategory(b.item) ||
+        noAspects(a.feeling) - noAspects(b.feeling) ||
         (a.item.id < b.item.id ? -1 : a.item.id > b.item.id ? 1 : 0),
-    )
-    .slice(0, MAX_ANCHORS);
+    );
 }
 
-// Body areas the user felt negative about, deduplicated, alphabetical.
+// Body areas of fit aspects the user felt bad about, deduplicated, alphabetical.
 export function troubleAreas(feelings: Iterable<FeelingStructured>): string[] {
   const areas = new Map<string, string>();
   for (const feeling of feelings) {
-    for (const { area, sentiment } of feeling.bodyAreas) {
-      const key = area.trim().toLowerCase();
-      if (sentiment === "negative" && key && !areas.has(key)) areas.set(key, area.trim());
+    for (const { aspect, sentiment, area } of feeling.aspects) {
+      const name = area?.trim();
+      if (aspect !== "fit" || sentiment !== "negative" || !name) continue;
+      if (!areas.has(name.toLowerCase())) areas.set(name.toLowerCase(), name);
     }
   }
   return [...areas.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([, area]) => area);
 }
 
-export function hasBasis(basis: Basis, anchors: readonly FeelingAnchor[], trouble: readonly string[]) {
+export function hasBasis(basis: Basis, rows: readonly FeltRow[], trouble: readonly string[]) {
   if (basis === "troubleAreas") return trouble.length > 0;
-  return anchors.some(({ feeling }) => (basis === "flattering" ? flatters(feeling) : liked(feeling)));
+  return rows.some(
+    ({ feeling }) =>
+      feeling[basis.verdict] !== "unknown" || feeling.aspects.some((a) => basis.aspects.includes(a.aspect)),
+  );
 }
 
 export function toItemSummary(item: ClosetItem): ItemSummary {
   return { id: item.id, title: item.title, tags: item.tags };
 }
 
-export function toAnchor({ item, feeling }: FeelingAnchor): Anchor {
-  return {
-    ...toItemSummary(item),
-    flattering: flatters(feeling),
-    liked: liked(feeling),
-    feeling: { bodyAreas: feeling.bodyAreas, mood: feeling.mood, summary: feeling.summary },
-  };
+export function toFeltItem({ item, feeling }: FeltRow): FeltItem {
+  const { flattering, liked, aspects, mood, summary } = feeling;
+  return { ...toItemSummary(item), feeling: { flattering, liked, aspects, mood, summary } };
 }
 
 export interface FitAnswer {

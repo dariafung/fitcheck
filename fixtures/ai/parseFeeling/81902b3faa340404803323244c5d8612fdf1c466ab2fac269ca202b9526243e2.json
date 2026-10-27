@@ -1,0 +1,35 @@
+{
+  "fn": "parseFeeling",
+  "promptVersion": "parse-feeling@3",
+  "inputHash": "81902b3faa340404803323244c5d8612fdf1c466ab2fac269ca202b9526243e2",
+  "inputPreview": "{\"item\":{\"id\":\"852c8e3d-abf7-4955-ab65-9d83194a02ae\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White cotton button-down\"},\"text\":\"Love the co",
+  "output": {
+    "flattering": "yes",
+    "liked": "unknown",
+    "aspects": [
+      {
+        "aspect": "color",
+        "sentiment": "positive",
+        "said": "Love the color on me",
+        "means": "Love the color on me"
+      },
+      {
+        "aspect": "length",
+        "sentiment": "negative",
+        "said": "too short",
+        "means": "too short"
+      },
+      {
+        "aspect": "fit",
+        "sentiment": "negative",
+        "area": "overall",
+        "said": "rides up when I lift my arms",
+        "means": "rides up when I lift my arms"
+      }
+    ],
+    "occasions": [],
+    "mood": [],
+    "summary": "Flattering color but too short and rides up with arm movement."
+  },
+  "recordedAt": "2026-10-27T01:42:07.963Z"
+}

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { FeelingStructured, ItemSummary } from "./common";
 
-export const PROMPT_VERSION = "build-profile@1";
+export const PROMPT_VERSION = "build-profile@2";
 
 export const BuildProfileInput = z.object({
   items: z.array(ItemSummary).min(1),

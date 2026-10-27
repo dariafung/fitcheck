@@ -50,10 +50,18 @@ const SHOES = item("23c59091-9b18-4c24-92c3-1072a5581d8e", "Sneakers", "shoes");
 const FEELING = {
   flattering: "unknown",
   liked: "yes",
-  bodyAreas: [{ area: "shoulders", sentiment: "negative" }],
+  aspects: [
+    { aspect: "feel", sentiment: "positive", area: null, said: "comfortable", means: "comfortable" },
+    { aspect: "fit", sentiment: "negative", area: "shoulders", said: "tight in the shoulders", means: "shoulders run narrow" },
+  ],
   occasions: ["work"],
   mood: ["calm"],
   summary: "Comfortable but tight in the shoulders.",
+};
+// What parseFeeling returns: a null area is left out.
+const PARSED = {
+  ...FEELING,
+  aspects: [{ aspect: "feel", sentiment: "positive", said: "comfortable", means: "comfortable" }, FEELING.aspects[1]],
 };
 
 beforeEach(() => {
@@ -64,7 +72,7 @@ beforeEach(() => {
 describe("shared request", () => {
   it("asks muse-spark-1.3 for strict JSON, unstored, with low reasoning", async () => {
     create.mockResolvedValue(reply(FEELING));
-    await expect(parseFeeling({ text: "Comfy, tight shoulders", item: SHIRT }, LIVE)).resolves.toEqual(FEELING);
+    await expect(parseFeeling({ text: "Comfy, tight shoulders", item: SHIRT }, LIVE)).resolves.toEqual(PARSED);
     const [body, options] = create.mock.calls[0];
     expect(body).toMatchObject({
       model: MODEL,
@@ -93,7 +101,7 @@ describe("shared request", () => {
 
   it("retries once when the text is not the expected JSON", async () => {
     create.mockResolvedValueOnce(reply({ nope: true })).mockResolvedValueOnce(reply(FEELING));
-    await expect(parseFeeling({ text: "Fine", item: SHIRT }, LIVE)).resolves.toEqual(FEELING);
+    await expect(parseFeeling({ text: "Fine", item: SHIRT }, LIVE)).resolves.toEqual(PARSED);
     expect(create).toHaveBeenCalledTimes(2);
   });
 

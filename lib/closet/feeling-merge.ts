@@ -1,4 +1,4 @@
-import { FeelingStructured } from "@/lib/ai/schemas/common";
+import { FeelingStructured, type FeelingAspect } from "@/lib/ai/schemas/common";
 
 // Re-editing a feeling keeps what the old text said unless the new text says
 // otherwise: a field the new text gives a different answer for takes the new
@@ -11,13 +11,13 @@ export function mergeFeeling(
   if (!old.success) return next;
   const prev = old.data;
 
-  const areas = new Map(prev.bodyAreas.map((a) => [key(a.area), a]));
-  for (const a of next.bodyAreas) areas.set(key(a.area), a);
+  const aspects = new Map(prev.aspects.map((a) => [aspectKey(a), a]));
+  for (const a of next.aspects) aspects.set(aspectKey(a), a);
 
   return {
     flattering: next.flattering === "unknown" ? prev.flattering : next.flattering,
     liked: next.liked === "unknown" ? prev.liked : next.liked,
-    bodyAreas: [...areas.values()],
+    aspects: [...aspects.values()],
     occasions: union(next.occasions, prev.occasions),
     mood: union(next.mood, prev.mood),
     summary: next.summary || prev.summary,
@@ -26,6 +26,11 @@ export function mergeFeeling(
 
 function key(value: string): string {
   return value.trim().toLowerCase();
+}
+
+// The same aspect of the same body area, or of the same remark.
+function aspectKey(a: FeelingAspect): string {
+  return `${a.aspect}:${key(a.area ?? a.said)}`;
 }
 
 // New values first; old ones the new text did not repeat follow.

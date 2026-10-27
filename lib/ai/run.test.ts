@@ -54,7 +54,7 @@ describe("mock mode", () => {
           profile: {
             lifestyleMix: { work: 0, school: 3, social: 2, sport: 3, home: 3 },
           },
-          anchors: [OTHER],
+          feltItems: [{ ...OTHER, feeling: { flattering: "yes", liked: "unknown", mood: [], summary: "" } }],
           questions: [{ id: "fit", text: "Is the fit like the flattering pieces?" }],
         }),
       () =>
