@@ -48,12 +48,12 @@ import {
   suitsYouReason,
 } from "./reasons";
 import {
+  countPoints,
   DUPLICATE_POINTS,
   MAX_POINTS,
-  OCCASION_GAP_POINTS,
-  OUTFIT_TIERS,
-  REVIVE_TIERS,
-  tierPoints,
+  POINTS_PER_OUTFIT,
+  POINTS_PER_REVIVED,
+  roundPart,
 } from "./score";
 import { categoryOf, toClosetItem, type ClosetItem } from "./types";
 
@@ -245,22 +245,22 @@ export async function runBuyCheck(
       answers: fit.answers,
     },
     outfits: {
-      points: tierPoints(outfitCount, OUTFIT_TIERS),
+      points: roundPart(countPoints(outfitCount, POINTS_PER_OUTFIT, MAX_POINTS.outfits)),
       max: MAX_POINTS.outfits,
       reason: outfitsReason(outfitCount),
       count: outfitCount,
     },
     revives: {
-      points: tierPoints(revived.length, REVIVE_TIERS),
+      points: roundPart(countPoints(revived.length, POINTS_PER_REVIVED, MAX_POINTS.revives)),
       max: MAX_POINTS.revives,
       reason: revivesReason(revived.map((r) => r.title)),
       items: revived,
     },
     fillsGap: {
-      points: OCCASION_GAP_POINTS[gapByOccasion.tier],
+      ...gapByOccasion,
+      points: roundPart(gapByOccasion.points),
       max: MAX_POINTS.fillsGap,
       reason: fillsGapReason(gapByOccasion.tier, gapByOccasion.occasions, profile.mix !== null),
-      ...gapByOccasion,
     },
     notRepeat: {
       points: DUPLICATE_POINTS[duplicate.tier],
@@ -279,7 +279,7 @@ export async function runBuyCheck(
 
   return {
     result: {
-      score: Object.values(parts).reduce((sum, p) => sum + p.points, 0),
+      score: roundPart(Object.values(parts).reduce((sum, p) => sum + p.points, 0)),
       summary: fit.summary,
       parts,
       gap: slots && { slots, reason: gapReason(slots) },

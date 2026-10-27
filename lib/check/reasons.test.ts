@@ -25,9 +25,9 @@ describe("reasons", () => {
   });
 
   it("explains the occasion gap", () => {
-    const school = { occasion: "school" as const, before: 1, after: 2, wanted: 3, tier: "more_outfits" as const };
-    const home = { occasion: "home" as const, before: 0, after: 1, wanted: 2, tier: "from_zero" as const };
-    const sport = { occasion: "sport" as const, before: 4, after: 6, wanted: 1, tier: "already_enough" as const };
+    const school = { occasion: "school" as const, before: 1, after: 2, wanted: 3, tier: "more_outfits" as const, points: 3.3 };
+    const home = { occasion: "home" as const, before: 0, after: 1, wanted: 2, tier: "from_zero" as const, points: 5 };
+    const sport = { occasion: "sport" as const, before: 4, after: 6, wanted: 1, tier: "already_enough" as const, points: 0 };
     expect(fillsGapReason("from_zero", [home, school, sport], true)).toBe(
       "Home: 2 short, this adds 1. School: 2 short, this adds 1.",
     );

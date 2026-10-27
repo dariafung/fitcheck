@@ -7,6 +7,7 @@ import type { BuyCheck, BuyCheckResult } from "@/lib/check/buy-check";
 import { FIT_QUESTIONS } from "@/lib/check/fit-questions";
 import { CANDIDATE_ITEM_ID } from "@/lib/check/pairings";
 import { NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
+import { roundPart } from "@/lib/check/score";
 import { createServerClient } from "@/lib/db/server";
 
 // Spies on the model calls while keeping the mock answers.
@@ -135,10 +136,11 @@ beforeEach(() => {
 describe("POST /api/checks", () => {
   it("scores an item that closes a gap", async () => {
     const r = await result(LOAFERS);
-    expect(r.parts.outfits).toMatchObject({ count: 1, points: 8 });
+    expect(r.parts.outfits).toMatchObject({ count: 1, points: 2.5 });
     expect(r.parts.revives.items.map((i) => i.id).sort()).toEqual([shirtId, trousersId].sort());
-    expect(r.parts.revives.points).toBe(10);
-    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 15, reason: "Work: 3 short, this adds 1." });
+    expect(r.parts.revives.points).toBe(8);
+    // Work: 3 of 3 short, adds 1.
+    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 5, reason: "Work: 3 short, this adds 1." });
     expect(r.parts.notRepeat).toMatchObject({ tier: "none", points: 10 });
     expect(r.gap).toBeNull();
     expect(r.sampleOutfits).toHaveLength(1);
@@ -147,7 +149,7 @@ describe("POST /api/checks", () => {
       ["Black trousers", false],
       ["Black loafers", true],
     ]);
-    expect(r.score).toBe(Object.values(r.parts).reduce((s, p) => s + p.points, 0));
+    expect(r.score).toBe(roundPart(Object.values(r.parts).reduce((s, p) => s + p.points, 0)));
 
     // Every question had something to compare against.
     expect(r.parts.suitsYou.answers).toHaveLength(FIT_QUESTIONS.length);

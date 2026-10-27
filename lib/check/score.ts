@@ -1,6 +1,6 @@
-// The 0–100 match score: five parts, all computed in code. Tier boundaries
-// are exported so they can be tuned during testing.
-import type { DuplicateTier, OccasionGapTier } from "./gaps";
+// The 0–100 match score: five parts, all computed in code. Values are
+// exported so they can be tuned during testing.
+import type { DuplicateTier } from "./gaps";
 
 export const MAX_POINTS = {
   suitsYou: 40,
@@ -15,31 +15,16 @@ export const MAX_POINTS = {
 export const POINTS_PER_YES = 8;
 export const NO_DATA_POINTS = POINTS_PER_YES / 2;
 
-// [at least this many, points], highest first.
-export type Tiers = readonly (readonly [number, number])[];
+// Each outfit the candidate forms; 8 outfits fill the part.
+export const POINTS_PER_OUTFIT = 2.5;
 
-// Outfits the candidate forms: 0 / 1–2 / 3–5 / 6+.
-export const OUTFIT_TIERS: Tiers = [
-  [6, 20],
-  [3, 15],
-  [1, 8],
-  [0, 0],
-];
+// Each owned item it revives, up to the part's max.
+export const POINTS_PER_REVIVED = 4;
 
-// Owned items it revives: 0 / 1 / 2–3 / 4+.
-export const REVIVE_TIERS: Tiers = [
-  [4, 15],
-  [2, 10],
-  [1, 5],
-  [0, 0],
-];
-
-export const OCCASION_GAP_POINTS: Record<OccasionGapTier, number> = {
-  none: 0,
-  already_enough: 3,
-  more_outfits: 8,
-  from_zero: 15,
-};
+// Fills a gap: each outfit added to an occasion that's short earns this,
+// times how short it was (short / wanted, before the candidate). Outfits past
+// the shortfall earn nothing; occasions add up to the part's max.
+export const GAP_POINTS_PER_OUTFIT = 5;
 
 export const DUPLICATE_POINTS: Record<DuplicateTier, number> = {
   near_identical: 0,
@@ -47,6 +32,20 @@ export const DUPLICATE_POINTS: Record<DuplicateTier, number> = {
   none: 10,
 };
 
-export function tierPoints(count: number, tiers: Tiers): number {
-  return tiers.find(([min]) => count >= min)?.[1] ?? 0;
+export function countPoints(count: number, perEach: number, max: number): number {
+  return Math.min(count * perEach, max);
+}
+
+// One occasion's share, before the cap. An occasion the user wants no
+// outfits for, or already has enough for, earns nothing.
+export function occasionPoints(before: number, after: number, wanted: number): number {
+  const short = Math.max(0, wanted - before);
+  if (short === 0) return 0;
+  const filled = Math.min(Math.max(0, after - before), short);
+  return GAP_POINTS_PER_OUTFIT * (short / wanted) * filled;
+}
+
+// Parts and the total keep one decimal.
+export function roundPart(points: number): number {
+  return Math.round(points * 10) / 10;
 }
