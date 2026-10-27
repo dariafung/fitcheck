@@ -13,6 +13,8 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
 });
 
 let item: { id: string; title: string };
+// Extra rows a test adds; removed with the item.
+let extraIds: string[] = [];
 
 // The server runs with WEATHER_MODE=fixed, so today is FIXED_WEATHER. The
 // test item is only comfortable in warmer weather than that.
@@ -47,7 +49,8 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-  await db.from("items").delete().eq("id", item.id);
+  await db.from("items").delete().in("id", [item.id, ...extraIds]);
+  extraIds = [];
 });
 
 test("open an item from the grid, write how it feels, and keep it", async ({ page }) => {
@@ -102,15 +105,16 @@ test("edit a saved feeling", async ({ page }) => {
   await expect(page.getByText("Fine, I guess.")).toHaveCount(0);
 });
 
-test("widening the temperature range moves an item into Good for today", async ({ page }) => {
-  await page.goto("/closet");
+test("widening the temperature range moves an item into Good for today on home", async ({ page }) => {
+  await page.goto("/");
   const good = page.getByRole("region", { name: "Good for today" });
-  const notToday = page.getByRole("region", { name: "Not for today" });
   await expect(good).toContainText(`${FIXED_WEATHER.city} · ${FIXED_WEATHER.lowF}–${FIXED_WEATHER.highF}°F`);
   await expect(page.getByRole("link", { name: "Weather data by Open-Meteo.com" })).toBeVisible();
-  await expect(notToday.getByRole("link", { name: item.title })).toBeVisible();
+  await expect(good.getByRole("link", { name: item.title })).toHaveCount(0);
 
-  await notToday.getByRole("link", { name: item.title }).click();
+  await good.getByRole("link", { name: "See all clothes" }).click();
+  await expect(page).toHaveURL(/\/closet$/);
+  await page.getByRole("link", { name: item.title }).click();
   await expect(page.getByText(`${TOO_WARM.min} to ${TOO_WARM.max}°F`)).toBeVisible();
   await page.getByRole("button", { name: "Edit temperature range" }).click();
   await page.getByRole("spinbutton", { name: "Lowest °F" }).fill(String(FIXED_WEATHER.lowF - 5));
@@ -118,10 +122,50 @@ test("widening the temperature range moves an item into Good for today", async (
   await page.getByRole("button", { name: "Save temperature range" }).click();
   await expect(page.getByText(`${FIXED_WEATHER.lowF - 5} to ${FIXED_WEATHER.highF + 5}°F`)).toBeVisible();
 
-  await page.getByRole("link", { name: "← Closet" }).click();
+  await page.getByRole("navigation").getByRole("link", { name: "fitcheck" }).click();
+  await expect(page).toHaveURL(/\/$/);
   await expect(good.getByRole("link", { name: item.title })).toBeVisible();
-  await expect(notToday.getByRole("link", { name: item.title })).toHaveCount(0);
 
   await page.reload();
   await expect(good.getByRole("link", { name: item.title })).toBeVisible();
+});
+
+test("closet tabs: All shows what you wear, Passing on survives a refresh", async ({ page }) => {
+  const passing = `E2E old jacket ${randomUUID().slice(0, 8)}`;
+  const { data, error } = await db
+    .from("items")
+    .insert({ user_id: DEMO_USER_ID, entry_method: "manual", title: passing, category: "outerwear", status: "passing_on" })
+    .select("id")
+    .single();
+  if (error) throw error;
+  extraIds.push(data.id);
+
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const allTab = main.getByRole("link", { name: /^All \d+$/ });
+  const passingTab = main.getByRole("link", { name: /^Passing on \d+$/ });
+  await expect(allTab).toHaveAttribute("aria-current", "page");
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+  await expect(main.getByRole("link", { name: passing })).toHaveCount(0);
+
+  await passingTab.click();
+  await expect(page).toHaveURL(/\/closet\?tab=passing-on$/);
+  await expect(passingTab).toHaveAttribute("aria-current", "page");
+  await expect(main.getByRole("link", { name: passing })).toBeVisible();
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+
+  await page.reload();
+  await expect(passingTab).toHaveAttribute("aria-current", "page");
+  await expect(main.getByRole("link", { name: passing })).toBeVisible();
+
+  await allTab.click();
+  await expect(page).toHaveURL(/\/closet$/);
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+});
+
+// Only this file adds passing-on items, and its tests run one at a time.
+test("Passing on is empty when nothing is on its way out", async ({ page }) => {
+  await page.goto("/closet?tab=passing-on");
+  await expect(page.getByText("Nothing to pass on.")).toBeVisible();
+  await expect(page.getByRole("link", { name: item.title })).toHaveCount(0);
 });

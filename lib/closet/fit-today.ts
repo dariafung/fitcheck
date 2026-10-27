@@ -20,22 +20,13 @@ export function fitsToday(range: TempRangeF | null, today: TempRangeF): boolean 
   return range === null || rangesOverlap(range, today);
 }
 
-export interface ClosetGroups<T> {
-  good: T[];
-  notToday: T[];
-  passingOn: T[];
-}
-
-// Without today's weather every active item counts as good. Order is kept.
-export function groupForToday<T extends { status: string; tempRangeF: TempRangeF | null }>(
+// Active items that suit today's temps; without today's weather, every active
+// item. Order is kept.
+export function goodForToday<T extends { status: string; tempRangeF: TempRangeF | null }>(
   items: T[],
   today: TempRangeF | null,
-): ClosetGroups<T> {
-  const groups: ClosetGroups<T> = { good: [], notToday: [], passingOn: [] };
-  for (const item of items) {
-    if (item.status === "passing_on") groups.passingOn.push(item);
-    else if (today === null || fitsToday(item.tempRangeF, today)) groups.good.push(item);
-    else groups.notToday.push(item);
-  }
-  return groups;
+): T[] {
+  return items.filter(
+    (item) => item.status === "active" && (today === null || fitsToday(item.tempRangeF, today)),
+  );
 }

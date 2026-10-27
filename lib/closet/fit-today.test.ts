@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fitsToday, groupForToday, itemTempRange } from "./fit-today";
+import { fitsToday, goodForToday, itemTempRange } from "./fit-today";
 
 const TODAY = { min: 50, max: 65 };
 
@@ -23,7 +23,7 @@ describe("fitsToday", () => {
   });
 });
 
-describe("groupForToday", () => {
+describe("goodForToday", () => {
   const items = [
     { id: "parka", status: "active", tempRangeF: { min: -20, max: 35 } },
     { id: "tee", status: "active", tempRangeF: { min: 60, max: 95 } },
@@ -31,16 +31,11 @@ describe("groupForToday", () => {
     { id: "shorts", status: "passing_on", tempRangeF: { min: 60, max: 95 } },
   ];
 
-  it("splits active items by today's temps and puts passing-on items last", () => {
-    const groups = groupForToday(items, TODAY);
-    expect(groups.good.map((i) => i.id)).toEqual(["tee", "scarf"]);
-    expect(groups.notToday.map((i) => i.id)).toEqual(["parka"]);
-    expect(groups.passingOn.map((i) => i.id)).toEqual(["shorts"]);
+  it("keeps active items that fit today's temps", () => {
+    expect(goodForToday(items, TODAY).map((i) => i.id)).toEqual(["tee", "scarf"]);
   });
 
-  it("does not split without weather", () => {
-    const groups = groupForToday(items, null);
-    expect(groups.good.map((i) => i.id)).toEqual(["parka", "tee", "scarf"]);
-    expect(groups.notToday).toEqual([]);
+  it("keeps every active item without weather", () => {
+    expect(goodForToday(items, null).map((i) => i.id)).toEqual(["parka", "tee", "scarf"]);
   });
 });
