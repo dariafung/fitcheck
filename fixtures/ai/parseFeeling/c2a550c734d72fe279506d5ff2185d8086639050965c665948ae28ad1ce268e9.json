@@ -1,0 +1,35 @@
+{
+  "fn": "parseFeeling",
+  "promptVersion": "parse-feeling@3",
+  "inputHash": "c2a550c734d72fe279506d5ff2185d8086639050965c665948ae28ad1ce268e9",
+  "inputPreview": "{\"item\":{\"id\":\"852c8e3d-abf7-4955-ab65-9d83194a02ae\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White cotton button-down\"},\"text\":\"Love this s",
+  "output": {
+    "flattering": "yes",
+    "liked": "yes",
+    "aspects": [
+      {
+        "aspect": "feel",
+        "sentiment": "positive",
+        "said": "so comfy",
+        "means": "so comfy"
+      },
+      {
+        "aspect": "color",
+        "sentiment": "positive",
+        "said": "color makes me look awake",
+        "means": "looks awake in white"
+      },
+      {
+        "aspect": "fit",
+        "sentiment": "negative",
+        "area": "shoulders",
+        "said": "tight across the shoulders",
+        "means": "shoulders need more room"
+      }
+    ],
+    "occasions": [],
+    "mood": [],
+    "summary": "Comfy white shirt looks awake but tight across shoulders."
+  },
+  "recordedAt": "2026-10-27T01:41:49.984Z"
+}

@@ -17,12 +17,12 @@ With all of P0 done and deployed, judges can walk through "add clothes → feeli
 
 | # | Feature | What it does | Done when | Model |
 | --- | --- | --- | --- | --- |
-| P0-1 | Profile | Body measurements, body shape, lifestyle mix (outfits wanted per season for each occasion: work / school / social / sport / home) | Can be saved and edited; used by the purchase check | — |
+| P0-1 | Profile | Body measurements (height and weight required; shown in in / lb or cm / kg, stored in cm / kg), body shape (one of five, required), lifestyle mix (outfits wanted per season for each occasion: work / school / social / sport / home), weather location for home's "Good for today" (device location by default, or a picked city) | Can be saved and edited; used by the purchase check | — |
 | P0-2 | Add items: screenshot | Upload a screenshot of the product page → Spark identifies the product and points at the product photo → `web_search` fills in material, fit, etc. → user confirms or edits. The product photo is cropped out of the screenshot. Produces an item card | All 15–20 items of the demo persona added from screenshots with mostly correct attributes; user can edit tags | Spark 1.3 + web_search |
-| P0-3 | Free-text feelings | One text box per item, write anything; the backend extracts flattering, liked, body areas, occasions, mood | Raw text saved; structured fields generated without the user seeing or filling them | Spark 1.3 |
+| P0-3 | Free-text feelings | One text box per item, write anything; the backend extracts flattering, liked, occasions, mood, and one entry per aspect the text mentions (color, feel, fit with body area, length, style, other): good or bad, what was said, and what it means | Raw text saved; structured fields generated without the user seeing or filling them | Spark 1.3 |
 | P0-4 | Wardrobe grid | Grid of all items; open one to see details and feelings | Works in mobile and desktop browsers | — |
 | P0-5 | Pairing | Rule pre-filter (complementary categories, formality, overlapping temperature ranges, obvious color clashes) → Spark judges pairs in batches, results cached → code enumerates complete outfits: top + bottom + shoes, or one-piece + shoes; outerwear optional by temperature; accessories don't count | Spot checks of the persona's pairings look mostly right | Spark 1.3 |
-| P0-6 | **Purchase check** | Four gap metrics computed in code: how many existing items it revives, how many outfits the new item forms, whether it adds outfits to an occasion that has fewer than the user wants, whether it duplicates something owned (tuned during testing). Match score 0–100 computed in code; the model only answers yes/no questions and writes the reasons. Main signal: items the user marked as flattering or liked; body-shape rules get low weight and only feed the reasons. One item at a time; accessories are not checked yet (P2-4) | Two demo items give stable results: one closes a gap, one creates a gap. The item being checked is never stored or cached; each check asks the model again, so its yes/no answers may differ slightly between runs, but the scoring rules are deterministic code | Spark 1.3 |
+| P0-6 | **Purchase check** | Four gap metrics computed in code: how many existing items it revives, how many outfits the new item forms, whether it adds outfits to an occasion that has fewer than the user wants, whether it duplicates something owned (tuned during testing). Match score 0–100 computed in code; the model only answers yes/no questions and writes the reasons. Main signal: every item the user wrote a feeling about, good and bad; body-shape rules get low weight and only feed the reasons. One item at a time; accessories are not checked yet (P2-4) | Two demo items give stable results: one closes a gap, one creates a gap. The item being checked is never stored or cached; each check asks the model again, so its yes/no answers may differ slightly between runs, but the scoring rules are deterministic code | Spark 1.3 |
 | P0-7 | Demo data + deploy | Fictional demo persona; demo items preloaded; seed data read-only; visitor data isolated with one-click reset; rate limits + daily budget | Judges can use it from the link; a full run shows no console errors | — |
 
 ## P1: bonus
@@ -88,7 +88,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 | `parseFeeling` | Free text → structured feelings | Spark 1.3 |
 | `transcribe` | Recording → text | Voice Transcribe |
 | `judgePairing` | Two items → pairs or not + reason | Spark 1.3 |
-| `scorePurchase` | New item + profile + flattering/liked anchor items → yes/no answers with reasons (score, gaps and outfit count are computed in code) | Spark 1.3 |
+| `scorePurchase` | New item + profile + every item with a feeling → yes/no answers with reasons (score, gaps and outfit count are computed in code) | Spark 1.3 |
 | `renderOutfit` | 3 item images → one outfit image | Muse Image |
 | `buildProfile` | All items + feelings → style profile | Spark 1.3 |
 | `segmentGarment` | On-model image + category word → transparent cutout (P2) | SAM 3.1 |
@@ -102,6 +102,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 - The Meta console has no hard spending cap: the app keeps a daily budget counter and rate-limits by IP
 - Muse Image requests turn off `enable_web_search` and `enable_image_search`; generated images are copied to our storage right away and cached by "item ids + prompt version"
 - Secrets live only in the keychain, `.env.local` and Vercel environment variables, never in git
+- Weather: Open-Meteo forecast and geocoding (free, no key, credited on the page). Location order: picked city → device location → Vercel IP headers → Madison. The location and the unit choice live in browser cookies, never in the database; automated tests use `WEATHER_MODE=fixed` and never call Open-Meteo
 
 ## Data model
 

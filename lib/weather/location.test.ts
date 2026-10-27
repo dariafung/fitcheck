@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LOCATION, locationFromHeaders, resolveLocation } from "./location";
+import { DEFAULT_LOCATION, describeLocation, locationFromHeaders, resolveLocation, shortCity } from "./location";
+import { LOCATION_COOKIE } from "./location-cookie";
 
 describe("locationFromHeaders", () => {
   it("reads Vercel's IP headers and decodes the city", () => {
@@ -23,8 +24,50 @@ describe("locationFromHeaders", () => {
   });
 });
 
+const IP = { "x-vercel-ip-latitude": "47.61", "x-vercel-ip-longitude": "-122.33", "x-vercel-ip-city": "Seattle" };
+
+function cookie(value: unknown): string {
+  return `${LOCATION_COOKIE}=${encodeURIComponent(JSON.stringify(value))}`;
+}
+
 describe("resolveLocation", () => {
   it("falls back to Madison when nothing else is known", async () => {
     expect(await resolveLocation("user", new Headers())).toEqual(DEFAULT_LOCATION);
+  });
+
+  it("prefers the browser's location cookie over the IP guess", async () => {
+    const picked = new Headers({ ...IP, cookie: cookie({ src: "picked", lat: 41.88, lon: -87.63, city: "Chicago, Illinois, US" }) });
+    expect(await resolveLocation("user", picked)).toEqual({ lat: 41.88, lon: -87.63, city: "Chicago, Illinois, US" });
+
+    const device = new Headers({ ...IP, cookie: `a=1; ${cookie({ src: "device", lat: 40.71, lon: -74.01 })}` });
+    expect(await resolveLocation("user", device)).toEqual({ lat: 40.71, lon: -74.01, city: null });
+  });
+
+  it("ignores a malformed cookie and uses the IP guess", async () => {
+    const headers = new Headers({ ...IP, cookie: `${LOCATION_COOKIE}=not-json` });
+    expect(await resolveLocation("user", headers)).toEqual({ lat: 47.61, lon: -122.33, city: "Seattle" });
+  });
+});
+
+describe("shortCity", () => {
+  it("keeps the part before the first comma", () => {
+    expect(shortCity("Chicago, Illinois, US")).toBe("Chicago");
+    expect(shortCity("Madison")).toBe("Madison");
+  });
+});
+
+describe("describeLocation", () => {
+  it("names each source the way the profile page shows it", () => {
+    const picked = { src: "picked", lat: 41.88, lon: -87.63, city: "Chicago, Illinois, US" };
+    expect(describeLocation(new Headers({ ...IP, cookie: cookie(picked) }))).toEqual({
+      label: "Chicago, Illinois, US",
+      picked: true,
+    });
+    expect(describeLocation(new Headers({ ...IP, cookie: cookie({ src: "device", lat: 1, lon: 2 }) }))).toEqual({
+      label: "Your location",
+      picked: false,
+    });
+    expect(describeLocation(new Headers(IP))).toEqual({ label: "Seattle (best guess)", picked: false });
+    expect(describeLocation(new Headers())).toEqual({ label: "Madison (default)", picked: false });
   });
 });

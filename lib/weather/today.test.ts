@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LOCATION_COOKIE } from "./location-cookie";
 import { CACHE_MS, clearWeatherCache, FIXED_WEATHER, todayWeather } from "./today";
 
 const FORECAST = {
@@ -56,5 +57,31 @@ describe("todayWeather", () => {
     vi.stubEnv("WEATHER_MODE", "off");
     expect(await todayWeather("u", new Headers(), { fetchImpl })).toBeNull();
     expect(calls).toBe(0);
+  });
+
+  it("names fixed weather after the browser's location, temps unchanged", async () => {
+    vi.stubEnv("WEATHER_MODE", "fixed");
+    const withCookie = (value: unknown) =>
+      new Headers({ cookie: `${LOCATION_COOKIE}=${encodeURIComponent(JSON.stringify(value))}` });
+    expect(
+      await todayWeather("u", withCookie({ src: "picked", lat: 41.88, lon: -87.63, city: "Chicago, Illinois, US" })),
+    ).toEqual({ ...FIXED_WEATHER, city: "Chicago, Illinois, US" });
+    expect(await todayWeather("u", withCookie({ src: "device", lat: 1, lon: 2 }))).toEqual({
+      ...FIXED_WEATHER,
+      city: null,
+    });
+  });
+
+  it("asks Open-Meteo for the cookie's location", async () => {
+    const urls: string[] = [];
+    const spy = (async (url: string) => {
+      urls.push(url);
+      return new Response(JSON.stringify(FORECAST));
+    }) as unknown as typeof fetch;
+    const headers = new Headers({
+      cookie: `${LOCATION_COOKIE}=${encodeURIComponent(JSON.stringify({ src: "device", lat: 41.88, lon: -87.63 }))}`,
+    });
+    expect(await todayWeather("u", headers, { fetchImpl: spy })).toMatchObject({ city: null, lowF: 40 });
+    expect(urls[0]).toContain("latitude=41.88&longitude=-87.63");
   });
 });

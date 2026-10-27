@@ -90,20 +90,36 @@ beforeAll(async () => {
     .throwOnError();
   await db
     .from("item_feelings")
-    .insert({
-      item_id: shirtId,
-      user_id: userId,
-      raw_text: "Love it, flattering, but it pulls at the hips",
-      source: "typed",
-      structured: {
-        flattering: "yes",
-        liked: "yes",
-        bodyAreas: [{ area: "hips", sentiment: "negative" }],
-        occasions: [],
-        mood: ["confident"],
-        summary: "Loves it.",
+    .insert([
+      {
+        item_id: shirtId,
+        user_id: userId,
+        raw_text: "Love it, flattering, but it pulls at the hips",
+        source: "typed",
+        structured: {
+          flattering: "yes",
+          liked: "yes",
+          aspects: [{ aspect: "fit", sentiment: "negative", area: "hips", said: "pulls at the hips", means: "hips need room" }],
+          occasions: [],
+          mood: ["confident"],
+          summary: "Loves it.",
+        },
       },
-    })
+      {
+        item_id: trousersId,
+        user_id: userId,
+        raw_text: "The black washes me out",
+        source: "typed",
+        structured: {
+          flattering: "no",
+          liked: "unknown",
+          aspects: [{ aspect: "color", sentiment: "negative", said: "black washes me out", means: "black is too harsh" }],
+          occasions: [],
+          mood: [],
+          summary: "Black washes them out.",
+        },
+      },
+    ])
     .throwOnError();
 });
 
@@ -138,9 +154,17 @@ describe("POST /api/checks", () => {
     expect(r.parts.suitsYou.answers.every((a) => a.answer !== null)).toBe(true);
     const [input] = vi.mocked(ai.scorePurchase).mock.calls[0];
     expect(input.troubleAreas).toEqual(["hips"]);
-    expect(input.anchors).toEqual([
-      expect.objectContaining({ id: shirtId, flattering: true, liked: true, feeling: expect.objectContaining({ mood: ["confident"] }) }),
-    ]);
+    // Every felt item goes in, the one they dislike too.
+    expect(input.feltItems).toHaveLength(2);
+    expect(input.feltItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: shirtId, feeling: expect.objectContaining({ flattering: "yes", mood: ["confident"] }) }),
+        expect.objectContaining({
+          id: trousersId,
+          feeling: expect.objectContaining({ flattering: "no", aspects: [expect.objectContaining({ aspect: "color" })] }),
+        }),
+      ]),
+    );
     expect(input.profile).toMatchObject({ bodyShape: "pear", lifestyleMix: MIX });
   });
 

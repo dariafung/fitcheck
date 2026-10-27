@@ -15,8 +15,8 @@ import {
   FIT_QUESTIONS,
   fitAnswers,
   hasBasis,
-  pickAnchors,
-  toAnchor,
+  pickFeltItems,
+  toFeltItem,
   toItemSummary,
   troubleAreas,
   type FitAnswer,
@@ -159,14 +159,14 @@ async function askFit(
   feelings: Map<string, FeelingStructured>,
   profile: ProfileSummary,
 ): Promise<{ answers: FitAnswer[]; summary: string }> {
-  const anchors = pickAnchors(closet, feelings, candidate);
-  const trouble = troubleAreas(feelings.values());
-  const asked = FIT_QUESTIONS.filter((q) => hasBasis(q.basis, anchors, trouble));
+  const rows = pickFeltItems(closet, feelings, candidate);
+  const trouble = troubleAreas(rows.map((r) => r.feeling));
+  const asked = FIT_QUESTIONS.filter((q) => hasBasis(q.basis, rows, trouble));
   if (asked.length === 0) return { answers: fitAnswers([], null), summary: NO_FIT_SUMMARY };
   const output = await score({
     candidate: toItemSummary(candidate),
     profile,
-    anchors: anchors.map(toAnchor),
+    feltItems: rows.map(toFeltItem),
     troubleAreas: trouble,
     questions: asked.map(({ id, text }) => ({ id, text })),
   });

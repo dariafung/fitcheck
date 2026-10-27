@@ -1,0 +1,84 @@
+[
+  {
+    "id": "5b0d3c1e-6f2a-4c8e-9a1d-2e7f4b6c8a01",
+    "item_id": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
+    "raw_text": "Love this shirt, so comfy and the color makes me look awake. A bit tight across the shoulders though.",
+    "source": "typed",
+    "structured": {
+      "flattering": "yes",
+      "liked": "yes",
+      "aspects": [
+        {
+          "aspect": "feel",
+          "sentiment": "positive",
+          "said": "so comfy",
+          "means": "so comfy"
+        },
+        {
+          "aspect": "color",
+          "sentiment": "positive",
+          "said": "color makes me look awake",
+          "means": "looks awake in white"
+        },
+        {
+          "aspect": "fit",
+          "sentiment": "negative",
+          "area": "shoulders",
+          "said": "tight across the shoulders",
+          "means": "shoulders need more room"
+        }
+      ],
+      "occasions": [],
+      "mood": [],
+      "summary": "Comfy white shirt looks awake but tight across shoulders."
+    },
+    "parsed_at": "2026-10-26T00:00:00Z"
+  },
+  {
+    "id": "5b0d3c1e-6f2a-4c8e-9a1d-2e7f4b6c8a02",
+    "item_id": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+    "raw_text": "Never wear these. The waist digs in when I sit and they make my legs look short.",
+    "source": "typed",
+    "structured": {
+      "flattering": "no",
+      "liked": "no",
+      "aspects": [
+        {
+          "aspect": "fit",
+          "sentiment": "negative",
+          "area": "waist",
+          "said": "waist digs in when I sit",
+          "means": "needs roomier waist for sitting"
+        },
+        {
+          "aspect": "length",
+          "sentiment": "negative",
+          "said": "make my legs look short",
+          "means": "needs longer-looking leg line"
+        }
+      ],
+      "occasions": [],
+      "mood": [],
+      "summary": "Unworn jeans dig at the waist and shorten the leg line."
+    },
+    "parsed_at": "2026-10-26T00:00:00Z"
+  },
+  {
+    "id": "5b0d3c1e-6f2a-4c8e-9a1d-2e7f4b6c8a03",
+    "item_id": "23c59091-9b18-4c24-92c3-1072a5581d8e",
+    "raw_text": "Wore them to brunch and a long walk, no complaints.",
+    "source": "typed",
+    "structured": {
+      "flattering": "unknown",
+      "liked": "unknown",
+      "aspects": [],
+      "occasions": [
+        "social",
+        "sport"
+      ],
+      "mood": [],
+      "summary": "White leather sneakers worn to brunch and long walk without complaints."
+    },
+    "parsed_at": "2026-10-26T00:00:00Z"
+  }
+]
