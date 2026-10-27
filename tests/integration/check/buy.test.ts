@@ -98,7 +98,7 @@ beforeAll(async () => {
       structured: {
         flattering: "yes",
         liked: "yes",
-        bodyAreas: [{ area: "hips", sentiment: "negative" }],
+        aspects: [{ aspect: "fit", sentiment: "negative", area: "hips", said: "pulls at the hips", means: "hips need room" }],
         occasions: [],
         mood: ["confident"],
         summary: "Loves it.",

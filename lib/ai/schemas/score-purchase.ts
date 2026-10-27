@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { FeelingStructured, ItemSummary, ProfileSummary } from "./common";
 
-export const PROMPT_VERSION = "score-purchase@2";
+export const PROMPT_VERSION = "score-purchase@3";
 
 // What the user said about an anchor, parsed from their own words.
 export const AnchorFeeling = FeelingStructured.pick({
-  bodyAreas: true,
+  aspects: true,
   mood: true,
   summary: true,
 });
@@ -22,7 +22,7 @@ export const ScorePurchaseInput = z.object({
   candidate: ItemSummary,
   profile: ProfileSummary,
   anchors: z.array(Anchor),
-  // Body areas the user felt negative about, across all their feelings.
+  // Body areas of fit aspects the user felt bad about, across all feelings.
   troubleAreas: z.array(z.string()).default([]),
   questions: z
     .array(z.object({ id: z.string().min(1), text: z.string().min(1) }))

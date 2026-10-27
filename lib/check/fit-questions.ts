@@ -85,13 +85,14 @@ export function pickAnchors(
     .slice(0, MAX_ANCHORS);
 }
 
-// Body areas the user felt negative about, deduplicated, alphabetical.
+// Body areas of fit aspects the user felt bad about, deduplicated, alphabetical.
 export function troubleAreas(feelings: Iterable<FeelingStructured>): string[] {
   const areas = new Map<string, string>();
   for (const feeling of feelings) {
-    for (const { area, sentiment } of feeling.bodyAreas) {
-      const key = area.trim().toLowerCase();
-      if (sentiment === "negative" && key && !areas.has(key)) areas.set(key, area.trim());
+    for (const { aspect, sentiment, area } of feeling.aspects) {
+      const name = area?.trim();
+      if (aspect !== "fit" || sentiment !== "negative" || !name) continue;
+      if (!areas.has(name.toLowerCase())) areas.set(name.toLowerCase(), name);
     }
   }
   return [...areas.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([, area]) => area);
@@ -111,7 +112,7 @@ export function toAnchor({ item, feeling }: FeelingAnchor): Anchor {
     ...toItemSummary(item),
     flattering: flatters(feeling),
     liked: liked(feeling),
-    feeling: { bodyAreas: feeling.bodyAreas, mood: feeling.mood, summary: feeling.summary },
+    feeling: { aspects: feeling.aspects, mood: feeling.mood, summary: feeling.summary },
   };
 }
 

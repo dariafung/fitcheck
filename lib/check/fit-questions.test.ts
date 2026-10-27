@@ -23,7 +23,7 @@ function item(category: Category) {
 }
 
 function feeling(over: Partial<FeelingStructured> = {}): FeelingStructured {
-  return { flattering: "unknown", liked: "unknown", bodyAreas: [], occasions: [], mood: [], summary: "", ...over };
+  return { flattering: "unknown", liked: "unknown", aspects: [], occasions: [], mood: [], summary: "", ...over };
 }
 
 describe("pickAnchors", () => {
@@ -51,10 +51,12 @@ describe("pickAnchors", () => {
 });
 
 describe("troubleAreas", () => {
-  it("collects negative areas once, alphabetically", () => {
+  it("collects areas of bad fit aspects once, alphabetically", () => {
+    const fit = (area: string | undefined, sentiment: "positive" | "negative" = "negative", aspect: "fit" | "color" = "fit") =>
+      ({ aspect, sentiment, area, said: "", means: "" });
     const areas = troubleAreas([
-      feeling({ bodyAreas: [{ area: "Hips", sentiment: "negative" }, { area: "waist", sentiment: "positive" }] }),
-      feeling({ bodyAreas: [{ area: "hips ", sentiment: "negative" }, { area: "Arms", sentiment: "negative" }] }),
+      feeling({ aspects: [fit("Hips"), fit("waist", "positive"), fit(undefined)] }),
+      feeling({ aspects: [fit("hips "), fit("Arms"), fit("neckline", "negative", "color")] }),
     ]);
     expect(areas).toEqual(["Arms", "Hips"]);
   });
@@ -73,7 +75,7 @@ describe("hasBasis", () => {
 describe("toAnchor", () => {
   it("passes the feeling without the verdicts", () => {
     const anchor = toAnchor({ item: item("top"), feeling: feeling({ flattering: "yes", mood: ["calm"], summary: "Fits well" }) });
-    expect(anchor).toMatchObject({ flattering: true, liked: false, feeling: { bodyAreas: [], mood: ["calm"], summary: "Fits well" } });
+    expect(anchor).toMatchObject({ flattering: true, liked: false, feeling: { aspects: [], mood: ["calm"], summary: "Fits well" } });
   });
 });
 

@@ -1,24 +1,29 @@
 {
   "fn": "parseFeeling",
-  "promptVersion": "parse-feeling@2",
-  "inputHash": "d03752e3934d611c463cf162e978c0b175679fe27177543a9c04ceefafec3380",
+  "promptVersion": "parse-feeling@3",
+  "inputHash": "c4b6574bc7c811fe1c9ad114749c646ce7aa61e004fd365151d085779fbc7a70",
   "inputPreview": "{\"item\":{\"id\":\"c81b2b56-1f62-4284-83b6-7307a6355ac5\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"denim\",\"colors\":[{\"name\":\"indigo\"}],\"fit\":\"regular\",\"formality\":2,\"materials\":[\"denim\"],\"occasions\":[\"work\",\"social\"],\"tempRangeF\":{\"max\":80,\"min\":40}},\"title\":\"Dark straight-leg jeans\"},\"text\":\"Never wea",
   "output": {
     "flattering": "no",
     "liked": "no",
-    "bodyAreas": [
+    "aspects": [
       {
+        "aspect": "fit",
+        "sentiment": "negative",
         "area": "waist",
-        "sentiment": "negative"
+        "said": "waist digs in when I sit",
+        "means": "needs roomier waist for sitting"
       },
       {
-        "area": "legs",
-        "sentiment": "negative"
+        "aspect": "length",
+        "sentiment": "negative",
+        "said": "make my legs look short",
+        "means": "needs longer-looking leg line"
       }
     ],
     "occasions": [],
     "mood": [],
-    "summary": "Unworn jeans with digging waistband and shortening effect on legs."
+    "summary": "Unworn jeans dig at the waist and shorten the leg line."
   },
-  "recordedAt": "2026-10-27T00:26:34.918Z"
+  "recordedAt": "2026-10-27T01:41:53.858Z"
 }

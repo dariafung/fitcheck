@@ -59,15 +59,27 @@ export type ItemSummary = z.infer<typeof ItemSummary>;
 
 export const Verdict = z.enum(["yes", "no", "mixed", "unknown"]);
 
+export const FeelingAspectKind = z.enum(["color", "feel", "fit", "length", "style", "other"]);
+export type FeelingAspectKind = z.infer<typeof FeelingAspectKind>;
+
+// One thing the note says about one aspect of the item, good or bad.
+export const FeelingAspect = z.object({
+  aspect: FeelingAspectKind,
+  sentiment: z.enum(["positive", "negative"]),
+  // The body area, for fit only.
+  area: z.string().optional(),
+  // What the note says ("tight across the shoulders") and what that means
+  // for buying ("shoulders run narrow"), in short English.
+  said: z.string(),
+  means: z.string(),
+});
+export type FeelingAspect = z.infer<typeof FeelingAspect>;
+
 export const FeelingStructured = z.object({
   flattering: Verdict,
   liked: Verdict,
-  bodyAreas: z.array(
-    z.object({
-      area: z.string(),
-      sentiment: z.enum(["positive", "negative", "neutral"]),
-    }),
-  ),
+  // Feelings parsed before aspects existed have none.
+  aspects: z.array(FeelingAspect).default([]),
   occasions: z.array(z.string()),
   mood: z.array(z.string()),
   summary: z.string(),

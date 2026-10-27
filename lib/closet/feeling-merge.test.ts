@@ -5,9 +5,10 @@ import { mergeFeeling } from "./feeling-merge";
 const OLD: FeelingStructured = {
   flattering: "yes",
   liked: "yes",
-  bodyAreas: [
-    { area: "waist", sentiment: "positive" },
-    { area: "hips", sentiment: "positive" },
+  aspects: [
+    { aspect: "fit", sentiment: "positive", area: "waist", said: "nice at the waist", means: "defined waist suits them" },
+    { aspect: "fit", sentiment: "positive", area: "hips", said: "smooth over the hips", means: "skims the hips" },
+    { aspect: "color", sentiment: "positive", said: "love the green", means: "green suits them" },
   ],
   occasions: ["work"],
   mood: ["confident"],
@@ -17,7 +18,7 @@ const OLD: FeelingStructured = {
 const EMPTY: FeelingStructured = {
   flattering: "unknown",
   liked: "unknown",
-  bodyAreas: [],
+  aspects: [],
   occasions: [],
   mood: [],
   summary: "",
@@ -28,15 +29,25 @@ describe("mergeFeeling", () => {
     const merged = mergeFeeling(OLD, {
       ...EMPTY,
       liked: "no",
-      bodyAreas: [{ area: "Hips", sentiment: "negative" }],
+      aspects: [{ aspect: "fit", sentiment: "negative", area: "Hips", said: "tight on the hips", means: "hips need room" }],
       summary: "Tight on the hips now.",
     });
     expect(merged.liked).toBe("no");
-    expect(merged.bodyAreas).toEqual([
-      { area: "waist", sentiment: "positive" },
-      { area: "Hips", sentiment: "negative" },
+    expect(merged.aspects).toEqual([
+      OLD.aspects[0],
+      { aspect: "fit", sentiment: "negative", area: "Hips", said: "tight on the hips", means: "hips need room" },
+      OLD.aspects[2],
     ]);
     expect(merged.summary).toBe("Tight on the hips now.");
+  });
+
+  it("matches aspects without an area by what was said", () => {
+    const merged = mergeFeeling(OLD, {
+      ...EMPTY,
+      aspects: [{ aspect: "color", sentiment: "negative", said: "Love the green ", means: "faded now" }],
+    });
+    expect(merged.aspects).toHaveLength(3);
+    expect(merged.aspects[2]).toMatchObject({ aspect: "color", sentiment: "negative" });
   });
 
   it("keeps old answers the new text does not mention", () => {
@@ -46,6 +57,20 @@ describe("mergeFeeling", () => {
       occasions: ["social", "Work"],
       mood: ["cozy", "confident"],
     });
+  });
+
+  it("reads feelings parsed before aspects existed and drops their body areas", () => {
+    const legacy = {
+      flattering: "yes",
+      liked: "no",
+      bodyAreas: [{ area: "hips", sentiment: "negative" }],
+      occasions: ["work"],
+      mood: [],
+      summary: "Old one.",
+    };
+    const merged = mergeFeeling(legacy, EMPTY);
+    expect(merged).toEqual({ ...EMPTY, flattering: "yes", liked: "no", occasions: ["work"], summary: "Old one." });
+    expect(merged).not.toHaveProperty("bodyAreas");
   });
 
   it("uses the new fields as they are when there is nothing valid to merge with", () => {

@@ -72,6 +72,10 @@ export const FEELING_CASES: { name: string; input: ParseFeelingInput }[] = [
     name: "chinese note",
     input: { item: SHIRT, text: "版型很好，显瘦，就是领口有点紧，上班穿刚好" },
   },
+  {
+    name: "good color, too short",
+    input: { item: SHIRT, text: "Love the color on me, but it's too short and rides up when I lift my arms." },
+  },
 ];
 
 export const PAIRING_CASES: { name: string; input: JudgePairingInput }[] = [
