@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { checkBudget } from "./budget";
+import { releaseBudget, reserveBudget } from "./budget";
 import type { AiFunctionDef } from "./define";
 import { AiInputError, AiOutputError, AiReplayMissError } from "./errors";
 import { inputHash, stableStringify } from "./hash";
@@ -66,8 +66,12 @@ async function callLive<I extends z.ZodType, O extends z.ZodType>(
   def: AiFunctionDef<I, O>,
   input: z.output<I>,
 ) {
-  await checkBudget(def.name);
-  return def.output.safeParse(await def.live(input));
+  const hold = await reserveBudget(def.name);
+  try {
+    return def.output.safeParse(await def.live(input));
+  } finally {
+    await releaseBudget(hold);
+  }
 }
 
 function parseOutput<I extends z.ZodType, O extends z.ZodType>(

@@ -1,16 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  checkBudget,
   costUsd,
   DEFAULT_DAILY_BUDGET_USD,
   MAX_COST_USD,
+  memoryBudgetStore,
   recordSpend,
-  resetBudget,
+  releaseBudget,
+  reserveBudget,
+  setBudgetStore,
   spentTodayUsd,
+  today,
 } from "./budget";
 import { AiBudgetError } from "./errors";
 
-beforeEach(() => resetBudget());
+beforeEach(() => setBudgetStore(memoryBudgetStore()));
 afterEach(() => vi.unstubAllEnvs());
 
 describe("costUsd", () => {
@@ -20,20 +23,44 @@ describe("costUsd", () => {
   });
 });
 
-describe("checkBudget", () => {
+describe("today", () => {
+  it("counts days in Chicago time", () => {
+    // 03:00 UTC on Oct 28 is still Oct 27 in Chicago (UTC-5 in October).
+    expect(today(new Date("2026-10-28T03:00:00Z"))).toBe("2026-10-27");
+    expect(today(new Date("2026-10-28T06:00:00Z"))).toBe("2026-10-28");
+  });
+});
+
+describe("reserveBudget", () => {
   it("allows a call that fits in today's budget", async () => {
-    recordSpend(DEFAULT_DAILY_BUDGET_USD - MAX_COST_USD.parseFeeling);
-    await expect(checkBudget("parseFeeling")).resolves.toBeUndefined();
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD - MAX_COST_USD.parseFeeling);
+    await expect(reserveBudget("parseFeeling")).resolves.toEqual({
+      day: today(),
+      usd: MAX_COST_USD.parseFeeling,
+    });
   });
 
   it("refuses a call whose worst case would pass the budget", async () => {
-    recordSpend(DEFAULT_DAILY_BUDGET_USD - MAX_COST_USD.parseFeeling / 2);
-    await expect(checkBudget("parseFeeling")).rejects.toBeInstanceOf(AiBudgetError);
-    expect(spentTodayUsd()).toBeGreaterThan(0);
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD - MAX_COST_USD.parseFeeling / 2);
+    await expect(reserveBudget("parseFeeling")).rejects.toBeInstanceOf(AiBudgetError);
+    expect(await spentTodayUsd()).toBeCloseTo(DEFAULT_DAILY_BUDGET_USD - MAX_COST_USD.parseFeeling / 2, 9);
+  });
+
+  it("counts calls in flight, so they cannot overspend together", async () => {
+    vi.stubEnv("AI_DAILY_BUDGET_USD", String(MAX_COST_USD.judgePairing * 2.5));
+    const results = await Promise.allSettled([1, 2, 3].map(() => reserveBudget("judgePairing")));
+    expect(results.map((r) => r.status)).toEqual(["fulfilled", "fulfilled", "rejected"]);
+  });
+
+  it("leaves only the real cost once the hold is released", async () => {
+    const hold = await reserveBudget("extractItem");
+    await recordSpend(0.004);
+    await releaseBudget(hold);
+    expect(await spentTodayUsd()).toBeCloseTo(0.004, 9);
   });
 
   it("reads the budget from AI_DAILY_BUDGET_USD", async () => {
     vi.stubEnv("AI_DAILY_BUDGET_USD", "0");
-    await expect(checkBudget("judgePairing")).rejects.toBeInstanceOf(AiBudgetError);
+    await expect(reserveBudget("judgePairing")).rejects.toBeInstanceOf(AiBudgetError);
   });
 });

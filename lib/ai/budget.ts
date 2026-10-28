@@ -1,4 +1,5 @@
 import type { AiFunctionName } from "./define";
+import { dbBudgetStore } from "./budget-db";
 import { AiBudgetError } from "./errors";
 
 // Muse Spark 1.3 Standard prices in USD (dev.meta.ai/docs/pricing-rate-limits,
@@ -42,7 +43,7 @@ export function costUsd(usage: TokenUsage | null | undefined, webSearches = 0): 
 }
 
 // Days are counted in Chicago time.
-function today(now = new Date()): string {
+export function today(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(now);
 }
 
@@ -52,34 +53,71 @@ export function dailyBudgetUsd(): number {
   return Number.isFinite(usd) && usd >= 0 ? usd : DEFAULT_DAILY_BUDGET_USD;
 }
 
-// TODO(P0-7): in process memory for now, so it resets on restart and each
-// server instance counts on its own. Move to a database table before deploy,
-// together with the per-IP rate limit.
-let ledger = { day: today(), spentUsd: 0 };
-
-function current() {
-  const day = today();
-  if (ledger.day !== day) ledger = { day, spentUsd: 0 };
-  return ledger;
+// Where the day's spend is kept: the ai_budget_days table, shared by every
+// server instance. Unit tests swap in memoryBudgetStore().
+export interface BudgetStore {
+  // Adds usd to the day's spend unless that would pass limit. False if not.
+  reserve(day: string, usd: number, limit: number): Promise<boolean>;
+  // Adds usd to the day's spend; negative gives some back.
+  settle(day: string, usd: number): Promise<void>;
+  spent(day: string): Promise<number>;
 }
 
-export function spentTodayUsd(): number {
-  return current().spentUsd;
-}
+let store: BudgetStore | undefined;
 
-export function recordSpend(usd: number): void {
-  current().spentUsd += usd;
+function budgetStore(): BudgetStore {
+  return (store ??= dbBudgetStore());
 }
 
 // Test hook.
-export function resetBudget(): void {
-  ledger = { day: today(), spentUsd: 0 };
+export function setBudgetStore(next: BudgetStore): void {
+  store = next;
 }
 
-// Refuses a live attempt that could push today's spend over the budget.
-// Runs before every live attempt, including the retry.
-export async function checkBudget(fn: AiFunctionName): Promise<void> {
-  if (spentTodayUsd() + MAX_COST_USD[fn] > dailyBudgetUsd()) {
+export async function spentTodayUsd(): Promise<number> {
+  return budgetStore().spent(today());
+}
+
+export async function recordSpend(usd: number): Promise<void> {
+  if (usd > 0) await budgetStore().settle(today(), usd);
+}
+
+export interface BudgetHold {
+  day: string;
+  usd: number;
+}
+
+// Holds the worst-case cost of one live attempt, or refuses it if that could
+// push today's spend over the budget. Runs before every live attempt,
+// including retries; releaseBudget gives the hold back once recordSpend has
+// added the real cost.
+export async function reserveBudget(fn: AiFunctionName): Promise<BudgetHold> {
+  const hold = { day: today(), usd: MAX_COST_USD[fn] };
+  if (!(await budgetStore().reserve(hold.day, hold.usd, dailyBudgetUsd()))) {
     throw new AiBudgetError(fn);
   }
+  return hold;
+}
+
+export async function releaseBudget(hold: BudgetHold): Promise<void> {
+  await budgetStore().settle(hold.day, -hold.usd);
+}
+
+// Same rules as the database functions, kept in memory: for unit tests.
+export function memoryBudgetStore(): BudgetStore {
+  const days = new Map<string, number>();
+  return {
+    async reserve(day, usd, limit) {
+      const spent = days.get(day) ?? 0;
+      if (spent + usd > limit) return false;
+      days.set(day, spent + usd);
+      return true;
+    },
+    async settle(day, usd) {
+      days.set(day, (days.get(day) ?? 0) + usd);
+    },
+    async spent(day) {
+      return days.get(day) ?? 0;
+    },
+  };
 }

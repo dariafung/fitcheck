@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import type { Response } from "openai/resources/responses/responses";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resetBudget, spentTodayUsd } from "../budget";
+import { memoryBudgetStore, setBudgetStore, spentTodayUsd } from "../budget";
 import { AiNotConfiguredError, AiOutputError, AiUpstreamError } from "../errors";
 import { extractItem, judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "../index";
 import { MODEL } from "./respond";
@@ -66,7 +66,7 @@ const PARSED = {
 
 beforeEach(() => {
   create.mockReset();
-  resetBudget();
+  setBudgetStore(memoryBudgetStore());
 });
 
 describe("shared request", () => {
@@ -90,7 +90,7 @@ describe("shared request", () => {
     create.mockResolvedValue(reply(FEELING));
     await parseFeeling({ text: "Fine", item: SHIRT }, LIVE);
     // 1000 input at $1.25/M + 1000 output at $4.25/M
-    expect(spentTodayUsd()).toBeCloseTo(0.0055, 6);
+    expect(await spentTodayUsd()).toBeCloseTo(0.0055, 6);
   });
 
   it("retries once when the answer is cut off, then gives up", async () => {
@@ -211,7 +211,7 @@ describe("extractItem", () => {
     expect(out.tags.tempRangeF).toEqual({ min: 60, max: 85 });
     expect(out.tags.subcategory).toBeUndefined();
     // 1000 in + 1000 out + one search at $0.0025
-    expect(spentTodayUsd()).toBeCloseTo(0.008, 6);
+    expect(await spentTodayUsd()).toBeCloseTo(0.008, 6);
   });
 
   it("drops a box with no area and sends no tools without search", async () => {
