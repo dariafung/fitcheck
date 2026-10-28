@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid item", issues: parsed.error.issues }, { status: 400 });
   }
   try {
-    const check = await runBuyCheck(createServerClient(), currentUserId(), parsed.data, {
+    const check = await runBuyCheck(createServerClient(), await currentUserId(), parsed.data, {
       judge: judgePairing,
       score: scorePurchase,
       repeat: judgeRepeat,

@@ -12,7 +12,7 @@ const GRID = "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3";
 export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> }) {
   await connection();
   const [items, tab] = await Promise.all([
-    listClosetItems(createServerClient(), currentUserId()),
+    currentUserId().then((userId) => listClosetItems(createServerClient(), userId)),
     tabParam,
   ]);
 

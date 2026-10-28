@@ -1,0 +1,124 @@
+import { randomUUID } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
+import { DEMO_READ_ONLY } from "../../../lib/auth/messages";
+import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
+import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
+import { expect, test } from "../fixtures";
+import type { Page } from "@playwright/test";
+
+// Runs with sign-in on (playwright.auth.config.ts). Every account made here
+// is deleted afterwards; the demo persona is only read.
+const env = readLocalSupabase();
+const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
+  auth: { persistSession: false },
+});
+const PASSWORD = "e2e-password";
+const SEED_ITEM = { id: "852c8e3d-abf7-4955-ab65-9d83194a02ae", title: "White cotton button-down" };
+const created: string[] = [];
+
+test.afterAll(async () => {
+  for (const id of created) {
+    const { data: files } = await db.storage.from("item-images").list(id);
+    if (files?.length) await db.storage.from("item-images").remove(files.map((f) => `${id}/${f.name}`));
+    await db.from("users").delete().eq("id", id);
+    await db.auth.admin.deleteUser(id);
+  }
+});
+
+async function signUp(page: Page): Promise<string> {
+  const email = `e2e-${randomUUID().slice(0, 8)}@example.com`;
+  await page.goto("/signup");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL("/closet");
+  const { data } = await db.auth.admin.listUsers({ perPage: 1000 });
+  const user = data.users.find((u) => u.email === email);
+  if (!user) throw new Error(`No auth user for ${email}`);
+  created.push(user.id);
+  return email;
+}
+
+async function tryDemo(page: Page) {
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Try the demo account" }).click();
+  await expect(page).toHaveURL("/");
+}
+
+test("signed out, pages send you to log in", async ({ page }) => {
+  await page.goto("/closet");
+  await expect(page).toHaveURL(/\/login/);
+  await expect(page.getByRole("heading", { level: 1, name: "Log in" })).toBeVisible();
+});
+
+test("sign up and land on an empty closet", async ({ page }) => {
+  await signUp(page);
+  await expect(page.getByText("Your closet is empty.")).toBeVisible();
+  await expect(page.getByText(SEED_ITEM.title)).toBeHidden();
+});
+
+test("a new account can add its first item", async ({ page }) => {
+  await signUp(page);
+  await page.getByRole("link", { name: /add/i }).first().click();
+  await expect(page).toHaveURL("/closet/add");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "tee.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const card = page.getByRole("form", { name: "Item details" });
+  await card.getByLabel("Name").fill("First tee");
+  await card.getByRole("button", { name: "Save to closet" }).click();
+  await expect(page.getByRole("status")).toContainText("First tee is in your closet.");
+
+  await page.goto("/closet");
+  await expect(page.getByRole("link", { name: "First tee" })).toBeVisible();
+});
+
+test("log in with the account you made, then log out", async ({ page }) => {
+  const email = await signUp(page);
+  await page.getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL("/login");
+
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("not-the-password");
+  await page.getByRole("button", { name: "Log in" }).click();
+  await expect(page.getByText("Wrong email or password.")).toBeVisible();
+
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Log in" }).click();
+  await expect(page).toHaveURL("/");
+});
+
+test("Try the demo account opens the persona's closet", async ({ page }) => {
+  await tryDemo(page);
+  await page.goto("/closet");
+  await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
+});
+
+test("the demo account can look but not change anything", async ({ page }) => {
+  await tryDemo(page);
+  const before = await db.from("items").select("*").eq("id", SEED_ITEM.id).single();
+
+  await page.goto(`/closet/${SEED_ITEM.id}`);
+  await expect(page.getByRole("heading", { level: 1, name: SEED_ITEM.title })).toBeVisible();
+  await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /save/i })).toHaveCount(0);
+
+  await page.goto("/closet/add");
+  await expect(page.getByText(DEMO_READ_ONLY)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Choose a screenshot" })).toBeHidden();
+
+  await page.goto("/profile");
+  await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);
+
+  // The server says no even when the page is skipped. The body is invalid on
+  // purpose: if the block ever goes missing this fails with 400 and writes nothing.
+  const res = await page.request.patch(`/api/items/${SEED_ITEM.id}`, { data: {} });
+  expect(res.status()).toBe(403);
+  expect(await res.json()).toMatchObject({ message: DEMO_READ_ONLY });
+
+  const after = await db.from("items").select("*").eq("id", SEED_ITEM.id).single();
+  expect(after.data).toEqual(before.data);
+});
