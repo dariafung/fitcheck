@@ -122,6 +122,15 @@ describe("POST /api/items/[id]/feelings", () => {
     expect(data.user_tags).toEqual({ fit: "oversized" });
   });
 
+  it("records whether the latest save came from a recording", async () => {
+    await post(closet.itemId, { text: "Love the color.", source: "voice" });
+    expect((await feelings())[0]).toMatchObject({ source: "voice" });
+    await post(closet.itemId, { text: "Love the color. Itchy though." });
+    expect((await feelings())[0]).toMatchObject({ source: "typed" });
+    expect((await post(closet.itemId, { text: "Nice.", source: "video" })).status).toBe(400);
+    await flushAfter();
+  });
+
   it("rejects blank text and unknown items without writing", async () => {
     expect((await post(closet.itemId, { text: "   " })).status).toBe(400);
     expect((await post(closet.itemId, {})).status).toBe(400);

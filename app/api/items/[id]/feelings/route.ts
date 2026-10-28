@@ -20,8 +20,8 @@ export async function POST(req: Request, ctx: RouteContext<"/api/items/[id]/feel
   const item = await findItemSummary(db, userId, id);
   if (!item) return Response.json({ error: "Not found" }, { status: 404 });
 
-  const { text } = body.data;
-  const feeling = await saveFeeling(db, { itemId: item.id, userId, text });
+  const { text, source } = body.data;
+  const feeling = await saveFeeling(db, { itemId: item.id, userId, text, source });
 
   after(async () => {
     try {
