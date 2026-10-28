@@ -68,6 +68,6 @@ export async function liveTranscribe(
 
   const parsed = TranscribeResponse.safeParse(await res.json().catch(() => null));
   if (!parsed.success) return null;
-  recordSpend(audioCostUsd(parsed.data.audioDurationMs));
+  await recordSpend(audioCostUsd(parsed.data.audioDurationMs));
   return { text: parsed.data.transcript.trim(), language: "en" };
 }

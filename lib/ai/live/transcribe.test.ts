@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { audioCostUsd, resetBudget, spentTodayUsd } from "../budget";
+import { audioCostUsd, memoryBudgetStore, setBudgetStore, spentTodayUsd } from "../budget";
 import { AiNotConfiguredError, AiOutputError, AiUpstreamError } from "../errors";
 import { transcribe } from "../index";
 import { TRANSCRIBE_MODEL, transcribeUrl } from "./transcribe";
@@ -20,7 +20,7 @@ beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
   vi.useFakeTimers({ toFake: ["setTimeout"] });
-  resetBudget();
+  setBudgetStore(memoryBudgetStore());
 });
 
 afterEach(() => {
@@ -68,7 +68,7 @@ describe("live transcribe", () => {
   it("counts the cost by whole seconds of audio", async () => {
     fetchMock.mockResolvedValueOnce(answer(TRANSCRIPT));
     await run();
-    expect(spentTodayUsd()).toBeCloseTo(audioCostUsd(7900), 12);
+    expect(await spentTodayUsd()).toBeCloseTo(audioCostUsd(7900), 12);
     expect(audioCostUsd(7900)).toBeCloseTo((7 * 0.18) / 3600, 12);
     expect(audioCostUsd(180_000)).toBeCloseTo(0.009, 12);
   });

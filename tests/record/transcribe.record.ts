@@ -7,7 +7,7 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { expect, it } from "vitest";
 import { transcribe } from "@/lib/ai";
-import { MAX_COST_USD, spentTodayUsd } from "@/lib/ai/budget";
+import { MAX_COST_USD, memoryBudgetStore, setBudgetStore, spentTodayUsd } from "@/lib/ai/budget";
 import { inputHash } from "@/lib/ai/hash";
 import { readReplay } from "@/lib/ai/replay/store";
 import { PROMPT_VERSION, TranscribeInput } from "@/lib/ai/schemas/transcribe";
@@ -16,6 +16,9 @@ import { VOICE_CASE } from "./voice-cases";
 // One run never spends more than this.
 const RUN_LIMIT_USD = 0.05;
 const LOG = "test-results/ai-record.log";
+
+// Counted in memory, as one run: spentTodayUsd() below is this run's total.
+setBudgetStore(memoryBudgetStore());
 
 mkdirSync("test-results", { recursive: true });
 const log = (line: string) => appendFileSync(LOG, `${line}\n`);
@@ -27,14 +30,14 @@ it(`transcribe · ${VOICE_CASE.name}`, async () => {
     log(`transcribe · ${VOICE_CASE.name} · already recorded, skipped`);
     return;
   }
-  if (spentTodayUsd() + MAX_COST_USD.transcribe > RUN_LIMIT_USD) {
+  if ((await spentTodayUsd()) + MAX_COST_USD.transcribe > RUN_LIMIT_USD) {
     throw new Error(`Stopped: run limit $${RUN_LIMIT_USD} could be passed`);
   }
   const started = Date.now();
   const output = await transcribe(VOICE_CASE.input, { mode: "live", record: true });
   log(
     `\n=== ${new Date().toISOString()}\ntranscribe · ${VOICE_CASE.name} · ok · ${Date.now() - started} ms` +
-      ` · run total $${spentTodayUsd().toFixed(5)}\n${JSON.stringify(output, null, 2)}`,
+      ` · run total $${(await spentTodayUsd()).toFixed(5)}\n${JSON.stringify(output, null, 2)}`,
   );
   expect(output.text.length).toBeGreaterThan(0);
 });
