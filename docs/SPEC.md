@@ -23,7 +23,7 @@ With all of P0 done and deployed, judges can walk through "add clothes → feeli
 | P0-4 | Wardrobe grid | Grid of all items; open one to see details and feelings | Works in mobile and desktop browsers | — |
 | P0-5 | Pairing | Rule pre-filter (complementary categories, formality, overlapping temperature ranges, obvious color clashes) → Spark judges pairs in batches, results cached → code enumerates complete outfits: top + bottom + shoes, or one-piece + shoes; outerwear optional by temperature; accessories don't count | Spot checks of the persona's pairings look mostly right | Spark 1.3 |
 | P0-6 | **Purchase check** | Match score 0–100 = suits you 40 + outfits 20 + revives 15 + fills a gap 15 + not a repeat 10; each part and the total keep one decimal. Suits you: the model scores 5 questions 0–8 each against every item the user wrote a feeling about, good and bad; a question with no related feeling isn't asked and gets 4. Not a repeat: `judgeRepeat` scores 0–10 and names the most similar owned item. Outfits, revives and gaps are counted in code (see Gap algorithm). Body-shape rules get low weight and only feed the reasons. If the model leaves an answer out or goes out of range, retry up to 3 times; still incomplete → no score, the page shows a short notice and Try again. One item at a time; accessories are not checked yet (P2-4) | Two demo items give stable results: one closes a gap, one creates a gap. The item being checked is never stored or cached; each check asks the model again, so the AI-scored parts vary a little between runs (same input, 3 runs: totals within 3 points) | Spark 1.3 |
-| P0-7 | Demo data + deploy | Fictional demo persona; demo items preloaded; seed data read-only; visitor data isolated with one-click reset; rate limits + daily budget | Judges can use it from the link; a full run shows no console errors | — |
+| P0-7 | Demo data + deploy | Email + password sign-up, no email confirmation; new accounts start with an empty closet; read-only demo account of the fictional persona ("Try the demo account"); daily AI budget $4 kept in the DB; daily cron drops orphan photos and old voice recordings; rate limits on hold | Judges can use it from the link; a full run shows no console errors | — |
 
 ## P1: bonus
 
@@ -144,7 +144,7 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 | Purchase check results unstable | Outfits, revives and gaps counted in code; the model only gives integer scores (0–8, 0–10) with reasons; caching; 10/31 checkpoint |
 | Charges go to the card once credits run out | In-app daily budget + rate limits; watch usage |
 | Supabase free project pauses after a week idle | Daily scheduled ping |
-| Judges break the demo data | Read-only seed data; visitor isolation + reset |
+| Judges break the demo data | Demo account is read-only on the server; everyone else gets their own account |
 | Screenshot content | Only the cropped product photo is kept, shown only to that user |
 
 **Open items**
