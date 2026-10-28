@@ -8,7 +8,7 @@ import { appendFileSync, mkdirSync } from "node:fs";
 import type { Response } from "openai/resources/responses/responses";
 import { describe, expect, it, vi } from "vitest";
 import { judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "@/lib/ai";
-import { costUsd, MAX_COST_USD, spentTodayUsd } from "@/lib/ai/budget";
+import { costUsd, MAX_COST_USD, memoryBudgetStore, setBudgetStore, spentTodayUsd } from "@/lib/ai/budget";
 import type { AiFunctionName } from "@/lib/ai/define";
 import { inputHash } from "@/lib/ai/hash";
 import { getClient } from "@/lib/ai/live/client";
@@ -24,6 +24,9 @@ import { FEELING_CASES, PAIRING_CASES, REPEAT_CASES, SCORE_CASES } from "./cases
 const RUN_LIMIT_USD = 0.45;
 const LIVE = { mode: "live", record: true } as const;
 const LOG = "test-results/ai-record.log";
+
+// Counted in memory, as one run: spentTodayUsd() below is this run's total.
+setBudgetStore(memoryBudgetStore());
 
 mkdirSync("test-results", { recursive: true });
 const log = (line: string) => appendFileSync(LOG, `${line}\n`);
@@ -44,7 +47,7 @@ async function recorded<T>(
     log(`${fn} · ${name} · already recorded, skipped`);
     return null;
   }
-  if (spentTodayUsd() + MAX_COST_USD[fn] > RUN_LIMIT_USD) {
+  if ((await spentTodayUsd()) + MAX_COST_USD[fn] > RUN_LIMIT_USD) {
     throw new Error(`Stopped before "${name}": run limit $${RUN_LIMIT_USD} could be passed`);
   }
   const client = await getClient(fn);
@@ -69,7 +72,7 @@ async function recorded<T>(
     }
     log(
       `  ${fn} · ${name} · ${create.mock.calls.length} call(s) · ${Date.now() - started} ms` +
-        ` · run total $${spentTodayUsd().toFixed(4)}`,
+        ` · run total $${(await spentTodayUsd()).toFixed(4)}`,
     );
   }
 }

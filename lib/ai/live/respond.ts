@@ -71,7 +71,7 @@ export async function respondStructured<W extends z.ZodType>(
     if (err instanceof OpenAI.APIError) throw new AiUpstreamError(req.fn, err.status);
     throw err;
   }
-  recordSpend(costUsd(response.usage, countWebSearches(response)));
+  await recordSpend(costUsd(response.usage, countWebSearches(response)));
   return { data: parseStructured(response, req.schema), response };
 }
 

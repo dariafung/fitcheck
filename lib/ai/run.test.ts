@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
+import { memoryBudgetStore, setBudgetStore, spentTodayUsd } from "./budget";
 import { defineAiFunction } from "./define";
 import { AiInputError, AiOutputError, AiReplayMissError } from "./errors";
 import * as ai from "./index";
@@ -35,6 +36,7 @@ function fakeDef(live: () => Promise<unknown>) {
 
 let replayDir: string;
 beforeEach(async () => {
+  setBudgetStore(memoryBudgetStore());
   replayDir = await mkdtemp(path.join(tmpdir(), "fitcheck-replay-"));
 });
 afterEach(async () => {
@@ -89,6 +91,17 @@ describe("live mode", () => {
       AiOutputError,
     );
     expect(live).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives the budget hold back after each attempt, also when it throws", async () => {
+    let heldDuringCall = 0;
+    const live = vi.fn(async () => {
+      heldDuringCall = await spentTodayUsd();
+      throw new Error("network");
+    });
+    await expect(runAi(fakeDef(live), { text: "x" }, { mode: "live", record: false })).rejects.toThrow("network");
+    expect(heldDuringCall).toBeGreaterThan(0);
+    expect(await spentTodayUsd()).toBe(0);
   });
 });
 
