@@ -1,6 +1,6 @@
 # fitcheck · Hackathon Spec
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 
 ## Overview
 
@@ -31,7 +31,7 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 
 | # | Feature | What it does | Done when | Model | Fallback |
 | --- | --- | --- | --- | --- | --- |
-| P1-1 | Voice feelings | Hold to talk, up to 3 minutes → converted to 16 kHz WAV in the browser → uploaded straight to Supabase Storage → transcribed on the server → same structuring flow as P0-3; language auto-detected | Recording works in Chrome and Safari; Chinese and English both transcribe | Voice Transcribe | Typing only |
+| P1-1 | Voice feelings | Hold to talk, up to 3 minutes → converted to 16 kHz WAV in the browser → uploaded straight to Supabase Storage → transcribed on the server → same structuring flow as P0-3; English only | Recording works in Chrome and Safari; English transcribes | Voice Transcribe | Typing only |
 | P1-2 | Outfit preview | In the purchase check, combine "new item + 2 owned items" into one flat-lay / invisible-mannequin outfit image, **no human body**; web and image search turned off; shown side by side with a collage of the real item photos, labeled as AI-generated | Colors and styles are recognizable at a glance; demo outfits pre-generated | Muse Image | Collage only |
 | P1-3 | Style profile | One card summarizing all items and feelings: what suits you, what to avoid, frequent occasions | Every statement on the card traces back to specific items or feelings | Spark 1.3 | Used in the backend only, card not shown |
 | P1-4 | Daily outfit insights | Tick what you wore today; 30 days of seed data show wear counts, idle items and "what you say vs. what you wear" | At least one insight worth showing in the video | Spark 1.3 | Stats only, no generated insight |
