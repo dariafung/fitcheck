@@ -5,6 +5,8 @@ import { AiBudgetError } from "./errors";
 // read 2026-10-26). Reasoning tokens bill as output tokens.
 export const PRICE_PER_M_TOKENS = { input: 1.25, cachedInput: 0.15, output: 4.25 };
 export const PRICE_PER_WEB_SEARCH = 0.0025;
+// Muse Voice Transcribe, billed per whole second of audio (same page).
+export const PRICE_PER_AUDIO_HOUR = 0.18;
 
 export const DEFAULT_DAILY_BUDGET_USD = 4;
 
@@ -16,7 +18,8 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   extractItem: 0.05,
   parseFeeling: 0.015,
   judgePairing: 0.035,
-  transcribe: 0.05,
+  // Three minutes of audio, the longest recording, is $0.009.
+  transcribe: 0.01,
   scorePurchase: 0.05,
   renderOutfit: 0.05,
   buildProfile: 0.05,
@@ -38,6 +41,10 @@ export function costUsd(usage: TokenUsage | null | undefined, webSearches = 0): 
     cached * PRICE_PER_M_TOKENS.cachedInput +
     usage.output_tokens * PRICE_PER_M_TOKENS.output;
   return tokens / 1_000_000 + searchCost;
+}
+
+export function audioCostUsd(durationMs: number): number {
+  return (Math.floor(durationMs / 1000) * PRICE_PER_AUDIO_HOUR) / 3600;
 }
 
 // Days are counted in Chicago time.
