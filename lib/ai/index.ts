@@ -6,6 +6,7 @@ import { liveJudgeRepeat } from "./live/judge-repeat";
 import { notImplemented } from "./live/not-implemented";
 import { liveParseFeeling } from "./live/parse-feeling";
 import { liveScorePurchase } from "./live/score-purchase";
+import { liveTranscribe } from "./live/transcribe";
 import { mockBuildProfile } from "./mock/build-profile";
 import { mockExtractItem } from "./mock/extract-item";
 import { mockJudgePairing } from "./mock/judge-pairing";
@@ -52,7 +53,7 @@ export const transcribe = defineAiFunction({
   input: transcribeSchema.TranscribeInput,
   output: transcribeSchema.TranscribeOutput,
   mock: mockTranscribe,
-  live: notImplemented("transcribe"),
+  live: liveTranscribe,
 });
 
 export const judgePairing = defineAiFunction({
