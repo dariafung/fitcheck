@@ -14,18 +14,8 @@
   --line: #e2e2df;
   --signal: #d7261e;
   --press: #333333;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0e0e0e;
-    --tile: #1a1a1a;
-    --ink: #ededeb;
-    --ink-2: #9a9a96;
-    --line: #2b2b29;
-    --signal: #ef4136;
-    --press: #c9c9c6;
-  }
+  /* Light only, whatever the device's theme: the gallery look is designed in light. */
+  color-scheme: light;
 }
 
 @theme inline {
