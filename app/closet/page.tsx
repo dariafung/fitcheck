@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ClosetGrid, ClosetGridSkeleton } from "@/components/closet/closet-grid";
-import { closetTab } from "@/lib/closet/tabs";
+import { closetView } from "@/lib/closet/tabs";
 
 // /closet/add belongs to the entry lane.
 export default function ClosetPage({ searchParams }: PageProps<"/closet">) {
@@ -14,7 +14,7 @@ export default function ClosetPage({ searchParams }: PageProps<"/closet">) {
         </Link>
       </div>
       <Suspense fallback={<ClosetGridSkeleton tabs />}>
-        <ClosetGrid tab={searchParams.then((params) => closetTab(params.tab))} />
+        <ClosetGrid view={searchParams.then(closetView)} />
       </Suspense>
     </div>
   );

@@ -2,60 +2,44 @@ import Link from "next/link";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { listClosetItems, type ClosetCard } from "@/lib/closet/items";
-import { CLOSET_TABS, inTab, type ClosetTab } from "@/lib/closet/tabs";
+import { CLOSET_TABS, closetHref, inCategory, inTab, type ClosetView } from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { ClosetFilters, FILTER } from "./closet-filters";
 import { ItemImage } from "./item-image";
 
 // The shelf: 4:5 tiles, 16px apart, 40px between rows. Four across on a
 // desktop, two on a phone.
 export const SHELF = "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4";
 
-export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> }) {
+export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView> }) {
   await connection();
-  const [items, tab] = await Promise.all([
+  const [items, view] = await Promise.all([
     currentUserId().then((userId) => listClosetItems(createServerClient(), userId)),
-    tabParam,
+    viewParam,
   ]);
 
   if (items.length === 0) return <EmptyCloset />;
 
-  const shown = inTab(items, tab);
+  const tabItems = inTab(items, view.tab);
+  const shown = inCategory(tabItems, view.cat);
   return (
     <div className="flex flex-col gap-10">
-      <ClosetTabs
-        active={tab}
-        counts={{ all: inTab(items, "all").length, "passing-on": inTab(items, "passing-on").length }}
-      />
+      <ClosetFilters items={items} view={view} />
       {shown.length > 0 ? (
         <ItemList items={shown} />
-      ) : tab === "passing-on" ? (
+      ) : tabItems.length > 0 ? (
+        <Empty title="Nothing in this category." text="Pick another one, or see everything here.">
+          <Link href={closetHref({ ...view, cat: null })} scroll={false} className="btn-secondary mt-4">
+            Show all
+          </Link>
+        </Empty>
+      ) : view.tab === "passing-on" ? (
         <Empty title="Nothing to pass on." text="Clothes you plan to sell or give away show up here." />
       ) : (
-        <Empty title="Nothing you're wearing right now." text="Add something new to fill it back up." />
+        <Empty title="Nothing left to wear." text="Everything is in Passing on. Add something new to fill it back up." />
       )}
-    </div>
-  );
-}
-
-const TAB =
-  "text-sm underline-offset-[6px] decoration-2 transition-colors duration-150";
-
-function ClosetTabs({ active, counts }: { active: ClosetTab; counts: Record<ClosetTab, number> }) {
-  return (
-    <div className="flex items-center gap-8 border-y border-line py-3.5">
-      {CLOSET_TABS.map((tab) => (
-        <Link
-          key={tab.id}
-          href={tab.href}
-          scroll={false}
-          aria-current={tab.id === active ? "page" : undefined}
-          className={`${TAB} ${tab.id === active ? "text-ink underline" : "text-ink-2 hover:text-ink"}`}
-        >
-          {tab.label} <span className="text-ink-2 tabular-nums">{counts[tab.id]}</span>
-        </Link>
-      ))}
     </div>
   );
 }
@@ -74,11 +58,12 @@ function EmptySlot({ children }: { children: ReactNode }) {
   );
 }
 
-function Empty({ title, text }: { title: string; text: string }) {
+function Empty({ title, text, children }: { title: string; text: string; children?: ReactNode }) {
   return (
     <EmptySlot>
       <p className="text-lg font-medium">{title}</p>
       <p className="text-sm text-ink-2">{text}</p>
+      {children}
     </EmptySlot>
   );
 }
@@ -133,15 +118,21 @@ export function ClosetGridSkeleton({ tabs = false, grid = SHELF }: { tabs?: bool
     </ul>
   );
   if (!tabs) return list;
-  // Same height as the tab bar, so the grid does not jump when it loads.
+  // Same height as the tab bar and the category row, so the grid does not
+  // jump when it loads.
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex items-center gap-8 border-y border-line py-3.5">
-        {CLOSET_TABS.map((tab) => (
-          <span key={tab.id} className={`${TAB} text-ink-2/60`}>
-            {tab.label}
-          </span>
-        ))}
+      <div className="flex flex-col">
+        <div className="flex items-center gap-8 border-y border-line py-3.5">
+          {CLOSET_TABS.map((tab) => (
+            <span key={tab.id} className={`${FILTER} text-ink-2/60`}>
+              {tab.label}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-6 pt-4 pb-1">
+          <span className={`${FILTER} py-1 text-ink-2/60`}>All</span>
+        </div>
       </div>
       {list}
     </div>
