@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { aiNotice, isAiFailure } from "@/lib/ai/notices";
 import {
   micError,
   startRecording,
@@ -18,6 +19,7 @@ const MIC_MESSAGES: Record<MicError, string> = {
   failed: "Couldn't start the mic. Try again.",
 };
 const FAILED = "Couldn't hear that. Record again.";
+const AI_FAILED = "Couldn't turn that into text. Try again?";
 
 const noSubscribe = () => () => {};
 
@@ -82,10 +84,13 @@ export function VoiceButton({ itemId, onText }: { itemId: string; onText: (text:
         setMessage("Hold a bit longer.");
         return;
       }
-      const text = await transcribeRecording(itemId, wav);
-      if (text === null) setMessage(FAILED);
-      else if (text === "") setMessage("Didn't catch anything. Record again.");
-      else onText(text);
+      const result = await transcribeRecording(itemId, wav);
+      if ("text" in result) {
+        if (result.text === "") setMessage("Didn't catch anything. Record again.");
+        else onText(result.text);
+      } else {
+        setMessage(aiNotice(result.error) ?? (isAiFailure(result.error) ? AI_FAILED : FAILED));
+      }
     } catch {
       setMessage(FAILED);
     } finally {
@@ -141,11 +146,19 @@ export function VoiceButton({ itemId, onText }: { itemId: string; onText: (text:
   );
 }
 
-// Upload straight to storage, then ask the server for the text. Null when any
-// step fails.
-async function transcribeRecording(itemId: string, wav: Uint8Array<ArrayBuffer>): Promise<string | null> {
+type Transcript = { text: string } | { error?: string };
+
+// The `error` name a failed API call answered with, if any.
+async function errorOf(res: Response): Promise<{ error?: string }> {
+  const json = (await res.json().catch(() => null)) as { error?: unknown } | null;
+  return typeof json?.error === "string" ? { error: json.error } : {};
+}
+
+// Upload straight to storage, then ask the server for the text. On failure,
+// the `error` name from our API when there is one.
+async function transcribeRecording(itemId: string, wav: Uint8Array<ArrayBuffer>): Promise<Transcript> {
   const upload = await fetch(`/api/items/${itemId}/feelings/voice/upload`, { method: "POST" });
-  if (!upload.ok) return null;
+  if (!upload.ok) return errorOf(upload);
   const { path, uploadUrl } = (await upload.json()) as { path: string; uploadUrl: string };
 
   const put = await fetch(uploadUrl, {
@@ -153,14 +166,14 @@ async function transcribeRecording(itemId: string, wav: Uint8Array<ArrayBuffer>)
     headers: { "Content-Type": "audio/wav" },
     body: new Blob([wav], { type: "audio/wav" }),
   });
-  if (!put.ok) return null;
+  if (!put.ok) return {};
 
   const res = await fetch(`/api/items/${itemId}/feelings/voice`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path }),
   });
-  if (!res.ok) return null;
+  if (!res.ok) return errorOf(res);
   const { text } = (await res.json()) as { text: string };
-  return text.trim();
+  return { text: text.trim() };
 }

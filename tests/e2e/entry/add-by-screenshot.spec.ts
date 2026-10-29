@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { AiBudgetError } from "../../../lib/ai/errors";
+import { aiErrorResponse } from "../../../lib/ai/http";
+import { AI_BUDGET_NOTICE } from "../../../lib/ai/notices";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
@@ -107,4 +110,22 @@ test("a wide screenshot is narrowed to 1600 px in the browser before upload", as
   created.push({ paths: draft.imagePaths });
   expect(draft.rawSource.screenshot).toEqual({ width: 1600, height: 4000, mime: "image/jpeg" });
   await expect(page.getByRole("form", { name: "Item details" })).toBeVisible();
+});
+
+test("when the day's AI budget is spent, the page says so", async ({ page }) => {
+  // Answer exactly as the route does, without calling the model.
+  const spent = aiErrorResponse(new AiBudgetError("extractItem"));
+  const body = await spent.text();
+  await page.route("**/api/items/extract", (route) =>
+    route.fulfill({ status: spent.status, contentType: "application/json", body }),
+  );
+  await page.goto("/closet/add");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "wrap-dress.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  await expect(page.getByRole("status")).toContainText(AI_BUDGET_NOTICE);
+  await expect(page.getByRole("form", { name: "Item details" })).toBeHidden();
+  await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
 });

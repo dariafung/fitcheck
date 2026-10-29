@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
 import { extractErrorMessage, OFFLINE } from "@/components/entry/messages";
 import { shrinkScreenshot } from "@/components/entry/shrink";
+import { aiNotice } from "@/lib/ai/notices";
 import type { BuyCheck as BuyCheckResponse, BuyCheckResult } from "@/lib/check/buy-check";
 import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
@@ -79,7 +80,7 @@ export function BuyCheck() {
         return;
       }
       if (res.ok && json.error === INCOMPLETE_ERROR) setRetry(edited);
-      setProblem(res.ok && "message" in json ? json.message : CHECK_FAILED);
+      setProblem(res.ok && "message" in json ? json.message : (aiNotice(json.error) ?? CHECK_FAILED));
     } catch {
       setProblem(OFFLINE);
     }
