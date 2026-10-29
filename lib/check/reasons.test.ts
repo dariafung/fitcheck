@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import type { Category } from "../ai/schemas/common";
+import type { MissingSlot } from "./gaps";
 import {
   fillsGapReason,
   gapReason,
@@ -37,13 +39,27 @@ describe("reasons", () => {
   });
 
   it("says which slot is missing", () => {
-    expect(gapReason([{ category: "shoes", owned: false }])).toBe("Creates a gap: you have no shoes.");
+    const none = (category: Category): MissingSlot => ({ category, owned: false });
+    const owned = (category: Category): MissingSlot => ({ category, owned: true });
+    expect(gapReason([[none("top"), none("bottom")], [none("one_piece")]], "nothing_owned", "shoes")).toBe(
+      "Nothing in your closet to wear these with yet. Add a top and bottom, or a one-piece.",
+    );
+    expect(gapReason([[none("shoes")]], "nothing_owned", "bottom")).toBe(
+      "Nothing in your closet to wear this with yet. Add shoes.",
+    );
+    // A jacket with only a one-piece in the closet: missingSlots keeps just the shoes.
+    expect(gapReason([[none("shoes")]], "nothing_owned", "outerwear")).toBe(
+      "Nothing in your closet to wear this with yet. Add shoes.",
+    );
     expect(
-      gapReason([
-        { category: "top", owned: false },
-        { category: "bottom", owned: true },
-      ]),
-    ).toBe("Creates a gap: you have no tops, and none of your bottoms go with it.");
-    expect(gapReason([])).toBe("Creates a gap: the pieces that go with it don't go together.");
+      gapReason([[none("top"), none("bottom"), none("shoes")], [none("one_piece"), none("shoes")]], "nothing_owned", "outerwear"),
+    ).toBe("Nothing in your closet to wear this with yet. Add a top, bottom and shoes, or a one-piece and shoes.");
+    expect(gapReason([[owned("top")], [none("one_piece")]], "no_match", "shoes")).toBe(
+      "Creates a gap: none of your tops go with it, or you have no one-pieces.",
+    );
+    expect(gapReason([[none("top"), owned("bottom")]], "no_match", "shoes")).toBe(
+      "Creates a gap: you have no tops, and none of your bottoms go with it.",
+    );
+    expect(gapReason([], "no_match", "top")).toBe("Creates a gap: the pieces that go with it don't go together.");
   });
 });

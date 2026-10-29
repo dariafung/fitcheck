@@ -25,9 +25,11 @@ import {
   type FitAnswer,
 } from "./fit-questions";
 import {
+  gapKind,
   missingSlots,
   occasionGap,
   revivedItemIds,
+  type GapKind,
   type MissingSlot,
   type OccasionChange,
   type OccasionGapTier,
@@ -90,7 +92,8 @@ export interface BuyCheckResult {
     notRepeat: Part & { item: { id: string; title: string } | null };
   };
   // Set only when the candidate forms no outfit at all.
-  gap: { slots: MissingSlot[]; reason: string } | null;
+  // `slots` holds what's missing for each way to build an outfit around it.
+  gap: { kind: GapKind; slots: MissingSlot[][]; reason: string } | null;
   sampleOutfits: SampleOutfit[];
   stats: PairingStats;
 }
@@ -223,6 +226,11 @@ async function sampleOutfits(
   }));
 }
 
+function gapNotice(slots: MissingSlot[][], category: Category): NonNullable<BuyCheckResult["gap"]> {
+  const kind = gapKind(slots);
+  return { kind, slots, reason: gapReason(slots, kind, category) };
+}
+
 // Null when the user doesn't exist.
 export async function runBuyCheck(
   db: Db,
@@ -298,7 +306,7 @@ export async function runBuyCheck(
       score: roundPart(Object.values(parts).reduce((sum, p) => sum + p.points, 0)),
       summary: fit.summary,
       parts,
-      gap: slots && { slots, reason: gapReason(slots) },
+      gap: slots && gapNotice(slots, categoryOf(candidate)),
       sampleOutfits: await sampleOutfits(db, withCandidate, titles),
       stats: comparison.stats,
     },
