@@ -99,7 +99,7 @@ test("edit a saved feeling", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
   await expect(page.getByText("Fine, I guess.")).toBeVisible();
   const feeling = page.getByRole("region", { name: "How it feels" });
-  await feeling.getByRole("button", { name: "Edit" }).click();
+  await feeling.getByRole("button", { name: "Edit note" }).click();
   const box = feeling.getByRole("textbox", { name: "How it feels" });
   await expect(box).toHaveValue("Fine, I guess.");
   await box.fill("Shrank in the wash. Too tight now.");
@@ -111,7 +111,7 @@ test("edit a saved feeling", async ({ page }) => {
   await expect(page.getByText("Fine, I guess.")).toHaveCount(0);
 });
 
-test("widening the temperature range moves an item into Good for today on home", async ({ page }) => {
+test("edit details: a wider temperature range moves an item into Good for today on home", async ({ page }) => {
   await page.goto("/");
   const good = page.getByRole("region", { name: "Good for today" });
   await expect(good).toContainText(`${FIXED_WEATHER.city} · ${FIXED_WEATHER.lowF}–${FIXED_WEATHER.highF}°F`);
@@ -122,11 +122,19 @@ test("widening the temperature range moves an item into Good for today on home",
   await expect(page).toHaveURL(/\/closet$/);
   await page.getByRole("link", { name: item.title }).click();
   await expect(page.getByText(`${TOO_WARM.min} to ${TOO_WARM.max}°F`)).toBeVisible();
-  await page.getByRole("button", { name: "Edit temperature range" }).click();
-  await page.getByRole("spinbutton", { name: "Lowest °F" }).fill(String(FIXED_WEATHER.lowF - 5));
-  await page.getByRole("spinbutton", { name: "Highest °F" }).fill(String(FIXED_WEATHER.highF + 5));
-  await page.getByRole("button", { name: "Save temperature range" }).click();
+  await page.getByRole("button", { name: "Edit details" }).click();
+  const card = page.getByRole("form", { name: "Item details" });
+  await expect(card.getByRole("heading", { name: "Edit details" })).toBeVisible();
+  await expect(card.getByLabel("Name")).toHaveValue(item.title);
+  await expect(card.getByRole("spinbutton", { name: "Lowest °F" })).toHaveValue(String(TOO_WARM.min));
+  await card.getByRole("spinbutton", { name: "Lowest °F" }).fill(String(FIXED_WEATHER.lowF - 5));
+  await card.getByRole("spinbutton", { name: "Highest °F" }).fill(String(FIXED_WEATHER.highF + 5));
+  await card.getByLabel("How dressy").selectOption({ label: "Business" });
+  await card.getByRole("button", { name: "Save changes" }).click();
+  await expect(card).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
   await expect(page.getByText(`${FIXED_WEATHER.lowF - 5} to ${FIXED_WEATHER.highF + 5}°F`)).toBeVisible();
+  await expect(page.getByText("Business", { exact: true })).toBeVisible();
 
   await page.getByRole("navigation").getByRole("link", { name: "fitcheck" }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -166,6 +174,26 @@ test("closet tabs: All shows what you wear, Passing on survives a refresh", asyn
 
   await allTab.click();
   await expect(page).toHaveURL(/\/closet$/);
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+});
+
+test("pass an item on from its page, then keep wearing it", async ({ page }) => {
+  await page.goto(`/closet/${item.id}`);
+  await page.getByRole("button", { name: "Pass it on" }).click();
+  await expect(page.getByText("Passing on. It's left out of your outfits and buy checks.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Pass it on" })).toHaveCount(0);
+
+  const main = page.getByRole("main");
+  await page.goto("/closet?tab=passing-on");
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+  await page.goto("/closet");
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+
+  await page.goto(`/closet/${item.id}`);
+  await page.getByRole("button", { name: "Keep wearing it" }).click();
+  await expect(page.getByRole("button", { name: "Pass it on" })).toBeVisible();
+  await expect(page.getByText("Passing on. It's left out of your outfits and buy checks.")).toHaveCount(0);
+  await page.goto("/closet");
   await expect(main.getByRole("link", { name: item.title })).toBeVisible();
 });
 

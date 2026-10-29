@@ -87,7 +87,7 @@ const WRITES: [string, () => Promise<Response>][] = [
         new Request(`http://localhost/api/items/${itemId}`, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ tempRangeF: { min: 0, max: 1 } }),
+          body: JSON.stringify({ status: "passing_on" }),
         }),
         ctx(itemId),
       ),

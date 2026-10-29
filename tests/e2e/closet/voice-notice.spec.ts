@@ -47,7 +47,7 @@ async function recordAndFail(page: import("@playwright/test").Page, err: AiError
 
   await page.goto(`/closet/${await seededItemId()}`);
   const feeling = page.getByRole("region", { name: "How it feels" });
-  const edit = feeling.getByRole("button", { name: "Edit", exact: true });
+  const edit = feeling.getByRole("button", { name: "Edit note", exact: true });
   if (await edit.isVisible()) await edit.click();
   const talk = feeling.getByRole("button", { name: "Hold to talk" });
   await talk.hover();

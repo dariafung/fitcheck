@@ -3,21 +3,13 @@
 import Image from "next/image";
 import { useId, useState, type ReactNode } from "react";
 import type { Category, ItemTags, Occasion } from "@/lib/ai/schemas/common";
+import { CATEGORY_LABELS, FIELD_LABELS, FORMALITY_LABELS, capitalize } from "@/lib/closet/labels";
 import { COLOR_FAMILIES, COLOR_FAMILY_HEX, type ColorFamily } from "@/lib/color-families";
 import type { ItemDraft } from "@/lib/entry/draft";
 import { TEMP_F_MAX, TEMP_F_MIN } from "@/lib/temperature";
 import { readTempRange } from "./temp-range";
 
-const CATEGORIES: [Category, string][] = [
-  ["top", "Top"],
-  ["bottom", "Bottom"],
-  ["one_piece", "One-piece"],
-  ["outerwear", "Outerwear"],
-  ["shoes", "Shoes"],
-  ["accessory", "Accessory"],
-];
 const FITS = ["slim", "regular", "relaxed", "oversized"] as const;
-const FORMALITY = ["Lounge", "Casual", "Smart casual", "Business", "Formal"];
 const OCCASIONS: Occasion[] = ["work", "school", "social", "sport", "home"];
 
 const FIELD = "field";
@@ -26,10 +18,6 @@ export interface EditedItem {
   title: string;
   brand?: string;
   tags: ItemTags;
-}
-
-function capitalize(word: string) {
-  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 function splitList(text: string): string[] {
@@ -67,14 +55,19 @@ export function ItemCard({
   onSave,
   submitLabel = "Save to closet",
   busyLabel = "Saving…",
+  heading = "Look right?",
   hint = "Fix anything that's off, then save.",
+  actions,
 }: {
   draft: ItemDraft;
   saving: boolean;
   onSave: (item: EditedItem) => void;
   submitLabel?: string;
   busyLabel?: string;
+  heading?: string;
   hint?: string;
+  // Shown next to the submit button, e.g. Cancel and an error when editing.
+  actions?: ReactNode;
 }) {
   const [title, setTitle] = useState(draft.title);
   const [brand, setBrand] = useState(draft.brand ?? "");
@@ -169,7 +162,7 @@ export function ItemCard({
 
       <div className="flex min-w-0 flex-col gap-5 md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-7">
         <div className="mb-3 flex flex-col gap-1 border-b border-ink pb-4">
-          <h2 className="text-xl font-medium">Look right?</h2>
+          <h2 className="text-xl font-medium">{heading}</h2>
           <p className="text-sm text-ink-2">{hint}</p>
         </div>
 
@@ -185,16 +178,16 @@ export function ItemCard({
         </Field>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Type" unsure={unsure.has("category")}>
+          <Field label={FIELD_LABELS.category} unsure={unsure.has("category")}>
             {(id) => (
               <select id={id} className={FIELD} value={tags.category} onChange={(e) => update("category", e.target.value as Category)}>
-                {CATEGORIES.map(([value, label]) => (
+                {CATEGORY_LABELS.map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
             )}
           </Field>
-          <Field label="Fit" unsure={unsure.has("fit")}>
+          <Field label={FIELD_LABELS.fit} unsure={unsure.has("fit")}>
             {(id) => (
               <select
                 id={id}
@@ -213,7 +206,7 @@ export function ItemCard({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Main color" unsure={unsure.has("colorFamily")}>
+          <Field label={FIELD_LABELS.colorFamily} unsure={unsure.has("colorFamily")}>
             {(id) => (
               <div className="relative">
                 <span
@@ -235,22 +228,22 @@ export function ItemCard({
               </div>
             )}
           </Field>
-          <Field label="Colors" unsure={unsure.has("colors")}>
+          <Field label={FIELD_LABELS.colors} unsure={unsure.has("colors")}>
             {(id) => (
               <input id={id} className={FIELD} value={colors} placeholder="black, white" onChange={(e) => setColors(e.target.value)} />
             )}
           </Field>
         </div>
-        <Field label="Materials" unsure={unsure.has("materials")}>
+        <Field label={FIELD_LABELS.materials} unsure={unsure.has("materials")}>
           {(id) => (
             <input id={id} className={FIELD} value={materials} placeholder="cotton" onChange={(e) => setMaterials(e.target.value)} />
           )}
         </Field>
 
-        <Field label="How dressy" unsure={unsure.has("formality")}>
+        <Field label={FIELD_LABELS.formality} unsure={unsure.has("formality")}>
           {(id) => (
             <select id={id} className={FIELD} value={tags.formality} onChange={(e) => update("formality", Number(e.target.value))}>
-              {FORMALITY.map((label, i) => (
+              {FORMALITY_LABELS.map((label, i) => (
                 <option key={label} value={i + 1}>{label}</option>
               ))}
             </select>
@@ -259,7 +252,7 @@ export function ItemCard({
 
         <fieldset className="flex flex-col gap-1.5">
           <legend className="mb-1.5 text-sm text-ink-2">
-            Comfortable in
+            {FIELD_LABELS.tempRangeF}
             {unsure.has("tempRangeF") && <Unsure />}
           </legend>
           <div className="flex items-center gap-2">
@@ -295,20 +288,23 @@ export function ItemCard({
           )}
         </fieldset>
         <Chips
-          label="Good for"
+          label={FIELD_LABELS.occasions}
           unsure={unsure.has("occasions")}
           options={OCCASIONS}
           selected={tags.occasions}
           onToggle={(o) => update("occasions", toggle(tags.occasions, o))}
         />
 
-        <button
-          type="submit"
-          disabled={saving || !title.trim() || !!temp.problem}
-          className="btn-primary mt-4 w-full md:w-auto md:self-start md:px-10"
-        >
-          {saving ? busyLabel : submitLabel}
-        </button>
+        <div className="mt-4 flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center">
+          <button
+            type="submit"
+            disabled={saving || !title.trim() || !!temp.problem}
+            className="btn-primary w-full md:w-auto md:px-10"
+          >
+            {saving ? busyLabel : submitLabel}
+          </button>
+          {actions}
+        </div>
       </div>
     </form>
   );
