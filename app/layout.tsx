@@ -25,7 +25,8 @@ export const metadata: Metadata = {
   description: "Check if a piece works with your closet before you buy it.",
 };
 
-const NAV_LINK = "text-sm text-ink transition-colors duration-150 hover:text-ink-2";
+// 44px tall to tap, though the header still reads as one thin line.
+const NAV_LINK = "inline-flex h-11 items-center text-sm text-ink transition-colors duration-150 hover:text-ink-2";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

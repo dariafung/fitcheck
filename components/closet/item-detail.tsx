@@ -59,7 +59,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
         <div className="flex flex-col gap-16 md:col-span-6 md:col-start-7 lg:col-span-4 lg:col-start-8 md:sticky md:top-10 md:self-start">
           <div className="flex flex-col gap-8">
             <div>
-              <h1 className="text-xl font-medium">{item.title}</h1>
+              <h1 className="text-title font-medium">{item.title}</h1>
               <p className="mt-2 text-sm text-ink-2">{byline}</p>
             </div>
 

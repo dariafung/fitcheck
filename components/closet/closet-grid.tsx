@@ -4,20 +4,24 @@ import type { ReactNode } from "react";
 import { listClosetItems, type ClosetCard } from "@/lib/closet/items";
 import { CLOSET_TABS, closetHref, inCategory, inTab, type ClosetView } from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
+import { isReadOnly } from "@/lib/auth/session";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { ClosetFilters, FILTER } from "./closet-filters";
 import { ItemImage } from "./item-image";
 
-// The shelf: 4:5 tiles, 16px apart, 40px between rows. Four across on a
-// desktop, two on a phone.
-export const SHELF = "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4";
+// The shelf: 4:5 tiles. Four across on a desktop, 16px apart, 48px between
+// rows. On a phone two across, 4px apart, pulled out to 8px from the screen
+// edge so each tile is about half the screen, as on The Row, H&M, Everlane.
+export const SHELF =
+  "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4 lg:grid-cols-4 lg:gap-y-12";
 
 export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView> }) {
   await connection();
-  const [items, view] = await Promise.all([
+  const [items, view, readOnly] = await Promise.all([
     currentUserId().then((userId) => listClosetItems(createServerClient(), userId)),
     viewParam,
+    isReadOnly(),
   ]);
 
   if (items.length === 0) return <EmptyCloset />;
@@ -28,7 +32,7 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
     <div className="flex flex-col gap-10">
       <ClosetFilters items={items} view={view} />
       {shown.length > 0 ? (
-        <ItemList items={shown} />
+        <ItemList items={shown} addSlot={view.tab === "wearing" && !readOnly} />
       ) : tabItems.length > 0 ? (
         <Empty title="Nothing in this category." text="Pick another one, or see everything.">
           <Link href={closetHref({ ...view, cat: null })} scroll={false} className="btn-secondary mt-4">
@@ -80,7 +84,25 @@ export function EmptyCloset() {
   );
 }
 
-export function ItemList({ items, grid = SHELF }: { items: ClosetCard[]; grid?: string }) {
+// Shown only where the last row has a gap at that width (2, 3 or 4 across),
+// so a short row reads as full and the gap becomes the way to add more.
+function addSlotVisibility(count: number): string {
+  return [
+    count % 2 === 0 ? "hidden" : "block",
+    count % 3 === 0 ? "md:hidden" : "md:block",
+    count % 4 === 0 ? "lg:hidden" : "lg:block",
+  ].join(" ");
+}
+
+export function ItemList({
+  items,
+  grid = SHELF,
+  addSlot = false,
+}: {
+  items: ClosetCard[];
+  grid?: string;
+  addSlot?: boolean;
+}) {
   return (
     <ul className={grid}>
       {items.map((item, i) => (
@@ -94,13 +116,24 @@ export function ItemList({ items, grid = SHELF }: { items: ClosetCard[]; grid?: 
               sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
               priority={i < 4}
             />
-            <p className="mt-2 line-clamp-2 text-sm leading-snug decoration-1 underline-offset-[3px] group-hover:underline">
-              {item.title}
-            </p>
-            <p className="text-sm text-ink-2">{categoryLabel(item.category)}</p>
+            <div className="px-1 md:px-0">
+              <p className="mt-2 line-clamp-2 text-sm leading-snug decoration-1 underline-offset-[3px] group-hover:underline">
+                {item.title}
+              </p>
+              <p className="text-sm text-ink-2">{categoryLabel(item.category)}</p>
+            </div>
           </Link>
         </li>
       ))}
+      {addSlot && (
+        <li className={addSlotVisibility(items.length)}>
+          <Link href="/closet/add" className="group block">
+            <div className="flex aspect-[4/5] items-center justify-center bg-tile outline-1 -outline-offset-[10px] outline-ink/30 outline-dashed transition-colors duration-150 group-hover:outline-ink">
+              <span className="text-sm text-ink-2 transition-colors duration-150 group-hover:text-ink">Add clothes</span>
+            </div>
+          </Link>
+        </li>
+      )}
     </ul>
   );
 }

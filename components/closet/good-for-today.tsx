@@ -14,7 +14,7 @@ import { LocationSync } from "./location-sync";
 
 // Three across next to the black tile on a desktop, so each slot lines up
 // with the closet's four-across shelf.
-const TODAY_GRID = "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3";
+const TODAY_GRID = "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4";
 
 // Home's pick from the closet: what suits today's local weather. The location
 // comes from the browser (picked city or device location, see LocationSync),

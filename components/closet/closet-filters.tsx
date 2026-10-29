@@ -29,7 +29,7 @@ export function ClosetFilters<T extends { status: string; category: string }>({
             href={closetHref({ ...view, tab: tab.id })}
             scroll={false}
             aria-current={tab.id === view.tab ? "page" : undefined}
-            className={`${FILTER} ${on(tab.id === view.tab)}`}
+            className={`${FILTER} -my-3 py-3 ${on(tab.id === view.tab)}`}
           >
             {tab.label}{" "}
             <span className="text-ink-2 tabular-nums">{inCategory(inTab(items, tab.id), view.cat).length}</span>
@@ -42,7 +42,7 @@ export function ClosetFilters<T extends { status: string; category: string }>({
         <div
           role="group"
           aria-label="Category"
-          className="-mx-4 flex items-center gap-6 overflow-x-auto px-4 pt-4 pb-1 md:mx-0 md:px-0"
+          className="-mx-4 flex items-center gap-6 overflow-x-auto px-4 pt-1.5 md:mx-0 md:px-0"
         >
           <CategoryLink href={closetHref({ ...view, cat: null })} active={view.cat === null}>
             All <span className="text-ink-2 tabular-nums">{tabItems.length}</span>
@@ -64,7 +64,7 @@ function CategoryLink({ href, active, children }: { href: string; active: boolea
       href={href}
       scroll={false}
       aria-current={active ? "true" : undefined}
-      className={`${FILTER} py-1 ${on(active)}`}
+      className={`${FILTER} pt-3.5 pb-2 ${on(active)}`}
     >
       {children}
     </Link>
