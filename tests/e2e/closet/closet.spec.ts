@@ -136,7 +136,7 @@ test("widening the temperature range moves an item into Good for today on home",
   await expect(good.getByRole("link", { name: item.title })).toBeVisible();
 });
 
-test("closet tabs: All shows what you wear, Passing on survives a refresh", async ({ page }) => {
+test("closet tabs: Wearing shows what you wear, Passing on survives a refresh", async ({ page }) => {
   const passing = `E2E old jacket ${randomUUID().slice(0, 8)}`;
   const { data, error } = await db
     .from("items")
@@ -148,9 +148,9 @@ test("closet tabs: All shows what you wear, Passing on survives a refresh", asyn
 
   await page.goto("/closet");
   const main = page.getByRole("main");
-  const allTab = main.getByRole("link", { name: /^All \d+$/ });
+  const wearingTab = main.getByRole("link", { name: /^Wearing \d+$/ });
   const passingTab = main.getByRole("link", { name: /^Passing on \d+$/ });
-  await expect(allTab).toHaveAttribute("aria-current", "page");
+  await expect(wearingTab).toHaveAttribute("aria-current", "page");
   await expect(main.getByRole("link", { name: item.title })).toBeVisible();
   await expect(main.getByRole("link", { name: passing })).toHaveCount(0);
 
@@ -164,9 +164,47 @@ test("closet tabs: All shows what you wear, Passing on survives a refresh", asyn
   await expect(passingTab).toHaveAttribute("aria-current", "page");
   await expect(main.getByRole("link", { name: passing })).toBeVisible();
 
-  await allTab.click();
+  await wearingTab.click();
   await expect(page).toHaveURL(/\/closet$/);
   await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+});
+
+test("closet categories: filter by type, keep the tab, and show all again when empty", async ({ page }) => {
+  const passing = `E2E old jacket ${randomUUID().slice(0, 8)}`;
+  const { data, error } = await db
+    .from("items")
+    .insert({ user_id: DEMO_USER_ID, entry_method: "manual", title: passing, category: "outerwear", status: "passing_on" })
+    .select("id")
+    .single();
+  if (error) throw error;
+  extraIds.push(data.id);
+
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const categories = main.getByRole("group", { name: "Category" });
+  await expect(categories.getByRole("link", { name: /^All \d+$/ })).toHaveAttribute("aria-current", "true");
+  // Outerwear is only in Passing on, so Wearing does not offer it.
+  await expect(categories.getByRole("link", { name: /^Outerwear/ })).toHaveCount(0);
+
+  await categories.getByRole("link", { name: /^Top \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?cat=top$/);
+  await expect(categories.getByRole("link", { name: /^Top \d+$/ })).toHaveAttribute("aria-current", "true");
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+  await expect(main.getByRole("list").getByText("Bottom", { exact: true })).toHaveCount(0);
+
+  await page.reload();
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+
+  // The tab keeps the category: no tops are on their way out.
+  await main.getByRole("link", { name: /^Passing on 0$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tab=passing-on&cat=top$/);
+  await expect(page.getByText("Nothing in this category.")).toBeVisible();
+  await expect(main.getByRole("link", { name: passing })).toHaveCount(0);
+
+  await main.getByRole("link", { name: "Show all" }).click();
+  await expect(page).toHaveURL(/\/closet\?tab=passing-on$/);
+  await expect(main.getByRole("link", { name: passing })).toBeVisible();
+  await expect(categories.getByRole("link", { name: /^Outerwear 1$/ })).toBeVisible();
 });
 
 // Only this file adds passing-on items, and its tests run one at a time.
@@ -202,7 +240,7 @@ test("delete an item: confirm first, then it's gone from home, the closet and st
   await page.getByRole("button", { name: "Delete this item" }).click();
   await page.getByRole("button", { name: "Yes, delete it" }).click();
   await expect(page).toHaveURL(/\/closet$/);
-  await expect(page.getByRole("main").getByRole("link", { name: /^All \d+$/ })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: /^Wearing \d+$/ })).toBeVisible();
   await expect(page.getByRole("link", { name: item.title })).toHaveCount(0);
 
   await page.goto("/");
