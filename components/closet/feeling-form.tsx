@@ -132,7 +132,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
             }}
             className="btn-secondary"
           >
-            Edit
+            Edit note
           </button>
           <VoiceButton itemId={itemId} onText={addTranscript} />
           </div>

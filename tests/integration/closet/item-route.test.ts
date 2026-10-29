@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH } from "@/app/api/items/[id]/route";
 import { ITEM_IMAGES_BUCKET } from "@/lib/closet/images";
+import { loadClosetItems } from "@/lib/check/pairings";
 import { listClosetItems } from "@/lib/closet/items";
 import { createTestCloset } from "./helpers";
 
@@ -83,31 +84,84 @@ describe("GET /api/items/[id]", () => {
 });
 
 describe("PATCH /api/items/[id]", () => {
-  it("stores the range in user_tags, next to other corrections", async () => {
-    const res = await patch(closet.itemId, { tempRangeF: { min: 40, max: 70 } });
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ tempRangeF: { min: 40, max: 70 } });
-
+  async function stored() {
     const { data } = await closet.db
       .from("items")
-      .select("ai_tags, user_tags")
+      .select("title, brand, category, status, ai_tags, user_tags")
       .eq("id", closet.itemId)
       .single()
       .throwOnError();
-    expect(data.user_tags).toEqual({ fit: "oversized", tempRangeF: { min: 40, max: 70 } });
-    expect(data.ai_tags).toMatchObject({ tempRangeF: { min: 65, max: 95 } });
+    return data;
+  }
 
-    const { item } = await (await get(closet.itemId)).json();
-    expect(item.tempRangeF).toEqual({ min: 40, max: 70 });
+  it("saves edited details: name and brand in columns, tags as corrections to the AI's", async () => {
+    const { item: before } = await (await get(closet.itemId)).json();
+    const tags = {
+      ...before.tags,
+      category: "outerwear",
+      fit: "relaxed",
+      formality: 3,
+      tempRangeF: { min: 40, max: 70 },
+      occasions: ["social", "work"],
+    };
+    const res = await patch(closet.itemId, { details: { title: "Linen overshirt", brand: " Arket ", tags } });
+    expect(res.status).toBe(200);
+    const { item } = await res.json();
+    expect(item).toMatchObject({
+      title: "Linen overshirt",
+      brand: "Arket",
+      category: "outerwear",
+      status: "active",
+      tempRangeF: { min: 40, max: 70 },
+      tags: { category: "outerwear", fit: "relaxed", formality: 3, occasions: ["social", "work"] },
+    });
+
+    const row = await stored();
+    expect(row).toMatchObject({ title: "Linen overshirt", brand: "Arket", category: "outerwear" });
+    // fit is back to the AI's value, so the old correction is gone.
+    expect(row.user_tags).toEqual({
+      category: "outerwear",
+      formality: 3,
+      tempRangeF: { min: 40, max: 70 },
+      occasions: ["social", "work"],
+    });
+    expect(row.ai_tags).toMatchObject({ category: "top", fit: "relaxed", tempRangeF: { min: 65, max: 95 } });
+
+    // The closet and the outfit builder read the new values.
+    const [card] = await listClosetItems(closet.db, closet.userId);
+    expect(card).toMatchObject({ title: "Linen overshirt", category: "outerwear", tempRangeF: { min: 40, max: 70 } });
+    const { items } = await loadClosetItems(closet.db, closet.userId);
+    expect(items[0]).toMatchObject({ title: "Linen overshirt" });
+    expect(items[0].tags).toMatchObject({ category: "outerwear", formality: 3, tempRangeF: { min: 40, max: 70 } });
   });
 
-  it("rejects seasons, other fields and bad ranges, and 404s for items that are not this user's", async () => {
-    expect((await patch(closet.itemId, { seasons: ["fall"] })).status).toBe(400);
-    expect((await patch(closet.itemId, { tempRangeF: { min: 40, max: 70 }, title: "New" })).status).toBe(400);
-    expect((await patch(closet.itemId, { tempRangeF: { min: 70, max: 40 } })).status).toBe(400);
-    expect((await patch("not-a-uuid", { tempRangeF: { min: 40, max: 70 } })).status).toBe(404);
+  it("passes an item on and keeps it again", async () => {
+    const off = await patch(closet.itemId, { status: "passing_on" });
+    expect(off.status).toBe(200);
+    expect((await off.json()).item.status).toBe("passing_on");
+    expect((await stored()).status).toBe("passing_on");
+    expect((await loadClosetItems(closet.db, closet.userId)).items).toEqual([]);
+
+    const back = await patch(closet.itemId, { status: "active" });
+    expect((await back.json()).item.status).toBe("active");
+    expect((await stored()).status).toBe("active");
+  });
+
+  it("rejects unknown fields, bad statuses and bad ranges, and 404s for items that are not this user's", async () => {
+    const { item } = await (await get(closet.itemId)).json();
+    const details = { title: item.title, brand: null, tags: item.tags };
+    expect((await patch(closet.itemId, {})).status).toBe(400);
+    expect((await patch(closet.itemId, { tempRangeF: { min: 40, max: 70 } })).status).toBe(400);
+    expect((await patch(closet.itemId, { status: "candidate" })).status).toBe(400);
+    expect((await patch(closet.itemId, { status: "active", title: "New" })).status).toBe(400);
+    const badRange = { ...details, tags: { ...item.tags, tempRangeF: { min: 70, max: 40 } } };
+    expect((await patch(closet.itemId, { details: badRange })).status).toBe(400);
+    expect((await patch(closet.itemId, { details: { ...details, title: " " } })).status).toBe(400);
+    expect((await patch("not-a-uuid", { status: "active" })).status).toBe(404);
     user.id = randomUUID();
-    expect((await patch(closet.itemId, { tempRangeF: { min: 40, max: 70 } })).status).toBe(404);
+    expect((await patch(closet.itemId, { details })).status).toBe(404);
+    expect((await patch(closet.itemId, { status: "passing_on" })).status).toBe(404);
+    expect(await stored()).toMatchObject({ title: "Test linen shirt", status: "active", user_tags: { fit: "oversized" } });
   });
 });
 
