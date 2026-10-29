@@ -143,7 +143,7 @@ describe("POST /api/checks", () => {
     expect(r.parts.revives.items.map((i) => i.id).sort()).toEqual([shirtId, trousersId].sort());
     expect(r.parts.revives.points).toBe(8);
     // Work: 3 of 3 short, adds 1.
-    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 5, reason: "Work: 3 short, this adds 1." });
+    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 5, reason: "You want 3 work outfits and have 0. This adds 1." });
     expect(r.parts.notRepeat).toMatchObject({ points: 10, item: null });
     expect(r.gap).toBeNull();
     expect(r.sampleOutfits).toHaveLength(1);
@@ -186,7 +186,7 @@ describe("POST /api/checks", () => {
     expect(r.gap).toEqual({
       kind: "nothing_owned",
       slots: [[{ category: "shoes", owned: false }]],
-      reason: "Nothing in your closet to wear this with yet. Add shoes.",
+      reason: "Your tops could go with this, but you have no shoes yet.",
     });
     expect(r.sampleOutfits).toEqual([]);
   });

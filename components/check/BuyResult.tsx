@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import type { BuyCheckResult } from "@/lib/check/buy-check";
+import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
 
 const PARTS: [keyof BuyCheckResult["parts"], string][] = [
   ["suitsYou", "Suits you"],
@@ -99,24 +101,48 @@ export function BuyResult({
                     <span className="text-ink-2">/{part.max}</span>
                   </span>
                 </div>
-                <p className="max-w-[48ch] text-sm text-ink-2">{part.reason}</p>
+                <p className="max-w-[48ch] text-sm text-ink-2">
+                  {part.reason === NO_LIFESTYLE_REASON ? (
+                    <>
+                      {NO_LIFESTYLE_PARTS[0]}
+                      <Link href={PROFILE_MIX_HREF} className="text-ink underline underline-offset-4">
+                        {NO_LIFESTYLE_PARTS[1]}
+                      </Link>
+                      {NO_LIFESTYLE_PARTS[2]}
+                    </>
+                  ) : (
+                    part.reason
+                  )}
+                </p>
                 {key === "suitsYou" && parts.suitsYou.answers.some((a) => a.score !== null) && (
                   <details className="group mt-1 text-sm">
                     <summary className="inline-flex cursor-pointer list-none items-baseline gap-1.5 text-ink after:w-2 after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
                       <span className="underline underline-offset-4">Why</span>
                     </summary>
                     <ul className="mt-3 flex flex-col gap-2.5 border-l border-line pl-4">
-                      {parts.suitsYou.answers.map((a) => (
-                        <li key={a.id} className="flex gap-3">
-                          <span className="w-8 shrink-0 text-ink-2">
-                            {a.points}/{a.max}
-                          </span>
-                          <span>
-                            <span className="font-medium">{a.question}.</span>{" "}
-                            <span className="text-ink-2">{a.reason}</span>
-                          </span>
-                        </li>
-                      ))}
+                      {parts.suitsYou.answers.map((a) =>
+                        // Not asked, for lack of notes: greyed out, default score.
+                        a.score === null ? (
+                          <li key={a.id} data-default className="flex gap-3 text-ink-2">
+                            <span className="w-8 shrink-0">
+                              {a.points}/{a.max}
+                            </span>
+                            <span>
+                              {a.question}. {NO_NOTES_ANSWER}
+                            </span>
+                          </li>
+                        ) : (
+                          <li key={a.id} className="flex gap-3">
+                            <span className="w-8 shrink-0 text-ink-2">
+                              {a.points}/{a.max}
+                            </span>
+                            <span>
+                              <span className="font-medium">{a.question}.</span>{" "}
+                              <span className="text-ink-2">{a.reason}</span>
+                            </span>
+                          </li>
+                        ),
+                      )}
                     </ul>
                   </details>
                 )}
