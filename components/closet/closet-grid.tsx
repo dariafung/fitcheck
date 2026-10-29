@@ -30,7 +30,7 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
       {shown.length > 0 ? (
         <ItemList items={shown} />
       ) : tabItems.length > 0 ? (
-        <Empty title="Nothing in this category." text="Pick another one, or see everything here.">
+        <Empty title="Nothing in this category." text="Pick another one, or see everything.">
           <Link href={closetHref({ ...view, cat: null })} scroll={false} className="btn-secondary mt-4">
             Show all
           </Link>
@@ -38,7 +38,7 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
       ) : view.tab === "passing-on" ? (
         <Empty title="Nothing to pass on." text="Clothes you plan to sell or give away show up here." />
       ) : (
-        <Empty title="Nothing left to wear." text="Everything is in Passing on. Add something new to fill it back up." />
+        <Empty title="Nothing left to wear." text="Everything is in Passing on. Add something new to fill your closet back up." />
       )}
     </div>
   );
