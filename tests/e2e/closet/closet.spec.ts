@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import sharp from "sharp";
+import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { DEMO_USER_ID } from "../../../lib/db/current-user";
 import { FIXED_WEATHER } from "../../../lib/weather/today";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
@@ -15,6 +17,8 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
 let item: { id: string; title: string };
 // Extra rows a test adds; removed with the item.
 let extraIds: string[] = [];
+// Photos a test uploads; removed with the item.
+let imagePaths: string[] = [];
 
 // The server runs with WEATHER_MODE=fixed, so today is FIXED_WEATHER. The
 // test item is only comfortable in warmer weather than that.
@@ -50,7 +54,9 @@ test.beforeEach(async () => {
 
 test.afterEach(async () => {
   await db.from("items").delete().in("id", [item.id, ...extraIds]);
+  if (imagePaths.length) await db.storage.from("item-images").remove(imagePaths);
   extraIds = [];
+  imagePaths = [];
 });
 
 test("open an item from the grid, write how it feels, and keep it", async ({ page }) => {
@@ -168,4 +174,43 @@ test("Passing on is empty when nothing is on its way out", async ({ page }) => {
   await page.goto("/closet?tab=passing-on");
   await expect(page.getByText("Nothing to pass on.")).toBeVisible();
   await expect(page.getByRole("link", { name: item.title })).toHaveCount(0);
+});
+
+test("delete an item: confirm first, then it's gone from home, the closet and storage", async ({ page }) => {
+  const photo = `${DEMO_USER_ID}/${randomUUID()}.webp`;
+  imagePaths.push(photo);
+  const webp = await sharp(await fakeScreenshot()).webp().toBuffer();
+  const upload = await db.storage.from("item-images").upload(photo, webp, { contentType: "image/webp" });
+  if (upload.error) throw upload.error;
+  const comfy = { min: FIXED_WEATHER.lowF, max: FIXED_WEATHER.highF };
+  const { error } = await db
+    .from("items")
+    .update({ image_paths: [photo], user_tags: { tempRangeF: comfy } })
+    .eq("id", item.id);
+  if (error) throw error;
+
+  await page.goto("/");
+  const good = page.getByRole("region", { name: "Good for today" });
+  await good.getByRole("link", { name: item.title }).click();
+  await expect(page).toHaveURL(`/closet/${item.id}`);
+
+  await page.getByRole("button", { name: "Delete this item" }).click();
+  await expect(page.getByText("Delete this for good?")).toBeVisible();
+  await page.getByRole("button", { name: "Keep it" }).click();
+  await expect(page.getByText("Delete this for good?")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Delete this item" }).click();
+  await page.getByRole("button", { name: "Yes, delete it" }).click();
+  await expect(page).toHaveURL(/\/closet$/);
+  await expect(page.getByRole("main").getByRole("link", { name: /^All \d+$/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: item.title })).toHaveCount(0);
+
+  await page.goto("/");
+  await expect(good).toBeVisible();
+  await expect(good.getByRole("link", { name: item.title })).toHaveCount(0);
+
+  const { data: rows } = await db.from("items").select("id").eq("id", item.id);
+  expect(rows).toEqual([]);
+  const { data: files } = await db.storage.from("item-images").list(DEMO_USER_ID, { search: photo.split("/")[1] });
+  expect(files).toEqual([]);
 });
