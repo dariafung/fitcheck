@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { DEMO_READ_ONLY } from "@/lib/auth/messages";
 import { MAX_FEELING_LENGTH } from "@/lib/closet/feeling-body";
 import { appendTranscript, isTooLong } from "@/lib/closet/feeling-draft";
 import { VoiceButton } from "./voice-button";
 
-type Status = "idle" | "saving" | "saved" | "error";
+type Status = "idle" | "saving" | "saved" | "error" | "read-only";
 
 export function FeelingForm({ itemId, initialText }: { itemId: string; initialText: string | null }) {
   const router = useRouter();
@@ -42,7 +43,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
       body: JSON.stringify({ text: draft, source: usedVoice ? "voice" : "typed" }),
     }).catch(() => null);
     if (!res?.ok) {
-      setStatus("error");
+      setStatus(res?.status === 403 ? "read-only" : "error");
       return;
     }
     const { feeling } = (await res.json()) as { feeling: { text: string } };
@@ -104,6 +105,11 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
             {status === "error" && (
               <p role="alert" className="text-sm text-red-600 dark:text-red-400">
                 Couldn&apos;t save. Try again.
+              </p>
+            )}
+            {status === "read-only" && (
+              <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+                {DEMO_READ_ONLY}
               </p>
             )}
           </div>
