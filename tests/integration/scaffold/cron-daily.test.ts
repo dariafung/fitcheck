@@ -1,15 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GET } from "@/app/api/cron/daily/route";
+import { AUDIO_MAX_AGE_MS, deleteOldAudio } from "@/lib/cron/old-audio";
 import { deleteOrphanImages, ORPHAN_MIN_AGE_MS } from "@/lib/cron/orphan-images";
 import { createServerClient } from "@/lib/db/server";
 import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
 
-// The route's cleanup is spied on: a real run would also remove other
-// lanes' old orphans in the shared local bucket.
+// The route's cleanups are spied on: a real run would also remove other
+// lanes' old files in the shared local buckets.
 vi.mock("@/lib/cron/orphan-images", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/cron/orphan-images")>();
   return { ...actual, deleteOrphanImages: vi.fn(actual.deleteOrphanImages) };
+});
+vi.mock("@/lib/cron/old-audio", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/cron/old-audio")>();
+  return { ...actual, deleteOldAudio: vi.fn(actual.deleteOldAudio) };
 });
 
 const SECRET = "test-cron-secret-0123456789";
@@ -37,18 +42,37 @@ describe("GET /api/cron/daily", () => {
     expect((await GET(cronRequest())).status).toBe(401);
     expect((await GET(cronRequest("Bearer wrong"))).status).toBe(401);
     expect(deleteOrphanImages).not.toHaveBeenCalled();
+    expect(deleteOldAudio).not.toHaveBeenCalled();
   });
 
-  it("cleans up photos older than a day when Vercel Cron calls", async () => {
+  it("cleans up photos and recordings older than a day when Vercel Cron calls", async () => {
     vi.stubEnv("CRON_SECRET", SECRET);
     vi.mocked(deleteOrphanImages).mockResolvedValueOnce(2);
+    vi.mocked(deleteOldAudio).mockResolvedValueOnce(3);
     const started = Date.now();
     const res = await GET(cronRequest(`Bearer ${SECRET}`));
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, deletedImages: 2 });
-    const { before } = vi.mocked(deleteOrphanImages).mock.calls[0][1];
-    expect(started - before.getTime()).toBeGreaterThanOrEqual(ORPHAN_MIN_AGE_MS - 1000);
-    expect(started - before.getTime()).toBeLessThanOrEqual(ORPHAN_MIN_AGE_MS + 1000);
+    expect(await res.json()).toEqual({ ok: true, deletedImages: 2, deletedAudio: 3 });
+    const imagesBefore = vi.mocked(deleteOrphanImages).mock.calls[0][1].before;
+    expect(started - imagesBefore.getTime()).toBeGreaterThanOrEqual(ORPHAN_MIN_AGE_MS - 1000);
+    expect(started - imagesBefore.getTime()).toBeLessThanOrEqual(ORPHAN_MIN_AGE_MS + 1000);
+    const audioBefore = vi.mocked(deleteOldAudio).mock.calls[0][1].before;
+    expect(started - audioBefore.getTime()).toBeGreaterThanOrEqual(AUDIO_MAX_AGE_MS - 1000);
+    expect(started - audioBefore.getTime()).toBeLessThanOrEqual(AUDIO_MAX_AGE_MS + 1000);
+  });
+
+  it("answers 200 when there are no recordings to look at", async () => {
+    vi.stubEnv("CRON_SECRET", SECRET);
+    vi.mocked(deleteOrphanImages).mockResolvedValueOnce(0);
+    // Real walk, kept to a folder nobody uploads to.
+    const { deleteOldAudio: realDeleteOldAudio } =
+      await vi.importActual<typeof import("@/lib/cron/old-audio")>("@/lib/cron/old-audio");
+    vi.mocked(deleteOldAudio).mockImplementationOnce((client, opts) =>
+      realDeleteOldAudio(client, { ...opts, folder: randomUUID() }),
+    );
+    const res = await GET(cronRequest(`Bearer ${SECRET}`));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, deletedImages: 0, deletedAudio: 0 });
   });
 });
 

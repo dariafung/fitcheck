@@ -1,11 +1,12 @@
 import { connection } from "next/server";
+import { AUDIO_MAX_AGE_MS, deleteOldAudio } from "@/lib/cron/old-audio";
 import { deleteOrphanImages, ORPHAN_MIN_AGE_MS } from "@/lib/cron/orphan-images";
 import { createServerClient } from "@/lib/db/server";
 
 // Called once a day by Vercel Cron (vercel.json), which sends
 // `Authorization: Bearer $CRON_SECRET`. Touches the database so the free
 // Supabase project is not paused for inactivity, and removes orphaned item
-// photos older than a day.
+// photos and leftover voice recordings older than a day.
 export async function GET(request: Request) {
   await connection();
   const secret = process.env.CRON_SECRET;
@@ -17,5 +18,8 @@ export async function GET(request: Request) {
   const deletedImages = await deleteOrphanImages(db, {
     before: new Date(Date.now() - ORPHAN_MIN_AGE_MS),
   });
-  return Response.json({ ok: true, deletedImages });
+  const deletedAudio = await deleteOldAudio(db, {
+    before: new Date(Date.now() - AUDIO_MAX_AGE_MS),
+  });
+  return Response.json({ ok: true, deletedImages, deletedAudio });
 }
