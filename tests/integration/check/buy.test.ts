@@ -184,8 +184,9 @@ describe("POST /api/checks", () => {
     // The shirt was never judged against it (no shoes, so no outfit to judge
     // for), so only the shoes count as missing.
     expect(r.gap).toEqual({
-      slots: [{ category: "shoes", owned: false }],
-      reason: "Creates a gap: you have no shoes.",
+      kind: "nothing_owned",
+      slots: [[{ category: "shoes", owned: false }]],
+      reason: "Nothing in your closet to wear this with yet. Add shoes.",
     });
     expect(r.sampleOutfits).toEqual([]);
   });

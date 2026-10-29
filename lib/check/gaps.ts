@@ -84,14 +84,15 @@ export interface MissingSlot {
 }
 
 // For a candidate that forms no outfit: the slots where nothing goes with it,
-// from the alternative closest to complete. Empty when every slot has a
-// match but those matches don't go with each other (or with the weather).
+// one list per alternative, in SLOTS_NEEDED order. Empty when some
+// alternative has a match in every slot but those matches don't go with each
+// other (or with the weather).
 // `mightPair` should give unjudged pairs the benefit of the doubt.
 export function missingSlots(
   candidate: ClosetItem,
   closet: readonly ClosetItem[],
   mightPair: Compatible,
-): MissingSlot[] {
+): MissingSlot[][] {
   const category = categoryOf(candidate);
   if (category === "accessory") return [];
   const options = SLOTS_NEEDED[category].map((slots) =>
@@ -105,5 +106,23 @@ export function missingSlots(
         owned: closet.some((item) => categoryOf(item) === slot),
       })),
   );
-  return options.reduce((best, missing) => (missing.length < best.length ? missing : best));
+  if (options.some((missing) => missing.length === 0)) return [];
+  // Drop an alternative that needs everything another one does and more.
+  const has = (missing: MissingSlot[], slot: MissingSlot) =>
+    missing.some((s) => s.category === slot.category);
+  return options.filter(
+    (missing) =>
+      !options.some(
+        (other) => other.length < missing.length && other.every((slot) => has(missing, slot)),
+      ),
+  );
+}
+
+// "nothing_owned": every missing slot is a category the closet has none of,
+// so the closet is short, not the candidate. "no_match": something owned
+// doesn't go with it.
+export type GapKind = "nothing_owned" | "no_match";
+
+export function gapKind(options: MissingSlot[][]): GapKind {
+  return options.length > 0 && options.flat().every((s) => !s.owned) ? "nothing_owned" : "no_match";
 }

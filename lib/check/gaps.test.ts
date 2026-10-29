@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Category, LifestyleMix, Occasion } from "../ai/schemas/common";
 import {
+  gapKind,
   missingSlots,
   occasionGap,
   occasionTier,
   revivedItemIds,
+  type MissingSlot,
 } from "./gaps";
 import { CANDIDATE_ITEM_ID } from "./pairings";
 import { roundPart } from "./score";
@@ -98,29 +100,27 @@ describe("missingSlots", () => {
     };
   };
 
+  const none = (category: Category): MissingSlot => ({ category, owned: false });
+
   it("names slots the closet has nothing in", () => {
     const top = candidateOf("top");
-    expect(missingSlots(top, [item("bottom")], always)).toEqual([{ category: "shoes", owned: false }]);
+    expect(missingSlots(top, [item("bottom")], always)).toEqual([[none("shoes")]]);
   });
 
   it("names slots where nothing goes with it", () => {
     const top = candidateOf("top");
     const bottom = item("bottom");
     const shoes = item("shoes");
-    expect(missingSlots(top, [bottom, shoes], only(bottom))).toEqual([{ category: "shoes", owned: true }]);
+    expect(missingSlots(top, [bottom, shoes], only(bottom))).toEqual([[{ category: "shoes", owned: true }]]);
   });
 
-  it("picks the alternative closest to complete for shoes", () => {
+  it("names what's missing for both ways to wear shoes", () => {
     const shoes = candidateOf("shoes");
     expect(missingSlots(shoes, [item("one_piece")], always)).toEqual([]);
-    // A tie (one missing either way) goes to top + bottom.
-    expect(missingSlots(shoes, [item("top")], always)).toEqual([{ category: "bottom", owned: false }]);
-    // Fewer missing wins: one one-piece beats a top and a bottom.
-    expect(missingSlots(shoes, [], always)).toEqual([{ category: "one_piece", owned: false }]);
-    expect(missingSlots(candidateOf("top"), [], always)).toEqual([
-      { category: "bottom", owned: false },
-      { category: "shoes", owned: false },
-    ]);
+    expect(missingSlots(shoes, [item("top")], always)).toEqual([[none("bottom")], [none("one_piece")]]);
+    // Owning only shoes is the same as owning nothing.
+    expect(missingSlots(shoes, [item("shoes")], always)).toEqual([[none("top"), none("bottom")], [none("one_piece")]]);
+    expect(missingSlots(candidateOf("top"), [], always)).toEqual([[none("bottom"), none("shoes")]]);
   });
 
   it("is empty when every slot has a match that doesn't go together", () => {
@@ -134,6 +134,28 @@ describe("missingSlots", () => {
 
   it("needs a base outfit for outerwear", () => {
     const coat = candidateOf("outerwear");
-    expect(missingSlots(coat, [item("one_piece")], always)).toEqual([{ category: "shoes", owned: false }]);
+    // Top + bottom + shoes needs everything one-piece + shoes does, so only
+    // the shoes are named.
+    expect(missingSlots(coat, [item("one_piece")], always)).toEqual([[none("shoes")]]);
+    expect(missingSlots(coat, [], always)).toEqual([
+      [none("top"), none("bottom"), none("shoes")],
+      [none("one_piece"), none("shoes")],
+    ]);
+    expect(missingSlots(coat, [item("top"), item("bottom")], always)).toEqual([
+      [none("shoes")],
+    ]);
+    expect(missingSlots(coat, [item("shoes")], always)).toEqual([
+      [none("top"), none("bottom")],
+      [none("one_piece")],
+    ]);
+  });
+});
+
+describe("gapKind", () => {
+  it("tells a short closet from pieces that don't go with it", () => {
+    const none = (category: Category): MissingSlot => ({ category, owned: false });
+    expect(gapKind([[none("top"), none("bottom")], [none("one_piece")]])).toBe("nothing_owned");
+    expect(gapKind([[{ category: "top", owned: true }], [none("one_piece")]])).toBe("no_match");
+    expect(gapKind([])).toBe("no_match");
   });
 });
