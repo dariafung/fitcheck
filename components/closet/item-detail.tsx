@@ -24,19 +24,18 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   const byline = [item.brand, categoryLabel(item.category)].filter(Boolean).join(" · ");
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="flex flex-col gap-3">
+    <div className="grid gap-x-4 gap-y-10 md:grid-cols-12">
+      <div className="flex flex-col gap-4 md:col-span-6 lg:col-span-6">
         <ItemImage
           src={cover ?? null}
           alt={item.title}
           category={item.category}
           swatch={item.swatch}
-          sizes="(min-width: 768px) 360px, 100vw"
-          aspect="aspect-square md:aspect-[3/4]"
+          sizes="(min-width: 768px) 50vw, 100vw"
           priority
         />
         {more.length > 0 && (
-          <ul className="grid grid-cols-4 gap-2">
+          <ul className="grid grid-cols-4 gap-4">
             {more.map((src, i) => (
               <li key={src}>
                 <ItemImage
@@ -44,7 +43,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
                   alt={`${item.title}, photo ${i + 2}`}
                   category={item.category}
                   swatch={null}
-                  sizes="90px"
+                  sizes="160px"
                 />
               </li>
             ))}
@@ -52,23 +51,22 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
         )}
       </div>
 
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
+      {/* The Row's product column: narrow, quiet, held in view while the photo scrolls. */}
+      <div className="flex flex-col gap-16 md:col-span-6 md:col-start-7 lg:col-span-4 lg:col-start-8 md:sticky md:top-10 md:self-start">
+        <div className="flex flex-col gap-8">
           <div>
-            <h1 className="text-2xl font-semibold leading-tight">{item.title}</h1>
-            <p className="mt-1 text-sm text-foreground/60">{byline}</p>
+            <h1 className="text-xl font-medium">{item.title}</h1>
+            <p className="mt-2 text-sm text-ink-2">{byline}</p>
           </div>
 
-          <dl className="flex flex-col gap-2.5 text-sm">
+          <div className="border-t border-line text-sm">
+          <dl>
             {tagGroups(item.tags).map((group) => (
-              <div key={group.label} className="flex gap-3">
-                <dt className="w-16 shrink-0 pt-0.5 text-foreground/60">{group.label}</dt>
-                <dd className="flex flex-wrap gap-1.5">
+              <div key={group.label} className="grid grid-cols-[7rem_1fr] gap-3 border-b border-line py-3">
+                <dt className="text-ink-2">{group.label}</dt>
+                <dd className="flex flex-wrap gap-x-1">
                   {group.values.map((value) => (
-                    <span
-                      key={value}
-                      className="rounded-full bg-black/[.05] px-2.5 py-0.5 dark:bg-white/[.08]"
-                    >
+                    <span key={value} className="after:content-[','] last:after:content-none">
                       {value}
                     </span>
                   ))}
@@ -76,19 +74,19 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
               </div>
             ))}
           </dl>
-
-          <div className="text-sm">
+          <div className="border-b border-line py-3">
             <TempRangeEditor itemId={item.id} initial={item.tempRangeF} readOnly={readOnly} />
           </div>
+          </div>
 
-          {item.tags.notes && <p className="text-sm text-foreground/80">{item.tags.notes}</p>}
+          {item.tags.notes && <p className="text-base">{item.tags.notes}</p>}
 
           {item.sourceUrl && (
             <a
               href={item.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="self-start text-sm underline underline-offset-4"
+              className="btn-text self-start text-ink"
             >
               See it at {item.retailer ?? "the store"}
             </a>
@@ -101,7 +99,11 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
           <FeelingForm itemId={item.id} initialText={item.feeling?.text ?? null} />
         )}
 
-        {!readOnly && <DeleteItem itemId={item.id} />}
+        {!readOnly && (
+          <div className="border-t border-line pt-4">
+            <DeleteItem itemId={item.id} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -111,14 +113,10 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
 function ReadOnlyFeeling({ text }: { text: string | null }) {
   return (
     <section aria-labelledby="feeling-heading" className="flex flex-col gap-3">
-      <h2 id="feeling-heading" className="text-lg font-semibold">
+      <h2 id="feeling-heading" className="text-lg font-medium">
         How it feels
       </h2>
-      {text && (
-        <p className="w-full whitespace-pre-wrap rounded-xl bg-black/[.04] p-4 leading-relaxed dark:bg-white/[.06]">
-          {text}
-        </p>
-      )}
+      {text && <p className="font-serif text-lg whitespace-pre-wrap">{text}</p>}
       <ReadOnlyNote />
     </section>
   );
@@ -126,11 +124,11 @@ function ReadOnlyFeeling({ text }: { text: string | null }) {
 
 export function ItemDetailSkeleton() {
   return (
-    <div className="grid gap-8 md:grid-cols-2" aria-busy="true" aria-label="Loading item">
-      <div className="aspect-[3/4] animate-pulse rounded-xl bg-black/[.06] dark:bg-white/[.08]" />
-      <div className="flex flex-col gap-3">
-        <div className="h-7 w-2/3 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
-        <div className="h-4 w-1/3 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
+    <div className="grid gap-x-4 gap-y-10 md:grid-cols-12" aria-busy="true" aria-label="Loading item">
+      <div className="aspect-[4/5] bg-tile motion-safe:animate-pulse md:col-span-6" />
+      <div className="flex flex-col gap-3 md:col-span-6 md:col-start-7 lg:col-span-4 lg:col-start-8">
+        <div className="h-8 w-2/3 bg-tile motion-safe:animate-pulse" />
+        <div className="h-4 w-1/3 bg-tile motion-safe:animate-pulse" />
       </div>
     </div>
   );

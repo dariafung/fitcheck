@@ -95,7 +95,7 @@ export function AddByScreenshot() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -109,7 +109,8 @@ export function AddByScreenshot() {
           if (file && !busy) void upload(file);
         }}
         data-dragging={dragging || undefined}
-        className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-black/15 px-4 py-8 text-center data-dragging:border-foreground dark:border-white/20"
+        data-idle={step.kind === "idle" || undefined}
+        className="dropzone flex min-h-64 flex-col items-center justify-center gap-4 px-8 py-12 text-center md:min-h-80"
       >
         <input
           ref={inputRef}
@@ -125,11 +126,11 @@ export function AddByScreenshot() {
         />
         <label
           htmlFor="screenshot"
-          className="cursor-pointer rounded-full bg-foreground px-5 py-2.5 font-medium text-background peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-disabled:cursor-default peer-disabled:opacity-50"
+          className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
         >
           {step.kind === "loading" ? "Reading…" : "Choose a screenshot"}
         </label>
-        <p className="text-sm opacity-60">
+        <p className="max-w-[40ch] text-sm text-ink-2">
           One screen is enough. Just get the photo and name in it.
           <span className="hidden sm:inline"> You can also drop or paste it.</span>
         </p>
@@ -137,21 +138,21 @@ export function AddByScreenshot() {
 
       <div role="status" aria-live="polite" className="empty:hidden">
         {problem && (
-          <p className="rounded-xl border border-amber-600/30 bg-amber-500/10 px-4 py-3 text-sm font-medium">
+          <p className="notice">
             {problem}
           </p>
         )}
-        {step.kind === "loading" && <p className="text-sm opacity-70">Reading your screenshot…</p>}
+        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
         {step.kind === "saved" && (
-          <div className="flex flex-col gap-3 rounded-2xl border border-black/10 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/15">
-            <p>
+          <div className="notice flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-lg">
               <span className="font-medium">{step.title}</span> is in your closet.
             </p>
-            <div className="flex gap-2">
-              <Link href="/closet" className="rounded-full border px-4 py-2 text-sm">
+            <div className="flex gap-3">
+              <Link href="/closet" className="btn-secondary">
                 See closet
               </Link>
-              <button type="button" onClick={addAnother} className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background">
+              <button type="button" onClick={addAnother} className="btn-primary">
                 Add another
               </button>
             </div>
@@ -174,15 +175,15 @@ export function AddByScreenshot() {
 
 function LoadingCard({ preview }: { preview: string }) {
   return (
-    <div aria-hidden className="grid gap-6 rounded-2xl border border-black/10 p-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:p-6 dark:border-white/15">
-      <div className="relative mx-auto aspect-[4/5] w-full max-w-xs overflow-hidden rounded-xl bg-black/5 sm:max-w-none dark:bg-white/10">
-        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 640px) 280px, 100vw" className="object-cover object-top opacity-60" />
+    <div aria-hidden className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12">
+      <div className="relative aspect-[4/5] w-3/5 overflow-hidden bg-tile md:col-span-5 md:w-full">
+        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 768px) 40vw, 60vw" className="object-contain p-[9%] opacity-50" />
       </div>
-      <div className="flex animate-pulse flex-col gap-3">
-        <div className="h-6 w-1/2 rounded bg-black/5 dark:bg-white/10" />
-        <div className="h-10 rounded-lg bg-black/5 dark:bg-white/10" />
-        <div className="h-10 rounded-lg bg-black/5 dark:bg-white/10" />
-        <div className="h-10 w-2/3 rounded-lg bg-black/5 dark:bg-white/10" />
+      <div className="flex flex-col gap-4 md:col-span-6 md:col-start-7 motion-safe:animate-pulse">
+        <div className="h-7 w-1/2 bg-tile" />
+        <div className="h-10 bg-tile" />
+        <div className="h-10 bg-tile" />
+        <div className="h-10 w-2/3 bg-tile" />
       </div>
     </div>
   );

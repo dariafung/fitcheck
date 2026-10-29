@@ -28,7 +28,7 @@ export function DeleteItem({ itemId }: { itemId: string }) {
         type="button"
         onClick={() => setStatus("confirming")}
         aria-label="Delete this item"
-        className="self-start text-sm text-foreground/60 underline underline-offset-2 hover:text-foreground"
+        className="btn-text self-start"
       >
         Delete
       </button>
@@ -37,14 +37,14 @@ export function DeleteItem({ itemId }: { itemId: string }) {
 
   return (
     <div className="flex flex-col gap-2 text-sm">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-4">
         <span>Delete this for good?</span>
         <button
           type="button"
           onClick={remove}
           aria-label="Yes, delete it"
           disabled={status === "deleting"}
-          className="rounded-full bg-foreground px-4 py-1 font-medium text-background disabled:opacity-40"
+          className="btn-primary h-9 px-4"
         >
           {status === "deleting" ? "Deleting…" : "Delete"}
         </button>
@@ -53,13 +53,13 @@ export function DeleteItem({ itemId }: { itemId: string }) {
           onClick={() => setStatus("idle")}
           aria-label="Keep it"
           disabled={status === "deleting"}
-          className="text-foreground/60 hover:underline disabled:opacity-40"
+          className="btn-text"
         >
           Cancel
         </button>
       </div>
       {status === "error" && (
-        <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm font-medium">
           Couldn&apos;t delete. Try again.
         </p>
       )}

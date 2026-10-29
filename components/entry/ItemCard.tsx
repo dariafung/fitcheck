@@ -20,8 +20,7 @@ const FITS = ["slim", "regular", "relaxed", "oversized"] as const;
 const FORMALITY = ["Lounge", "Casual", "Smart casual", "Business", "Formal"];
 const OCCASIONS: Occasion[] = ["work", "school", "social", "sport", "home"];
 
-const FIELD =
-  "w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 dark:border-white/20";
+const FIELD = "field";
 
 export interface EditedItem {
   title: string;
@@ -113,21 +112,21 @@ export function ItemCard({
     <form
       onSubmit={save}
       aria-label="Item details"
-      className="grid gap-6 rounded-2xl border border-black/10 p-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:p-6 dark:border-white/15"
+      className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12"
     >
-      <div className="mx-auto flex w-full max-w-xs flex-col gap-2 sm:max-w-none">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-black/5 dark:bg-white/10">
+      <div className="flex w-3/5 flex-col gap-3 md:sticky md:top-10 md:col-span-5 md:w-full md:self-start">
+        <div className="relative aspect-[4/5] overflow-hidden bg-tile">
           {draft.imageUrls[shown] ? (
             <Image
               src={draft.imageUrls[shown]}
               alt={title}
               fill
               unoptimized
-              sizes="(min-width: 640px) 280px, 100vw"
-              className="object-cover"
+              sizes="(min-width: 768px) 40vw, 60vw"
+              className="object-contain p-[9%]"
             />
           ) : (
-            <p className="flex h-full items-center justify-center text-sm opacity-60">No photo</p>
+            <p className="flex h-full items-end p-4 text-sm text-ink-2">No photo</p>
           )}
         </div>
         {draft.imageUrls.length > 1 && (
@@ -139,9 +138,9 @@ export function ItemCard({
                 onClick={() => setShown(i)}
                 aria-label={`Photo ${i + 1}`}
                 aria-pressed={i === shown}
-                className="relative aspect-[4/5] w-14 overflow-hidden rounded-md border border-black/10 aria-pressed:border-foreground dark:border-white/15"
+                className="relative aspect-[4/5] w-14 overflow-hidden border border-transparent bg-tile transition-colors duration-150 aria-pressed:border-ink"
               >
-                <Image src={url} alt="" fill unoptimized sizes="56px" className="object-cover" />
+                <Image src={url} alt="" fill unoptimized sizes="56px" className="object-contain p-1" />
               </button>
             ))}
           </div>
@@ -152,14 +151,14 @@ export function ItemCard({
             <Unsure />
           </p>
         )}
-        {price && <p className="text-sm opacity-70">{price}</p>}
+        {price && <p className="text-base tabular-nums">{price}</p>}
         {draft.webSources.length > 0 && (
-          <p className="text-sm opacity-70">
+          <p className="text-sm text-ink-2">
             Some details are from{" "}
             {uniqueHosts(draft.webSources).map((source, i) => (
               <span key={source.url}>
                 {i > 0 && ", "}
-                <a href={source.url} target="_blank" rel="noreferrer" className="underline">
+                <a href={source.url} target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-ink">
                   {source.host}
                 </a>
               </span>
@@ -168,10 +167,10 @@ export function ItemCard({
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-4">
-        <div>
-          <h2 className="text-lg font-semibold">Look right?</h2>
-          <p className="text-sm opacity-70">{hint}</p>
+      <div className="flex min-w-0 flex-col gap-5 md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-7">
+        <div className="mb-3 flex flex-col gap-1 border-b border-ink pb-4">
+          <h2 className="text-xl font-medium">Look right?</h2>
+          <p className="text-sm text-ink-2">{hint}</p>
         </div>
 
         <Field label="Name" unsure={unsure.has("title")}>
@@ -219,7 +218,7 @@ export function ItemCard({
               <div className="relative">
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 rounded-full border border-black/15 dark:border-white/20"
+                  className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 border border-ink/20"
                   style={{ background: tags.colorFamily ? COLOR_FAMILY_HEX[tags.colorFamily] : "transparent" }}
                 />
                 <select
@@ -259,7 +258,7 @@ export function ItemCard({
         </Field>
 
         <fieldset className="flex flex-col gap-1.5">
-          <legend className="mb-1.5 text-sm font-medium">
+          <legend className="mb-1.5 text-sm text-ink-2">
             Comfortable in
             {unsure.has("tempRangeF") && <Unsure />}
           </legend>
@@ -276,7 +275,7 @@ export function ItemCard({
               onChange={(e) => setTempLow(e.target.value)}
               className={`${FIELD} min-w-0 flex-1`}
             />
-            <span className="opacity-70">to</span>
+            <span className="text-ink-2">to</span>
             <input
               aria-label="Highest °F"
               type="number"
@@ -289,10 +288,10 @@ export function ItemCard({
               onChange={(e) => setTempHigh(e.target.value)}
               className={`${FIELD} min-w-0 flex-1`}
             />
-            <span className="opacity-70">°F</span>
+            <span className="text-ink-2">°F</span>
           </div>
           {temp.problem && (
-            <p className="text-sm text-amber-700 dark:text-amber-400">{temp.problem}</p>
+            <p className="text-sm font-medium">{temp.problem}</p>
           )}
         </fieldset>
         <Chips
@@ -306,7 +305,7 @@ export function ItemCard({
         <button
           type="submit"
           disabled={saving || !title.trim() || !!temp.problem}
-          className="mt-2 rounded-full bg-foreground px-5 py-2.5 font-medium text-background disabled:opacity-50 sm:self-start"
+          className="btn-primary mt-4 w-full md:w-auto md:self-start md:px-10"
         >
           {saving ? busyLabel : submitLabel}
         </button>
@@ -316,7 +315,7 @@ export function ItemCard({
 }
 
 function Unsure() {
-  return <span className="ml-1.5 text-xs font-normal text-amber-700 dark:text-amber-400">· double-check</span>;
+  return <span className="ml-1.5 font-medium text-ink underline decoration-dotted underline-offset-4">· double-check</span>;
 }
 
 function Field({
@@ -331,7 +330,7 @@ function Field({
   const id = useId();
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium">
+      <label htmlFor={id} className="text-sm text-ink-2">
         {label}
         {unsure && <Unsure />}
       </label>
@@ -355,7 +354,7 @@ function Chips<T extends string>({
 }) {
   return (
     <fieldset className="flex flex-col gap-1.5">
-      <legend className="mb-1.5 text-sm font-medium">
+      <legend className="mb-1.5 text-sm text-ink-2">
         {label}
         {unsure && <Unsure />}
       </legend>
@@ -366,7 +365,7 @@ function Chips<T extends string>({
             type="button"
             aria-pressed={selected.includes(option)}
             onClick={() => onToggle(option)}
-            className="rounded-full border border-black/15 px-3 py-1 text-sm aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background dark:border-white/20"
+            className="chip"
           >
             {capitalize(option)}
           </button>

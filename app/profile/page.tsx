@@ -12,8 +12,8 @@ import { ProfileForm } from "./profile-form";
 
 export default function ProfilePage() {
   return (
-    <div className="flex flex-col gap-10">
-      <h1 className="text-2xl font-semibold">Profile</h1>
+    <div className="flex flex-col gap-16">
+      <h1 className="text-xl font-medium">Profile</h1>
       <Suspense fallback={<FormSkeleton />}>
         <BodyAndOutfits />
       </Suspense>
@@ -31,7 +31,7 @@ async function BodyAndOutfits() {
     cookies(),
     isReadOnly(),
   ]);
-  if (!profile) return <p className="text-sm text-foreground/60">Couldn&apos;t find your profile.</p>;
+  if (!profile) return <p className="text-sm text-ink-2">Couldn&apos;t find your profile.</p>;
   return (
     <ProfileForm
       initial={profile}
@@ -47,9 +47,9 @@ async function WeatherLocation() {
 
 function FormSkeleton() {
   return (
-    <div aria-hidden="true" className="flex flex-col gap-4">
-      <div className="h-6 w-32 rounded bg-black/[.06] dark:bg-white/[.08]" />
-      <div className="h-40 rounded-xl bg-black/[.04] dark:bg-white/[.06]" />
+    <div aria-hidden="true" className="flex flex-col gap-4 border-t border-ink pt-6">
+      <div className="h-6 w-32 bg-tile motion-safe:animate-pulse" />
+      <div className="h-40 bg-tile motion-safe:animate-pulse" />
     </div>
   );
 }

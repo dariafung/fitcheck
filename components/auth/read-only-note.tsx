@@ -4,9 +4,9 @@ import Link from "next/link";
 // exactly DEMO_READ_ONLY in lib/auth/messages.ts.
 export function ReadOnlyNote() {
   return (
-    <p className="rounded-xl bg-black/[.04] px-4 py-3 text-sm text-foreground/70 dark:bg-white/[.06]">
+    <p className="bg-tile px-4 py-3 text-sm text-ink-2">
       Demo account is read-only.{" "}
-      <Link href="/signup" className="font-medium text-foreground underline underline-offset-2">
+      <Link href="/signup" className="font-medium text-ink underline underline-offset-4">
         Sign up
       </Link>{" "}
       to add your own.

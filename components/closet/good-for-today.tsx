@@ -12,6 +12,10 @@ import { todayWeather } from "@/lib/weather/today";
 import { ClosetGridSkeleton, EmptyCloset, ItemList } from "./closet-grid";
 import { LocationSync } from "./location-sync";
 
+// Three across next to the black tile on a desktop, so each slot lines up
+// with the closet's four-across shelf.
+const TODAY_GRID = "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3";
+
 // Home's pick from the closet: what suits today's local weather. The location
 // comes from the browser (picked city or device location, see LocationSync),
 // else the IP guess.
@@ -30,20 +34,25 @@ export async function GoodForToday() {
     >
       <LocationSync />
       {!weather && (
-        <p className="text-sm text-foreground/60">
+        <p className="text-sm text-ink-2">
           Couldn&apos;t get today&apos;s weather, so here&apos;s everything.
         </p>
       )}
       {items.length === 0 ? (
         <EmptyCloset />
       ) : good.length > 0 ? (
-        <ItemList items={good} />
+        <ItemList items={good} grid={TODAY_GRID} />
       ) : (
-        <p className="text-sm text-foreground/60">Nothing here fits today&apos;s weather.</p>
+        <p className="text-sm text-ink-2">Nothing here fits today&apos;s weather.</p>
       )}
       {weather && (
-        <p className="text-xs text-foreground/50">
-          <a href={ATTRIBUTION.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+        <p className="text-xs text-ink-2">
+          <a
+            href={ATTRIBUTION.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 transition-colors duration-150 hover:text-ink"
+          >
             {ATTRIBUTION.text}
           </a>
         </p>
@@ -55,33 +64,35 @@ export async function GoodForToday() {
 export function GoodForTodaySkeleton() {
   return (
     <Section>
-      <ClosetGridSkeleton />
+      <ClosetGridSkeleton grid={TODAY_GRID} />
     </Section>
   );
 }
 
 function Section({ note, children }: { note?: string; children: ReactNode }) {
   return (
-    <section aria-labelledby="good-for-today" className="flex flex-col gap-4">
-      <div className="flex items-baseline justify-between gap-4">
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <h2 id="good-for-today" className="text-lg font-semibold">
+    <section aria-labelledby="good-for-today" className="flex flex-col gap-6">
+      {/* Fixed height: the black tile beside it starts where the shelf does. */}
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line pb-3 lg:h-12 lg:flex-nowrap lg:items-end">
+          <h2 id="good-for-today" className="text-lg leading-none font-medium">
             Good for today
           </h2>
           {note && (
-            <span className="text-sm text-foreground/50">
+            <span className="order-last w-full text-sm text-ink-2 md:order-none md:w-auto">
               {note} ·{" "}
               <Link
                 href="/profile#weather"
                 aria-label="Change weather location"
-                className="underline underline-offset-2 hover:text-foreground"
+                className="underline underline-offset-4 transition-colors duration-150 hover:text-ink"
               >
                 Change
               </Link>
             </span>
           )}
-        </div>
-        <Link href="/closet" className="shrink-0 text-sm font-medium underline-offset-2 hover:underline">
+        <Link
+          href="/closet"
+          className="ml-auto shrink-0 text-sm underline underline-offset-4 transition-colors duration-150 hover:text-ink-2"
+        >
           See all clothes
         </Link>
       </div>

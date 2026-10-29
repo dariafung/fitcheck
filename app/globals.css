@@ -1,26 +1,297 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Minimal: a white-box gallery shelf with one spoken verdict.
+  Black, white, cool grey. The only color on any page is --signal, and it
+  belongs to the buy / don't-buy verdict (score, gap warning) and nothing else.
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --paper: #ffffff;
+  --tile: #f0f0ee;
+  --ink: #111111;
+  --ink-2: #6b6b6b;
+  --line: #e2e2df;
+  --signal: #d7261e;
+  --press: #333333;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #0e0e0e;
+    --tile: #1a1a1a;
+    --ink: #ededeb;
+    --ink-2: #9a9a96;
+    --line: #2b2b29;
+    --signal: #ef4136;
+    --press: #c9c9c6;
   }
 }
 
+@theme inline {
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+
+  --color-paper: var(--paper);
+  --color-tile: var(--tile);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
+  --color-signal: var(--signal);
+  --color-press: var(--press);
+  /* Older class names still map onto the same two inks. */
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+}
+
+@theme {
+  --text-xs: 11px;
+  --text-xs--line-height: 1.4;
+  --text-sm: 13px;
+  --text-sm--line-height: 1.4;
+  --text-base: 15px;
+  --text-base--line-height: 1.5;
+  --text-lg: 20px;
+  --text-lg--line-height: 1.45;
+  --text-xl: 28px;
+  --text-xl--line-height: 1.15;
+  --text-xl--letter-spacing: -0.01em;
+  --text-2xl: 40px;
+  --text-2xl--line-height: 1.05;
+  --text-2xl--letter-spacing: -0.015em;
+  --text-score: 96px;
+  --text-score--line-height: 0.9;
+  --text-score--letter-spacing: -0.04em;
+
+  --radius-*: initial;
+  --radius-input: 2px;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+
+  --ease-quiet: cubic-bezier(0.2, 0, 0, 1);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Newsreader is upright only, sized by its optical axis. */
+.font-serif {
+  font-style: normal;
+  font-optical-sizing: auto;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* One focus ring everywhere: a 2px ink outline, square like everything else. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  color: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-2);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/* Shared pieces. Kept as utilities so components only name what they are. */
+
+@utility shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: 16px;
+  @media (width >= 48rem) {
+    padding-inline: 48px;
+  }
+}
+
+/* Primary: black rectangle, white text. */
+@utility btn-primary {
+  display: inline-flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 20px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease-quiet);
+  &:hover:not(:disabled) {
+    background: var(--press);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+/* Secondary: white with a 1px ink edge. */
+@utility btn-secondary {
+  display: inline-flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 20px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease-quiet);
+  &:hover:not(:disabled) {
+    background: var(--tile);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+/* Third level: text with an underline. */
+@utility btn-text {
+  font-size: 13px;
+  color: var(--ink-2);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  transition: color 150ms var(--ease-quiet);
+  &:hover:not(:disabled) {
+    color: var(--ink);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+/* Text fields: 1px line box, the only 2px radius on the site. */
+@utility field {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-input);
+  background: var(--paper);
+  padding-inline: 12px;
+  font-size: 15px;
+  transition: border-color 150ms var(--ease-quiet);
+  &:hover {
+    border-color: var(--ink-2);
+  }
+  &:focus {
+    border-color: var(--ink);
+  }
+  &[aria-invalid="true"] {
+    border-color: var(--ink);
+    border-width: 2px;
+  }
+}
+
+/* Toggle chip: square, ink when on. */
+@utility chip {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  padding-inline: 12px;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-quiet),
+    border-color 150ms var(--ease-quiet),
+    color 150ms var(--ease-quiet);
+  &:hover {
+    border-color: var(--ink);
+  }
+  &[aria-pressed="true"],
+  &:has(:checked) {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  &:has(:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+}
+
+/* A notice band: black hairlines above and below, no fill, no color. */
+@utility notice {
+  border-block: 1px solid var(--ink);
+  padding-block: 12px;
+  font-size: 15px;
+}
+
+/* The drop target for screenshots: the shelf tile with a dashed outline. */
+@utility dropzone {
+  position: relative;
+  background: var(--tile);
+  outline: 1px dashed color-mix(in oklab, var(--ink) 35%, transparent);
+  outline-offset: -12px;
+  transition: outline-color 150ms var(--ease-quiet);
+  &[data-dragging] {
+    outline: 2px solid var(--ink);
+    outline-offset: -12px;
+  }
+}
+
+/*
+  Add clothes, before a screenshot: the empty 4:5 slot on the left and the
+  page title beside it, the way the item will sit once it's read. Back to one
+  column as soon as there is a card (or for the read-only demo).
+*/
+@media (min-width: 768px) {
+  .slot-page:has(.slot-body [data-idle]):not(:has([data-read-only])) {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 16px;
+  }
+  .slot-page:has(.slot-body [data-idle]):not(:has([data-read-only])) > * {
+    grid-column: 1 / -1;
+  }
+  .slot-page:has(.slot-body [data-idle]):not(:has([data-read-only])) > .slot-head {
+    grid-column: 7 / span 5;
+    grid-row: 1;
+    padding-top: 8px;
+  }
+  .slot-page:has(.slot-body [data-idle]):not(:has([data-read-only])) > .slot-body {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+  }
+  .slot-page .dropzone[data-idle] {
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+  }
 }
