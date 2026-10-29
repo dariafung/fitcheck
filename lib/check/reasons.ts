@@ -1,6 +1,6 @@
 // Result-page copy for the parts computed in code. Same numbers, same words.
 import type { Category, Occasion } from "../ai/schemas/common";
-import type { MissingSlot, OccasionChange, OccasionGapTier } from "./gaps";
+import type { GapKind, MissingSlot, OccasionChange, OccasionGapTier } from "./gaps";
 
 const PLURAL: Record<Category, string> = {
   top: "tops",
@@ -70,16 +70,39 @@ export function fillsGapReason(
 // Not a repeat, when there's nothing in the closet to ask the model about.
 export const EMPTY_CLOSET_REPEAT_REASON = "Nothing in your closet to repeat.";
 
-// Shown when the candidate forms no outfit at all.
-export function gapReason(slots: MissingSlot[]): string {
-  if (slots.length === 0) return "Creates a gap: the pieces that go with it don't go together.";
+const SINGULAR: Record<Category, string> = {
+  top: "top",
+  bottom: "bottom",
+  one_piece: "one-piece",
+  shoes: "shoes",
+  outerwear: "jacket",
+  accessory: "accessory",
+};
+
+// "a top and bottom", "shoes", "a one-piece and shoes".
+function toAdd(slots: MissingSlot[]): string {
+  const words = list(slots.map((s) => SINGULAR[s.category]));
+  return slots[0].category === "shoes" ? words : `a ${words}`;
+}
+
+function whatsMissing(slots: MissingSlot[]): string {
   const none = slots.filter((s) => !s.owned).map((s) => PLURAL[s.category]);
   const unmatched = slots.filter((s) => s.owned).map((s) => PLURAL[s.category]);
-  const parts = [
+  return [
     ...(none.length > 0 ? [`you have no ${list(none)}`] : []),
     ...(unmatched.length > 0 ? [`none of your ${list(unmatched)} go with it`] : []),
-  ];
-  return `Creates a gap: ${parts.join(", and ")}.`;
+  ].join(", and ");
+}
+
+// Shown when the candidate forms no outfit at all; `options` holds the
+// missing slots of each way to build an outfit around it.
+export function gapReason(options: MissingSlot[][], kind: GapKind, candidate: Category): string {
+  if (options.length === 0) return "Creates a gap: the pieces that go with it don't go together.";
+  if (kind === "nothing_owned") {
+    const it = candidate === "shoes" ? "these" : "this";
+    return `Nothing in your closet to wear ${it} with yet. Add ${options.map(toAdd).join(", or ")}.`;
+  }
+  return `Creates a gap: ${options.map(whatsMissing).join(", or ")}.`;
 }
 
 export const ACCESSORY_NOTICE = "Accessories aren't supported yet. Try clothes or shoes.";

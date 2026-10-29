@@ -51,7 +51,14 @@ export function BuyResult({
       </div>
 
       {result.gap && (
-        <p className="rounded-xl border border-amber-600/30 bg-amber-500/10 px-4 py-3 text-sm font-medium">
+        <p
+          data-kind={result.gap.kind}
+          className={
+            result.gap.kind === "nothing_owned"
+              ? "rounded-xl border border-black/10 bg-black/5 px-4 py-3 text-sm dark:border-white/15 dark:bg-white/10"
+              : "rounded-xl border border-amber-600/30 bg-amber-500/10 px-4 py-3 text-sm font-medium"
+          }
+        >
           {result.gap.reason}
         </p>
       )}
