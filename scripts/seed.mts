@@ -6,10 +6,15 @@
 // seeds the hosted project instead: SUPABASE_URL and SUPABASE_SECRET_KEY come
 // from the environment, the project ref must be typed back to confirm, and
 // the old demo data is cleared first.
+//
+// Also creates the read-only demo account's auth user (same id as the
+// persona) with DEMO_ACCOUNT_PASSWORD: from .env.local locally, from the
+// environment for SEED_REMOTE. The password never lives in the repo.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
+import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -24,6 +29,10 @@ const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SECRET_KEY;
 if (!url || !key) {
   throw new Error(remote ? "Set SUPABASE_URL and SUPABASE_SECRET_KEY." : "Run `pnpm env:local` first.");
+}
+const demoPassword = process.env.DEMO_ACCOUNT_PASSWORD;
+if (!demoPassword) {
+  throw new Error(remote ? `Set DEMO_ACCOUNT_PASSWORD for ${DEMO_EMAIL}.` : "Run `pnpm env:local` first.");
 }
 if (remote) {
   const ref = /^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/.exec(url)?.[1];
@@ -62,11 +71,9 @@ if (remote) {
   }
 }
 
-// TODO(P0-7 auth): create the demo account's auth user and password here
-// once sign-in lands, linked to persona.id.
-
 const users = await db.from("users").upsert(persona);
 if (users.error) throw users.error;
+await ensureDemoAuthUser(db, persona.id, demoPassword);
 for (const imagePath of imagePaths) {
   const file = readFileSync(new URL(`../seed/images/${path.basename(imagePath)}`, import.meta.url));
   const contentType = IMAGE_TYPES[path.extname(imagePath)];

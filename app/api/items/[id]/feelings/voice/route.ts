@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { aiErrorResponse, transcribe } from "@/lib/ai";
+import { requireWriter } from "@/lib/auth/guard";
 import { findItemSummary } from "@/lib/closet/items";
 import { isVoicePath } from "@/lib/closet/voice/path";
 import { readVoiceAudio, removeVoiceAudio } from "@/lib/closet/voice/storage";
 import { voiceWavProblem } from "@/lib/closet/voice/wav";
-import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 
 // A live transcription can take a while; see the timeouts in lib/ai/live/transcribe.ts.
@@ -17,10 +17,12 @@ const VoiceBody = z.object({ path: z.string() });
 // would be. The recording is deleted whether or not this works; on failure
 // the user records again.
 export async function POST(req: Request, ctx: RouteContext<"/api/items/[id]/feelings/voice">) {
+  const writer = await requireWriter();
+  if ("denied" in writer) return writer.denied;
   const { id } = await ctx.params;
   const body = VoiceBody.safeParse(await req.json().catch(() => null));
   const db = createServerClient();
-  const userId = currentUserId();
+  const { userId } = writer;
   const item = await findItemSummary(db, userId, id);
   if (!item) return Response.json({ error: "Not found" }, { status: 404 });
   if (!body.success || !isVoicePath(body.data.path, userId, item.id)) {

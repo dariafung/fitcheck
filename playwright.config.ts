@@ -4,6 +4,8 @@ import { readLocalSupabase } from "./scripts/lib/local-supabase.mjs";
 // Serves the existing production build: run `pnpm build` first.
 const PORT = 5129;
 const PROFILE_SPEC = /closet\/profile\.spec\.ts$/;
+// Sign-in specs need AUTH_REQUIRED=1: playwright.auth.config.ts runs them.
+const AUTH_SPECS = /\/auth\//;
 const CHROME = { ...devices["Desktop Chrome"], launchOptions: { args: ["--mute-audio"] } };
 
 export default defineConfig({
@@ -19,7 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testIgnore: PROFILE_SPEC,
+      testIgnore: [PROFILE_SPEC, AUTH_SPECS],
       use: CHROME,
     },
     // Writes the shared demo persona's profile, so it runs after everything

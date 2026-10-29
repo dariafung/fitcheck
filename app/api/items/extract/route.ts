@@ -1,5 +1,5 @@
 import { aiErrorResponse, extractItem } from "@/lib/ai";
-import { currentUserId } from "@/lib/db/current-user";
+import { requireWriter } from "@/lib/auth/guard";
 import { createServerClient } from "@/lib/db/server";
 import type { EntryErrorCode, ItemDraft } from "@/lib/entry/draft";
 import { signImages, storeImage } from "@/lib/entry/images";
@@ -15,6 +15,8 @@ function fail(error: EntryErrorCode) {
 // saving, or { error }. The model identifies the product, fills in details
 // with web search, and points at the product photo, which we crop and keep.
 export async function POST(request: Request) {
+  const writer = await requireWriter();
+  if ("denied" in writer) return writer.denied;
   const form = await request.formData().catch(() => null);
   const file = form?.get("screenshot");
   if (!(file instanceof Blob) || file.size === 0) return fail("no_file");
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
 
   const photo = await productPhoto(shot, extracted.productBox);
   const db = createServerClient();
-  const imagePaths = [await storeImage(db, currentUserId(), photo.webp)];
+  const imagePaths = [await storeImage(db, writer.userId, photo.webp)];
   const lowConfidence = photo.cropped
     ? extracted.lowConfidence
     : [...extracted.lowConfidence, "image"];

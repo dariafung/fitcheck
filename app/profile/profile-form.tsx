@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ReadOnlyNote } from "@/components/auth/read-only-note";
 import { writeCookie } from "@/lib/cookie";
 import { MAX_OUTFITS_WANTED, Occasion } from "@/lib/ai/schemas/common";
 import {
@@ -68,7 +69,15 @@ const INPUT =
   "w-24 rounded-lg border border-black/15 bg-transparent px-2 py-1 tabular-nums outline-none focus:border-foreground dark:border-white/20";
 const ERROR = "text-xs text-red-600 dark:text-red-400";
 
-export function ProfileForm({ initial, initialUnits }: { initial: Profile; initialUnits: Units }) {
+export function ProfileForm({
+  initial,
+  initialUnits,
+  readOnly = false,
+}: {
+  initial: Profile;
+  initialUnits: Units;
+  readOnly?: boolean;
+}) {
   const router = useRouter();
   const [units, setUnits] = useState(initialUnits);
   const [fields, setFields] = useState(() => fieldsFor(initial, initialUnits));
@@ -131,6 +140,7 @@ export function ProfileForm({ initial, initialUnits }: { initial: Profile; initi
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (readOnly) return;
     const found = check();
     setErrors(found);
     const input = ProfileInput.safeParse({
@@ -284,13 +294,17 @@ export function ProfileForm({ initial, initialUnits }: { initial: Profile; initi
       </section>
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={status === "saving"}
-          className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background disabled:opacity-40"
-        >
-          {status === "saving" ? "Saving…" : "Save"}
-        </button>
+        {readOnly ? (
+          <ReadOnlyNote />
+        ) : (
+          <button
+            type="submit"
+            disabled={status === "saving"}
+            className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background disabled:opacity-40"
+          >
+            {status === "saving" ? "Saving…" : "Save"}
+          </button>
+        )}
         {status === "saved" && (
           <p role="status" className="text-sm text-foreground/60">
             Saved
