@@ -104,6 +104,7 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: SEED_ITEM.title })).toBeVisible();
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /save/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /delete/i })).toHaveCount(0);
 
   await page.goto("/closet/add");
   await expect(page.getByText(DEMO_READ_ONLY)).toBeVisible();
@@ -118,6 +119,8 @@ test("the demo account can look but not change anything", async ({ page }) => {
   const res = await page.request.patch(`/api/items/${SEED_ITEM.id}`, { data: {} });
   expect(res.status()).toBe(403);
   expect(await res.json()).toMatchObject({ message: DEMO_READ_ONLY });
+  const del = await page.request.delete(`/api/items/${SEED_ITEM.id}`);
+  expect(del.status()).toBe(403);
 
   const after = await db.from("items").select("*").eq("id", SEED_ITEM.id).single();
   expect(after.data).toEqual(before.data);

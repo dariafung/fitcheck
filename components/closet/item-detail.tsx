@@ -6,6 +6,7 @@ import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { DeleteItem } from "./delete-item";
 import { FeelingForm } from "./feeling-form";
 import { ItemImage } from "./item-image";
 import { TempRangeEditor } from "./temp-range-editor";
@@ -99,6 +100,8 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
         ) : (
           <FeelingForm itemId={item.id} initialText={item.feeling?.text ?? null} />
         )}
+
+        {!readOnly && <DeleteItem itemId={item.id} />}
       </div>
     </div>
   );
