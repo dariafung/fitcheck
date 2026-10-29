@@ -82,7 +82,7 @@ export function parseStructured<W extends z.ZodType>(
   if (response.status !== "completed") return null;
   let json: unknown;
   try {
-    json = JSON.parse(outputText(response));
+    json = JSON.parse(answerText(response));
   } catch {
     return null;
   }
@@ -96,6 +96,14 @@ export function outputText(response: Response): string {
     .flatMap((item) => (item.type === "message" ? item.content : []))
     .map((part) => (part.type === "output_text" ? part.text : ""))
     .join("");
+}
+
+// The structured answer is the last message. With tools on, the model also
+// writes short plain-text "commentary" messages between calls.
+export function answerText(response: Response): string {
+  const answer = response.output.findLast((item) => item.type === "message");
+  if (answer?.type !== "message") return "";
+  return answer.content.map((part) => (part.type === "output_text" ? part.text : "")).join("");
 }
 
 // Billed per search query; usage has no field for it, so count the calls.
