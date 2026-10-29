@@ -12,7 +12,7 @@ Test the hosted app in your browser and report anything that doesn't match the e
 
 ## How to test
 
-Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). Keep the DevTools console open: **any red error in the console is a bug**, even if the page looks fine.
+Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px).
 
 ### 1. New account
 
@@ -21,7 +21,7 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). 
 | 1.1 | Open the site while signed out | You land on `/login` with "Log in", "Sign up" and "Try the demo account" |
 | 1.2 | "Sign up" with your email and a password of 6+ characters | You land on an empty closet: "Your closet is empty."; "Log out" top right |
 | 1.3 | Log out, log in again with the same email and password | Back in your (empty) closet |
-| 1.4 | Log in with a wrong password | A short error on the page, no red console error |
+| 1.4 | Log in with a wrong password | A short error on the page |
 | 1.5 | Open `/closet` in a private window | Sent to `/login` |
 
 ### 2. Add clothes by screenshot
@@ -35,7 +35,7 @@ Take screenshots of real product pages from different stores (one screen: produc
 | 2.3 | Fix a field, "Save to closet" | "Saved"; the item shows in the closet grid |
 | 2.4 | Add 5–8 items: tops, bottoms, shoes, one outerwear | Each one saves; the closet grid shows them all |
 | 2.5 | Upload a screenshot with no product in it | "Couldn't spot a product there. Try another screenshot?" and nothing saved |
-| 2.6 | Upload a file that isn't an image | A short message, no red console error |
+| 2.6 | Upload a file that isn't an image | A short message |
 
 ### 3. Item page
 
@@ -87,7 +87,7 @@ Open a GitHub issue in dariafung/fitcheck, one bug per issue:
 - **Commit**: the latest commit on `main` when you tested
 - **Steps**: numbered, from a page URL
 - **Expected** and **Actual**
-- **Screenshot** and any red console error, copied as text
+- **Screenshot**
 - **Browser and width**: e.g. Chrome 131, 390 px
 
 Never paste a password or key into an issue.

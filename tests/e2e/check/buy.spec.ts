@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { AiUpstreamError } from "../../../lib/ai/errors";
+import { aiErrorResponse } from "../../../lib/ai/http";
 import { MOCK_INCOMPLETE_TITLE } from "../../../lib/ai/mock/score-purchase";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { CANDIDATE_ITEM_ID } from "../../../lib/check/pairings";
@@ -106,4 +108,19 @@ test("accessories aren't scored yet", async ({ page }) => {
   await page.getByRole("button", { name: "Use another screenshot" }).click();
   await expect(card).toBeHidden();
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
+});
+
+test("when the AI fails, the card stays and Check it works again", async ({ page }) => {
+  // Answer exactly as the route does, without calling the model.
+  const failed = aiErrorResponse(new AiUpstreamError("scorePurchase", 500));
+  const body = await failed.text();
+  await page.route("**/api/checks", (route) =>
+    route.fulfill({ status: failed.status, contentType: "application/json", body }),
+  );
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByRole("button", { name: "Check it" }).click();
+  await expect(page.getByRole("status")).toContainText("Couldn't check it. Try again?");
+  await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
+  await expect(card.getByRole("button", { name: "Check it" })).toBeEnabled();
 });
