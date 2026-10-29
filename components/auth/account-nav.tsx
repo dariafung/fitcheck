@@ -12,20 +12,20 @@ export async function AccountNav() {
   const user = await sessionUser();
   if (!user) {
     return (
-      <Link href="/login" className="pl-2 hover:underline">
+      <Link href="/login" className="text-sm transition-colors duration-150 hover:text-ink-2">
         Log in
       </Link>
     );
   }
   return (
-    <div className="flex items-center gap-3 pl-2">
+    <div className="flex items-center gap-5">
       {user.readOnly && (
-        <Link href="/signup" className="font-medium hover:underline">
+        <Link href="/signup" className="text-sm font-medium underline underline-offset-4 transition-colors duration-150 hover:text-ink-2">
           Sign up
         </Link>
       )}
       <form action={logOut}>
-        <button type="submit" className="text-foreground/60 hover:text-foreground hover:underline">
+        <button type="submit" className="cursor-pointer text-sm text-ink-2 transition-colors duration-150 hover:text-ink">
           Log out
         </button>
       </form>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { categoryLabel, itemTags, tagGroups } from "./tags";
+import { aiTags, categoryLabel, itemTags, tagGroups } from "./tags";
 
 const AI_TAGS = {
   category: "top",
@@ -45,18 +45,54 @@ describe("itemTags", () => {
     expect(tags).toMatchObject({ fit: "relaxed", materials: ["cotton"], tempRangeF: { min: 50, max: 80 } });
     expect(tags.colorFamily).toBeUndefined();
   });
+  it("keeps the AI's color family and range when the user changed other fields", () => {
+    const tags = itemTags({
+      category: "top",
+      ai_tags: { ...AI_TAGS, colorFamily: "white", tempRangeF: { min: 55, max: 85 } },
+      user_tags: { fit: "relaxed" },
+    });
+    expect(tags).toMatchObject({ fit: "relaxed", colorFamily: "white", tempRangeF: { min: 55, max: 85 } });
+    expect(itemTags({ category: "top", ai_tags: { ...AI_TAGS, colorFamily: "white" }, user_tags: {} }).colorFamily).toBe("white");
+  });
 });
 
 describe("tagGroups", () => {
-  it("labels values and drops empty groups", () => {
+  it("names fields like the entry card and drops empty groups", () => {
     const groups = tagGroups(itemTags({ category: "top", ai_tags: AI_TAGS, user_tags: {} }));
     expect(groups).toEqual([
-      { label: "Color", values: ["White"] },
-      { label: "Material", values: ["Cotton"] },
+      { label: "Type", values: ["Top"] },
       { label: "Fit", values: ["Regular"] },
-      { label: "Vibe", values: ["Smart casual"] },
-      { label: "For", values: ["Work"] },
+      { label: "Colors", values: ["White"] },
+      { label: "Materials", values: ["Cotton"] },
+      { label: "How dressy", values: ["Smart casual"] },
+      { label: "Comfortable in", values: ["Any weather"] },
+      { label: "Good for", values: ["Work"] },
     ]);
+  });
+
+  it("shows the main color, the range, the finer type and user corrections", () => {
+    const groups = tagGroups(
+      itemTags({
+        category: "top",
+        ai_tags: { ...AI_TAGS, subcategory: "button-down", colorFamily: "white", tempRangeF: { min: 55, max: 85 } },
+        user_tags: { formality: 1, colorFamily: "cream", occasions: ["home", "social"] },
+      }),
+    );
+    const byLabel = Object.fromEntries(groups.map((g) => [g.label, g.values]));
+    expect(byLabel).toMatchObject({
+      Type: ["Top · Button-down"],
+      "Main color": ["Cream"],
+      "How dressy": ["Lounge"],
+      "Comfortable in": ["55 to 85°F"],
+      "Good for": ["Home", "Social"],
+    });
+  });
+});
+
+describe("aiTags", () => {
+  it("is the AI's tags without user corrections, or a plain set from the category", () => {
+    expect(aiTags({ category: "top", ai_tags: AI_TAGS })).toMatchObject({ fit: "regular", occasions: ["work"] });
+    expect(aiTags({ category: "shoes", ai_tags: null })).toMatchObject({ category: "shoes", formality: 3 });
   });
 });
 

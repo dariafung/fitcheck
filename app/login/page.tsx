@@ -6,16 +6,16 @@ export const metadata: Metadata = { title: "Log in · fitcheck" };
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-8">
-      <h1 className="text-2xl font-semibold">Log in</h1>
+    <div className="mx-auto flex w-full max-w-[360px] flex-col gap-10 md:pt-10">
+      <h1 className="text-xl font-medium">Log in</h1>
       <AuthForm mode="login" />
-      <p className="text-sm text-foreground/60">
+      <p className="text-sm text-ink-2">
         New here?{" "}
-        <Link href="/signup" className="font-medium text-foreground underline">
+        <Link href="/signup" className="font-medium text-ink underline underline-offset-4">
           Sign up
         </Link>
       </p>
-      <div className="border-t border-black/10 pt-8 dark:border-white/15">
+      <div className="border-t border-line pt-10">
         <DemoButton />
       </div>
     </div>

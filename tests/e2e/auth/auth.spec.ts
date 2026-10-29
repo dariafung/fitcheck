@@ -105,6 +105,7 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /save/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /delete/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /edit|pass it on/i })).toHaveCount(0);
 
   await page.goto("/closet/add");
   await expect(page.getByText(DEMO_READ_ONLY)).toBeVisible();

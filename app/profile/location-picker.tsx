@@ -8,8 +8,7 @@ import { clearLocationCookieString, locationCookieString } from "@/lib/weather/l
 
 type Status = "idle" | "searching" | "locating" | "saved" | "error";
 
-const BUTTON =
-  "rounded-full border border-black/15 px-4 py-1.5 text-sm font-medium hover:bg-black/[.04] disabled:opacity-40 dark:border-white/20 dark:hover:bg-white/[.06]";
+const BUTTON = "btn-secondary h-10";
 
 // Where the weather is for. A picked city lives in the browser's
 // fc_location cookie and wins over device location until "Use my location".
@@ -79,14 +78,19 @@ export function LocationPicker({ current }: { current: { label: string; picked: 
   }
 
   return (
-    <section id="weather" aria-labelledby="weather-heading" className="flex scroll-mt-6 flex-col gap-3">
-      <h2 id="weather-heading" className="text-lg font-semibold">
+    <section
+      id="weather"
+      aria-labelledby="weather-heading"
+      className="grid scroll-mt-6 gap-x-4 gap-y-6 border-t border-ink pt-6 md:grid-cols-12"
+    >
+      <h2 id="weather-heading" className="text-lg font-medium md:col-span-4">
         Weather location
       </h2>
-      <div className="flex flex-wrap items-center gap-3">
-        <p data-testid="weather-location">{current.label}</p>
+      <div className="flex flex-col gap-4 md:col-span-7 md:col-start-6">
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <p data-testid="weather-location" className="text-lg">{current.label}</p>
         {status === "saved" && (
-          <p role="status" className="text-sm text-foreground/60">
+          <p role="status" className="text-sm text-ink-2">
             {message ?? "Saved"}
           </p>
         )}
@@ -103,20 +107,20 @@ export function LocationPicker({ current }: { current: { label: string; picked: 
               onChange={(e) => setQuery(e.target.value)}
               placeholder="City name"
               autoFocus
-              className="w-56 rounded-lg border border-black/15 bg-transparent px-3 py-1.5 outline-none focus:border-foreground dark:border-white/20"
+              className="field w-56"
             />
             <button type="submit" disabled={status === "searching"} className={BUTTON}>
               {status === "searching" ? "Searching…" : "Search"}
             </button>
-            <button type="button" onClick={close} className="px-2 py-1.5 text-sm text-foreground/60 hover:underline">
+            <button type="button" onClick={close} className="btn-text ml-2">
               Cancel
             </button>
           </form>
           {results && results.length > 0 && (
-            <ul aria-label="Matching cities" className="flex flex-col items-start gap-1">
+            <ul aria-label="Matching cities" className="flex flex-col items-start gap-2">
               {results.map((c) => (
                 <li key={c.label}>
-                  <button type="button" onClick={() => pick(c)} className="text-left underline-offset-2 hover:underline">
+                  <button type="button" onClick={() => pick(c)} className="cursor-pointer text-left underline-offset-4 hover:underline">
                     {c.label}
                   </button>
                 </li>
@@ -124,18 +128,18 @@ export function LocationPicker({ current }: { current: { label: string; picked: 
             </ul>
           )}
           {message && (
-            <p role={status === "error" ? "alert" : undefined} className="text-sm text-foreground/60">
+            <p role={status === "error" ? "alert" : undefined} className="text-sm text-ink-2">
               {message}
             </p>
           )}
-          <p className="text-xs text-foreground/50">
-            <a href={GEOCODING_ATTRIBUTION.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+          <p className="text-xs text-ink-2">
+            <a href={GEOCODING_ATTRIBUTION.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">
               {GEOCODING_ATTRIBUTION.text}
             </a>
           </p>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={() => {
@@ -153,6 +157,7 @@ export function LocationPicker({ current }: { current: { label: string; picked: 
           )}
         </div>
       )}
+      </div>
     </section>
   );
 }

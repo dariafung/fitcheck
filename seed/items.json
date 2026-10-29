@@ -1,6 +1,7 @@
 [
   {
     "id": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
+    "image_paths": ["f97fc346-9acc-4404-bc52-9a6ba86a9bce/852c8e3d-abf7-4955-ab65-9d83194a02ae.webp"],
     "status": "active",
     "entry_method": "manual",
     "title": "White cotton button-down",
@@ -18,6 +19,7 @@
   },
   {
     "id": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+    "image_paths": ["f97fc346-9acc-4404-bc52-9a6ba86a9bce/c81b2b56-1f62-4284-83b6-7307a6355ac5.webp"],
     "status": "active",
     "entry_method": "manual",
     "title": "Dark straight-leg jeans",
@@ -35,6 +37,7 @@
   },
   {
     "id": "23c59091-9b18-4c24-92c3-1072a5581d8e",
+    "image_paths": ["f97fc346-9acc-4404-bc52-9a6ba86a9bce/23c59091-9b18-4c24-92c3-1072a5581d8e.webp"],
     "status": "active",
     "entry_method": "manual",
     "title": "White leather sneakers",
