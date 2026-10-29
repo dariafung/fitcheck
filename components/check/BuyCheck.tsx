@@ -94,7 +94,7 @@ export function BuyCheck() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {(step.kind === "idle" || step.kind === "loading") && (
         <div
           onDragOver={(e) => {
@@ -109,7 +109,7 @@ export function BuyCheck() {
             if (file && !busy) void upload(file);
           }}
           data-dragging={dragging || undefined}
-          className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-black/15 px-4 py-8 text-center data-dragging:border-foreground dark:border-white/20"
+          className="dropzone flex min-h-64 flex-col items-center justify-center gap-4 px-8 py-12 text-center md:aspect-[4/5] md:min-h-0"
         >
           <input
             ref={inputRef}
@@ -125,11 +125,11 @@ export function BuyCheck() {
           />
           <label
             htmlFor="screenshot"
-            className="cursor-pointer rounded-full bg-foreground px-5 py-2.5 font-medium text-background peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-disabled:cursor-default peer-disabled:opacity-50"
+            className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
           >
             {step.kind === "loading" ? "Reading…" : "Choose a screenshot"}
           </label>
-          <p className="text-sm opacity-60">
+          <p className="max-w-[40ch] text-sm text-ink-2">
             A screenshot of the product page.
             <span className="hidden sm:inline"> You can also drop or paste it.</span>
           </p>
@@ -138,13 +138,13 @@ export function BuyCheck() {
 
       <div role="status" aria-live="polite" className="empty:hidden">
         {problem && (
-          <p className="rounded-xl border border-amber-600/30 bg-amber-500/10 px-4 py-3 text-sm font-medium">
+          <p className="notice">
             {problem}
           </p>
         )}
-        {step.kind === "loading" && <p className="text-sm opacity-70">Reading your screenshot…</p>}
+        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
         {step.kind === "draft" && step.checking && (
-          <p className="text-sm opacity-70">Checking it against your closet…</p>
+          <p className="text-sm text-ink-2">Checking it against your closet…</p>
         )}
       </div>
 
@@ -152,7 +152,7 @@ export function BuyCheck() {
         <button
           type="button"
           onClick={() => check(step.draft, retry)}
-          className="self-start rounded-full bg-foreground px-5 py-2.5 font-medium text-background"
+          className="btn-primary self-start"
         >
           Try again
         </button>
@@ -162,7 +162,7 @@ export function BuyCheck() {
           type="button"
           onClick={checkAnother}
           disabled={step.checking}
-          className="self-start text-sm underline opacity-70 disabled:opacity-40"
+          className="btn-text self-start"
         >
           Use another screenshot
         </button>

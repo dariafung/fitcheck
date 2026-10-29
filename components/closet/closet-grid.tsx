@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 import { listClosetItems, type ClosetCard } from "@/lib/closet/items";
 import { CLOSET_TABS, inTab, type ClosetTab } from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
@@ -7,7 +8,9 @@ import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { ItemImage } from "./item-image";
 
-const GRID = "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3";
+// The shelf: 4:5 tiles, 16px apart, 40px between rows. Four across on a
+// desktop, two on a phone.
+export const SHELF = "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4";
 
 export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> }) {
   await connection();
@@ -20,7 +23,7 @@ export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> })
 
   const shown = inTab(items, tab);
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <ClosetTabs
         active={tab}
         counts={{ all: inTab(items, "all").length, "passing-on": inTab(items, "passing-on").length }}
@@ -36,57 +39,65 @@ export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> })
   );
 }
 
-const TAB = "-mb-px border-b-2 px-3 py-2 text-sm font-medium";
+const TAB =
+  "text-sm underline-offset-[6px] decoration-2 transition-colors duration-150";
 
 function ClosetTabs({ active, counts }: { active: ClosetTab; counts: Record<ClosetTab, number> }) {
   return (
-    <div className="flex gap-2 border-b border-black/10 dark:border-white/15">
+    <div className="flex items-center gap-8 border-y border-line py-3.5">
       {CLOSET_TABS.map((tab) => (
         <Link
           key={tab.id}
           href={tab.href}
           scroll={false}
           aria-current={tab.id === active ? "page" : undefined}
-          className={`${TAB} ${
-            tab.id === active
-              ? "border-foreground"
-              : "border-transparent text-foreground/60 hover:text-foreground"
-          }`}
+          className={`${TAB} ${tab.id === active ? "text-ink underline" : "text-ink-2 hover:text-ink"}`}
         >
-          {tab.label} <span className="font-normal text-foreground/50">{counts[tab.id]}</span>
+          {tab.label} <span className="text-ink-2 tabular-nums">{counts[tab.id]}</span>
         </Link>
       ))}
     </div>
   );
 }
 
+// An empty slot on the shelf: a tile outlined in a dashed line, the words
+// beside it.
+function EmptySlot({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-end gap-6 md:gap-10">
+      <div
+        aria-hidden
+        className="aspect-[4/5] w-28 shrink-0 bg-tile outline-1 -outline-offset-[10px] outline-ink/30 outline-dashed md:w-56"
+      />
+      <div className="flex max-w-sm flex-col items-start gap-2 pb-1">{children}</div>
+    </div>
+  );
+}
+
 function Empty({ title, text }: { title: string; text: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
-      <p className="font-medium">{title}</p>
-      <p className="text-sm text-foreground/60">{text}</p>
-    </div>
+    <EmptySlot>
+      <p className="text-lg font-medium">{title}</p>
+      <p className="text-sm text-ink-2">{text}</p>
+    </EmptySlot>
   );
 }
 
 export function EmptyCloset() {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
-      <p className="font-medium">Your closet is empty.</p>
-      <p className="text-sm text-foreground/60">Add a few things you own to get started.</p>
-      <Link
-        href="/closet/add"
-        className="mt-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
-      >
+    <EmptySlot>
+      <p className="text-lg font-medium">Your closet is empty.</p>
+      <p className="text-sm text-ink-2">Add a few things you own to get started.</p>
+      <Link href="/closet/add" className="btn-primary mt-4">
         Add your first piece
       </Link>
-    </div>
+    </EmptySlot>
   );
 }
 
-export function ItemList({ items }: { items: ClosetCard[] }) {
+export function ItemList({ items, grid = SHELF }: { items: ClosetCard[]; grid?: string }) {
   return (
-    <ul className={GRID}>
+    <ul className={grid}>
       {items.map((item, i) => (
         <li key={item.id}>
           <Link href={`/closet/${item.id}`} className="group block">
@@ -95,13 +106,13 @@ export function ItemList({ items }: { items: ClosetCard[] }) {
               alt={item.title}
               category={item.category}
               swatch={item.swatch}
-              sizes="(min-width: 640px) 240px, 50vw"
+              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
               priority={i < 4}
             />
-            <p className="mt-2 line-clamp-2 text-sm font-medium leading-snug group-hover:underline">
+            <p className="mt-2 line-clamp-2 text-sm leading-snug decoration-1 underline-offset-[3px] group-hover:underline">
               {item.title}
             </p>
-            <p className="text-xs text-foreground/60">{categoryLabel(item.category)}</p>
+            <p className="text-sm text-ink-2">{categoryLabel(item.category)}</p>
           </Link>
         </li>
       ))}
@@ -109,13 +120,14 @@ export function ItemList({ items }: { items: ClosetCard[] }) {
   );
 }
 
-export function ClosetGridSkeleton({ tabs = false }: { tabs?: boolean }) {
+export function ClosetGridSkeleton({ tabs = false, grid = SHELF }: { tabs?: boolean; grid?: string }) {
   const list = (
-    <ul className={GRID} aria-busy="true" aria-label="Loading your closet">
-      {Array.from({ length: 6 }, (_, i) => (
+    <ul className={grid} aria-busy="true" aria-label="Loading your closet">
+      {Array.from({ length: 4 }, (_, i) => (
         <li key={i}>
-          <div className="aspect-[3/4] animate-pulse rounded-xl bg-black/[.06] dark:bg-white/[.08]" />
-          <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
+          <div className="aspect-[4/5] bg-tile motion-safe:animate-pulse" />
+          <div className="mt-2 h-4 w-3/4 bg-tile motion-safe:animate-pulse" />
+          <div className="mt-1 h-4 w-1/3 bg-tile motion-safe:animate-pulse" />
         </li>
       ))}
     </ul>
@@ -123,10 +135,10 @@ export function ClosetGridSkeleton({ tabs = false }: { tabs?: boolean }) {
   if (!tabs) return list;
   // Same height as the tab bar, so the grid does not jump when it loads.
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex gap-2 border-b border-black/10 dark:border-white/15">
+    <div className="flex flex-col gap-10">
+      <div className="flex items-center gap-8 border-y border-line py-3.5">
         {CLOSET_TABS.map((tab) => (
-          <span key={tab.id} className={`${TAB} border-transparent text-foreground/40`}>
+          <span key={tab.id} className={`${TAB} text-ink-2/60`}>
             {tab.label}
           </span>
         ))}

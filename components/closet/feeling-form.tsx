@@ -56,13 +56,13 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
   }
 
   return (
-    <section aria-labelledby="feeling-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="feeling-heading" className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 id="feeling-heading" className="text-lg font-semibold">
+        <h2 id="feeling-heading" className="text-lg font-medium">
           How it feels
         </h2>
         {status === "saved" && (
-          <p role="status" className="text-sm text-foreground/60">
+          <p role="status" className="text-sm text-ink-2">
             Saved
           </p>
         )}
@@ -78,13 +78,13 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
             maxLength={MAX_FEELING_LENGTH}
             rows={5}
             placeholder="Fit, comfort, how you feel in it. Anything goes."
-            className="w-full resize-y rounded-xl border border-black/15 bg-transparent p-3 text-base leading-relaxed outline-none focus:border-foreground dark:border-white/20"
+            className="field h-auto resize-y px-4 py-3 font-serif text-lg"
           />
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             <button
               type="submit"
               disabled={status === "saving" || draft.trim() === "" || tooLong}
-              className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background disabled:opacity-40"
+              className="btn-primary"
             >
               {status === "saving" ? "Saving…" : "Save"}
             </button>
@@ -97,45 +97,45 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
                   setUsedVoice(false);
                   setStatus("idle");
                 }}
-                className="px-2 py-2 text-sm text-foreground/60 hover:underline"
+                className="btn-text"
               >
                 Cancel
               </button>
             )}
             {status === "error" && (
-              <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+              <p role="alert" className="text-sm font-medium">
                 Couldn&apos;t save. Try again.
               </p>
             )}
             {status === "read-only" && (
-              <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+              <p role="alert" className="text-sm font-medium">
                 {DEMO_READ_ONLY}
               </p>
             )}
           </div>
           {tooLong && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm font-medium">
               That&apos;s a lot. Trim it to save.
             </p>
           )}
           <VoiceButton itemId={itemId} onText={addTranscript} />
         </form>
       ) : (
-        <div className="flex flex-col items-start gap-2">
-          <p className="w-full whitespace-pre-wrap rounded-xl bg-black/[.04] p-4 leading-relaxed dark:bg-white/[.06]">
-            {saved}
-          </p>
+        <div className="flex flex-col items-start gap-6">
+          <p className="w-full font-serif text-lg whitespace-pre-wrap">{saved}</p>
+          <div className="flex flex-wrap items-start gap-3">
           <button
             type="button"
             onClick={() => {
               setEditing(true);
               setStatus("idle");
             }}
-            className="rounded-full border border-black/15 px-4 py-1.5 text-sm font-medium hover:bg-black/[.04] dark:border-white/20 dark:hover:bg-white/[.06]"
+            className="btn-secondary"
           >
             Edit
           </button>
           <VoiceButton itemId={itemId} onText={addTranscript} />
+          </div>
         </div>
       )}
     </section>
