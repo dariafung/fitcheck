@@ -23,7 +23,21 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "item_feelings": {
+            "ai_budget_days": {
+                  Row: {
+                    "day": string,"spent_usd": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "day": string,"spent_usd"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "day"?: string,"spent_usd"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"item_feelings": {
                   Row: {
                     "audio_path": string | null,"created_at": string,"id": string,"item_id": string,"parsed_at": string | null,"raw_text": string,"source": string,"structured": Json | null,"user_id": string
                   }
@@ -175,7 +189,15 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "ai_reserve":
+{ Args: { "p_day": string,"p_limit": number,"p_usd": number }; Returns: boolean
+                           },
+"ai_settle":
+{ Args: { "p_day": string,"p_usd": number }; Returns: undefined
+                           },
+"orphan_item_images":
+{ Args: { "p_before": string,"p_limit": number,"p_prefix"?: string }; Returns: string[]
+                           }
           }
           Enums: {
             [_ in never]: never

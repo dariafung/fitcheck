@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { isReadOnly } from "@/lib/auth/session";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { loadProfile } from "@/lib/profile/profile";
@@ -25,9 +26,19 @@ export default function ProfilePage() {
 
 async function BodyAndOutfits() {
   await connection();
-  const [profile, jar] = await Promise.all([loadProfile(createServerClient(), currentUserId()), cookies()]);
+  const [profile, jar, readOnly] = await Promise.all([
+    currentUserId().then((userId) => loadProfile(createServerClient(), userId)),
+    cookies(),
+    isReadOnly(),
+  ]);
   if (!profile) return <p className="text-sm text-foreground/60">Couldn&apos;t find your profile.</p>;
-  return <ProfileForm initial={profile} initialUnits={parseUnits(jar.get(UNITS_COOKIE)?.value)} />;
+  return (
+    <ProfileForm
+      initial={profile}
+      initialUnits={parseUnits(jar.get(UNITS_COOKIE)?.value)}
+      readOnly={readOnly}
+    />
+  );
 }
 
 async function WeatherLocation() {

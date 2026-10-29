@@ -15,7 +15,15 @@ function formatRange(range: TempRangeF | null): string {
 
 // "Comfortable in 68 to 95°F" (same wording as the entry card); Edit opens
 // low/high fields that are saved together.
-export function TempRangeEditor({ itemId, initial }: { itemId: string; initial: TempRangeF | null }) {
+export function TempRangeEditor({
+  itemId,
+  initial,
+  readOnly = false,
+}: {
+  itemId: string;
+  initial: TempRangeF | null;
+  readOnly?: boolean;
+}) {
   const router = useRouter();
   const [range, setRange] = useState(initial);
   const [editing, setEditing] = useState(false);
@@ -64,13 +72,15 @@ export function TempRangeEditor({ itemId, initial }: { itemId: string; initial: 
         <span className="rounded-full bg-black/[.05] px-2.5 py-0.5 tabular-nums dark:bg-white/[.08]">
           {formatRange(range)}
         </span>
-        <button
-          type="button"
-          onClick={startEditing}
-          aria-label={range ? "Edit temperature range" : "Set temperature range"}
-          className="text-foreground/60 underline underline-offset-2 hover:text-foreground">
-          {range ? "Edit" : "Set"}
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={startEditing}
+            aria-label={range ? "Edit temperature range" : "Set temperature range"}
+            className="text-foreground/60 underline underline-offset-2 hover:text-foreground">
+            {range ? "Edit" : "Set"}
+          </button>
+        )}
         {status === "saved" && (
           <span role="status" className="text-xs text-foreground/50">
             Saved

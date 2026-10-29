@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MAX_FEELING_LENGTH } from "@/lib/closet/feeling-body";
+import { appendTranscript, isTooLong } from "@/lib/closet/feeling-draft";
+import { VoiceButton } from "./voice-button";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -12,6 +14,24 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
   const [draft, setDraft] = useState(initialText ?? "");
   const [editing, setEditing] = useState(initialText === null);
   const [status, setStatus] = useState<Status>("idle");
+  // Set once a transcript lands in the box; saved as the feeling's source.
+  const [usedVoice, setUsedVoice] = useState(false);
+  const textarea = useRef<HTMLTextAreaElement>(null);
+  const tooLong = isTooLong(draft);
+
+  function addTranscript(text: string) {
+    setDraft((d) => appendTranscript(d, text));
+    setUsedVoice(true);
+    setEditing(true);
+    setStatus("idle");
+    // After the box renders with the new text, put the cursor at its end.
+    requestAnimationFrame(() => {
+      const el = textarea.current;
+      if (!el) return;
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    });
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -19,7 +39,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
     const res = await fetch(`/api/items/${itemId}/feelings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: draft }),
+      body: JSON.stringify({ text: draft, source: usedVoice ? "voice" : "typed" }),
     }).catch(() => null);
     if (!res?.ok) {
       setStatus("error");
@@ -29,6 +49,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
     setSaved(feeling.text);
     setDraft(feeling.text);
     setEditing(false);
+    setUsedVoice(false);
     setStatus("saved");
     router.refresh();
   }
@@ -49,6 +70,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
       {editing ? (
         <form onSubmit={save} className="flex flex-col gap-3">
           <textarea
+            ref={textarea}
             aria-label="How it feels"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -60,7 +82,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
           <div className="flex items-center gap-3">
             <button
               type="submit"
-              disabled={status === "saving" || draft.trim() === ""}
+              disabled={status === "saving" || draft.trim() === "" || tooLong}
               className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background disabled:opacity-40"
             >
               {status === "saving" ? "Saving…" : "Save"}
@@ -71,6 +93,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
                 onClick={() => {
                   setDraft(saved);
                   setEditing(false);
+                  setUsedVoice(false);
                   setStatus("idle");
                 }}
                 className="px-2 py-2 text-sm text-foreground/60 hover:underline"
@@ -84,6 +107,12 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
               </p>
             )}
           </div>
+          {tooLong && (
+            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+              That&apos;s a lot. Trim it to save.
+            </p>
+          )}
+          <VoiceButton itemId={itemId} onText={addTranscript} />
         </form>
       ) : (
         <div className="flex flex-col items-start gap-2">
@@ -100,6 +129,7 @@ export function FeelingForm({ itemId, initialText }: { itemId: string; initialTe
           >
             Edit
           </button>
+          <VoiceButton itemId={itemId} onText={addTranscript} />
         </div>
       )}
     </section>

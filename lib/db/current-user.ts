@@ -1,7 +1,21 @@
-// One demo account for now. P0-7 visitor isolation replaces this with a
-// per-visitor id; every lane reads the current user from here only.
-export const DEMO_USER_ID = "f97fc346-9acc-4404-bc52-9a6ba86a9bce";
+import { redirect } from "next/navigation";
+import { authRequired } from "../auth/config";
+import { sessionUser } from "../auth/session";
+import { ensureKnownUser } from "../auth/users";
+import { DEMO_USER_ID } from "./demo-user";
+import { createServerClient } from "./server";
 
-export function currentUserId(): string {
-  return DEMO_USER_ID;
+export { DEMO_USER_ID };
+
+// Every lane reads the current user from here only. With sign-in off (local
+// dev, the default e2e run) it is always the demo persona; on, it is the
+// signed-in user. proxy.ts already sends signed-out pages to /login; this
+// covers anything that slips past it, API routes included. Also makes the
+// users row if sign-up didn't get to it.
+export async function currentUserId(): Promise<string> {
+  if (!authRequired()) return DEMO_USER_ID;
+  const user = await sessionUser();
+  if (!user) redirect("/login");
+  if (!user.readOnly) await ensureKnownUser(createServerClient(), user.id, user.email);
+  return user.id;
 }

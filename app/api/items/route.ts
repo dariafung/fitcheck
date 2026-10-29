@@ -1,5 +1,5 @@
+import { requireWriter } from "@/lib/auth/guard";
 import type { Json } from "@/lib/db/database.types";
-import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { SaveItemRequest } from "@/lib/entry/draft";
 import { isOwnImagePath } from "@/lib/entry/images";
@@ -7,12 +7,14 @@ import { changedTags } from "@/lib/entry/tags";
 
 // POST a confirmed draft → a new active item in the closet.
 export async function POST(request: Request) {
+  const writer = await requireWriter();
+  if ("denied" in writer) return writer.denied;
   const body = SaveItemRequest.safeParse(await request.json().catch(() => null));
   if (!body.success) {
     return Response.json({ error: "invalid_item", issues: body.error.issues }, { status: 400 });
   }
   const item = body.data;
-  const userId = currentUserId();
+  const { userId } = writer;
   if (!item.imagePaths.every((path) => isOwnImagePath(path, userId))) {
     return Response.json({ error: "invalid_item" }, { status: 400 });
   }

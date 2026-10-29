@@ -7,7 +7,7 @@ import { createServerClient } from "@/lib/db/server";
 // are sent to judgePairing and cached, so repeat calls cost nothing. The
 // request body is ignored: the user always comes from the server.
 export async function POST() {
-  const userId = currentUserId();
+  const userId = await currentUserId();
   const db = createServerClient();
   const { data: user } = await db
     .from("users")

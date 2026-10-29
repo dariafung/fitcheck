@@ -1,6 +1,6 @@
 # fitcheck · Hackathon Spec
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 
 ## Overview
 
@@ -22,8 +22,8 @@ With all of P0 done and deployed, judges can walk through "add clothes → feeli
 | P0-3 | Free-text feelings | One text box per item, write anything; the backend extracts flattering, liked, occasions, mood, and one entry per aspect the text mentions (color, feel, fit with body area, length, style, other): good or bad, what was said, and what it means | Raw text saved; structured fields generated without the user seeing or filling them | Spark 1.3 |
 | P0-4 | Wardrobe grid | Grid of all items; open one to see details and feelings | Works in mobile and desktop browsers | — |
 | P0-5 | Pairing | Rule pre-filter (complementary categories, formality, overlapping temperature ranges, obvious color clashes) → Spark judges pairs in batches, results cached → code enumerates complete outfits: top + bottom + shoes, or one-piece + shoes; outerwear optional by temperature; accessories don't count | Spot checks of the persona's pairings look mostly right | Spark 1.3 |
-| P0-6 | **Purchase check** | Four gap metrics computed in code: how many existing items it revives, how many outfits the new item forms, whether it adds outfits to an occasion that has fewer than the user wants, whether it duplicates something owned (tuned during testing). Match score 0–100 computed in code; the model only answers yes/no questions and writes the reasons. Main signal: every item the user wrote a feeling about, good and bad; body-shape rules get low weight and only feed the reasons. One item at a time; accessories are not checked yet (P2-4) | Two demo items give stable results: one closes a gap, one creates a gap. The item being checked is never stored or cached; each check asks the model again, so its yes/no answers may differ slightly between runs, but the scoring rules are deterministic code | Spark 1.3 |
-| P0-7 | Demo data + deploy | Fictional demo persona; demo items preloaded; seed data read-only; visitor data isolated with one-click reset; rate limits + daily budget | Judges can use it from the link; a full run shows no console errors | — |
+| P0-6 | **Purchase check** | Match score 0–100 = suits you 40 + outfits 20 + revives 15 + fills a gap 15 + not a repeat 10; each part and the total keep one decimal. Suits you: the model scores 5 questions 0–8 each against every item the user wrote a feeling about, good and bad; a question with no related feeling isn't asked and gets 4. Not a repeat: `judgeRepeat` scores 0–10 and names the most similar owned item. Outfits, revives and gaps are counted in code (see Gap algorithm). Body-shape rules get low weight and only feed the reasons. If the model leaves an answer out or goes out of range, retry up to 3 times; still incomplete → no score, the page shows a short notice and Try again. One item at a time; accessories are not checked yet (P2-4) | Two demo items give stable results: one closes a gap, one creates a gap. The item being checked is never stored or cached; each check asks the model again, so the AI-scored parts vary a little between runs (same input, 3 runs: totals within 3 points) | Spark 1.3 |
+| P0-7 | Demo data + deploy | Email + password sign-up, no email confirmation; new accounts start with an empty closet; read-only demo account of the fictional persona ("Try the demo account"); daily AI budget $4 kept in the DB; daily cron drops orphan photos and old voice recordings; rate limits on hold | Judges can use it from the link; a full run shows no console errors | — |
 
 ## P1: bonus
 
@@ -31,7 +31,7 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 
 | # | Feature | What it does | Done when | Model | Fallback |
 | --- | --- | --- | --- | --- | --- |
-| P1-1 | Voice feelings | Hold to talk, up to 3 minutes → converted to 16 kHz WAV in the browser → uploaded straight to Supabase Storage → transcribed on the server → same structuring flow as P0-3; language auto-detected | Recording works in Chrome and Safari; Chinese and English both transcribe | Voice Transcribe | Typing only |
+| P1-1 | Voice feelings | Hold to talk, up to 3 minutes → converted to 16 kHz WAV in the browser → uploaded straight to Supabase Storage → transcribed on the server → same structuring flow as P0-3; English only | Recording works in Chrome and Safari; English transcribes | Voice Transcribe | Typing only |
 | P1-2 | Outfit preview | In the purchase check, combine "new item + 2 owned items" into one flat-lay / invisible-mannequin outfit image, **no human body**; web and image search turned off; shown side by side with a collage of the real item photos, labeled as AI-generated | Colors and styles are recognizable at a glance; demo outfits pre-generated | Muse Image | Collage only |
 | P1-3 | Style profile | One card summarizing all items and feelings: what suits you, what to avoid, frequent occasions | Every statement on the card traces back to specific items or feelings | Spark 1.3 | Used in the backend only, card not shown |
 | P1-4 | Daily outfit insights | Tick what you wore today; 30 days of seed data show wear counts, idle items and "what you say vs. what you wear" | At least one insight worth showing in the video | Spark 1.3 | Stats only, no generated insight |
@@ -88,17 +88,18 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 | `parseFeeling` | Free text → structured feelings | Spark 1.3 |
 | `transcribe` | Recording → text | Voice Transcribe |
 | `judgePairing` | Two items → pairs or not + reason | Spark 1.3 |
-| `scorePurchase` | New item + profile + every item with a feeling → yes/no answers with reasons (score, gaps and outfit count are computed in code) | Spark 1.3 |
+| `scorePurchase` | New item + profile + every item with a feeling + fit questions → a 0–8 score and reason per question | Spark 1.3 |
+| `judgeRepeat` | New item + all active items → not-a-repeat score 0–10 + the most similar item + reason | Spark 1.3 |
 | `renderOutfit` | 3 item images → one outfit image | Muse Image |
 | `buildProfile` | All items + feelings → style profile | Spark 1.3 |
 | `segmentGarment` | On-model image + category word → transparent cutout (P2) | SAM 3.1 |
 
-**Gap algorithm**: keep an "item → items it pairs with" table and let code enumerate complete outfits. Four metrics for a new item: how many existing items that couldn't form an outfit it revives (the new item itself is not counted), how many outfits the new item forms, whether it adds outfits to an occasion that has fewer than the user wants (every occasion is checked), and whether it duplicates an owned item. If it forms no outfit at all, it creates a gap, and we say which slot is missing. Thresholds get tuned during testing.
+**Gap algorithm**: keep an "item → items it pairs with" table and let code enumerate complete outfits. Three parts for a new item, all linear: outfits it forms, 2.5 each, up to 20; owned items that had no outfit and now have one, 4 each, up to 15 (the new item itself doesn't count); fills a gap, for occasions the user wants outfits for: each added outfit earns 5 × how short the occasion was (short ÷ wanted, before the new item), only up to the shortfall, occasions added up to 15, and an occasion that already has enough earns 0. If it forms no outfit at all, it creates a gap, and we say which slot is missing. Constants get tuned during testing.
 
 **Engineering conventions**
 
 - The AI layer has three modes: mock (fake data), live (real calls) and replay (real responses recorded and replayed by input hash, so development costs nothing and the demo has a safety net)
-- Stable results come from caching and code-computed scores, not from tuning temperature
+- Stable results come from caching, code-counted parts and narrow integer model scores, not from tuning temperature
 - The Meta console has no hard spending cap: the app keeps a daily budget counter and rate-limits by IP
 - Muse Image requests turn off `enable_web_search` and `enable_image_search`; generated images are copied to our storage right away and cached by "item ids + prompt version"
 - Secrets live only in the keychain, `.env.local` and Vercel environment variables, never in git
@@ -140,10 +141,10 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 | Store pages block fetching, worse from data-center IPs after deploy | Entry is screenshot + search only; demo items preloaded |
 | Screenshot + search misses details such as material | Verify in the small test; if missing, the user pastes that block of text |
 | Muse Image fidelity too low | Verify in the small test; otherwise show the collage only |
-| Purchase check results unstable | Code-computed scores, model only answers yes/no and writes reasons; caching; 10/31 checkpoint |
+| Purchase check results unstable | Outfits, revives and gaps counted in code; the model only gives integer scores (0–8, 0–10) with reasons; caching; 10/31 checkpoint |
 | Charges go to the card once credits run out | In-app daily budget + rate limits; watch usage |
 | Supabase free project pauses after a week idle | Daily scheduled ping |
-| Judges break the demo data | Read-only seed data; visitor isolation + reset |
+| Judges break the demo data | Demo account is read-only on the server; everyone else gets their own account |
 | Screenshot content | Only the cropped product photo is kept, shown only to that user |
 
 **Open items**

@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { ReadOnlyNote } from "@/components/auth/read-only-note";
+import { isReadOnly } from "@/lib/auth/session";
 import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { DeleteItem } from "./delete-item";
 import { FeelingForm } from "./feeling-form";
 import { ItemImage } from "./item-image";
 import { TempRangeEditor } from "./temp-range-editor";
@@ -11,7 +14,10 @@ import { TempRangeEditor } from "./temp-range-editor";
 export async function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const { id } = await params;
-  const item = await getClosetItem(createServerClient(), currentUserId(), id);
+  const [item, readOnly] = await Promise.all([
+    currentUserId().then((userId) => getClosetItem(createServerClient(), userId, id)),
+    isReadOnly(),
+  ]);
   if (!item) notFound();
 
   const [cover, ...more] = item.imageUrls;
@@ -72,7 +78,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
           </dl>
 
           <div className="text-sm">
-            <TempRangeEditor itemId={item.id} initial={item.tempRangeF} />
+            <TempRangeEditor itemId={item.id} initial={item.tempRangeF} readOnly={readOnly} />
           </div>
 
           {item.tags.notes && <p className="text-sm text-foreground/80">{item.tags.notes}</p>}
@@ -89,9 +95,32 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
           )}
         </div>
 
-        <FeelingForm itemId={item.id} initialText={item.feeling?.text ?? null} />
+        {readOnly ? (
+          <ReadOnlyFeeling text={item.feeling?.text ?? null} />
+        ) : (
+          <FeelingForm itemId={item.id} initialText={item.feeling?.text ?? null} />
+        )}
+
+        {!readOnly && <DeleteItem itemId={item.id} />}
       </div>
     </div>
+  );
+}
+
+// The demo account sees the feeling but can't write one.
+function ReadOnlyFeeling({ text }: { text: string | null }) {
+  return (
+    <section aria-labelledby="feeling-heading" className="flex flex-col gap-3">
+      <h2 id="feeling-heading" className="text-lg font-semibold">
+        How it feels
+      </h2>
+      {text && (
+        <p className="w-full whitespace-pre-wrap rounded-xl bg-black/[.04] p-4 leading-relaxed dark:bg-white/[.06]">
+          {text}
+        </p>
+      )}
+      <ReadOnlyNote />
+    </section>
   );
 }
 

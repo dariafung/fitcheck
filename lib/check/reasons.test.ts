@@ -3,7 +3,6 @@ import {
   fillsGapReason,
   gapReason,
   NO_LIFESTYLE_REASON,
-  notRepeatReason,
   outfitsReason,
   revivesReason,
   suitsYouReason,
@@ -19,25 +18,22 @@ describe("reasons", () => {
     );
   });
 
-  it("counts yes answers, leaving out unasked ones", () => {
-    expect(suitsYouReason([{ answer: true }, { answer: false }, { answer: null }])).toBe("Yes to 1 of 2.");
-    expect(suitsYouReason([{ answer: null }])).toBe("Not enough to go on yet.");
+  it("says how many questions had nothing to go on", () => {
+    expect(suitsYouReason([{ score: 6 }, { score: 0 }])).toBe("Scored on what you said about your clothes.");
+    expect(suitsYouReason([{ score: 6 }, { score: null }, { score: null }])).toBe("Half marks on 2 with nothing to go on.");
+    expect(suitsYouReason([{ score: null }])).toBe("Not enough to go on yet.");
   });
 
   it("explains the occasion gap", () => {
-    const school = { occasion: "school" as const, before: 1, after: 2, wanted: 3, tier: "more_outfits" as const };
-    const home = { occasion: "home" as const, before: 0, after: 1, wanted: 2, tier: "from_zero" as const };
-    const sport = { occasion: "sport" as const, before: 4, after: 6, wanted: 1, tier: "already_enough" as const };
+    const school = { occasion: "school" as const, before: 1, after: 2, wanted: 3, tier: "more_outfits" as const, points: 3.3 };
+    const home = { occasion: "home" as const, before: 0, after: 1, wanted: 2, tier: "from_zero" as const, points: 5 };
+    const sport = { occasion: "sport" as const, before: 4, after: 6, wanted: 1, tier: "already_enough" as const, points: 0 };
     expect(fillsGapReason("from_zero", [home, school, sport], true)).toBe(
       "Home: 2 short, this adds 1. School: 2 short, this adds 1.",
     );
     expect(fillsGapReason("already_enough", [sport], true)).toBe("Adds 2 for sport, but you already have enough.");
     expect(fillsGapReason("none", [], true)).toBe("Doesn't add outfits for any occasion.");
     expect(fillsGapReason("none", [], false)).toBe(NO_LIFESTYLE_REASON);
-  });
-
-  it("names the duplicate", () => {
-    expect(notRepeatReason("similar", "Black flats")).toBe("A lot like your Black flats.");
   });
 
   it("says which slot is missing", () => {

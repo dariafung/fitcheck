@@ -2,11 +2,15 @@
 import { defineAiFunction } from "./define";
 import { liveExtractItem } from "./live/extract-item";
 import { liveJudgePairing } from "./live/judge-pairing";
+import { liveJudgeRepeat } from "./live/judge-repeat";
 import { notImplemented } from "./live/not-implemented";
 import { liveParseFeeling } from "./live/parse-feeling";
+import { liveScorePurchase } from "./live/score-purchase";
+import { liveTranscribe } from "./live/transcribe";
 import { mockBuildProfile } from "./mock/build-profile";
 import { mockExtractItem } from "./mock/extract-item";
 import { mockJudgePairing } from "./mock/judge-pairing";
+import { mockJudgeRepeat } from "./mock/judge-repeat";
 import { mockParseFeeling } from "./mock/parse-feeling";
 import { mockRenderOutfit } from "./mock/render-outfit";
 import { mockScorePurchase } from "./mock/score-purchase";
@@ -15,11 +19,15 @@ import { mockTranscribe } from "./mock/transcribe";
 import * as buildProfileSchema from "./schemas/build-profile";
 import * as extractItemSchema from "./schemas/extract-item";
 import * as judgePairingSchema from "./schemas/judge-pairing";
+import * as judgeRepeatSchema from "./schemas/judge-repeat";
 import * as parseFeelingSchema from "./schemas/parse-feeling";
 import * as renderOutfitSchema from "./schemas/render-outfit";
 import * as scorePurchaseSchema from "./schemas/score-purchase";
 import * as segmentGarmentSchema from "./schemas/segment-garment";
 import * as transcribeSchema from "./schemas/transcribe";
+
+// A missing answer or out-of-range score is asked again up to 3 times.
+const SCORING_ATTEMPTS = 4;
 
 export const extractItem = defineAiFunction({
   name: "extractItem",
@@ -45,7 +53,7 @@ export const transcribe = defineAiFunction({
   input: transcribeSchema.TranscribeInput,
   output: transcribeSchema.TranscribeOutput,
   mock: mockTranscribe,
-  live: notImplemented("transcribe"),
+  live: liveTranscribe,
 });
 
 export const judgePairing = defineAiFunction({
@@ -57,13 +65,24 @@ export const judgePairing = defineAiFunction({
   live: liveJudgePairing,
 });
 
+export const judgeRepeat = defineAiFunction({
+  name: "judgeRepeat",
+  promptVersion: judgeRepeatSchema.PROMPT_VERSION,
+  input: judgeRepeatSchema.JudgeRepeatInput,
+  output: judgeRepeatSchema.JudgeRepeatOutput,
+  mock: mockJudgeRepeat,
+  live: liveJudgeRepeat,
+  liveAttempts: SCORING_ATTEMPTS,
+});
+
 export const scorePurchase = defineAiFunction({
   name: "scorePurchase",
   promptVersion: scorePurchaseSchema.PROMPT_VERSION,
   input: scorePurchaseSchema.ScorePurchaseInput,
   output: scorePurchaseSchema.ScorePurchaseOutput,
   mock: mockScorePurchase,
-  live: notImplemented("scorePurchase"),
+  live: liveScorePurchase,
+  liveAttempts: SCORING_ATTEMPTS,
 });
 
 export const renderOutfit = defineAiFunction({
@@ -101,6 +120,7 @@ export type * from "./schemas/common";
 export type { BuildProfileInput, BuildProfileOutput } from "./schemas/build-profile";
 export type { ExtractItemInput, ExtractItemOutput } from "./schemas/extract-item";
 export type { JudgePairingInput, JudgePairingOutput } from "./schemas/judge-pairing";
+export type { JudgeRepeatInput, JudgeRepeatOutput } from "./schemas/judge-repeat";
 export type { ParseFeelingInput, ParseFeelingOutput } from "./schemas/parse-feeling";
 export type { RenderOutfitInput, RenderOutfitOutput } from "./schemas/render-outfit";
 export type { ScorePurchaseInput, ScorePurchaseOutput } from "./schemas/score-purchase";

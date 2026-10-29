@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { Suspense } from "react";
+import { AccountNav } from "@/components/auth/account-nav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,6 +41,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/profile" className="ml-auto hover:underline">
               Profile
             </Link>
+            <Suspense>
+              <AccountNav />
+            </Suspense>
           </nav>
         </header>
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">

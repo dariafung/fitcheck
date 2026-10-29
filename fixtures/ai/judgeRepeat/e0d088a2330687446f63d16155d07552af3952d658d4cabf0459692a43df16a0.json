@@ -1,0 +1,12 @@
+{
+  "fn": "judgeRepeat",
+  "promptVersion": "judge-repeat@1",
+  "inputHash": "e0d088a2330687446f63d16155d07552af3952d658d4cabf0459692a43df16a0",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"white\",\"colors\":[{\"name\":\"white\"}],\"fit\":\"regular\",\"formality\":3,\"materials\":[\"cotton\"],\"occasions\":[\"work\",\"school\"],\"subcategory\":\"button-down\",\"tempRangeF\":{\"max\":85,\"min\":55}},\"title\":\"White oxford ",
+  "output": {
+    "score": 1,
+    "closestId": "f06222fb-82ba-483b-8359-3f0d12337f88",
+    "reason": "You already own a white cotton button-down that does the same job."
+  },
+  "recordedAt": "2026-10-27T18:11:22.760Z"
+}

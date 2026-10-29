@@ -6,6 +6,7 @@ export type AiFunctionName =
   | "parseFeeling"
   | "transcribe"
   | "judgePairing"
+  | "judgeRepeat"
   | "scorePurchase"
   | "renderOutfit"
   | "buildProfile"
@@ -19,6 +20,8 @@ export interface AiFunctionDef<I extends z.ZodType, O extends z.ZodType> {
   // `seed` is the input hash, so the same input always gets the same mock.
   mock: (input: z.output<I>, seed: string) => z.input<O>;
   live: (input: z.output<I>) => Promise<unknown>;
+  // Live calls in all when the output fails validation; default 2.
+  liveAttempts?: number;
 }
 
 export type AiFunction<I extends z.ZodType, O extends z.ZodType> = ((

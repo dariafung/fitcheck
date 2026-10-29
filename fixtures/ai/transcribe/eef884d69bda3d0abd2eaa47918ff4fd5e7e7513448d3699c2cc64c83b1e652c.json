@@ -1,0 +1,11 @@
+{
+  "fn": "transcribe",
+  "promptVersion": "transcribe@1",
+  "inputHash": "eef884d69bda3d0abd2eaa47918ff4fd5e7e7513448d3699c2cc64c83b1e652c",
+  "inputPreview": "{\"audio\":{\"base64\":\"UklGRmJJAwBXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YT5JAwDi/+X/BADi/+L//v/8/w4A+f/s/w0A6v/Y//L/7//z/9z/6f8wABgA8/8JAA4AFADW/6r/BgAKAOb/EAD9/wcAEgDX/wkAHgDO/+3/GQAOAAcAzf/a/zcADQD3/3gAoACKAIMAawB+AD0A0//+/xUA3v/g/wIAKAAwABEAPABqACgA3//d//f/8v/n/xQAZgBzACcAFAAZANb/pv93/3D/sv+V/5D/",
+  "output": {
+    "text": "I love the color of this shirt and it feels soft, but but it is a little tight across the shoulders so I mostly wear it to work..",
+    "language": "en"
+  },
+  "recordedAt": "2026-10-27T18:51:36.619Z"
+}

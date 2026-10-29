@@ -17,7 +17,7 @@ import { LocationSync } from "./location-sync";
 // else the IP guess.
 export async function GoodForToday() {
   await connection();
-  const userId = currentUserId();
+  const userId = await currentUserId();
   const [items, weather] = await Promise.all([
     listClosetItems(createServerClient(), userId),
     headers().then((h) => todayWeather(userId, h)),

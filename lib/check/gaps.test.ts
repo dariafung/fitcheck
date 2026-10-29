@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Category, LifestyleMix, Occasion } from "../ai/schemas/common";
-import { SAMPLE_CLOSET } from "./fixtures";
 import {
-  duplicateTier,
-  findDuplicate,
   missingSlots,
   occasionGap,
   occasionTier,
   revivedItemIds,
 } from "./gaps";
 import { CANDIDATE_ITEM_ID } from "./pairings";
+import { roundPart } from "./score";
 import { pairKey, toClosetItem, type ClosetItem, type Compatible } from "./types";
 
 let next = 0;
@@ -45,7 +43,7 @@ describe("occasionGap", () => {
     expect(occasionTier(0, 2, 0)).toBe("none");
   });
 
-  it("looks at every occasion and takes the best tier", () => {
+  it("adds up every occasion, most points first", () => {
     const m = mix({ school: 3, home: 2, sport: 1 });
     const result = occasionGap(
       m,
@@ -54,19 +52,29 @@ describe("occasionGap", () => {
       counts({ school: 2, home: 1, sport: 6, work: 3 }),
     );
     expect(result.tier).toBe("from_zero");
-    expect(result.occasions.map((o) => [o.occasion, o.tier, o.wanted])).toEqual([
-      ["home", "from_zero", 2],
-      ["school", "more_outfits", 3],
-      ["sport", "already_enough", 1],
+    expect(result.occasions.map((o) => [o.occasion, o.tier, o.wanted, roundPart(o.points)])).toEqual([
+      // 2 of 2 short, adds 1.
+      ["home", "from_zero", 2, 5],
+      // 2 of 3 short, adds 1.
+      ["school", "more_outfits", 3, 3.3],
+      // Already had enough.
+      ["sport", "already_enough", 1, 0],
     ]);
+    expect(roundPart(result.points)).toBe(8.3);
+  });
+
+  it("caps the sum at the part's max", () => {
+    const result = occasionGap(mix({ school: 10, home: 10 }), counts(), counts({ school: 3, home: 3 }));
+    expect(result.points).toBe(15);
   });
 
   it("is none when nothing is added, or without a mix", () => {
     expect(occasionGap(mix({ school: 3 }), counts({ school: 1 }), counts({ school: 1 }))).toEqual({
       tier: "none",
+      points: 0,
       occasions: [],
     });
-    expect(occasionGap(null, counts(), counts({ work: 3 }))).toEqual({ tier: "none", occasions: [] });
+    expect(occasionGap(null, counts(), counts({ work: 3 }))).toEqual({ tier: "none", points: 0, occasions: [] });
   });
 });
 
@@ -75,41 +83,6 @@ describe("revivedItemIds", () => {
     const before = { a: 0, b: 2, c: 0 };
     const after = { a: 1, b: 3, c: 0, [CANDIDATE_ITEM_ID]: 4 };
     expect(revivedItemIds(before, after)).toEqual(["a"]);
-  });
-});
-
-describe("duplicates", () => {
-  it("near identical: same category, color family and fit", () => {
-    const owned = item("top", { colorFamily: "white", fit: "regular", subcategory: "T-shirt" });
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "regular", subcategory: "t shirt" }), owned)).toBe("near_identical");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "regular" }), owned)).toBe("near_identical");
-  });
-
-  it("similar: same category and color family only", () => {
-    const owned = item("top", { colorFamily: "white", fit: "regular", subcategory: "t-shirt" });
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "slim" }), owned)).toBe("similar");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white", fit: "regular", subcategory: "blouse" }), owned)).toBe("similar");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "white" }), owned)).toBe("similar");
-  });
-
-  it("none: other category or color, or no color family", () => {
-    const owned = item("top", { colorFamily: "white", fit: "regular" });
-    expect(duplicateTier(candidateOf("bottom", { colorFamily: "white", fit: "regular" }), owned)).toBe("none");
-    expect(duplicateTier(candidateOf("top", { colorFamily: "black", fit: "regular" }), owned)).toBe("none");
-    expect(duplicateTier(candidateOf("top", { fit: "regular" }), item("top", { fit: "regular" }))).toBe("none");
-  });
-
-  it("finds the closest owned item", () => {
-    const similar = item("top", { colorFamily: "white" });
-    const same = item("top", { colorFamily: "white", fit: "slim" });
-    const result = findDuplicate(candidateOf("top", { colorFamily: "white", fit: "slim" }), [similar, same]);
-    expect(result).toEqual({ tier: "near_identical", item: same });
-    expect(findDuplicate(candidateOf("shoes", { colorFamily: "white" }), [similar]).tier).toBe("none");
-  });
-
-  it("flags the sample closet's white sneakers", () => {
-    const sneakers = candidateOf("shoes", { colorFamily: "white" });
-    expect(findDuplicate(sneakers, SAMPLE_CLOSET).item?.title).toBe("White leather sneakers");
   });
 });
 

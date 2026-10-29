@@ -69,14 +69,18 @@ export function BuyResult({
                 </span>
               </div>
               <p className="text-sm opacity-70">{part.reason}</p>
-              {key === "suitsYou" && parts.suitsYou.answers.some((a) => a.answer !== null) && (
+              {key === "suitsYou" && parts.suitsYou.answers.some((a) => a.score !== null) && (
                 <details className="text-sm">
                   <summary className="cursor-pointer opacity-70">Why</summary>
                   <ul className="mt-2 flex flex-col gap-2">
                     {parts.suitsYou.answers.map((a) => (
-                      <li key={a.id}>
-                        <span aria-hidden>{a.answer === null ? "–" : a.answer ? "✓" : "✗"} </span>
-                        <span className="font-medium">{a.question}.</span> <span className="opacity-70">{a.reason}</span>
+                      <li key={a.id} className="flex gap-3">
+                        <span className="w-8 shrink-0 tabular-nums opacity-70">
+                          {a.points}/{a.max}
+                        </span>
+                        <span>
+                          <span className="font-medium">{a.question}.</span> <span className="opacity-70">{a.reason}</span>
+                        </span>
                       </li>
                     ))}
                   </ul>
