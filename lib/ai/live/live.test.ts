@@ -214,6 +214,23 @@ describe("extractItem", () => {
     expect(await spentTodayUsd()).toBeCloseTo(0.008, 6);
   });
 
+  it("reads only the last message when the model comments between searches", async () => {
+    const commentary = (text: string) => ({
+      type: "message",
+      id: "rs_1",
+      role: "assistant",
+      status: "completed",
+      phase: "commentary",
+      content: [{ type: "output_text", text, annotations: [] }],
+    });
+    create.mockResolvedValue(
+      reply(WIRE, { output: [commentary("I'll search for the materials."), SEARCH, commentary("Found them.")] }),
+    );
+    const out = await extractItem({ knownFields: {}, images: [], screenshot: SCREENSHOT, allowWebSearch: true }, LIVE);
+    expect(out.title).toBe("Linen shirt");
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
   it("drops a box with no area and sends no tools without search", async () => {
     create.mockResolvedValue(reply({ ...WIRE, productBox: { x_min: 300, y_min: 10, x_max: 300, y_max: 90 } }));
     const out = await extractItem({ knownFields: {}, images: [], screenshot: SCREENSHOT, allowWebSearch: false }, LIVE);
