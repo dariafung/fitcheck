@@ -5,7 +5,7 @@ import type { Db } from "@/lib/db/server";
 import { latestFeeling } from "./feelings";
 import type { TempRangeF } from "@/lib/temperature";
 import { itemTempRange } from "./fit-today";
-import { imageUrls } from "./images";
+import { ITEM_IMAGES_BUCKET, imageUrls, isExternalUrl } from "./images";
 import { swatchHex } from "./swatch";
 import { itemTags } from "./tags";
 
@@ -146,6 +146,30 @@ export async function updateItemTempRange(
     .single()
     .throwOnError();
   return itemTempRange(updated);
+}
+
+// Deletes one of the user's items; false when it is not theirs. Its feeling
+// and its pairings go with it (on delete cascade), then its photos in the
+// item-images bucket. A photo that fails to delete is left to the daily cron,
+// which removes images no item points to.
+export async function deleteClosetItem(db: Db, userId: string, id: string): Promise<boolean> {
+  if (!isItemId(id)) return false;
+  const { data } = await db
+    .from("items")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("image_paths")
+    .maybeSingle()
+    .throwOnError();
+  if (!data) return false;
+
+  const stored = data.image_paths.filter((p) => !isExternalUrl(p));
+  if (stored.length > 0) {
+    const { error } = await db.storage.from(ITEM_IMAGES_BUCKET).remove(stored);
+    if (error) console.error(`Could not delete images of item ${id}:`, error);
+  }
+  return true;
 }
 
 function isRecord(value: unknown): value is { [key: string]: Json | undefined } {

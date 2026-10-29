@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST as checkPOST } from "@/app/api/checks/route";
-import { PATCH as itemPATCH } from "@/app/api/items/[id]/route";
+import { DELETE as itemDELETE, PATCH as itemPATCH } from "@/app/api/items/[id]/route";
 import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
 import { POST as voicePOST } from "@/app/api/items/[id]/feelings/voice/route";
 import { POST as voiceUploadPOST } from "@/app/api/items/[id]/feelings/voice/upload/route";
@@ -91,6 +91,10 @@ const WRITES: [string, () => Promise<Response>][] = [
         }),
         ctx(itemId),
       ),
+  ],
+  [
+    "DELETE /api/items/[id]",
+    () => itemDELETE(new Request(`http://localhost/api/items/${itemId}`, { method: "DELETE" }), ctx(itemId)),
   ],
   [
     "POST /api/items/[id]/feelings",

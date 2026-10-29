@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GET, PATCH } from "@/app/api/items/[id]/route";
+import { DELETE, GET, PATCH } from "@/app/api/items/[id]/route";
+import { ITEM_IMAGES_BUCKET } from "@/lib/closet/images";
+import { listClosetItems } from "@/lib/closet/items";
 import { createTestCloset } from "./helpers";
 
 const user = vi.hoisted(() => ({ id: "" }));
@@ -20,6 +22,18 @@ afterEach(async () => {
 function get(id: string) {
   return GET(new Request(`http://test/api/items/${id}`), { params: Promise.resolve({ id }) });
 }
+
+function del(id: string) {
+  return DELETE(new Request(`http://test/api/items/${id}`, { method: "DELETE" }), {
+    params: Promise.resolve({ id }),
+  });
+}
+
+// 1x1 transparent PNG.
+const PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+  "base64",
+);
 
 function patch(id: string, body: unknown) {
   return PATCH(
@@ -94,5 +108,56 @@ describe("PATCH /api/items/[id]", () => {
     expect((await patch("not-a-uuid", { tempRangeF: { min: 40, max: 70 } })).status).toBe(404);
     user.id = randomUUID();
     expect((await patch(closet.itemId, { tempRangeF: { min: 40, max: 70 } })).status).toBe(404);
+  });
+});
+
+describe("DELETE /api/items/[id]", () => {
+  it("deletes the item with its feeling, its pairings and its photo", async () => {
+    const { db, userId, itemId } = closet;
+    const imagePath = `${userId}/${randomUUID()}.webp`;
+    const bucket = db.storage.from(ITEM_IMAGES_BUCKET);
+    expect((await bucket.upload(imagePath, PNG, { contentType: "image/webp" })).error).toBeNull();
+    await db
+      .from("items")
+      .update({ image_paths: [imagePath, "https://cdn.example.com/shirt.jpg"] })
+      .eq("id", itemId)
+      .throwOnError();
+    await db
+      .from("item_feelings")
+      .insert({ item_id: itemId, user_id: userId, raw_text: "Breezy.", source: "typed" })
+      .throwOnError();
+    const { data: other } = await db
+      .from("items")
+      .insert({ user_id: userId, entry_method: "manual", title: "Test chinos", category: "bottom" })
+      .select("id")
+      .single()
+      .throwOnError();
+    const [a, b] = [itemId, other.id].sort();
+    await db
+      .from("pairings")
+      .insert({ user_id: userId, item_a_id: a, item_b_id: b, pairs: true, source: "rule" })
+      .throwOnError();
+
+    const res = await del(itemId);
+    expect(res.status).toBe(204);
+
+    expect((await get(itemId)).status).toBe(404);
+    expect((await listClosetItems(db, userId)).map((c) => c.id)).toEqual([other.id]);
+    const left = await Promise.all([
+      db.from("item_feelings").select("id").eq("item_id", itemId).throwOnError(),
+      db.from("pairings").select("id").eq("user_id", userId).throwOnError(),
+    ]);
+    expect(left.map((r) => r.data)).toEqual([[], []]);
+    const { data: files } = await bucket.list(userId);
+    expect(files).toEqual([]);
+  });
+
+  it("404s for unknown ids, bad ids and other users' items, and leaves them alone", async () => {
+    expect((await del(randomUUID())).status).toBe(404);
+    expect((await del("not-a-uuid")).status).toBe(404);
+    user.id = randomUUID();
+    expect((await del(closet.itemId)).status).toBe(404);
+    user.id = closet.userId;
+    expect((await get(closet.itemId)).status).toBe(200);
   });
 });

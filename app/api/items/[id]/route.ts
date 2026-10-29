@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { requireWriter } from "@/lib/auth/guard";
 import { ItemPatch } from "@/lib/closet/item-patch";
-import { getClosetItem, updateItemTempRange } from "@/lib/closet/items";
+import { deleteClosetItem, getClosetItem, updateItemTempRange } from "@/lib/closet/items";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 
@@ -26,4 +26,14 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/items/[id]">) 
   const range = await updateItemTempRange(createServerClient(), writer.userId, id, body.data.tempRangeF);
   if (!range) return Response.json({ error: "Not found" }, { status: 404 });
   return Response.json({ tempRangeF: range });
+}
+
+// Deletes the item with its feeling, its pairings and its photos.
+export async function DELETE(_req: Request, ctx: RouteContext<"/api/items/[id]">) {
+  const writer = await requireWriter();
+  if ("denied" in writer) return writer.denied;
+  const { id } = await ctx.params;
+  const deleted = await deleteClosetItem(createServerClient(), writer.userId, id);
+  if (!deleted) return Response.json({ error: "Not found" }, { status: 404 });
+  return new Response(null, { status: 204 });
 }
