@@ -151,14 +151,14 @@ isOneToOne: false
                   ]
                 },"style_profiles": {
                   Row: {
-                    "avoid": NonNullable<Json>,"evidence": NonNullable<Json>,"frequent_occasions": NonNullable<Json>,"generated_at": string,"id": string,"suits": NonNullable<Json>,"user_id": string
+                    "avoid": NonNullable<Json>,"evidence": NonNullable<Json>,"frequent_occasions": NonNullable<Json>,"generated_at": string,"generating_since": string | null,"generating_token": string | null,"headline": Json | null,"id": string,"input_hash": string | null,"prompt_version": string | null,"suits": NonNullable<Json>,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avoid"?: NonNullable<Json>,"evidence"?: NonNullable<Json>,"frequent_occasions"?: NonNullable<Json>,"generated_at"?: string,"id"?: string,"suits"?: NonNullable<Json>,"user_id": string
+                    "avoid"?: NonNullable<Json>,"evidence"?: NonNullable<Json>,"frequent_occasions"?: NonNullable<Json>,"generated_at"?: string,"generating_since"?: string | null,"generating_token"?: string | null,"headline"?: Json | null,"id"?: string,"input_hash"?: string | null,"prompt_version"?: string | null,"suits"?: NonNullable<Json>,"user_id": string
                   }
                   Update: {
-                    "avoid"?: NonNullable<Json>,"evidence"?: NonNullable<Json>,"frequent_occasions"?: NonNullable<Json>,"generated_at"?: string,"id"?: string,"suits"?: NonNullable<Json>,"user_id"?: string
+                    "avoid"?: NonNullable<Json>,"evidence"?: NonNullable<Json>,"frequent_occasions"?: NonNullable<Json>,"generated_at"?: string,"generating_since"?: string | null,"generating_token"?: string | null,"headline"?: Json | null,"id"?: string,"input_hash"?: string | null,"prompt_version"?: string | null,"suits"?: NonNullable<Json>,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -197,6 +197,9 @@ isOneToOne: false
                            },
 "orphan_item_images":
 { Args: { "p_before": string,"p_limit": number,"p_prefix"?: string }; Returns: string[]
+                           },
+"style_profile_claim":
+{ Args: { "p_cooldown": string,"p_hash": string,"p_user": string }; Returns: string
                            }
           }
           Enums: {
