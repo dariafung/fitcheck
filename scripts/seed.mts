@@ -1,5 +1,5 @@
-// Loads the fictional demo persona, items, feelings and style card into the
-// database.
+// Loads the fictional demo persona, items, feelings, style card and 30 days
+// of outfits (made up from the items, ending yesterday) into the database.
 // Idempotent: rows have fixed ids and are upserted. Item photos listed in
 // items.json image_paths are uploaded from seed/images/.
 //
@@ -11,11 +11,12 @@
 // Also creates the read-only demo account's auth user (same id as the
 // persona) with DEMO_ACCOUNT_PASSWORD: from .env.local locally, from the
 // environment for SEED_REMOTE. The password never lives in the repo.
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
+import { addDays, SEED_DAYS, seedOutfitLog, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -46,11 +47,15 @@ if (remote) {
   throw new Error(`Refusing to seed a non-local database: ${url} (SEED_REMOTE=1 seeds the hosted project)`);
 }
 
-const persona = readJson("persona.json") as { id: string };
-const items = (readJson("items.json") as { image_paths?: string[] }[]).map(
-  (item) => ({ ...item, user_id: persona.id }),
+const persona = readJson("persona.json") as { id: string; lifestyle_mix: Record<string, number> };
+// The outfit log ends yesterday (Chicago), leaving today for the demo. Items
+// count as owned since before it starts.
+const lastDay = addDays(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date()), -1);
+const ownedSince = `${addDays(lastDay, -SEED_DAYS)}T12:00:00Z`;
+const items = (readJson("items.json") as (SeedItem & { image_paths?: string[] })[]).map(
+  (item) => ({ ...item, user_id: persona.id, created_at: ownedSince }),
 );
-const feelings = (readJson("feelings.json") as Record<string, unknown>[]).map(
+const feelings = (readJson("feelings.json") as SeedFeeling[]).map(
   (feeling) => ({ ...feeling, user_id: persona.id }),
 );
 const imagePaths = items.flatMap((item) => item.image_paths ?? []);
@@ -60,7 +65,7 @@ const bucket = db.storage.from(ITEM_IMAGES_BUCKET);
 
 if (remote) {
   // Items take their feelings and pairings with them.
-  for (const table of ["items", "style_profiles", "outfit_logs"] as const) {
+  for (const table of ["items", "style_profiles", "outfit_logs", "wear_insights"] as const) {
     const cleared = await db.from(table).delete().eq("user_id", persona.id);
     if (cleared.error) throw cleared.error;
   }
@@ -72,7 +77,8 @@ if (remote) {
   }
 }
 
-const users = await db.from("users").upsert(persona);
+// A calendar turned off while testing comes back on.
+const users = await db.from("users").upsert({ ...persona, wear_log_enabled: true });
 if (users.error) throw users.error;
 await ensureDemoAuthUser(db, persona.id, demoPassword);
 for (const imagePath of imagePaths) {
@@ -109,7 +115,28 @@ const styled = await db.from("style_profiles").upsert(
 );
 if (styled.error) throw styled.error;
 
+// Dates move with the day the seed runs, so the old log goes first. Its
+// insights go too: they were about the old log.
+const plan = existsSync(new URL("../seed/wear-plan.json", import.meta.url))
+  ? (readJson("wear-plan.json") as Record<string, "rare" | "often" | "never">)
+  : null;
+const { rows: outfits } = seedOutfitLog({
+  personaId: persona.id,
+  items,
+  feelings,
+  lifestyleMix: persona.lifestyle_mix,
+  plan,
+  lastDay,
+});
+for (const table of ["outfit_logs", "wear_insights"] as const) {
+  const cleared = await db.from(table).delete().eq("user_id", persona.id);
+  if (cleared.error) throw cleared.error;
+}
+const logged = await db.from("outfit_logs").insert(outfits);
+if (logged.error) throw logged.error;
+
 console.log(
-  `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card and ${imagePaths.length} images` +
+  `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card, ` +
+    `${outfits.length} outfits to ${lastDay} and ${imagePaths.length} images` +
     (remote ? " into the hosted project." : "."),
 );
