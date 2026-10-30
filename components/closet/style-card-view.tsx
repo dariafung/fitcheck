@@ -40,9 +40,9 @@ export function StyleCardSkeleton({ note }: { note?: string }) {
   return (
     <StyleSection note={note}>
       <div aria-hidden="true" className="flex flex-col gap-3">
-        <div className="h-5 w-3/4 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
-        <div className="h-4 w-2/3 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
-        <div className="h-4 w-1/2 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
+        <div className="h-5 w-3/4 animate-pulse rounded bg-black/[.06]" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-black/[.06]" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-black/[.06]" />
       </div>
     </StyleSection>
   );
@@ -61,7 +61,7 @@ function StyleSection({ note, children }: { note?: string; children: ReactNode }
   return (
     <section
       aria-labelledby="your-style"
-      className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 sm:p-6 dark:border-white/15"
+      className="flex flex-col gap-4 rounded-2xl border border-black/10 p-5 sm:p-6"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
         <h2 id="your-style" className="text-lg font-semibold">
