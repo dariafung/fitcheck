@@ -20,7 +20,9 @@ export async function AccountNav() {
   return (
     <div className="flex items-center gap-5">
       {user.readOnly && (
-        <Link href="/signup" className="text-sm font-medium underline underline-offset-4 transition-colors duration-150 hover:text-ink-2">
+        // Not on a phone: the top bar has no room, and the read-only notes
+        // link to sign-up too.
+        <Link href="/signup" className="hidden text-sm font-medium underline underline-offset-4 transition-colors duration-150 hover:text-ink-2 md:inline">
           Sign up
         </Link>
       )}

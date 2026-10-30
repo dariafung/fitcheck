@@ -3,6 +3,7 @@ import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AccountNav } from "@/components/auth/account-nav";
+import { CalendarNavLink } from "@/components/calendar/calendar-nav-link";
 import "./globals.css";
 
 // Interface, headings and numbers: a news grotesque with a little more
@@ -41,9 +42,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             >
               fitcheck
             </Link>
-            <Link href="/closet" className={`${NAV_LINK} md:col-start-1 md:row-start-1 md:justify-self-start`}>
-              Closet
-            </Link>
+            <div className="flex items-center gap-5 md:col-start-1 md:row-start-1 md:justify-self-start">
+              <Link href="/closet" className={NAV_LINK}>
+                Closet
+              </Link>
+              <Suspense>
+                <CalendarNavLink className={NAV_LINK} />
+              </Suspense>
+            </div>
             <div className="flex items-center gap-5 text-sm md:col-start-3 md:row-start-1 md:justify-self-end">
               <Link href="/profile" className={NAV_LINK}>
                 Profile

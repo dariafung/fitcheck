@@ -2,6 +2,7 @@ import { expect, test } from "./fixtures";
 
 const PAGES = [
   { link: "Closet", heading: "Your closet", url: /\/closet$/ },
+  { link: "Calendar", heading: "Calendar", url: /\/calendar$/ },
   { link: "Profile", heading: "Profile", url: /\/profile$/ },
 ];
 

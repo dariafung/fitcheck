@@ -26,6 +26,7 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   renderOutfit: 0.05,
   buildProfile: 0.03,
   segmentGarment: 0.05,
+  summarizeWear: 0.02,
 };
 
 export interface TokenUsage {

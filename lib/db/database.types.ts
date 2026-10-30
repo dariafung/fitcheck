@@ -203,17 +203,37 @@ isOneToOne: false
                   ]
                 },"users": {
                   Row: {
-                    "body_shape": string | null,"bottom_size": string | null,"bust_cm": number | null,"created_at": string,"display_name": string,"height_cm": number | null,"hip_cm": number | null,"id": string,"inseam_cm": number | null,"is_seed": boolean,"lifestyle_mix": NonNullable<Json>,"resale_opt_in": boolean,"shoe_size": string | null,"top_size": string | null,"updated_at": string,"waist_cm": number | null,"weight_kg": number | null
+                    "body_shape": string | null,"bottom_size": string | null,"bust_cm": number | null,"created_at": string,"display_name": string,"height_cm": number | null,"hip_cm": number | null,"id": string,"inseam_cm": number | null,"is_seed": boolean,"lifestyle_mix": NonNullable<Json>,"resale_opt_in": boolean,"shoe_size": string | null,"top_size": string | null,"updated_at": string,"waist_cm": number | null,"wear_log_enabled": boolean,"weight_kg": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "body_shape"?: string | null,"bottom_size"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name": string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"shoe_size"?: string | null,"top_size"?: string | null,"updated_at"?: string,"waist_cm"?: number | null,"weight_kg"?: number | null
+                    "body_shape"?: string | null,"bottom_size"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name": string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"shoe_size"?: string | null,"top_size"?: string | null,"updated_at"?: string,"waist_cm"?: number | null,"wear_log_enabled"?: boolean,"weight_kg"?: number | null
                   }
                   Update: {
-                    "body_shape"?: string | null,"bottom_size"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name"?: string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"shoe_size"?: string | null,"top_size"?: string | null,"updated_at"?: string,"waist_cm"?: number | null,"weight_kg"?: number | null
+                    "body_shape"?: string | null,"bottom_size"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name"?: string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"shoe_size"?: string | null,"top_size"?: string | null,"updated_at"?: string,"waist_cm"?: number | null,"wear_log_enabled"?: boolean,"weight_kg"?: number | null
                   }
                   Relationships: [
                     
+                  ]
+                },"wear_insights": {
+                  Row: {
+                    "generated_at": string,"input_hash": string,"insights": NonNullable<Json>,"prompt_version": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "generated_at"?: string,"input_hash": string,"insights": NonNullable<Json>,"prompt_version": string,"user_id": string
+                  }
+                  Update: {
+                    "generated_at"?: string,"input_hash"?: string,"insights"?: NonNullable<Json>,"prompt_version"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wear_insights_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
                   ]
                 }
           }
