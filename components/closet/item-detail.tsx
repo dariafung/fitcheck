@@ -6,10 +6,13 @@ import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { readSize, sizeText } from "@/lib/resale/size";
+import { BuyerMatches } from "./buyer-matches";
 import { DeleteItem } from "./delete-item";
 import { FeelingForm } from "./feeling-form";
 import { EditDetailsButton, ItemEditor } from "./item-editor";
 import { ItemImage } from "./item-image";
+import { ItemSize } from "./item-size";
 import { PassOnToggle } from "./pass-on-toggle";
 
 export async function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -24,7 +27,9 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   const [cover, ...more] = item.imageUrls;
   const byline = [item.brand, categoryLabel(item.category)].filter(Boolean).join(" · ");
   const status = item.status === "passing_on" ? "passing_on" : "active";
-  const details = { title: item.title, brand: item.brand, tags: item.tags, imageUrls: item.imageUrls };
+  const details = { title: item.title, brand: item.brand, size: item.size, tags: item.tags, imageUrls: item.imageUrls };
+  // Accessories aren't matched with buyers.
+  const findsBuyers = status === "passing_on" && item.category !== "accessory";
 
   return (
     <ItemEditor itemId={item.id} details={details}>
@@ -64,7 +69,15 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
             </div>
 
             {status === "passing_on" && (
-              <p className="notice">Passing on. It&apos;s left out of your outfits and buy checks.</p>
+              <div className="flex flex-col gap-3">
+                <p className="notice">Passing on. It&apos;s left out of your outfits and buy checks.</p>
+                <ItemSize
+                  itemId={item.id}
+                  size={item.size}
+                  readable={item.size !== null && readSize(item.size, item.tags.category) !== null}
+                  readOnly={readOnly}
+                />
+              </div>
             )}
 
             <dl className="border-t border-line text-sm">
@@ -80,12 +93,18 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
                   </dd>
                 </div>
               ))}
+              {status === "active" && item.size && (
+                <div className="grid grid-cols-[7rem_1fr] gap-3 border-b border-line py-3">
+                  <dt className="text-ink-2">Size</dt>
+                  <dd>{sizeText(item.size)}</dd>
+                </div>
+              )}
             </dl>
 
             {!readOnly && (
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <EditDetailsButton />
-                <PassOnToggle itemId={item.id} status={status} />
+                <PassOnToggle itemId={item.id} status={status} size={item.size} />
               </div>
             )}
 
@@ -102,6 +121,8 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
               </a>
             )}
           </div>
+
+          {findsBuyers && <BuyerMatches itemId={item.id} size={item.size} />}
 
           {readOnly ? (
             <ReadOnlyFeeling text={item.feeling?.text ?? null} />

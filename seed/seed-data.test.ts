@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ProfileStatement } from "@/lib/ai/schemas/build-profile";
 import { Category, FeelingStructured, ItemTags, LifestyleMix } from "@/lib/ai/schemas/common";
 import { profileHash, profileInput, visibleCard } from "@/lib/closet/style-profile";
+import { LetterSize, ShoeSize } from "@/lib/resale/size";
 import feelings from "./feelings.json";
 import items from "./items.json";
 import persona from "./persona.json";
@@ -11,7 +12,16 @@ import styleProfile from "./style-profile.json";
 describe("seed data", () => {
   it("has a valid persona", () => {
     expect(() =>
-      z.object({ id: z.uuid(), is_seed: z.literal(true), lifestyle_mix: LifestyleMix }).parse(persona),
+      z
+        .object({
+          id: z.uuid(),
+          is_seed: z.literal(true),
+          lifestyle_mix: LifestyleMix,
+          top_size: LetterSize,
+          bottom_size: LetterSize,
+          shoe_size: ShoeSize,
+        })
+        .parse(persona),
     ).not.toThrow();
   });
 

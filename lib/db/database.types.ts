@@ -65,14 +65,14 @@ isOneToOne: false
                   ]
                 },"items": {
                   Row: {
-                    "ai_tags": Json | null,"brand": string | null,"category": string,"created_at": string,"currency": string | null,"entry_method": string,"id": string,"image_paths": (string)[],"on_model": boolean | null,"price_cents": number | null,"raw_source": Json | null,"retailer": string | null,"source_url": string | null,"status": string,"title": string,"updated_at": string,"user_id": string,"user_tags": NonNullable<Json>
+                    "ai_tags": Json | null,"brand": string | null,"category": string,"created_at": string,"currency": string | null,"entry_method": string,"id": string,"image_paths": (string)[],"on_model": boolean | null,"price_cents": number | null,"raw_source": Json | null,"retailer": string | null,"size": string | null,"source_url": string | null,"status": string,"title": string,"updated_at": string,"user_id": string,"user_tags": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "ai_tags"?: Json | null,"brand"?: string | null,"category": string,"created_at"?: string,"currency"?: string | null,"entry_method": string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"source_url"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"user_id": string,"user_tags"?: NonNullable<Json>
+                    "ai_tags"?: Json | null,"brand"?: string | null,"category": string,"created_at"?: string,"currency"?: string | null,"entry_method": string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"user_id": string,"user_tags"?: NonNullable<Json>
                   }
                   Update: {
-                    "ai_tags"?: Json | null,"brand"?: string | null,"category"?: string,"created_at"?: string,"currency"?: string | null,"entry_method"?: string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"source_url"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string,"user_tags"?: NonNullable<Json>
+                    "ai_tags"?: Json | null,"brand"?: string | null,"category"?: string,"created_at"?: string,"currency"?: string | null,"entry_method"?: string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string,"user_tags"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -149,6 +149,38 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"resale_matches": {
+                  Row: {
+                    "buyer_id": string,"buyer_reasons": (string)[],"checked_at": string,"fingerprint": string,"highlights": (string)[],"item_id": string,"score": number,"seller_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "buyer_id": string,"buyer_reasons"?: (string)[],"checked_at"?: string,"fingerprint": string,"highlights"?: (string)[],"item_id": string,"score": number,"seller_id": string
+                  }
+                  Update: {
+                    "buyer_id"?: string,"buyer_reasons"?: (string)[],"checked_at"?: string,"fingerprint"?: string,"highlights"?: (string)[],"item_id"?: string,"score"?: number,"seller_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "resale_matches_buyer_id_fkey"
+      columns: ["buyer_id"]
+isOneToOne: false
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "resale_matches_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "resale_matches_seller_id_fkey"
+      columns: ["seller_id"]
+isOneToOne: false
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"style_profiles": {
                   Row: {
                     "avoid": NonNullable<Json>,"evidence": NonNullable<Json>,"frequent_occasions": NonNullable<Json>,"generated_at": string,"generating_since": string | null,"generating_token": string | null,"headline": Json | null,"id": string,"input_hash": string | null,"prompt_version": string | null,"suits": NonNullable<Json>,"user_id": string
@@ -171,14 +203,14 @@ isOneToOne: false
                   ]
                 },"users": {
                   Row: {
-                    "body_shape": string | null,"bust_cm": number | null,"created_at": string,"display_name": string,"height_cm": number | null,"hip_cm": number | null,"id": string,"inseam_cm": number | null,"is_seed": boolean,"lifestyle_mix": NonNullable<Json>,"resale_opt_in": boolean,"updated_at": string,"waist_cm": number | null,"weight_kg": number | null
+                    "body_shape": string | null,"bottom_size": string | null,"bust_cm": number | null,"created_at": string,"display_name": string,"height_cm": number | null,"hip_cm": number | null,"id": string,"inseam_cm": number | null,"is_seed": boolean,"lifestyle_mix": NonNullable<Json>,"resale_opt_in": boolean,"shoe_size": string | null,"top_size": string | null,"updated_at": string,"waist_cm": number | null,"weight_kg": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "body_shape"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name": string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"updated_at"?: string,"waist_cm"?: number | null,"weight_kg"?: number | null
+                    "body_shape"?: string | null,"bottom_size"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name": string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"shoe_size"?: string | null,"top_size"?: string | null,"updated_at"?: string,"waist_cm"?: number | null,"weight_kg"?: number | null
                   }
                   Update: {
-                    "body_shape"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name"?: string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"updated_at"?: string,"waist_cm"?: number | null,"weight_kg"?: number | null
+                    "body_shape"?: string | null,"bottom_size"?: string | null,"bust_cm"?: number | null,"created_at"?: string,"display_name"?: string,"height_cm"?: number | null,"hip_cm"?: number | null,"id"?: string,"inseam_cm"?: number | null,"is_seed"?: boolean,"lifestyle_mix"?: NonNullable<Json>,"resale_opt_in"?: boolean,"shoe_size"?: string | null,"top_size"?: string | null,"updated_at"?: string,"waist_cm"?: number | null,"weight_kg"?: number | null
                   }
                   Relationships: [
                     

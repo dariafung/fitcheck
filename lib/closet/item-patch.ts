@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ItemTags } from "@/lib/ai/schemas/common";
+import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 
 // Worn (active) or on its way out (passing_on). Only active items count as
 // owned in outfits, buy checks and Good for today.
@@ -22,14 +23,23 @@ export const ItemDetails = z.strictObject({
 });
 export type ItemDetails = z.infer<typeof ItemDetails>;
 
-// What PATCH /api/items/[id] accepts: the details, the status, or both.
+// What PATCH /api/items/[id] accepts: the details, the status, the size, or
+// any of them together. The size is as typed (M, 28, US 8); null or empty
+// clears it, which an item on its way out can't do.
 // Unknown keys are rejected so other fields are not silently ignored.
 export const ItemPatch = z
   .strictObject({
     details: ItemDetails.optional(),
     status: ItemStatus.optional(),
+    size: z
+      .string()
+      .trim()
+      .max(MAX_ITEM_SIZE_LENGTH)
+      .nullable()
+      .transform((s) => s || null)
+      .optional(),
   })
-  .refine((p) => p.details !== undefined || p.status !== undefined, {
-    message: "Send details or a status.",
+  .refine((p) => p.details !== undefined || p.status !== undefined || p.size !== undefined, {
+    message: "Send details, a status or a size.",
   });
 export type ItemPatch = z.infer<typeof ItemPatch>;

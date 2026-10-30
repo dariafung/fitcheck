@@ -87,7 +87,7 @@ describe("PATCH /api/items/[id]", () => {
   async function stored() {
     const { data } = await closet.db
       .from("items")
-      .select("title, brand, category, status, ai_tags, user_tags")
+      .select("title, brand, category, status, size, ai_tags, user_tags")
       .eq("id", closet.itemId)
       .single()
       .throwOnError();
@@ -136,15 +136,40 @@ describe("PATCH /api/items/[id]", () => {
   });
 
   it("passes an item on and keeps it again", async () => {
-    const off = await patch(closet.itemId, { status: "passing_on" });
+    const off = await patch(closet.itemId, { status: "passing_on", size: "M" });
     expect(off.status).toBe(200);
-    expect((await off.json()).item.status).toBe("passing_on");
+    expect((await off.json()).item).toMatchObject({ status: "passing_on", size: "M" });
     expect((await stored()).status).toBe("passing_on");
     expect((await loadClosetItems(closet.db, closet.userId)).items).toEqual([]);
 
     const back = await patch(closet.itemId, { status: "active" });
     expect((await back.json()).item.status).toBe("active");
-    expect((await stored()).status).toBe("active");
+    // The size stays for next time.
+    expect(await stored()).toMatchObject({ status: "active", size: "M" });
+    const again = await patch(closet.itemId, { status: "passing_on" });
+    expect((await again.json()).item).toMatchObject({ status: "passing_on", size: "M" });
+  });
+
+  it("won't pass an item on without a size, or take its size away while it's passing on", async () => {
+    const noSize = await patch(closet.itemId, { status: "passing_on" });
+    expect(noSize.status).toBe(400);
+    expect(await noSize.json()).toEqual({ error: "size_required" });
+    expect((await patch(closet.itemId, { status: "passing_on", size: "  " })).status).toBe(400);
+    expect(await stored()).toMatchObject({ status: "active", size: null });
+
+    await patch(closet.itemId, { status: "passing_on", size: "W28" });
+    const { item } = await (await get(closet.itemId)).json();
+    const details = { title: item.title, brand: null, tags: item.tags };
+    expect((await patch(closet.itemId, { details, size: null })).status).toBe(400);
+    expect((await patch(closet.itemId, { size: "" })).status).toBe(400);
+    expect((await patch(closet.itemId, { details, size: "W29" })).status).toBe(200);
+    expect(await stored()).toMatchObject({ status: "passing_on", size: "W29" });
+  });
+
+  it("sets and clears the size of an item still worn", async () => {
+    expect((await (await patch(closet.itemId, { size: "S/M" })).json()).item.size).toBe("S/M");
+    expect((await (await patch(closet.itemId, { size: null })).json()).item.size).toBeNull();
+    expect((await patch(closet.itemId, { size: "x".repeat(21) })).status).toBe(400);
   });
 
   it("rejects unknown fields, bad statuses and bad ranges, and 404s for items that are not this user's", async () => {

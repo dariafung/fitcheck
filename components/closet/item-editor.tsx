@@ -12,6 +12,7 @@ import type { ItemDraft } from "@/lib/entry/draft";
 export interface EditableDetails {
   title: string;
   brand: string | null;
+  size: string | null;
   tags: ItemTags;
   imageUrls: string[];
 }
@@ -79,15 +80,16 @@ export function ItemEditor({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         details: { title: edited.title, brand: edited.brand ?? null, tags: edited.tags },
+        size: edited.size || null,
       }),
     }).catch(() => null);
     setSaving(false);
     if (!res?.ok) {
-      setProblem(res?.status === 403 ? DEMO_READ_ONLY : "Couldn't save. Try again.");
+      setProblem(await saveProblem(res));
       return;
     }
     const { item } = (await res.json()) as { item: ClosetItem };
-    setLatest({ title: item.title, brand: item.brand, tags: item.tags, imageUrls: item.imageUrls });
+    setLatest({ title: item.title, brand: item.brand, size: item.size, tags: item.tags, imageUrls: item.imageUrls });
     setSaved(true);
     show(false);
     router.refresh();
@@ -98,6 +100,8 @@ export function ItemEditor({
       {editing ? (
         <ItemCard
           draft={asDraft(latest ?? details)}
+          withSize
+          initialSize={(latest ?? details).size}
           saving={saving}
           onSave={save}
           submitLabel="Save changes"
@@ -126,6 +130,15 @@ export function ItemEditor({
       )}
     </div>
   );
+}
+
+async function saveProblem(res: Response | null): Promise<string> {
+  if (res?.status === 403) return DEMO_READ_ONLY;
+  if (res?.status === 400) {
+    const { error } = (await res.json().catch(() => ({}))) as { error?: string };
+    if (error === "size_required") return "Passing-on items need a size.";
+  }
+  return "Couldn't save. Try again.";
 }
 
 // Opens the editor; "Saved" next to it after a save.

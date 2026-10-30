@@ -27,6 +27,7 @@ export async function POST(request: Request) {
       entry_method: item.entryMethod,
       title: item.title,
       brand: item.brand || null,
+      size: item.size || null,
       price_cents: item.priceCents ?? null,
       currency: item.currency ?? null,
       category: item.tags.category,

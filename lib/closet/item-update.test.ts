@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ItemTags } from "@/lib/ai/schemas/common";
-import { itemUpdate, type EditableRow } from "./item-update";
+import { itemUpdate, needsSize, type EditableRow } from "./item-update";
 import { itemTags } from "./tags";
 
 const AI: ItemTags = {
@@ -20,6 +20,7 @@ function row(over: Partial<EditableRow> = {}): EditableRow {
     brand: "Uniqlo",
     category: "top",
     status: "active",
+    size: null,
     ai_tags: AI,
     user_tags: {},
     ...over,
@@ -83,5 +84,35 @@ describe("itemUpdate", () => {
       status: "passing_on",
       user_tags: { fit: "relaxed" },
     });
+  });
+
+  it("sets and clears the size, and leaves it alone when unchanged", () => {
+    expect(itemUpdate(row(), { size: "M" })).toEqual({ size: "M" });
+    expect(itemUpdate(row({ size: "M" }), { size: "M" })).toBeNull();
+    expect(itemUpdate(row({ size: "M" }), { size: null })).toEqual({ size: null });
+    expect(itemUpdate(row(), { status: "passing_on", size: "US 8" })).toEqual({ status: "passing_on", size: "US 8" });
+  });
+});
+
+describe("needsSize", () => {
+  it("asks for a size when passing on an item that has none", () => {
+    expect(needsSize(row(), { status: "passing_on" })).toBe(true);
+    expect(needsSize(row(), { status: "passing_on", size: "M" })).toBe(false);
+    expect(needsSize(row({ size: "M" }), { status: "passing_on" })).toBe(false);
+  });
+
+  it("won't take the size off an item that is passing on", () => {
+    expect(needsSize(row({ status: "passing_on", size: "M" }), { size: null })).toBe(true);
+    expect(needsSize(row({ status: "passing_on", size: "M" }), { size: "L" })).toBe(false);
+    // Kept again, the size may go.
+    expect(needsSize(row({ status: "passing_on", size: "M" }), { status: "active", size: null })).toBe(false);
+    expect(needsSize(row({ size: "M" }), { size: null })).toBe(false);
+  });
+
+  it("lets items passed on before sizes existed be edited or kept", () => {
+    const old = row({ status: "passing_on" });
+    expect(needsSize(old, edit(old, { formality: 4 }))).toBe(false);
+    expect(needsSize(old, { status: "passing_on" })).toBe(false);
+    expect(needsSize(old, { status: "active" })).toBe(false);
   });
 });

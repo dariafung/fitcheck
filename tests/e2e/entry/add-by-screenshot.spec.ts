@@ -46,6 +46,9 @@ test("upload a screenshot, fix the details, save it", async ({ page }) => {
   await expect(card.getByLabel("Main color")).toHaveValue("black");
   await card.getByLabel("Main color").selectOption("orange");
   await card.getByLabel("Colors").fill("Rust");
+  // Size is optional and typed as it reads on the label.
+  await expect(card.getByLabel("Size", { exact: true })).toHaveValue("");
+  await card.getByLabel("Size", { exact: true }).fill("S");
   // Mock range for a top; make it a warm-weather piece.
   await expect(card.getByLabel("Lowest °F")).toHaveValue("50");
   await expect(card.getByLabel("Highest °F")).toHaveValue("85");
@@ -72,6 +75,7 @@ test("upload a screenshot, fix the details, save it", async ({ page }) => {
     entry_method: "screenshot",
     title: "Wrap Midi Dress",
     category: "one_piece",
+    size: "S",
     source_url: null,
     user_tags: {
       category: "one_piece",

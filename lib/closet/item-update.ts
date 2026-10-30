@@ -10,6 +10,7 @@ export interface EditableRow {
   brand: string | null;
   category: string;
   status: string;
+  size: string | null;
   ai_tags: unknown;
   user_tags: unknown;
 }
@@ -19,7 +20,19 @@ export interface ItemRowUpdate {
   brand?: string | null;
   category?: string;
   status?: string;
+  size?: string | null;
   user_tags?: { [key: string]: Json };
+}
+
+// An item on its way out (passing_on) needs a size, so buyers can be matched
+// by it. True when the patch would put an item there without one, or take
+// the size off one that is there. Items passed on before sizes existed can
+// still be edited without adding one.
+export function needsSize(row: EditableRow, patch: ItemPatch): boolean {
+  const status = patch.status ?? row.status;
+  const size = patch.size === undefined ? row.size : patch.size;
+  if (status !== "passing_on" || size !== null) return false;
+  return row.status !== "passing_on" || patch.size === null;
 }
 
 // The columns a patch changes, or null when it changes nothing (so an
@@ -30,6 +43,7 @@ export interface ItemRowUpdate {
 export function itemUpdate(row: EditableRow, patch: ItemPatch): ItemRowUpdate | null {
   const next: ItemRowUpdate = {};
   if (patch.status !== undefined && patch.status !== row.status) next.status = patch.status;
+  if (patch.size !== undefined && patch.size !== row.size) next.size = patch.size;
 
   const details = patch.details;
   if (details) {

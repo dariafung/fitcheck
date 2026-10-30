@@ -9,6 +9,9 @@
   "inseam_cm": 76,
   "body_shape": "pear",
   "lifestyle_mix": { "work": 0, "school": 3, "social": 2, "sport": 3, "home": 3 },
+  "top_size": "M",
+  "bottom_size": "M",
+  "shoe_size": "W7.5",
   "resale_opt_in": true,
   "is_seed": true
 }

@@ -22,6 +22,15 @@ describe("ItemPatch", () => {
     expect(ItemPatch.parse({ status: "active", details: details() }).status).toBe("active");
   });
 
+  it("takes a size as typed, trimmed; empty or null clears it", () => {
+    expect(ItemPatch.parse({ size: "  US 8 " })).toEqual({ size: "US 8" });
+    expect(ItemPatch.parse({ status: "passing_on", size: "M" })).toEqual({ status: "passing_on", size: "M" });
+    expect(ItemPatch.parse({ size: "  " })).toEqual({ size: null });
+    expect(ItemPatch.parse({ size: null })).toEqual({ size: null });
+    expect(ItemPatch.safeParse({ size: "x".repeat(21) }).success).toBe(false);
+    expect(ItemPatch.safeParse({ size: 8 }).success).toBe(false);
+  });
+
   it("trims the name and turns an empty brand into none", () => {
     const parsed = ItemPatch.parse({ details: details({ title: "  Linen shirt ", brand: "  " }) });
     expect(parsed.details).toMatchObject({ title: "Linen shirt", brand: null });

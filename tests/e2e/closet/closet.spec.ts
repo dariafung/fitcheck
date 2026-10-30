@@ -217,8 +217,15 @@ test("closet categories: filter by type, keep the tab, and show all again when e
 
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
+  // It has no size yet, so it asks for one first.
+  await page.getByRole("button", { name: "Pass it on" }).click();
+  const size = page.getByLabel("What size is it?");
+  await page.getByRole("button", { name: "Pass it on" }).click();
+  await expect(page.getByText("Add a size first.")).toBeVisible();
+  await size.fill("M");
   await page.getByRole("button", { name: "Pass it on" }).click();
   await expect(page.getByText("Passing on. It's left out of your outfits and buy checks.")).toBeVisible();
+  await expect(page.getByText("Size M")).toBeVisible();
   await expect(page.getByRole("button", { name: "Pass it on" })).toHaveCount(0);
 
   const main = page.getByRole("main");
@@ -233,6 +240,11 @@ test("pass an item on from its page, then keep wearing it", async ({ page }) => 
   await expect(page.getByText("Passing on. It's left out of your outfits and buy checks.")).toHaveCount(0);
   await page.goto("/closet");
   await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+
+  // The size stays, so passing it on again is one tap.
+  await page.goto(`/closet/${item.id}`);
+  await page.getByRole("button", { name: "Pass it on" }).click();
+  await expect(page.getByText("Size M")).toBeVisible();
 });
 
 // Only this file adds passing-on items, and its tests run one at a time.

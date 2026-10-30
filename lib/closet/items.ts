@@ -6,7 +6,7 @@ import type { TempRangeF } from "@/lib/temperature";
 import { itemTempRange } from "./fit-today";
 import { ITEM_IMAGES_BUCKET, imageUrls, isExternalUrl } from "./images";
 import type { ItemPatch } from "./item-patch";
-import { itemUpdate } from "./item-update";
+import { itemUpdate, needsSize } from "./item-update";
 import { swatchHex } from "./swatch";
 import { itemTags } from "./tags";
 
@@ -30,6 +30,8 @@ export interface ClosetItem {
   category: string;
   // "active" or "passing_on".
   status: string;
+  // As the owner typed it; needed while passing_on.
+  size: string | null;
   tags: ItemTags;
   tempRangeF: TempRangeF | null;
   swatch: string;
@@ -96,7 +98,7 @@ export async function getClosetItem(
   if (!isItemId(id)) return null;
   const { data } = await db
     .from("items")
-    .select("id, title, brand, retailer, source_url, category, status, image_paths, ai_tags, user_tags")
+    .select("id, title, brand, retailer, source_url, category, status, size, image_paths, ai_tags, user_tags")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle()
@@ -115,6 +117,7 @@ export async function getClosetItem(
     sourceUrl: data.source_url,
     category: data.category,
     status: data.status,
+    size: data.size,
     tags: itemTags(data),
     tempRangeF: itemTempRange(data),
     swatch: swatchHex(data),
@@ -124,29 +127,31 @@ export async function getClosetItem(
 }
 
 // Applies a PATCH to one of the user's items: new details (name, brand, tags
-// as user corrections) and/or a new status. False when it is not theirs.
+// as user corrections), a new status and/or a new size. "not_found" when it
+// is not theirs; "size_required" when it would be passing on without a size.
 // Changing tags bumps updated_at, which marks its cached pairings stale.
 export async function updateClosetItem(
   db: Db,
   userId: string,
   id: string,
   patch: ItemPatch,
-): Promise<boolean> {
-  if (!isItemId(id)) return false;
+): Promise<"updated" | "not_found" | "size_required"> {
+  if (!isItemId(id)) return "not_found";
   const { data } = await db
     .from("items")
-    .select("title, brand, category, status, ai_tags, user_tags")
+    .select("title, brand, category, status, size, ai_tags, user_tags")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle()
     .throwOnError();
-  if (!data) return false;
+  if (!data) return "not_found";
+  if (needsSize(data, patch)) return "size_required";
 
   const update = itemUpdate(data, patch);
   if (update) {
     await db.from("items").update(update).eq("id", id).eq("user_id", userId).throwOnError();
   }
-  return true;
+  return "updated";
 }
 
 // Deletes one of the user's items; false when it is not theirs. Its feeling
