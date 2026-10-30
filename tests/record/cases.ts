@@ -1,6 +1,7 @@
 // Inputs for the recorded live calls. The recorder (live.record.ts) sends
 // them to the real model once; lib/ai/live/replay.test.ts replays the saved
 // answers for free. Changing an input or a PROMPT_VERSION needs a new recording.
+import type { BuildProfileInput } from "@/lib/ai/schemas/build-profile";
 import type { ItemSummary } from "@/lib/ai/schemas/common";
 import type { JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import type { JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
@@ -254,4 +255,123 @@ export const REPEAT_CASES: { name: string; input: JudgeRepeatInput }[] = [
   { name: "sample closet, white oxford shirt", input: { candidate: OXFORD_SHIRT, closet: SAMPLE_ITEMS } },
   { name: "sample closet, navy wide-leg trousers", input: { candidate: TROUSERS, closet: SAMPLE_ITEMS } },
   { name: "sample closet, mustard cropped top", input: { candidate: CROPPED_TOP, closet: SAMPLE_ITEMS } },
+];
+
+// A seven-piece closet whose feelings cover color, fit, fabric and length,
+// good and bad, so the style card has something for every topic.
+const PROFILE_TROUSERS: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
+  title: "Navy wide-leg trousers",
+  tags: {
+    category: "bottom",
+    subcategory: "trousers",
+    colors: [{ name: "navy" }],
+    colorFamily: "navy",
+    materials: ["wool blend"],
+    fit: "relaxed",
+    formality: 3,
+    occasions: ["school", "work"],
+    notes: "elastic back waist, full-length",
+  },
+};
+const PROFILE_TEE: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c02",
+  title: "Black cropped boxy tee",
+  tags: {
+    category: "top",
+    colors: [{ name: "black" }],
+    colorFamily: "black",
+    materials: ["cotton"],
+    fit: "oversized",
+    formality: 1,
+    occasions: ["home", "sport"],
+  },
+};
+const PROFILE_SWEATER: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03",
+  title: "Gray merino crewneck",
+  tags: {
+    category: "top",
+    colors: [{ name: "heather gray" }],
+    colorFamily: "gray",
+    materials: ["merino wool"],
+    fit: "regular",
+    formality: 3,
+    occasions: ["school", "work"],
+  },
+};
+const PROFILE_DRESS: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04",
+  title: "Mustard ribbed midi dress",
+  tags: {
+    category: "one_piece",
+    colors: [{ name: "mustard" }],
+    colorFamily: "yellow",
+    materials: ["viscose"],
+    fit: "slim",
+    formality: 3,
+    occasions: ["social"],
+  },
+};
+
+export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
+  {
+    name: "seven pieces, good and bad on every topic",
+    input: {
+      items: [SHIRT, JEANS, SNEAKERS, PROFILE_TROUSERS, PROFILE_TEE, PROFILE_SWEATER, PROFILE_DRESS],
+      feelings: [
+        { ...SHIRT_FEELING, itemId: SHIRT.id, occasions: ["school"] },
+        { ...JEANS_FEELING, itemId: JEANS.id, occasions: [] },
+        { ...SNEAKERS_FEELING, itemId: SNEAKERS.id, occasions: ["social", "sport"] },
+        {
+          itemId: PROFILE_TROUSERS.id,
+          flattering: "yes",
+          liked: "yes",
+          aspects: [
+            { aspect: "fit", sentiment: "positive", area: "waist", said: "the elastic back never digs in", means: "stretchy waistbands work" },
+            { aspect: "length", sentiment: "positive", said: "full length makes my legs look long", means: "full-length hems lengthen legs" },
+          ],
+          occasions: ["school"],
+          mood: ["put together"],
+          summary: "Comfortable trousers that never dig in and lengthen the legs.",
+        },
+        {
+          itemId: PROFILE_TEE.id,
+          flattering: "mixed",
+          liked: "yes",
+          aspects: [
+            { aspect: "feel", sentiment: "positive", said: "soft and easy", means: "soft cotton is comfortable" },
+            { aspect: "length", sentiment: "negative", said: "too short when I lift my arms", means: "cropped tops ride up" },
+          ],
+          occasions: ["home"],
+          mood: ["relaxed"],
+          summary: "Soft tee that rides up when arms are raised.",
+        },
+        {
+          itemId: PROFILE_SWEATER.id,
+          flattering: "yes",
+          liked: "mixed",
+          aspects: [
+            { aspect: "color", sentiment: "positive", said: "gray goes with everything", means: "soft neutrals are easy to wear" },
+            { aspect: "feel", sentiment: "negative", said: "itchy at the neck", means: "scratchy wool bothers the skin" },
+          ],
+          occasions: ["school"],
+          mood: [],
+          summary: "Easy gray sweater that itches at the neck.",
+        },
+        {
+          itemId: PROFILE_DRESS.id,
+          flattering: "no",
+          liked: "no",
+          aspects: [
+            { aspect: "color", sentiment: "negative", said: "mustard makes me look sick", means: "mustard washes the face out" },
+            { aspect: "fit", sentiment: "negative", area: "hips", said: "clings to my hips", means: "clingy fits over the hips don't work" },
+          ],
+          occasions: ["social"],
+          mood: ["self-conscious"],
+          summary: "Mustard dress washes the face out and clings at the hips.",
+        },
+      ],
+    },
+  },
 ];

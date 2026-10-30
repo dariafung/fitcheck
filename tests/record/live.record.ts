@@ -1,24 +1,25 @@
 // Paid: sends the cases in cases.ts to the real model and records the answers
 // under fixtures/ai/. Cases that already have a recording are skipped; set
-// RERECORD=parseFeeling,judgePairing,judgeRepeat,scorePurchase (or "all") to record them again. Run by
+// RERECORD=parseFeeling,judgePairing,judgeRepeat,scorePurchase,buildProfile (or "all") to record them again. Run by
 // hand, within the day's budget:
 //   npx -y pnpm@12.15.0 exec vitest run --project record
 // Token counts, cost and raw answers go to test-results/ai-record.log.
 import { appendFileSync, mkdirSync } from "node:fs";
 import type { Response } from "openai/resources/responses/responses";
 import { describe, expect, it, vi } from "vitest";
-import { judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "@/lib/ai";
+import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "@/lib/ai";
 import { costUsd, MAX_COST_USD, memoryBudgetStore, setBudgetStore, spentTodayUsd } from "@/lib/ai/budget";
 import type { AiFunctionName } from "@/lib/ai/define";
 import { inputHash } from "@/lib/ai/hash";
 import { getClient } from "@/lib/ai/live/client";
 import { outputText } from "@/lib/ai/live/respond";
 import { readReplay } from "@/lib/ai/replay/store";
+import { BuildProfileInput, PROMPT_VERSION as PROFILE_VERSION } from "@/lib/ai/schemas/build-profile";
 import { PROMPT_VERSION as FEELING_VERSION, ParseFeelingInput } from "@/lib/ai/schemas/parse-feeling";
 import { PROMPT_VERSION as PAIRING_VERSION, JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import { PROMPT_VERSION as REPEAT_VERSION, JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
 import { PROMPT_VERSION as SCORE_VERSION, ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
-import { FEELING_CASES, PAIRING_CASES, REPEAT_CASES, SCORE_CASES } from "./cases";
+import { FEELING_CASES, PAIRING_CASES, PROFILE_CASES, REPEAT_CASES, SCORE_CASES } from "./cases";
 
 // One run never spends more than this, whatever the daily budget says.
 const RUN_LIMIT_USD = 0.45;
@@ -113,6 +114,16 @@ describe("scorePurchase", () => {
       const hash = inputHash("scorePurchase", SCORE_VERSION, ScorePurchaseInput.parse(input));
       const output = await recorded("scorePurchase", name, hash, () => scorePurchase(input, LIVE));
       if (output) expect(output.answers.length).toBeGreaterThan(0);
+    });
+  }
+});
+
+describe("buildProfile", () => {
+  for (const { name, input } of PROFILE_CASES) {
+    it(name, async () => {
+      const hash = inputHash("buildProfile", PROFILE_VERSION, BuildProfileInput.parse(input));
+      const output = await recorded("buildProfile", name, hash, () => buildProfile(input, LIVE));
+      if (output) expect(output.suits.length).toBeGreaterThan(0);
     });
   }
 });

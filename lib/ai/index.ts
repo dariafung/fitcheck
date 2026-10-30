@@ -1,5 +1,6 @@
 // The only entry point for model calls. Import from Route Handlers only.
 import { defineAiFunction } from "./define";
+import { liveBuildProfile } from "./live/build-profile";
 import { liveExtractItem } from "./live/extract-item";
 import { liveJudgePairing } from "./live/judge-pairing";
 import { liveJudgeRepeat } from "./live/judge-repeat";
@@ -100,7 +101,7 @@ export const buildProfile = defineAiFunction({
   input: buildProfileSchema.BuildProfileInput,
   output: buildProfileSchema.BuildProfileOutput,
   mock: mockBuildProfile,
-  live: notImplemented("buildProfile"),
+  live: liveBuildProfile,
 });
 
 export const segmentGarment = defineAiFunction({
