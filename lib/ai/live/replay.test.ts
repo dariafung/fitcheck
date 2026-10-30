@@ -2,8 +2,10 @@
 // network and no cost; a miss means the case or PROMPT_VERSION changed
 // without a new recording.
 import { describe, expect, it } from "vitest";
-import { FEELING_CASES, PAIRING_CASES, REPEAT_CASES, SCORE_CASES } from "@/tests/record/cases";
-import { judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "../index";
+import { FEELING_CASES, PAIRING_CASES, PROFILE_CASES, REPEAT_CASES, SCORE_CASES } from "@/tests/record/cases";
+import { BuildProfileInput, HEADLINE_MAX_WORDS, profileFacts, STATEMENT_MAX_WORDS } from "../schemas/build-profile";
+import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "../index";
+import { retells } from "./build-profile";
 
 const REPLAY = { mode: "replay" } as const;
 const feeling = (name: string) => {
@@ -147,4 +149,36 @@ describe("judgeRepeat recordings", () => {
     expect((await repeat("sample closet, mustard cropped top")).score).toBeGreaterThanOrEqual(7);
   });
 
+});
+
+describe("buildProfile recordings", () => {
+  it.each(PROFILE_CASES.map((c) => [c.name, BuildProfileInput.parse(c.input)] as const))(
+    "%s: covers every topic in short summaries that cite real items",
+    async (_, input) => {
+      const out = await buildProfile(input, REPLAY);
+      const facts = profileFacts(input);
+      const statements = [...out.suits, ...out.avoid];
+      expect(new Set(statements.map((s) => s.topic))).toEqual(new Set(facts.topics));
+      expect(out.avoid.length).toBeGreaterThan(0);
+
+      const ids = new Set(input.items.map((i) => i.id));
+      const saids = input.feelings.flatMap((f) => f.aspects.map((a) => a.said));
+      expect(out.headline.evidenceItemIds.length).toBeGreaterThanOrEqual(2);
+      expect(words(out.headline.text)).toBeLessThanOrEqual(HEADLINE_MAX_WORDS);
+      for (const s of [out.headline, ...statements]) {
+        for (const id of s.evidenceItemIds) expect(ids).toContain(id);
+        expect(retells(s.text, saids), s.text).toBe(false);
+        expect(s.text).not.toMatch(/\b(she|her|hers|he|him|his)\b/i);
+      }
+      for (const s of statements) expect(words(s.text)).toBeLessThanOrEqual(STATEMENT_MAX_WORDS);
+
+      // Things to skip rest on items felt bad about.
+      const negative = new Set(
+        input.feelings
+          .filter((f) => f.flattering === "no" || f.liked === "no" || f.aspects.some((a) => a.sentiment === "negative"))
+          .map((f) => f.itemId),
+      );
+      for (const s of out.avoid) expect(s.evidenceItemIds.some((id) => negative.has(id)), s.text).toBe(true);
+    },
+  );
 });

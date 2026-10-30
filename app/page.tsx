@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { GoodForToday, GoodForTodaySkeleton } from "@/components/closet/good-for-today";
+import { StyleCard } from "@/components/closet/style-card";
+import { StyleCardSkeleton } from "@/components/closet/style-card-view";
 
 // /check belongs to the check lane; home only links to it.
 // Home is one shelf: the first slot is the thing you haven't bought yet (the
@@ -23,6 +25,11 @@ export default function Home() {
       <div className="min-w-0 lg:col-span-3">
         <Suspense fallback={<GoodForTodaySkeleton />}>
           <GoodForToday />
+        </Suspense>
+      </div>
+      <div className="min-w-0 lg:col-span-4">
+        <Suspense fallback={<StyleCardSkeleton />}>
+          <StyleCard />
         </Suspense>
       </div>
     </div>

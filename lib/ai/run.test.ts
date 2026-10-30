@@ -64,7 +64,11 @@ describe("mock mode", () => {
         ai.renderOutfit({
           items: [ITEM, OTHER, ITEM].map((i) => ({ id: i.id, image: IMAGE, category: i.tags.category, description: i.title })),
         }),
-      () => ai.buildProfile({ items: [ITEM], feelings: [] }),
+      () =>
+        ai.buildProfile({
+          items: [ITEM, OTHER],
+          feelings: [{ itemId: ITEM.id, flattering: "yes", liked: "yes", occasions: [], mood: [], summary: "" }],
+        }),
       () => ai.segmentGarment({ image: IMAGE, category: "shirt" }),
     ];
     for (const call of calls) {

@@ -24,7 +24,7 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   transcribe: 0.01,
   scorePurchase: 0.05,
   renderOutfit: 0.05,
-  buildProfile: 0.05,
+  buildProfile: 0.03,
   segmentGarment: 0.05,
 };
 

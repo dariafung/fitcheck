@@ -8,6 +8,7 @@ import { POST as extractPOST } from "@/app/api/items/extract/route";
 import { POST as itemsPOST } from "@/app/api/items/route";
 import { POST as pairingsPOST } from "@/app/api/pairings/route";
 import { GET as profileGET, PUT as profilePUT } from "@/app/api/profile/route";
+import { POST as styleProfilePOST } from "@/app/api/style-profile/route";
 import type { ItemTags } from "@/lib/ai";
 import { DEMO_READ_ONLY, DEMO_READ_ONLY_ERROR } from "@/lib/auth/messages";
 import { DEMO_USER_ID } from "@/lib/db/demo-user";
@@ -127,6 +128,7 @@ const WRITES: [string, () => Promise<Response>][] = [
         }),
       ),
   ],
+  ["POST /api/style-profile", () => styleProfilePOST()],
   [
     "POST /api/items/extract",
     async () => extractPOST(uploadRequest(new Blob([new Uint8Array(await fakeScreenshot())], { type: "image/png" }))),
