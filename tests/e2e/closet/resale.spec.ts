@@ -4,7 +4,9 @@ import { DEMO_USER_ID } from "../../../lib/db/current-user";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
-// A passing-on item's page: its size. Each test adds its own item.
+// A passing-on item's page: its size and who'd want it. The demo persona is
+// only matched with seeded sample buyers, and there are none yet, so the
+// buyer list is always empty here. Each test adds its own item.
 const env = readLocalSupabase();
 const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
@@ -39,6 +41,13 @@ test.beforeEach(async () => {
 
 test.afterEach(async () => {
   await db.from("items").delete().eq("id", item.id);
+});
+
+test("a passing-on item shows its size and who'd want it", async ({ page }) => {
+  await page.goto(`/closet/${item.id}`);
+  await expect(page.getByText("Size M")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Who'd want it" })).toBeVisible();
+  await expect(page.getByText("No active buyers right now.")).toBeVisible();
 });
 
 test("edit the size; one code can't read still saves, with a note", async ({ page }) => {

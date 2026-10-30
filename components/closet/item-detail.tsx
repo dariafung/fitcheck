@@ -7,6 +7,7 @@ import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { readSize, sizeText } from "@/lib/resale/size";
+import { BuyerMatches } from "./buyer-matches";
 import { DeleteItem } from "./delete-item";
 import { FeelingForm } from "./feeling-form";
 import { EditDetailsButton, ItemEditor } from "./item-editor";
@@ -27,6 +28,8 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   const byline = [item.brand, categoryLabel(item.category)].filter(Boolean).join(" · ");
   const status = item.status === "passing_on" ? "passing_on" : "active";
   const details = { title: item.title, brand: item.brand, size: item.size, tags: item.tags, imageUrls: item.imageUrls };
+  // Accessories aren't matched with buyers.
+  const findsBuyers = status === "passing_on" && item.category !== "accessory";
 
   return (
     <ItemEditor itemId={item.id} details={details}>
@@ -118,6 +121,8 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
               </a>
             )}
           </div>
+
+          {findsBuyers && <BuyerMatches itemId={item.id} size={item.size} />}
 
           {readOnly ? (
             <ReadOnlyFeeling text={item.feeling?.text ?? null} />
