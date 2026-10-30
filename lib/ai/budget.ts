@@ -9,7 +9,7 @@ export const PRICE_PER_WEB_SEARCH = 0.0025;
 // Muse Voice Transcribe, billed per whole second of audio (same page).
 export const PRICE_PER_AUDIO_HOUR = 0.18;
 
-export const DEFAULT_DAILY_BUDGET_USD = 4;
+export const DEFAULT_DAILY_BUDGET_USD = 7;
 
 // Worst-case cost of one live attempt: a generous input estimate plus the
 // function's max_output_tokens (reasoning included; even "low" effort used
