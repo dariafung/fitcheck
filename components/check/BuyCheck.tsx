@@ -5,6 +5,7 @@ import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
 import { extractErrorMessage, OFFLINE } from "@/components/entry/messages";
 import { shrinkScreenshot } from "@/components/entry/shrink";
 import { aiNotice } from "@/lib/ai/notices";
+import type { Category } from "@/lib/ai/schemas/common";
 import type { BuyCheck as BuyCheckResponse, BuyCheckResult } from "@/lib/check/buy-check";
 import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
@@ -16,7 +17,14 @@ type Step =
   | { kind: "idle" }
   | { kind: "loading" }
   | { kind: "draft"; draft: ItemDraft; checking: boolean }
-  | { kind: "result"; title: string; photo: string | null; result: BuyCheckResult };
+  | {
+      kind: "result";
+      title: string;
+      photo: string | null;
+      category: Category;
+      onModel: boolean;
+      result: BuyCheckResult;
+    };
 
 // Upload a screenshot → confirm the card → see the score. One item at a
 // time; nothing is kept once you check another.
@@ -76,7 +84,14 @@ export function BuyCheck() {
       });
       const json = (await res.json().catch(() => ({}))) as Partial<BuyCheckResponse> & { error?: string };
       if (res.ok && "result" in json && json.result) {
-        setStep({ kind: "result", title: edited.title, photo: draft.imageUrls[0] ?? null, result: json.result });
+        setStep({
+          kind: "result",
+          title: edited.title,
+          photo: draft.imageUrls[0] ?? null,
+          category: edited.tags.category,
+          onModel: draft.onModel,
+          result: json.result,
+        });
         return;
       }
       if (res.ok && json.error === INCOMPLETE_ERROR) setRetry(edited);
@@ -179,7 +194,14 @@ export function BuyCheck() {
         />
       )}
       {step.kind === "result" && (
-        <BuyResult title={step.title} photo={step.photo} result={step.result} onCheckAnother={checkAnother} />
+        <BuyResult
+          title={step.title}
+          photo={step.photo}
+          category={step.category}
+          onModel={step.onModel}
+          result={step.result}
+          onCheckAnother={checkAnother}
+        />
       )}
     </div>
   );

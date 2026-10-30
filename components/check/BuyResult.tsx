@@ -2,8 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { BuyCheckResult } from "@/lib/check/buy-check";
+import { useEffect, useState } from "react";
+import type { Category } from "@/lib/ai/schemas/common";
+import type { OwnedPiece } from "@/lib/check/board-pieces";
+import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
+import { OutfitBoard } from "./OutfitBoard";
 
 const PARTS: [keyof BuyCheckResult["parts"], string][] = [
   ["suitsYou", "Suits you"],
@@ -27,20 +31,54 @@ function Thumb({ src, alt }: { src: string | null; alt: string }) {
   );
 }
 
+interface Cutouts {
+  candidate: string | null;
+  items: Record<string, OwnedPiece>;
+}
+
+// Cut-outs for the outfit boards. Null while loading, or for good when the
+// request fails: the page then keeps the plain rows of photos.
+function useCutouts(outfits: SampleOutfit[], photo: string | null, onModel: boolean): Cutouts | null {
+  const [cutouts, setCutouts] = useState<Cutouts | null>(null);
+  useEffect(() => {
+    if (outfits.length === 0) return;
+    const itemIds = [...new Set(outfits.flatMap((o) => o.pieces.filter((p) => !p.isCandidate).map((p) => p.id)))];
+    const controller = new AbortController();
+    fetch("/api/checks/board", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ candidate: { photo, onModel }, itemIds }),
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: Cutouts | null) => {
+        if (json?.items) setCutouts(json);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [outfits, photo, onModel]);
+  return cutouts;
+}
+
 // The verdict page. Photo left, verdict right, held in view on a desktop:
 // the score is the only colored thing on the page.
 export function BuyResult({
   title,
   photo,
+  category,
+  onModel,
   result,
   onCheckAnother,
 }: {
   title: string;
   photo: string | null;
+  category: Category;
+  onModel: boolean;
   result: BuyCheckResult;
   onCheckAnother: () => void;
 }) {
   const { parts } = result;
+  const cutouts = useCutouts(result.sampleOutfits, photo, onModel);
   return (
     <section
       aria-label="Result"
@@ -154,15 +192,33 @@ export function BuyResult({
         {result.sampleOutfits.length > 0 && (
           <div className="flex flex-col gap-4">
             <h3 className="text-base font-medium">You could wear it like this</h3>
-            {result.sampleOutfits.map((outfit) => (
-              <ul key={outfit.id} aria-label="Outfit" className="flex gap-2 overflow-x-auto">
-                {outfit.pieces.map((piece) => (
-                  <li key={piece.id}>
-                    <Thumb src={piece.isCandidate ? photo : piece.imageUrl} alt={piece.title} />
-                  </li>
+            {cutouts ? (
+              <div className="-mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 md:mx-0 md:grid md:grid-cols-3 md:px-0">
+                {result.sampleOutfits.map((outfit) => (
+                  <OutfitBoard
+                    key={outfit.id}
+                    pieces={outfit.pieces.flatMap((piece) => {
+                      if (piece.isCandidate) {
+                        return [{ ...piece, category, src: cutouts.candidate ?? photo, cutout: !!cutouts.candidate }];
+                      }
+                      const owned = cutouts.items[piece.id];
+                      if (!owned) return [];
+                      return [{ ...piece, category: owned.category, src: owned.cutout ?? piece.imageUrl, cutout: !!owned.cutout }];
+                    })}
+                  />
                 ))}
-              </ul>
-            ))}
+              </div>
+            ) : (
+              result.sampleOutfits.map((outfit) => (
+                <ul key={outfit.id} aria-label="Outfit" className="flex gap-2 overflow-x-auto">
+                  {outfit.pieces.map((piece) => (
+                    <li key={piece.id}>
+                      <Thumb src={piece.isCandidate ? photo : piece.imageUrl} alt={piece.title} />
+                    </li>
+                  ))}
+                </ul>
+              ))
+            )}
           </div>
         )}
 

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { POST as boardPOST } from "@/app/api/checks/board/route";
 import { POST as checkPOST } from "@/app/api/checks/route";
 import { DELETE as itemDELETE, PATCH as itemPATCH } from "@/app/api/items/[id]/route";
 import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
@@ -151,6 +152,9 @@ describe("the demo account is read-only", () => {
     expect((await pairingsPOST()).status).toBe(200);
     const check = await checkPOST(jsonRequest("/api/checks", { title: "Black loafers", tags }));
     expect(check.status).toBe(200);
+    const photo = `data:image/png;base64,${(await fakeScreenshot()).toString("base64")}`;
+    const board = await boardPOST(jsonRequest("/api/checks/board", { candidate: { photo, onModel: false }, itemIds: [itemId] }));
+    expect(board.status).toBe(200);
 
     expect(await personaSnapshot(db, DEMO_USER_ID)).toEqual(before);
     expect(await pairingKeys(db, DEMO_USER_ID)).toEqual(expect.arrayContaining(pairsBefore));
