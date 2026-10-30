@@ -1,7 +1,7 @@
 // Names for item fields and their values, shared by the entry card (add,
 // check, edit) and the item page, so one field reads the same everywhere.
 // No server-only imports: the client bundles this file.
-import type { Category } from "@/lib/ai/schemas/common";
+import type { Category, Occasion } from "@/lib/ai/schemas/common";
 
 export const FIELD_LABELS = {
   category: "Type",
@@ -35,3 +35,12 @@ export function formalityLabel(formality: number): string {
 export function capitalize(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
+
+// The lifestyle mix's occasions, as the outfit calendar names them.
+export const OCCASION_LABELS: Record<Occasion, string> = {
+  work: "Work",
+  school: "School",
+  social: "Social",
+  sport: "Sport",
+  home: "Home",
+};

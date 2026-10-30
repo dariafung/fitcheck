@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { ReadOnlyNote } from "@/components/auth/read-only-note";
+import { ItemWearRow } from "@/components/calendar/item-wear-row";
 import { isReadOnly } from "@/lib/auth/session";
 import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
@@ -80,6 +81,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
                   </dd>
                 </div>
               ))}
+              <ItemWearRow itemId={item.id} />
             </dl>
 
             {!readOnly && (
