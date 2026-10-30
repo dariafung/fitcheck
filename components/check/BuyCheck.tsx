@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
-import { extractErrorMessage, OFFLINE } from "@/components/entry/messages";
+import { CleanedNote } from "@/components/entry/CleanedNote";
+import { CUTTING_OUT, extractErrorMessage, OFFLINE } from "@/components/entry/messages";
 import { shrinkScreenshot } from "@/components/entry/shrink";
 import { aiNotice } from "@/lib/ai/notices";
 import type { Category } from "@/lib/ai/schemas/common";
@@ -16,7 +17,9 @@ const CHECK_FAILED = "Couldn't check it. Try again?";
 type Step =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "draft"; draft: ItemDraft; checking: boolean }
+  | { kind: "cutting" }
+  // `original` is the draft before the model cut its photo out.
+  | { kind: "draft"; draft: ItemDraft; original?: ItemDraft; checking: boolean }
   | {
       kind: "result";
       title: string;
@@ -36,7 +39,30 @@ export function BuyCheck() {
   // The item to send again when the model didn't finish scoring it.
   const [retry, setRetry] = useState<EditedItem>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const busy = step.kind === "loading" || (step.kind === "draft" && step.checking);
+  const busy = step.kind === "loading" || step.kind === "cutting" || (step.kind === "draft" && step.checking);
+
+  // An on-model photo is redrawn as the garment alone on white, so the
+  // outfit boards show no person. Nothing is stored. If it fails the card
+  // keeps the original, without a word.
+  async function cutOut(draft: ItemDraft) {
+    setStep({ kind: "cutting" });
+    try {
+      const res = await fetch("/api/checks/cutout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ photo: draft.imageUrls[0], title: draft.title, tags: draft.tags }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.photo) {
+        const cleaned: ItemDraft = { ...draft, imageUrls: [json.photo], onModel: false };
+        setStep({ kind: "draft", draft: cleaned, original: draft, checking: false });
+        return;
+      }
+    } catch {
+      // Keep the original.
+    }
+    setStep({ kind: "draft", draft, checking: false });
+  }
 
   async function upload(file: File) {
     setProblem(undefined);
@@ -48,7 +74,8 @@ export function BuyCheck() {
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.draft) {
         setRound((r) => r + 1);
-        setStep({ kind: "draft", draft: json.draft, checking: false });
+        if (json.draft.onModel && json.draft.imageUrls[0]) await cutOut(json.draft);
+        else setStep({ kind: "draft", draft: json.draft, checking: false });
       } else {
         setProblem(extractErrorMessage(json.error));
         setStep({ kind: "idle" });
@@ -72,10 +99,10 @@ export function BuyCheck() {
     return () => document.removeEventListener("paste", onPaste);
   });
 
-  async function check(draft: ItemDraft, edited: EditedItem) {
+  async function check(draft: ItemDraft, edited: EditedItem, original?: ItemDraft) {
     setProblem(undefined);
     setRetry(undefined);
-    setStep({ kind: "draft", draft, checking: true });
+    setStep({ kind: "draft", draft, original, checking: true });
     try {
       const res = await fetch("/api/checks", {
         method: "POST",
@@ -99,7 +126,7 @@ export function BuyCheck() {
     } catch {
       setProblem(OFFLINE);
     }
-    setStep({ kind: "draft", draft, checking: false });
+    setStep({ kind: "draft", draft, original, checking: false });
   }
 
   function checkAnother() {
@@ -110,7 +137,7 @@ export function BuyCheck() {
 
   return (
     <div className="flex flex-col gap-8">
-      {(step.kind === "idle" || step.kind === "loading") && (
+      {(step.kind === "idle" || step.kind === "loading" || step.kind === "cutting") && (
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -142,7 +169,7 @@ export function BuyCheck() {
             htmlFor="screenshot"
             className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
           >
-            {step.kind === "loading" ? "Reading…" : "Choose a screenshot"}
+            {step.kind === "loading" || step.kind === "cutting" ? "Reading…" : "Choose a screenshot"}
           </label>
           <p className="max-w-[40ch] text-sm text-ink-2">
             A screenshot of the product page.
@@ -158,6 +185,7 @@ export function BuyCheck() {
           </p>
         )}
         {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
+        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
         {step.kind === "draft" && step.checking && (
           <p className="text-sm text-ink-2">Checking it against your closet…</p>
         )}
@@ -166,7 +194,7 @@ export function BuyCheck() {
       {step.kind === "draft" && retry && (
         <button
           type="button"
-          onClick={() => check(step.draft, retry)}
+          onClick={() => check(step.draft, retry, step.original)}
           className="btn-primary self-start"
         >
           Try again
@@ -182,12 +210,18 @@ export function BuyCheck() {
           Use another screenshot
         </button>
       )}
+      {step.kind === "draft" && step.original && (
+        <CleanedNote
+          disabled={step.checking}
+          onUseOriginal={() => step.original && setStep({ kind: "draft", draft: step.original, checking: false })}
+        />
+      )}
       {step.kind === "draft" && (
         <ItemCard
           key={round}
           draft={step.draft}
           saving={step.checking}
-          onSave={(edited) => check(step.draft, edited)}
+          onSave={(edited) => check(step.draft, edited, step.original)}
           submitLabel="Check it"
           busyLabel="Checking…"
           hint="Fix anything that's off, then check."

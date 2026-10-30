@@ -77,9 +77,21 @@ test("check an item: screenshot, confirm, score, check another", async ({ page }
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
 });
 
-test("sample outfits show as boards of real photos", async ({ page }) => {
+test("sample outfits show as boards of real photos; an on-model photo is cut out first", async ({ page }) => {
+  const cutouts: string[] = [];
+  page.on("request", (r) => {
+    if (new URL(r.url()).pathname === "/api/checks/cutout") cutouts.push(r.method());
+  });
+  // Mark the mock draft as on-model; everything else is the real flow.
+  await page.route("**/api/checks/extract", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
+  });
   await page.goto("/check");
   const card = await upload(page);
+  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  expect(cutouts).toEqual(["POST"]);
   await card.getByLabel("Name").fill("Black loafers");
   await card.getByLabel("Type").selectOption("shoes");
   await card.getByRole("button", { name: "Check it" }).click();

@@ -1,10 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST as boardPOST } from "@/app/api/checks/board/route";
+import { POST as checkCutoutPOST } from "@/app/api/checks/cutout/route";
 import { POST as checkPOST } from "@/app/api/checks/route";
 import { DELETE as itemDELETE, PATCH as itemPATCH } from "@/app/api/items/[id]/route";
 import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
 import { POST as voicePOST } from "@/app/api/items/[id]/feelings/voice/route";
 import { POST as voiceUploadPOST } from "@/app/api/items/[id]/feelings/voice/upload/route";
+import { POST as itemCutoutPOST } from "@/app/api/items/cutout/route";
 import { POST as extractPOST } from "@/app/api/items/extract/route";
 import { POST as itemsPOST } from "@/app/api/items/route";
 import { POST as pairingsPOST } from "@/app/api/pairings/route";
@@ -131,6 +133,13 @@ const WRITES: [string, () => Promise<Response>][] = [
   ],
   ["POST /api/style-profile", () => styleProfilePOST()],
   [
+    "POST /api/items/cutout",
+    () =>
+      itemCutoutPOST(
+        jsonRequest("/api/items/cutout", { path: `${DEMO_USER_ID}/${itemId}.webp`, title: "Loafers", tags }),
+      ),
+  ],
+  [
     "POST /api/items/extract",
     async () => extractPOST(uploadRequest(new Blob([new Uint8Array(await fakeScreenshot())], { type: "image/png" }))),
   ],
@@ -153,6 +162,8 @@ describe("the demo account is read-only", () => {
     const check = await checkPOST(jsonRequest("/api/checks", { title: "Black loafers", tags }));
     expect(check.status).toBe(200);
     const photo = `data:image/png;base64,${(await fakeScreenshot()).toString("base64")}`;
+    const cutout = await checkCutoutPOST(jsonRequest("/api/checks/cutout", { photo, title: "Black loafers", tags }));
+    expect(cutout.status).toBe(200);
     const board = await boardPOST(jsonRequest("/api/checks/board", { candidate: { photo, onModel: false }, itemIds: [itemId] }));
     expect(board.status).toBe(200);
 
