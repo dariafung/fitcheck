@@ -7,6 +7,7 @@ import { liveJudgeRepeat } from "./live/judge-repeat";
 import { notImplemented } from "./live/not-implemented";
 import { liveParseFeeling } from "./live/parse-feeling";
 import { liveScorePurchase } from "./live/score-purchase";
+import { liveSummarizeWear } from "./live/summarize-wear";
 import { liveTranscribe } from "./live/transcribe";
 import { mockBuildProfile } from "./mock/build-profile";
 import { mockExtractItem } from "./mock/extract-item";
@@ -16,6 +17,7 @@ import { mockParseFeeling } from "./mock/parse-feeling";
 import { mockRenderOutfit } from "./mock/render-outfit";
 import { mockScorePurchase } from "./mock/score-purchase";
 import { mockSegmentGarment } from "./mock/segment-garment";
+import { mockSummarizeWear } from "./mock/summarize-wear";
 import { mockTranscribe } from "./mock/transcribe";
 import * as buildProfileSchema from "./schemas/build-profile";
 import * as extractItemSchema from "./schemas/extract-item";
@@ -25,6 +27,7 @@ import * as parseFeelingSchema from "./schemas/parse-feeling";
 import * as renderOutfitSchema from "./schemas/render-outfit";
 import * as scorePurchaseSchema from "./schemas/score-purchase";
 import * as segmentGarmentSchema from "./schemas/segment-garment";
+import * as summarizeWearSchema from "./schemas/summarize-wear";
 import * as transcribeSchema from "./schemas/transcribe";
 
 // A missing answer or out-of-range score is asked again up to 3 times.
@@ -113,6 +116,15 @@ export const segmentGarment = defineAiFunction({
   live: notImplemented("segmentGarment"),
 });
 
+export const summarizeWear = defineAiFunction({
+  name: "summarizeWear",
+  promptVersion: summarizeWearSchema.PROMPT_VERSION,
+  input: summarizeWearSchema.SummarizeWearInput,
+  output: summarizeWearSchema.SummarizeWearOutput,
+  mock: mockSummarizeWear,
+  live: liveSummarizeWear,
+});
+
 export { AiError } from "./errors";
 export { aiErrorResponse } from "./http";
 export { currentMode, type AiMode } from "./mode";
@@ -126,4 +138,5 @@ export type { ParseFeelingInput, ParseFeelingOutput } from "./schemas/parse-feel
 export type { RenderOutfitInput, RenderOutfitOutput } from "./schemas/render-outfit";
 export type { ScorePurchaseInput, ScorePurchaseOutput } from "./schemas/score-purchase";
 export type { SegmentGarmentInput, SegmentGarmentOutput } from "./schemas/segment-garment";
+export type { SummarizeWearInput, SummarizeWearOutput } from "./schemas/summarize-wear";
 export type { TranscribeInput, TranscribeOutput } from "./schemas/transcribe";

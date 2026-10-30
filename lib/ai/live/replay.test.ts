@@ -2,9 +2,10 @@
 // network and no cost; a miss means the case or PROMPT_VERSION changed
 // without a new recording.
 import { describe, expect, it } from "vitest";
-import { FEELING_CASES, PAIRING_CASES, PROFILE_CASES, REPEAT_CASES, SCORE_CASES } from "@/tests/record/cases";
+import { FEELING_CASES, PAIRING_CASES, PROFILE_CASES, REPEAT_CASES, SCORE_CASES, WEAR_CASES } from "@/tests/record/cases";
 import { BuildProfileInput, HEADLINE_MAX_WORDS, profileFacts, STATEMENT_MAX_WORDS } from "../schemas/build-profile";
-import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase } from "../index";
+import { INSIGHT_MAX_WORDS, SummarizeWearInput } from "../schemas/summarize-wear";
+import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase, summarizeWear } from "../index";
 import { retells } from "./build-profile";
 
 const REPLAY = { mode: "replay" } as const;
@@ -179,6 +180,22 @@ describe("buildProfile recordings", () => {
           .map((f) => f.itemId),
       );
       for (const s of out.avoid) expect(s.evidenceItemIds.some((id) => negative.has(id)), s.text).toBe(true);
+    },
+  );
+});
+
+describe("summarizeWear recordings", () => {
+  it.each(WEAR_CASES.map((c) => [c.name, SummarizeWearInput.parse(c.input)] as const))(
+    "%s: short insights about real items, saying vs wearing first",
+    async (_, input) => {
+      const out = await summarizeWear(input, REPLAY);
+      const ids = new Set(input.items.map((i) => i.id));
+      expect(out.insights[0].kind).toBe("say_vs_wear");
+      for (const insight of out.insights) {
+        expect(words(insight.text)).toBeLessThanOrEqual(INSIGHT_MAX_WORDS);
+        expect(insight.text).not.toMatch(/\b(she|her|hers|he|him|his)\b|%|\bI\d/i);
+        for (const id of insight.itemIds) expect(ids.has(id)).toBe(true);
+      }
     },
   );
 });

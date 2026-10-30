@@ -2,6 +2,7 @@
 // them to the real model once; lib/ai/live/replay.test.ts replays the saved
 // answers for free. Changing an input or a PROMPT_VERSION needs a new recording.
 import type { BuildProfileInput } from "@/lib/ai/schemas/build-profile";
+import type { SummarizeWearInput } from "@/lib/ai/schemas/summarize-wear";
 import type { ItemSummary } from "@/lib/ai/schemas/common";
 import type { JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import type { JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
@@ -371,6 +372,55 @@ export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
           mood: ["self-conscious"],
           summary: "Mustard dress washes the face out and clings at the hips.",
         },
+      ],
+    },
+  },
+];
+
+// 30 days of outfits over the seven-piece closet: a praised dress worn once,
+// knocked jeans worn 11 times, a sweater never worn, and sport always in the
+// same outfit though three are wanted.
+const pick = ({ flattering, liked, aspects }: FeltFeeling) => ({ flattering, liked, aspects });
+const worn = (item: ItemSummary, wornCount: number, lastWornDaysAgo: number | null, feeling: FeltFeeling | null = null) => ({
+  ...item,
+  wornCount,
+  lastWornDaysAgo,
+  addedDaysAgo: null,
+  feeling: feeling && pick(feeling),
+});
+
+export const WEAR_CASES: { name: string; input: SummarizeWearInput }[] = [
+  {
+    name: "thirty days, say vs wear and a short occasion",
+    input: {
+      windowDays: 30,
+      loggedDays: 26,
+      outfitCount: 31,
+      items: [
+        worn(SHIRT, 3, 9, SHIRT_FEELING),
+        worn(JEANS, 11, 0, JEANS_FEELING),
+        worn(SNEAKERS, 14, 1, SNEAKERS_FEELING),
+        worn(PROFILE_TROUSERS, 9, 2, {
+          flattering: "yes",
+          liked: "yes",
+          aspects: [{ aspect: "fit", sentiment: "positive", area: "waist", said: "the elastic back never digs in", means: "stretchy waistbands work" }],
+          mood: [],
+          summary: "",
+        }),
+        worn(PROFILE_TEE, 6, 3),
+        worn(PROFILE_SWEATER, 0, null),
+        worn(PROFILE_DRESS, 1, 24, {
+          flattering: "yes",
+          liked: "yes",
+          aspects: [{ aspect: "color", sentiment: "positive", said: "the mustard makes me glow", means: "warm yellows suit you" }],
+          mood: ["confident"],
+          summary: "",
+        }),
+      ],
+      occasions: [
+        { occasion: "school", wanted: 3, outfitsLogged: 18, distinctOutfits: 6 },
+        { occasion: "social", wanted: 2, outfitsLogged: 2, distinctOutfits: 2 },
+        { occasion: "sport", wanted: 3, outfitsLogged: 5, distinctOutfits: 1 },
       ],
     },
   },
