@@ -114,6 +114,9 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await page.goto("/profile");
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);
+  // Sizes show; the demo account is never anyone's buyer, so no Resale.
+  await expect(page.getByLabel("Tops & dresses")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resale" })).toHaveCount(0);
 
   // The server says no even when the page is skipped. The body is invalid on
   // purpose: if the block ever goes missing this fails with 400 and writes nothing.

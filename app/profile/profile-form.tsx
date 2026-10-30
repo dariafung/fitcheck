@@ -26,6 +26,7 @@ import {
   unitsCookieString,
   type Units,
 } from "@/lib/profile/units";
+import { LETTER_SIZES, SHOE_SIZE_OPTIONS } from "@/lib/resale/size";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -47,6 +48,22 @@ const OCCASION_LABELS: Record<Occasion, string> = {
 };
 
 const kindOf = (m: Measurement) => (m === "weightKg" ? "weight" : "length");
+
+// Picked from fixed lists; all three are required.
+const SIZES = ["topSize", "bottomSize", "shoeSize"] as const;
+type SizeField = (typeof SIZES)[number];
+
+const SIZE_LABELS: Record<SizeField, string> = {
+  topSize: "Tops & dresses",
+  bottomSize: "Bottoms",
+  shoeSize: "Shoes",
+};
+
+const SIZE_OPTIONS: Record<SizeField, { value: string; label: string }[]> = {
+  topSize: LETTER_SIZES.map((s) => ({ value: s, label: s })),
+  bottomSize: LETTER_SIZES.map((s) => ({ value: s, label: s })),
+  shoeSize: SHOE_SIZE_OPTIONS,
+};
 
 // text is what the box shows; metric is the cm / kg value behind it (null =
 // empty, NaN = not a number). Untouched fields keep their stored value
@@ -89,7 +106,13 @@ export function ProfileForm({
   const [mix, setMix] = useState(() =>
     Object.fromEntries(Occasion.options.map((o) => [o, String(initial.lifestyleMix[o])])) as Record<Occasion, string>,
   );
-  const [errors, setErrors] = useState<Partial<Record<Measurement | Occasion | "shape", string>>>({});
+  const [sizes, setSizes] = useState<Record<SizeField, string>>(() => ({
+    topSize: initial.topSize ?? "",
+    bottomSize: initial.bottomSize ?? "",
+    shoeSize: initial.shoeSize ?? "",
+  }));
+  const [resaleOptIn, setResaleOptIn] = useState(initial.resaleOptIn);
+  const [errors, setErrors] = useState<Partial<Record<Measurement | Occasion | SizeField | "shape", string>>>({});
   const [status, setStatus] = useState<Status>("idle");
 
   function edited() {
@@ -133,6 +156,9 @@ export function ProfileForm({
       }
     }
     if (!shape) found.shape = "Pick one.";
+    for (const s of SIZES) {
+      if (!sizes[s]) found[s] = "Pick a size.";
+    }
     for (const o of Occasion.options) {
       const n = Number(mix[o]);
       if (mix[o].trim() === "" || !Number.isInteger(n) || n < 0 || n > MAX_OUTFITS_WANTED) {
@@ -151,6 +177,8 @@ export function ProfileForm({
       ...Object.fromEntries(MEASUREMENTS.map((m) => [m, fields[m].metric])),
       bodyShape: shape,
       lifestyleMix: Object.fromEntries(Occasion.options.map((o) => [o, Number(mix[o])])),
+      ...sizes,
+      resaleOptIn,
     });
     if (Object.keys(found).length > 0 || !input.success) {
       setStatus("idle");
@@ -179,7 +207,7 @@ export function ProfileForm({
           <h2 id="body-heading" className="text-lg font-medium">
             Your body
           </h2>
-          <p className="text-sm text-ink-2">Height and weight are a must. The rest helps.</p>
+          <p className="text-sm text-ink-2">Height, weight and sizes are a must. The rest helps.</p>
           <div role="group" aria-label="Units" className="mt-3 flex self-start border border-ink text-sm">
             {(["imperial", "metric"] as const).map((u) => (
               <button
@@ -254,6 +282,39 @@ export function ProfileForm({
               </p>
             )}
           </fieldset>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+            {SIZES.map((s) => (
+              <div key={s} className="flex flex-col gap-1.5">
+                <label htmlFor={s} className="text-sm text-ink-2">
+                  {SIZE_LABELS[s]}
+                </label>
+                <select
+                  id={s}
+                  value={sizes[s]}
+                  onChange={(e) => {
+                    setSizes((prev) => ({ ...prev, [s]: e.target.value }));
+                    edited();
+                  }}
+                  aria-invalid={errors[s] ? true : undefined}
+                  aria-describedby={errors[s] ? `${s}-error` : undefined}
+                  className="field h-9 px-2"
+                >
+                  <option value="">Pick one</option>
+                  {SIZE_OPTIONS[s].map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                {errors[s] && (
+                  <p id={`${s}-error`} className={ERROR}>
+                    {errors[s]}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -295,6 +356,35 @@ export function ProfileForm({
           ))}
         </div>
       </section>
+
+      {/* The demo account is never anyone's buyer, so it doesn't see this. */}
+      {!readOnly && (
+        <section aria-labelledby="resale-heading" className={SECTION}>
+          <div className={SECTION_HEAD}>
+            <h2 id="resale-heading" className="text-lg font-medium">
+              Resale
+            </h2>
+            <p className="text-sm text-ink-2">Your name, email and measurements stay private.</p>
+          </div>
+          <div className={SECTION_BODY}>
+            <label className="flex items-start gap-3 text-base">
+              <input
+                type="checkbox"
+                checked={resaleOptIn}
+                onChange={(e) => {
+                  setResaleOptIn(e.target.checked);
+                  edited();
+                }}
+                className="mt-1 size-4 accent-ink"
+              />
+              <span className="flex flex-col gap-1">
+                I&apos;d take secondhand clothes
+                <span className="text-sm text-ink-2">People passing on clothes can be matched with you.</span>
+              </span>
+            </label>
+          </div>
+        </section>
+      )}
 
       <div className="flex items-center gap-4 md:pl-[calc((100%-11*16px)/12*5+5*16px)]">
         {readOnly ? (

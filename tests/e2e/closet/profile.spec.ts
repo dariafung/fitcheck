@@ -11,7 +11,8 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
 });
 
-const COLUMNS = "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix";
+const COLUMNS =
+  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, resale_opt_in";
 const BLANK = {
   height_cm: null,
   weight_kg: null,
@@ -21,6 +22,10 @@ const BLANK = {
   inseam_cm: null,
   body_shape: null,
   lifestyle_mix: { work: 0, school: 0, social: 0, sport: 0, home: 0 },
+  top_size: null,
+  bottom_size: null,
+  shoe_size: null,
+  resale_opt_in: false,
 };
 
 let original: Record<string, unknown>;
@@ -57,11 +62,12 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   const weight = page.getByLabel("Weight", { exact: true });
   await expect(height).toHaveValue("");
 
-  // Nothing is saved until height, weight and body shape are in.
+  // Nothing is saved until height, weight, body shape and sizes are in.
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Add your height.")).toBeVisible();
   await expect(page.getByText("Add your weight.")).toBeVisible();
   await expect(page.getByText("Pick one.")).toBeVisible();
+  await expect(page.getByText("Pick a size.")).toHaveCount(3);
 
   await height.fill("65");
   await expect(page.getByText("5 ft 5 in")).toBeVisible();
@@ -69,17 +75,26 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await page.getByLabel("Hips", { exact: true }).fill("37");
   await page.locator("label", { hasText: /^Pear$/ }).click();
   await expect(page.getByRole("radio", { name: "Pear" })).toBeChecked();
+  await page.getByLabel("Tops & dresses").selectOption("M");
+  await page.getByLabel("Bottoms").selectOption("S");
+  await page.getByLabel("Shoes").selectOption({ label: "Women's 7.5" });
   await page.getByLabel("School", { exact: true }).fill("4");
   await page.getByLabel("Social", { exact: true }).fill("2");
+  await page.getByRole("checkbox", { name: /I'd take secondhand clothes/ }).check();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status")).toHaveText("Saved");
   await expect(page.getByText("Add your height.")).toHaveCount(0);
+  await expect(page.getByText("Pick a size.")).toHaveCount(0);
 
   const saved = await savedProfile();
   expect(saved).toMatchObject({
     body_shape: "pear",
     bust_cm: null,
     lifestyle_mix: { work: 0, school: 4, social: 2, sport: 0, home: 0 },
+    top_size: "M",
+    bottom_size: "S",
+    shoe_size: "W7.5",
+    resale_opt_in: true,
   });
   expect(saved?.height_cm).toBeCloseTo(165.1, 1);
   expect(saved?.weight_kg).toBeCloseTo(58.1, 1);
@@ -90,6 +105,8 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(weight).toHaveValue("128");
   await expect(page.getByLabel("School", { exact: true })).toHaveValue("4");
   await expect(page.getByRole("radio", { name: "Pear" })).toBeChecked();
+  await expect(page.getByLabel("Shoes")).toHaveValue("W7.5");
+  await expect(page.getByRole("checkbox", { name: /I'd take secondhand clothes/ })).toBeChecked();
 });
 
 test("units switch to cm / kg and stay that way after a refresh", async ({ page }) => {

@@ -17,6 +17,10 @@ const INPUT = {
   inseamCm: null,
   bodyShape: "hourglass",
   lifestyleMix: { work: 5, school: 0, social: 3, sport: 2, home: 4 },
+  topSize: "M",
+  bottomSize: "L",
+  shoeSize: "W8.5",
+  resaleOptIn: true,
 };
 
 // A brand-new user: nothing filled in yet.
@@ -52,6 +56,10 @@ describe("GET /api/profile", () => {
       inseamCm: null,
       bodyShape: null,
       lifestyleMix: { work: 0, school: 0, social: 0, sport: 0, home: 0 },
+      topSize: null,
+      bottomSize: null,
+      shoeSize: null,
+      resaleOptIn: false,
     });
   });
 
@@ -82,11 +90,49 @@ describe("PUT /api/profile", () => {
 
     const { data } = await db
       .from("users")
-      .select("height_cm, body_shape, lifestyle_mix")
+      .select("height_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, resale_opt_in")
       .eq("id", user.id)
       .single()
       .throwOnError();
-    expect(data).toEqual({ height_cm: 170, body_shape: "hourglass", lifestyle_mix: INPUT.lifestyleMix });
+    expect(data).toEqual({
+      height_cm: 170,
+      body_shape: "hourglass",
+      lifestyle_mix: INPUT.lifestyleMix,
+      top_size: "M",
+      bottom_size: "L",
+      shoe_size: "W8.5",
+      resale_opt_in: true,
+    });
+  });
+
+  it("requires all three sizes, whether or not the user takes secondhand clothes", async () => {
+    for (const bad of [
+      { ...INPUT, topSize: null },
+      { ...INPUT, bottomSize: undefined },
+      { ...INPUT, shoeSize: null, resaleOptIn: false },
+      { ...INPUT, topSize: "XXXL" },
+      { ...INPUT, shoeSize: "8.5" },
+      { ...INPUT, shoeSize: "W15.5" },
+      { ...INPUT, resaleOptIn: undefined },
+    ]) {
+      expect((await put(bad)).status).toBe(400);
+    }
+    expect((await (await GET()).json()).profile.topSize).toBeNull();
+  });
+
+  it("keeps the sizes when the user stops taking secondhand clothes", async () => {
+    await put(INPUT);
+    const { profile } = await (await put({ ...INPUT, resaleOptIn: false })).json();
+    expect(profile).toMatchObject({ resaleOptIn: false, topSize: "M", shoeSize: "W8.5" });
+  });
+
+  it("has the database refuse sizes off the lists", async () => {
+    await expect(
+      db.from("users").update({ shoe_size: "W8.0" }).eq("id", user.id).throwOnError(),
+    ).rejects.toThrow();
+    await expect(
+      db.from("users").update({ top_size: "XXXL" }).eq("id", user.id).throwOnError(),
+    ).rejects.toThrow();
   });
 
   it("clears optional measurements that are sent as null", async () => {

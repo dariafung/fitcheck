@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { LifestyleMix } from "../ai/schemas/common";
 import type { Db } from "../db/server";
+import { LetterSize, ShoeSize } from "../resale/size";
 
 export const BODY_SHAPES = ["pear", "apple", "hourglass", "rectangle", "inverted_triangle"] as const;
 export const BodyShape = z.enum(BODY_SHAPES);
@@ -32,8 +33,9 @@ export const REQUIRED_MEASUREMENTS: readonly Measurement[] = ["heightCm", "weigh
 
 const measure = (m: Measurement) => z.number().min(MEASUREMENT_LIMITS[m].min).max(MEASUREMENT_LIMITS[m].max);
 
-// What PUT /api/profile accepts: height, weight and body shape are required;
-// the other measurements may be null.
+// What PUT /api/profile accepts: height, weight, body shape and the three
+// sizes are required; the other measurements may be null. resaleOptIn says
+// whether people passing on clothes may be matched with this user.
 export const ProfileInput = z.strictObject({
   heightCm: measure("heightCm"),
   weightKg: measure("weightKg"),
@@ -43,6 +45,10 @@ export const ProfileInput = z.strictObject({
   inseamCm: measure("inseamCm").nullable(),
   bodyShape: BodyShape,
   lifestyleMix: LifestyleMix,
+  topSize: LetterSize,
+  bottomSize: LetterSize,
+  shoeSize: ShoeSize,
+  resaleOptIn: z.boolean(),
 });
 export type ProfileInput = z.infer<typeof ProfileInput>;
 
@@ -50,11 +56,16 @@ export type ProfileInput = z.infer<typeof ProfileInput>;
 export type Profile = Record<Measurement, number | null> & {
   bodyShape: BodyShape | null;
   lifestyleMix: LifestyleMix;
+  topSize: LetterSize | null;
+  bottomSize: LetterSize | null;
+  shoeSize: ShoeSize | null;
+  resaleOptIn: boolean;
 };
 
 export const EMPTY_MIX: LifestyleMix = { work: 0, school: 0, social: 0, sport: 0, home: 0 };
 
-const COLUMNS = "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix";
+const COLUMNS =
+  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, resale_opt_in";
 
 interface Row {
   height_cm: number | null;
@@ -65,6 +76,10 @@ interface Row {
   inseam_cm: number | null;
   body_shape: string | null;
   lifestyle_mix: unknown;
+  top_size: string | null;
+  bottom_size: string | null;
+  shoe_size: string | null;
+  resale_opt_in: boolean;
 }
 
 const num = (v: number | null) => (v === null ? null : Number(v));
@@ -83,6 +98,10 @@ function toProfile(row: Row): Profile {
     inseamCm: num(row.inseam_cm),
     bodyShape: shape.success ? shape.data : null,
     lifestyleMix: mix.success ? mix.data : EMPTY_MIX,
+    topSize: LetterSize.safeParse(row.top_size).data ?? null,
+    bottomSize: LetterSize.safeParse(row.bottom_size).data ?? null,
+    shoeSize: ShoeSize.safeParse(row.shoe_size).data ?? null,
+    resaleOptIn: row.resale_opt_in,
   };
 }
 
@@ -108,6 +127,10 @@ export async function saveProfile(db: Db, userId: string, input: ProfileInput): 
       inseam_cm: round1OrNull(input.inseamCm),
       body_shape: input.bodyShape,
       lifestyle_mix: input.lifestyleMix,
+      top_size: input.topSize,
+      bottom_size: input.bottomSize,
+      shoe_size: input.shoeSize,
+      resale_opt_in: input.resaleOptIn,
     })
     .eq("id", userId)
     .select(COLUMNS)
