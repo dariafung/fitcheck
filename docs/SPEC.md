@@ -34,7 +34,7 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 | P1-1 | Voice feelings | Hold to talk, up to 3 minutes → converted to 16 kHz WAV in the browser → uploaded straight to Supabase Storage → transcribed on the server → same structuring flow as P0-3; English only | Recording works in Chrome and Safari; English transcribes | Voice Transcribe | Typing only |
 | P1-2 | Outfit preview | In the purchase check, combine "new item + 2 owned items" into one flat-lay / invisible-mannequin outfit image, **no human body**; web and image search turned off; shown side by side with a collage of the real item photos, labeled as AI-generated | Colors and styles are recognizable at a glance; demo outfits pre-generated | Muse Image | Collage only |
 | P1-3 | Style profile | One card on home, under "Good for today", summing up all active items and their feelings: a headline, then one row per topic (colors, fit, fabrics, length, style, where you wear it) with what works and what to skip. Written as conclusions, never quoting the notes. Needs 3 parsed feelings; rebuilt when home opens after the closet changed, at most once a minute per user; the demo account shows a seeded card | Every statement has sources (items and their feelings) in the backend; the card doesn't show them | Spark 1.3 | Used in the backend only, card not shown |
-| P1-4 | Daily outfit insights | Tick what you wore today; 30 days of seed data show wear counts, idle items and "what you say vs. what you wear" | At least one insight worth showing in the video | Spark 1.3 | Stats only, no generated insight |
+| P1-4 | Daily outfit insights | Calendar in the top bar: tick what you wore on a day (today or up to 30 days back), several outfits a day, each with an optional occasion; 30 days of seed data, made up from whatever the persona's closet holds, show wear counts (per outfit), idle items, "what you say vs. what you wear" and outfits per occasion against the lifestyle mix; Spark writes up to 3 insights, cached and redone at most once a day when the log changes; can be turned off in Profile (the log is kept) | At least one insight worth showing in the video | Spark 1.3 | Stats only, no generated insight |
 | P1-5 | Resale matching (lite) | Mark an item "pass on"; rank the top 3 of 5–10 preset buyers with reasons; no transactions | Ranking and reasons make sense | Spark 1.3 | Shown as a mockup in the video |
 
 ## P2: only if time allows
@@ -92,6 +92,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 | `judgeRepeat` | New item + all active items → not-a-repeat score 0–10 + the most similar item + reason | Spark 1.3 |
 | `renderOutfit` | 3 item images → one outfit image | Muse Image |
 | `buildProfile` | Active items + parsed feelings → headline + what works / what to skip per topic, each citing items | Spark 1.3 |
+| `summarizeWear` | 30 days of wear counts per active item + their feelings + outfits per occasion → up to 3 insights, each citing items | Spark 1.3 |
 | `segmentGarment` | On-model image + category word → transparent cutout (P2) | SAM 3.1 |
 
 **Gap algorithm**: keep an "item → items it pairs with" table and let code enumerate complete outfits. Three parts for a new item, all linear: outfits it forms, 2.5 each, up to 20; owned items that had no outfit and now have one, 4 each, up to 15 (the new item itself doesn't count); fills a gap, for occasions the user wants outfits for: each added outfit earns 5 × how short the occasion was (short ÷ wanted, before the new item), only up to the shortfall, occasions added up to 15, and an occasion that already has enough earns 0. If it forms no outfit at all, we say what's missing for each way to build an outfit around it (shoes: a top and bottom, or a one-piece); when the closet has none of those categories it's a plain note that says what does go with it and what's missing ("Your tops could go with this, but you have no shoes yet", or "Nothing in your closet to wear these with yet" when nothing does), otherwise a warning that it creates a gap. Constants get tuned during testing.
@@ -109,12 +110,13 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 
 | Table | Main fields | Priority |
 | --- | --- | --- |
-| `users` | Measurements, body shape, lifestyle mix, resale opt-in | P0 |
+| `users` | Measurements, body shape, lifestyle mix, resale opt-in, outfit calendar on / off | P0 |
 | `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / passing on) | P0 |
 | `item_feelings` | Raw text, source (typed / voice), structured fields | P0 |
 | `pairings` | Item A, item B, pairs or not, reason, source (rule / AI) | P0 |
 | `style_profiles` | One per user: headline, suits, avoid (each with topic and source items), input hash, generated at | P1 |
-| `outfit_logs` | Date, items, occasion | P1 |
+| `outfit_logs` | One row per outfit (several a day): date, items (sorted, unique per day), occasion | P1 |
+| `wear_insights` | One per user: insights about the outfit log, input hash, generated at | P1 |
 | `resale_buyers` | Preset buyer profiles and preferences | P1 |
 
 ## Schedule
