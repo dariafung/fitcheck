@@ -1,0 +1,26 @@
+{
+  "promptVersion": "placeholder",
+  "inputHash": "3c5b0768bb80da12849f26be35ac9c0789bc36b7b681437260e2bd655ea7274e",
+  "headline": {
+    "text": "Casual basics in white and indigo.",
+    "evidenceItemIds": ["852c8e3d-abf7-4955-ab65-9d83194a02ae", "c81b2b56-1f62-4284-83b6-7307a6355ac5"]
+  },
+  "suits": [
+    {
+      "topic": "color",
+      "text": "Mostly white and indigo.",
+      "evidenceItemIds": ["852c8e3d-abf7-4955-ab65-9d83194a02ae", "c81b2b56-1f62-4284-83b6-7307a6355ac5", "23c59091-9b18-4c24-92c3-1072a5581d8e"]
+    },
+    {
+      "topic": "feel",
+      "text": "Cotton, denim and leather.",
+      "evidenceItemIds": ["852c8e3d-abf7-4955-ab65-9d83194a02ae", "c81b2b56-1f62-4284-83b6-7307a6355ac5", "23c59091-9b18-4c24-92c3-1072a5581d8e"]
+    },
+    {
+      "topic": "style",
+      "text": "Casual, easy pieces.",
+      "evidenceItemIds": ["852c8e3d-abf7-4955-ab65-9d83194a02ae", "c81b2b56-1f62-4284-83b6-7307a6355ac5", "23c59091-9b18-4c24-92c3-1072a5581d8e"]
+    }
+  ],
+  "avoid": []
+}

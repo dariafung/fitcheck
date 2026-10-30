@@ -1,4 +1,5 @@
-// Loads the fictional demo persona, items and feelings into the database.
+// Loads the fictional demo persona, items, feelings and style card into the
+// database.
 // Idempotent: rows have fixed ids and are upserted. Item photos listed in
 // items.json image_paths are uploaded from seed/images/.
 //
@@ -85,8 +86,30 @@ const upserted = await db.from("items").upsert(items);
 if (upserted.error) throw upserted.error;
 const felt = await db.from("item_feelings").upsert(feelings);
 if (felt.error) throw felt.error;
+// The persona's style card; a placeholder until a real one is recorded.
+const card = readJson("style-profile.json") as {
+  promptVersion: string;
+  inputHash: string;
+  headline: unknown;
+  suits: unknown;
+  avoid: unknown;
+};
+const styled = await db.from("style_profiles").upsert(
+  {
+    user_id: persona.id,
+    headline: card.headline,
+    suits: card.suits,
+    avoid: card.avoid,
+    input_hash: card.inputHash,
+    prompt_version: card.promptVersion,
+    generated_at: new Date().toISOString(),
+    generating_token: null,
+  },
+  { onConflict: "user_id" },
+);
+if (styled.error) throw styled.error;
 
 console.log(
-  `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings and ${imagePaths.length} images` +
+  `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card and ${imagePaths.length} images` +
     (remote ? " into the hosted project." : "."),
 );

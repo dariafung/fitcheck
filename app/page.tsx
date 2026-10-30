@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { GoodForToday, GoodForTodaySkeleton } from "@/components/closet/good-for-today";
+import { StyleCard } from "@/components/closet/style-card";
+import { StyleCardSkeleton } from "@/components/closet/style-card-view";
 
 // /check belongs to the check lane; home only links to it.
 export default function Home() {
@@ -16,6 +18,9 @@ export default function Home() {
       </Link>
       <Suspense fallback={<GoodForTodaySkeleton />}>
         <GoodForToday />
+      </Suspense>
+      <Suspense fallback={<StyleCardSkeleton />}>
+        <StyleCard />
       </Suspense>
     </div>
   );
