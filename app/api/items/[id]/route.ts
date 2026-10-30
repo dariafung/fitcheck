@@ -13,8 +13,9 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/items/[id]">) {
   return Response.json({ item });
 }
 
-// Edits the item's details (name, brand, tags) and/or its status (active or
-// passing_on). Returns the item as GET does, with the edit applied.
+// Edits the item's details (name, brand, tags), its status (active or
+// passing_on) and/or its size. Returns the item as GET does, with the edit
+// applied. An item can't be passing on without a size.
 export async function PATCH(req: Request, ctx: RouteContext<"/api/items/[id]">) {
   const writer = await requireWriter();
   if ("denied" in writer) return writer.denied;
@@ -24,9 +25,9 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/items/[id]">) 
     return Response.json({ error: "invalid_item", issues: body.error.issues }, { status: 400 });
   }
   const db = createServerClient();
-  if (!(await updateClosetItem(db, writer.userId, id, body.data))) {
-    return Response.json({ error: "Not found" }, { status: 404 });
-  }
+  const result = await updateClosetItem(db, writer.userId, id, body.data);
+  if (result === "not_found") return Response.json({ error: "Not found" }, { status: 404 });
+  if (result === "size_required") return Response.json({ error: "size_required" }, { status: 400 });
   return Response.json({ item: await getClosetItem(db, writer.userId, id) });
 }
 

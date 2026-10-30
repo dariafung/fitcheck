@@ -2,34 +2,63 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { DEMO_READ_ONLY } from "@/lib/auth/messages";
 import type { ItemStatus } from "@/lib/closet/item-patch";
+import { patchItem, SizeForm } from "./size-form";
 
 // Moves an item between worn (active) and Passing on, and back. No confirm
-// step: it's one tap to undo.
-export function PassOnToggle({ itemId, status }: { itemId: string; status: ItemStatus }) {
+// step: it's one tap to undo. An item without a size asks for one first,
+// in place, since buyers are matched by it.
+export function PassOnToggle({
+  itemId,
+  status,
+  size,
+}: {
+  itemId: string;
+  status: ItemStatus;
+  size: string | null;
+}) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [askingSize, setAskingSize] = useState(false);
   // Until the refreshed page brings the new status (and label) back.
   const [refreshing, startRefresh] = useTransition();
   const busy = saving || refreshing;
   const [problem, setProblem] = useState<string | null>(null);
   const next: ItemStatus = status === "passing_on" ? "active" : "passing_on";
 
+  async function send(body: { status: ItemStatus; size?: string }): Promise<string | null> {
+    const failed = await patchItem(itemId, body);
+    if (!failed) {
+      startRefresh(() => {
+        setAskingSize(false);
+        router.refresh();
+      });
+    }
+    return failed;
+  }
+
   async function toggle() {
-    setSaving(true);
-    setProblem(null);
-    const res = await fetch(`/api/items/${itemId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: next }),
-    }).catch(() => null);
-    setSaving(false);
-    if (!res?.ok) {
-      setProblem(res?.status === 403 ? DEMO_READ_ONLY : "Couldn't save. Try again.");
+    if (next === "passing_on" && !size) {
+      setProblem(null);
+      setAskingSize(true);
       return;
     }
-    startRefresh(() => router.refresh());
+    setSaving(true);
+    setProblem(null);
+    setProblem(await send({ status: next }));
+    setSaving(false);
+  }
+
+  if (askingSize) {
+    return (
+      <SizeForm
+        initial=""
+        submitLabel="Pass it on"
+        busyLabel="Saving…"
+        onSave={(typed) => send({ status: "passing_on", size: typed })}
+        onCancel={() => setAskingSize(false)}
+      />
+    );
   }
 
   return (
