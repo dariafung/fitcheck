@@ -26,7 +26,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   const [cover, ...more] = item.imageUrls;
   const byline = [item.brand, categoryLabel(item.category)].filter(Boolean).join(" · ");
   const status = item.status === "passing_on" ? "passing_on" : "active";
-  const details = { title: item.title, brand: item.brand, tags: item.tags, imageUrls: item.imageUrls };
+  const details = { title: item.title, brand: item.brand, size: item.size, tags: item.tags, imageUrls: item.imageUrls };
 
   return (
     <ItemEditor itemId={item.id} details={details}>

@@ -2,6 +2,7 @@
 // No server-only imports here: the client bundles this file.
 import { z } from "zod";
 import { ItemTags } from "@/lib/ai/schemas/common";
+import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 
 const WebSource = z.object({ field: z.string(), url: z.url() });
 
@@ -27,6 +28,8 @@ export const SaveItemRequest = z.object({
   entryMethod: z.literal("screenshot"),
   title: z.string().trim().min(1).max(200),
   brand: z.string().trim().max(120).optional(),
+  // As typed; empty means none.
+  size: z.string().trim().max(MAX_ITEM_SIZE_LENGTH).optional(),
   priceCents: z.int().nonnegative().optional(),
   currency: z.string().max(8).optional(),
   imagePaths: z.array(z.string()).max(3),

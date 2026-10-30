@@ -6,6 +6,7 @@ import type { Category, ItemTags, Occasion } from "@/lib/ai/schemas/common";
 import { CATEGORY_LABELS, FIELD_LABELS, FORMALITY_LABELS, capitalize } from "@/lib/closet/labels";
 import { COLOR_FAMILIES, COLOR_FAMILY_HEX, type ColorFamily } from "@/lib/color-families";
 import type { ItemDraft } from "@/lib/entry/draft";
+import { ITEM_SIZE_PLACEHOLDER, MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 import { TEMP_F_MAX, TEMP_F_MIN } from "@/lib/temperature";
 import { readTempRange } from "./temp-range";
 
@@ -17,6 +18,8 @@ const FIELD = "field";
 export interface EditedItem {
   title: string;
   brand?: string;
+  // Only from a card with a size field; empty when left blank.
+  size?: string;
   tags: ItemTags;
 }
 
@@ -58,6 +61,8 @@ export function ItemCard({
   heading = "Look right?",
   hint = "Fix anything that's off, then save.",
   actions,
+  withSize = false,
+  initialSize = null,
 }: {
   draft: ItemDraft;
   saving: boolean;
@@ -68,9 +73,13 @@ export function ItemCard({
   hint?: string;
   // Shown next to the submit button, e.g. Cancel and an error when editing.
   actions?: ReactNode;
+  // An optional, typed size: for items saved to the closet, not buy checks.
+  withSize?: boolean;
+  initialSize?: string | null;
 }) {
   const [title, setTitle] = useState(draft.title);
   const [brand, setBrand] = useState(draft.brand ?? "");
+  const [size, setSize] = useState(initialSize ?? "");
   const [tags, setTags] = useState<ItemTags>(draft.tags);
   const [colors, setColors] = useState(draft.tags.colors.map((c) => c.name).join(", "));
   const [materials, setMaterials] = useState(draft.tags.materials.join(", "));
@@ -92,6 +101,7 @@ export function ItemCard({
     onSave({
       title: title.trim(),
       brand: brand.trim() || undefined,
+      ...(withSize && { size: size.trim() }),
       tags: {
         ...tags,
         colors: splitList(colors).map((name) => known.get(name.toLowerCase()) ?? { name }),
@@ -176,6 +186,20 @@ export function ItemCard({
             <input id={id} className={FIELD} value={brand} maxLength={120} onChange={(e) => setBrand(e.target.value)} />
           )}
         </Field>
+        {withSize && (
+          <Field label="Size">
+            {(id) => (
+              <input
+                id={id}
+                className={FIELD}
+                value={size}
+                maxLength={MAX_ITEM_SIZE_LENGTH}
+                placeholder={ITEM_SIZE_PLACEHOLDER}
+                onChange={(e) => setSize(e.target.value)}
+              />
+            )}
+          </Field>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <Field label={FIELD_LABELS.category} unsure={unsure.has("category")}>

@@ -64,6 +64,7 @@ export function AddByScreenshot() {
       entryMethod: "screenshot",
       title: edited.title,
       brand: edited.brand,
+      size: edited.size,
       priceCents: draft.priceCents,
       currency: draft.currency,
       imagePaths: draft.imagePaths,
@@ -165,6 +166,7 @@ export function AddByScreenshot() {
         <ItemCard
           key={step.draft.imagePaths.join()}
           draft={step.draft}
+          withSize
           saving={step.saving}
           onSave={(edited) => save(step.draft, edited)}
         />
