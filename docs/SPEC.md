@@ -35,7 +35,7 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 | P1-2 | Outfit preview | In the purchase check, combine "new item + 2 owned items" into one flat-lay / invisible-mannequin outfit image, **no human body**; web and image search turned off; shown side by side with a collage of the real item photos, labeled as AI-generated | Colors and styles are recognizable at a glance; demo outfits pre-generated | Muse Image | Collage only |
 | P1-3 | Style profile | One card on home, under "Good for today", summing up all active items and their feelings: a headline, then one row per topic (colors, fit, fabrics, length, style, where you wear it) with what works and what to skip. Written as conclusions, never quoting the notes. Needs 3 parsed feelings; rebuilt when home opens after the closet changed, at most once a minute per user; the demo account shows a seeded card | Every statement has sources (items and their feelings) in the backend; the card doesn't show them | Spark 1.3 | Used in the backend only, card not shown |
 | P1-4 | Daily outfit insights | Tick what you wore today; 30 days of seed data show wear counts, idle items and "what you say vs. what you wear" | At least one insight worth showing in the video | Spark 1.3 | Stats only, no generated insight |
-| P1-5 | Resale matching (lite) | Mark an item "pass on"; rank the top 3 of 5–10 preset buyers with reasons; no transactions | Ranking and reasons make sense | Spark 1.3 | Shown as a mockup in the video |
+| P1-5 | Resale matching (lite) | Mark an item "pass on" (it needs a size, typed as on the label). Opted-in users whose profile sizes fit get the buy check run from their side; the seller sees everyone scoring 60+ as an anonymous avatar and score, best first. The demo persona is matched only with seeded sample buyers. No transactions | Matches and scores make sense | Spark 1.3 (the buy check's calls) | Shown as a mockup in the video |
 
 ## P2: only if time allows
 
@@ -109,13 +109,14 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 
 | Table | Main fields | Priority |
 | --- | --- | --- |
-| `users` | Measurements, body shape, lifestyle mix, resale opt-in | P0 |
-| `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / passing on) | P0 |
+| `users` | Measurements, body shape, lifestyle mix, sizes (top and bottom XS–XXL, shoe as W7.5 / M9), resale opt-in | P0 |
+| `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / passing on), size as typed | P0 |
 | `item_feelings` | Raw text, source (typed / voice), structured fields | P0 |
 | `pairings` | Item A, item B, pairs or not, reason, source (rule / AI) | P0 |
 | `style_profiles` | One per user: headline, suits, avoid (each with topic and source items), input hash, generated at | P1 |
 | `outfit_logs` | Date, items, occasion | P1 |
-| `resale_buyers` | Preset buyer profiles and preferences | P1 |
+| `resale_matches` | Passing-on item × buyer: buy check score, what the seller may see, the buyer's own reasons, fingerprint, checked at | P1 |
+| `resale_buyers` | Unused: buyers are opted-in users | P1 |
 
 ## Schedule
 
