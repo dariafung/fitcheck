@@ -32,7 +32,7 @@ P1 makes the demo memorable and lifts the Meta tooling score. Each item has a fa
 | # | Feature | What it does | Done when | Model | Fallback |
 | --- | --- | --- | --- | --- | --- |
 | P1-1 | Voice feelings | Hold to talk, up to 3 minutes → converted to 16 kHz WAV in the browser → uploaded straight to Supabase Storage → transcribed on the server → same structuring flow as P0-3; English only | Recording works in Chrome and Safari; English transcribes | Voice Transcribe | Typing only |
-| P1-2 | Outfit preview | In the purchase check, combine "new item + 2 owned items" into one flat-lay / invisible-mannequin outfit image, **no human body**; web and image search turned off; shown side by side with a collage of the real item photos, labeled as AI-generated | Colors and styles are recognizable at a glance; demo outfits pre-generated | Muse Image | Collage only |
+| P1-2 | Outfit boards | Each sample outfit in the purchase check (2–4 pieces) is laid out as an outfit board: the real item photos on white, each piece on its own, staggered like a flat-lay collage, **no human body**. Plain light backgrounds are cut away in code for free. An on-model photo is redrawn by Muse Image as the garment alone on white when it comes in: when an item is added (only the cut-out is stored) and when an item is checked (not stored); the card says "Photo cleaned up by AI." and offers the original until it is saved. Web and image search turned off | Colors and styles are recognizable at a glance; no person on any board | Muse Image | Original photo kept; boards fall back to rows of photos |
 | P1-3 | Style profile | One card on home, under "Good for today", summing up all active items and their feelings: a headline, then one row per topic (colors, fit, fabrics, length, style, where you wear it) with what works and what to skip. Written as conclusions, never quoting the notes. Needs 3 parsed feelings; rebuilt when home opens after the closet changed, at most once a minute per user; the demo account shows a seeded card | Every statement has sources (items and their feelings) in the backend; the card doesn't show them | Spark 1.3 | Used in the backend only, card not shown |
 | P1-4 | Daily outfit insights | Tick what you wore today; 30 days of seed data show wear counts, idle items and "what you say vs. what you wear" | At least one insight worth showing in the video | Spark 1.3 | Stats only, no generated insight |
 | P1-5 | Resale matching (lite) | Mark an item "pass on"; rank the top 3 of 5–10 preset buyers with reasons; no transactions | Ranking and reasons make sense | Spark 1.3 | Shown as a mockup in the video |
@@ -91,7 +91,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 | `judgeRepeat` | New item + all active items → not-a-repeat score 0–10 + the most similar item + reason | Spark 1.3 |
 | `renderOutfit` | 3 item images → one outfit image | Muse Image |
 | `buildProfile` | Active items + parsed feelings → headline + what works / what to skip per topic, each citing items | Spark 1.3 |
-| `segmentGarment` | On-model image + category word → transparent cutout (P2) | SAM 3.1 |
+| `segmentGarment` | On-model image + category word → the garment alone on white (P1-2; SAM 3.1 may replace it in P2-1) | Muse Image |
 
 **Gap algorithm**: keep an "item → items it pairs with" table and let code enumerate complete outfits. Three parts for a new item, all linear: outfits it forms, 2.5 each, up to 20; owned items that had no outfit and now have one, 4 each, up to 15 (the new item itself doesn't count); fills a gap, for occasions the user wants outfits for: each added outfit earns 5 × how short the occasion was (short ÷ wanted, before the new item), only up to the shortfall, occasions added up to 15, and an occasion that already has enough earns 0. If it forms no outfit at all, we say what's missing for each way to build an outfit around it (shoes: a top and bottom, or a one-piece); when the closet has none of those categories it's a plain note that says what does go with it and what's missing ("Your tops could go with this, but you have no shoes yet", or "Nothing in your closet to wear these with yet" when nothing does), otherwise a warning that it creates a gap. Constants get tuned during testing.
 
@@ -100,7 +100,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 - The AI layer has three modes: mock (fake data), live (real calls) and replay (real responses recorded and replayed by input hash, so development costs nothing and the demo has a safety net)
 - Stable results come from caching, code-counted parts and narrow integer model scores, not from tuning temperature
 - The Meta console has no hard spending cap: the app keeps a daily budget counter and rate-limits by IP
-- Muse Image requests turn off `enable_web_search` and `enable_image_search`; generated images are copied to our storage right away and cached by "item ids + prompt version"
+- Muse Image requests turn off `enable_web_search`, `enable_image_search` and `enable_shell`; a cleaned-up photo replaces the original before the item is saved, and the item being checked is never stored
 - Secrets live only in the keychain, `.env.local` and Vercel environment variables, never in git
 - Weather: Open-Meteo forecast and geocoding (free, no key, credited on the page). Location order: picked city → device location → Vercel IP headers → Madison. The location and the unit choice live in browser cookies, never in the database; automated tests use `WEATHER_MODE=fixed` and never call Open-Meteo
 
@@ -139,7 +139,7 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 | --- | --- |
 | Store pages block fetching, worse from data-center IPs after deploy | Entry is screenshot + search only; demo items preloaded |
 | Screenshot + search misses details such as material | Verify in the small test; if missing, the user pastes that block of text |
-| Muse Image fidelity too low | Verify in the small test; otherwise show the collage only |
+| Muse Image fidelity too low | Small test passed on an on-model photo (low effort, about 10 s); the user can keep the original photo before saving; boards use real photos |
 | Purchase check results unstable | Outfits, revives and gaps counted in code; the model only gives integer scores (0–8, 0–10) with reasons; caching; 10/31 checkpoint |
 | Charges go to the card once credits run out | In-app daily budget + rate limits; watch usage |
 | Supabase free project pauses after a week idle | Daily scheduled ping |
