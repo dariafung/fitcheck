@@ -35,6 +35,8 @@ export async function POST(request: Request) {
     return aiErrorResponse(err);
   }
   if (!extracted.recognized) return fail("unrecognized");
+  // The closet holds clothes and shoes only.
+  if (extracted.tags.category === "accessory") return fail("accessory");
 
   const photo = await productPhoto(shot, extracted.productBox);
   const db = createServerClient();

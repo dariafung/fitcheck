@@ -14,6 +14,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_item", issues: body.error.issues }, { status: 400 });
   }
   const item = body.data;
+  // The closet holds clothes and shoes only; the add page never offers it.
+  if (item.tags.category === "accessory") {
+    return Response.json({ error: "accessory" }, { status: 400 });
+  }
   const { userId } = writer;
   if (!item.imagePaths.every((path) => isOwnImagePath(path, userId))) {
     return Response.json({ error: "invalid_item" }, { status: 400 });

@@ -7,6 +7,7 @@ import { liveJudgeRepeat } from "./live/judge-repeat";
 import { notImplemented } from "./live/not-implemented";
 import { liveParseFeeling } from "./live/parse-feeling";
 import { liveScorePurchase } from "./live/score-purchase";
+import { liveSegmentGarment } from "./live/segment-garment";
 import { liveSummarizeWear } from "./live/summarize-wear";
 import { liveTranscribe } from "./live/transcribe";
 import { mockBuildProfile } from "./mock/build-profile";
@@ -113,7 +114,7 @@ export const segmentGarment = defineAiFunction({
   input: segmentGarmentSchema.SegmentGarmentInput,
   output: segmentGarmentSchema.SegmentGarmentOutput,
   mock: mockSegmentGarment,
-  live: notImplemented("segmentGarment"),
+  live: liveSegmentGarment,
 });
 
 export const summarizeWear = defineAiFunction({

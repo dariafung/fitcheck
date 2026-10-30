@@ -161,7 +161,7 @@ export function gapReason(options: MissingSlot[][], kind: GapKind, candidate: Ca
   return `Creates a gap: ${unique.map(whatsMissing).join(", or ")}.`;
 }
 
-export const ACCESSORY_NOTICE = "Accessories aren't supported yet. Try clothes or shoes.";
+export const ACCESSORY_NOTICE = "We only check clothes and shoes.";
 
 // Sent with a 200 when the model never finished scoring; the page offers to
 // try again.

@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { AiBudgetError } from "../../../lib/ai/errors";
 import { aiErrorResponse } from "../../../lib/ai/http";
 import { AI_BUDGET_NOTICE } from "../../../lib/ai/notices";
+import { ACCESSORY_NOT_ADDED } from "../../../components/entry/messages";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
@@ -131,5 +132,96 @@ test("when the day's AI budget is spent, the page says so", async ({ page }) => 
   });
   await expect(page.getByRole("status")).toContainText(AI_BUDGET_NOTICE);
   await expect(page.getByRole("form", { name: "Item details" })).toBeHidden();
+  await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
+});
+
+test("an on-model photo is cut out by AI before the card shows, and can be undone", async ({ page }) => {
+  // Mark the mock draft as on-model; everything else is the real flow.
+  let originalPath = "";
+  await page.route("**/api/items/extract", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    originalPath = json.draft.imagePaths[0];
+    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
+  });
+  await page.goto("/closet/add");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "on-model.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+
+  const card = page.getByRole("form", { name: "Item details" });
+  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  await card.getByLabel("Name").fill("Cut-out tee");
+
+  // Back to the original and then save: the name typed above stays.
+  await page.getByRole("button", { name: "Use original photo" }).click();
+  await expect(page.getByText("Photo cleaned up by AI.")).toBeHidden();
+  await expect(card.getByLabel("Name")).toHaveValue("Cut-out tee");
+  const saved = page.waitForResponse((res) => res.url().endsWith("/api/items") && res.request().method() === "POST");
+  await card.getByRole("button", { name: "Save to closet" }).click();
+  const { item } = await (await saved).json();
+
+  const { data: row } = await db.from("items").select("image_paths, on_model").eq("id", item.id).single().throwOnError();
+  created.push({ id: item.id, paths: row.image_paths });
+  expect(row).toEqual({ image_paths: [originalPath], on_model: true });
+});
+
+test("a cut-out photo is what gets saved", async ({ page }) => {
+  let originalPath = "";
+  await page.route("**/api/items/extract", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    originalPath = json.draft.imagePaths[0];
+    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
+  });
+  await page.goto("/closet/add");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "on-model.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const card = page.getByRole("form", { name: "Item details" });
+  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  await card.getByLabel("Name").fill("Cut-out skirt");
+  const saved = page.waitForResponse((res) => res.url().endsWith("/api/items") && res.request().method() === "POST");
+  await card.getByRole("button", { name: "Save to closet" }).click();
+  const { item } = await (await saved).json();
+
+  const { data: row } = await db
+    .from("items")
+    .select("image_paths, on_model, raw_source")
+    .eq("id", item.id)
+    .single()
+    .throwOnError();
+  created.push({ id: item.id, paths: [...row.image_paths, originalPath] });
+  expect(row.image_paths).toHaveLength(1);
+  expect(row.image_paths[0]).not.toBe(originalPath);
+  expect(row.on_model).toBe(false);
+  expect(row.raw_source).toMatchObject({ cutOutByAi: true });
+});
+
+test("accessories are turned away, and the card doesn't offer them", async ({ page }) => {
+  await page.goto("/closet/add");
+  const extracted = page.waitForResponse((res) => res.url().endsWith("/api/items/extract"));
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  created.push({ paths: (await (await extracted).json()).draft.imagePaths });
+  const card = page.getByRole("form", { name: "Item details" });
+  await expect(card.getByLabel("Type").locator("option")).toHaveText(["Top", "Bottom", "One-piece", "Outerwear", "Shoes"]);
+
+  // Answer exactly as the route does when the model reads an accessory.
+  await page.route("**/api/items/extract", (route) => route.fulfill({ json: { error: "accessory" } }));
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "hoops.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  await expect(page.getByRole("status")).toContainText(ACCESSORY_NOT_ADDED);
+  await expect(card).toBeHidden();
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
 });

@@ -3,23 +3,56 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft, SaveItemRequest } from "@/lib/entry/draft";
+import { CleanedNote } from "./CleanedNote";
 import { ItemCard, type EditedItem } from "./ItemCard";
-import { extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
+import { ACCESSORY_NOT_ADDED, CUTTING_OUT, extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
 import { shrinkScreenshot } from "./shrink";
 
 type Step =
   | { kind: "idle" }
   | { kind: "loading"; preview: string }
-  | { kind: "draft"; draft: ItemDraft; saving: boolean }
+  | { kind: "cutting"; draft: ItemDraft }
+  // `original` is the draft before the model cut its photo out.
+  | { kind: "draft"; draft: ItemDraft; original?: ItemDraft; saving: boolean }
   | { kind: "saved"; title: string };
 
 export function AddByScreenshot() {
   const [step, setStep] = useState<Step>({ kind: "idle" });
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
+  const [round, setRound] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const busy = step.kind === "loading" || (step.kind === "draft" && step.saving);
+  const busy = step.kind === "loading" || step.kind === "cutting" || (step.kind === "draft" && step.saving);
+
+  // An on-model photo is redrawn as the garment alone on white before the
+  // card shows. If that fails the card keeps the original, without a word.
+  async function cutOut(draft: ItemDraft) {
+    setStep({ kind: "cutting", draft });
+    try {
+      const res = await fetch("/api/items/cutout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ path: draft.imagePaths[0], title: draft.title, tags: draft.tags }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.path && json.url) {
+        const cleaned: ItemDraft = {
+          ...draft,
+          imagePaths: [json.path],
+          imageUrls: [json.url],
+          onModel: false,
+          rawSource: { ...draft.rawSource, cutOutByAi: true },
+        };
+        setStep({ kind: "draft", draft: cleaned, original: draft, saving: false });
+        return;
+      }
+    } catch {
+      // Keep the original.
+    }
+    setStep({ kind: "draft", draft, saving: false });
+  }
 
   async function upload(file: File) {
     setProblem(undefined);
@@ -31,7 +64,9 @@ export function AddByScreenshot() {
       const res = await fetch("/api/items/extract", { method: "POST", body });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.draft) {
-        setStep({ kind: "draft", draft: json.draft, saving: false });
+        setRound((r) => r + 1);
+        if (json.draft.onModel && json.draft.imagePaths[0]) await cutOut(json.draft);
+        else setStep({ kind: "draft", draft: json.draft, saving: false });
       } else {
         setProblem(extractErrorMessage(json.error));
         setStep({ kind: "idle" });
@@ -57,9 +92,9 @@ export function AddByScreenshot() {
     return () => document.removeEventListener("paste", onPaste);
   });
 
-  async function save(draft: ItemDraft, edited: EditedItem) {
+  async function save(draft: ItemDraft, edited: EditedItem, original?: ItemDraft) {
     setProblem(undefined);
-    setStep({ kind: "draft", draft, saving: true });
+    setStep({ kind: "draft", draft, original, saving: true });
     const body: SaveItemRequest = {
       entryMethod: "screenshot",
       title: edited.title,
@@ -83,11 +118,12 @@ export function AddByScreenshot() {
         setStep({ kind: "saved", title: edited.title });
         return;
       }
-      setProblem(SAVE_FAILED);
+      const json = await res.json().catch(() => ({}));
+      setProblem(json.error === "accessory" ? ACCESSORY_NOT_ADDED : SAVE_FAILED);
     } catch {
       setProblem(OFFLINE);
     }
-    setStep({ kind: "draft", draft, saving: false });
+    setStep({ kind: "draft", draft, original, saving: false });
   }
 
   function addAnother() {
@@ -129,7 +165,7 @@ export function AddByScreenshot() {
           htmlFor="screenshot"
           className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
         >
-          {step.kind === "loading" ? "Reading…" : "Choose a screenshot"}
+          {step.kind === "loading" || step.kind === "cutting" ? "Reading…" : "Choose a screenshot"}
         </label>
         <p className="max-w-[40ch] text-sm text-ink-2">
           One screen is enough. Just get the photo and name in it.
@@ -144,6 +180,7 @@ export function AddByScreenshot() {
           </p>
         )}
         {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
+        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
         {step.kind === "saved" && (
           <div className="notice flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-lg">
@@ -162,13 +199,21 @@ export function AddByScreenshot() {
       </div>
 
       {step.kind === "loading" && <LoadingCard preview={step.preview} />}
+      {step.kind === "cutting" && step.draft.imageUrls[0] && <LoadingCard preview={step.draft.imageUrls[0]} />}
+      {step.kind === "draft" && step.original && (
+        <CleanedNote
+          disabled={step.saving}
+          onUseOriginal={() => step.original && setStep({ kind: "draft", draft: step.original, saving: false })}
+        />
+      )}
       {step.kind === "draft" && (
         <ItemCard
-          key={step.draft.imagePaths.join()}
+          key={round}
           draft={step.draft}
           withSize
           saving={step.saving}
-          onSave={(edited) => save(step.draft, edited)}
+          onSave={(edited) => save(step.draft, edited, step.original)}
+          categories={CLOTHING_LABELS}
         />
       )}
     </div>

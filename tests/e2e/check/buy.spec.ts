@@ -5,7 +5,7 @@ import { aiErrorResponse } from "../../../lib/ai/http";
 import { MOCK_INCOMPLETE_TITLE } from "../../../lib/ai/mock/score-purchase";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { CANDIDATE_ITEM_ID } from "../../../lib/check/pairings";
-import { INCOMPLETE_NOTICE } from "../../../lib/check/reasons";
+import { ACCESSORY_NOTICE, INCOMPLETE_NOTICE } from "../../../lib/check/reasons";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
@@ -77,6 +77,45 @@ test("check an item: screenshot, confirm, score, check another", async ({ page }
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
 });
 
+test("sample outfits show as boards of real photos; an on-model photo is cut out first", async ({ page }) => {
+  const cutouts: string[] = [];
+  page.on("request", (r) => {
+    if (new URL(r.url()).pathname === "/api/checks/cutout") cutouts.push(r.method());
+  });
+  // Mark the mock draft as on-model; everything else is the real flow.
+  await page.route("**/api/checks/extract", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  expect(cutouts).toEqual(["POST"]);
+  await card.getByLabel("Name").fill("Black loafers");
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+
+  const result = page.getByRole("region", { name: "Result" });
+  const board = result.getByTestId("outfit-board").first();
+  await expect(board).toBeVisible();
+  await expect(board.getByText("New", { exact: true })).toBeVisible();
+  await expect(board.getByRole("img", { name: "Black loafers" })).toBeVisible();
+  await expect(result.getByRole("list", { name: "Outfit" })).toHaveCount(await result.getByTestId("outfit-board").count());
+});
+
+test("when the boards can't load, the plain rows of photos stay", async ({ page }) => {
+  await page.route("**/api/checks/board", (route) => route.fulfill({ status: 500, body: "" }));
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Name").fill("Black loafers");
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByRole("list", { name: "Outfit" }).first()).toBeVisible();
+  await expect(result.getByTestId("outfit-board")).toHaveCount(0);
+});
+
 test("when the AI doesn't finish, try again sends the same item", async ({ page }) => {
   const sent: string[] = [];
   page.on("request", (r) => {
@@ -97,12 +136,12 @@ test("when the AI doesn't finish, try again sends the same item", async ({ page 
   await expect(page.getByRole("button", { name: "Try again" })).toBeEnabled();
 });
 
-test("accessories aren't scored yet", async ({ page }) => {
+test("accessories aren't scored", async ({ page }) => {
   await page.goto("/check");
   const card = await upload(page);
   await card.getByLabel("Type").selectOption("accessory");
   await card.getByRole("button", { name: "Check it" }).click();
-  await expect(page.getByRole("status")).toContainText("Accessories aren't supported yet");
+  await expect(page.getByRole("status")).toContainText(ACCESSORY_NOTICE);
   await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
 
   await page.getByRole("button", { name: "Use another screenshot" }).click();

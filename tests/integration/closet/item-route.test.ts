@@ -182,6 +182,10 @@ describe("PATCH /api/items/[id]", () => {
     const badRange = { ...details, tags: { ...item.tags, tempRangeF: { min: 70, max: 40 } } };
     expect((await patch(closet.itemId, { details: badRange })).status).toBe(400);
     expect((await patch(closet.itemId, { details: { ...details, title: " " } })).status).toBe(400);
+    // The closet holds clothes and shoes only.
+    const toAccessory = await patch(closet.itemId, { details: { ...details, tags: { ...item.tags, category: "accessory" } } });
+    expect(toAccessory.status).toBe(400);
+    expect(await toAccessory.json()).toEqual({ error: "accessory" });
     expect((await patch("not-a-uuid", { status: "active" })).status).toBe(404);
     user.id = randomUUID();
     expect((await patch(closet.itemId, { details })).status).toBe(404);

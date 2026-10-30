@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import { createContext, use, useRef, useState, type ReactNode } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
+import { ACCESSORY_NOT_ADDED } from "@/components/entry/messages";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { DEMO_READ_ONLY } from "@/lib/auth/messages";
 import type { ClosetItem } from "@/lib/closet/items";
+import { CATEGORY_LABELS, CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft } from "@/lib/entry/draft";
 
 // What the entry card edits on a saved item.
@@ -105,6 +107,9 @@ export function ItemEditor({
           saving={saving}
           onSave={save}
           submitLabel="Save changes"
+          // An accessory saved before they were turned away keeps its type
+          // on show; anything else can't become one.
+          categories={(latest ?? details).tags.category === "accessory" ? CATEGORY_LABELS : CLOTHING_LABELS}
           heading="Edit details"
           hint="Change anything that's off, then save."
           actions={
@@ -137,6 +142,7 @@ async function saveProblem(res: Response | null): Promise<string> {
   if (res?.status === 400) {
     const { error } = (await res.json().catch(() => ({}))) as { error?: string };
     if (error === "size_required") return "Passing-on items need a size.";
+    if (error === "accessory") return ACCESSORY_NOT_ADDED;
   }
   return "Couldn't save. Try again.";
 }

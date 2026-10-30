@@ -8,6 +8,8 @@ export const PRICE_PER_M_TOKENS = { input: 1.25, cachedInput: 0.15, output: 4.25
 export const PRICE_PER_WEB_SEARCH = 0.0025;
 // Muse Voice Transcribe, billed per whole second of audio (same page).
 export const PRICE_PER_AUDIO_HOUR = 0.18;
+// Muse Image, a flat price per returned image (same page).
+export const PRICE_PER_IMAGE = 0.01;
 
 export const DEFAULT_DAILY_BUDGET_USD = 7;
 
@@ -25,7 +27,8 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   scorePurchase: 0.05,
   renderOutfit: 0.05,
   buildProfile: 0.03,
-  segmentGarment: 0.05,
+  // One Muse Image picture.
+  segmentGarment: PRICE_PER_IMAGE,
   summarizeWear: 0.02,
 };
 

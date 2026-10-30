@@ -32,7 +32,10 @@ test("home leads to the purchase check", async ({ page }) => {
 
 test("adding clothes starts from the closet", async ({ page }) => {
   await page.goto("/closet");
-  await page.getByRole("main").getByRole("link", { name: "Add clothes" }).click();
+  // The header's link: the grid can end in an "Add clothes" tile too,
+  // depending on how many items there are.
+  const header = page.getByRole("heading", { name: "Your closet" }).locator("xpath=..");
+  await header.getByRole("link", { name: "Add clothes" }).click();
   await expect(page).toHaveURL(/\/closet\/add$/);
   await expect(page.getByRole("heading", { name: "Add clothes" })).toBeVisible();
 });
