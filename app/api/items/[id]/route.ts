@@ -23,6 +23,10 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/items/[id]">) 
   if (!body.success) {
     return Response.json({ error: "invalid_item", issues: body.error.issues }, { status: 400 });
   }
+  // The closet holds clothes and shoes only; the edit card never offers it.
+  if (body.data.details?.tags.category === "accessory") {
+    return Response.json({ error: "accessory" }, { status: 400 });
+  }
   const db = createServerClient();
   if (!(await updateClosetItem(db, writer.userId, id, body.data))) {
     return Response.json({ error: "Not found" }, { status: 404 });

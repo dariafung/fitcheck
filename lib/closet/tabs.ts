@@ -9,8 +9,8 @@ export const CLOSET_TABS: { id: ClosetTab; label: string }[] = [
   { id: "passing-on", label: "Passing on" },
 ];
 
-// Head to toe, then the extras.
-export const CLOSET_CATEGORIES: Category[] = ["top", "bottom", "one_piece", "outerwear", "shoes", "accessory"];
+// Head to toe. Accessories can't be added, so they get no filter.
+export const CLOSET_CATEGORIES: Category[] = ["top", "bottom", "one_piece", "outerwear", "shoes"];
 
 export interface ClosetView {
   tab: ClosetTab;

@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import { createContext, use, useRef, useState, type ReactNode } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
+import { ACCESSORY_NOT_ADDED } from "@/components/entry/messages";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { DEMO_READ_ONLY } from "@/lib/auth/messages";
 import type { ClosetItem } from "@/lib/closet/items";
+import { CATEGORY_LABELS, CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft } from "@/lib/entry/draft";
 
 // What the entry card edits on a saved item.
@@ -83,7 +85,14 @@ export function ItemEditor({
     }).catch(() => null);
     setSaving(false);
     if (!res?.ok) {
-      setProblem(res?.status === 403 ? DEMO_READ_ONLY : "Couldn't save. Try again.");
+      const json = await res?.json().catch(() => null);
+      setProblem(
+        res?.status === 403
+          ? DEMO_READ_ONLY
+          : json?.error === "accessory"
+            ? ACCESSORY_NOT_ADDED
+            : "Couldn't save. Try again.",
+      );
       return;
     }
     const { item } = (await res.json()) as { item: ClosetItem };
@@ -101,6 +110,9 @@ export function ItemEditor({
           saving={saving}
           onSave={save}
           submitLabel="Save changes"
+          // An accessory saved before they were turned away keeps its type
+          // on show; anything else can't become one.
+          categories={(latest ?? details).tags.category === "accessory" ? CATEGORY_LABELS : CLOTHING_LABELS}
           heading="Edit details"
           hint="Change anything that's off, then save."
           actions={

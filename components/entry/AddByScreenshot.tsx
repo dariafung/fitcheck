@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft, SaveItemRequest } from "@/lib/entry/draft";
 import { CleanedNote } from "./CleanedNote";
 import { ItemCard, type EditedItem } from "./ItemCard";
-import { CUTTING_OUT, extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
+import { ACCESSORY_NOT_ADDED, CUTTING_OUT, extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
 import { shrinkScreenshot } from "./shrink";
 
 type Step =
@@ -116,7 +117,8 @@ export function AddByScreenshot() {
         setStep({ kind: "saved", title: edited.title });
         return;
       }
-      setProblem(SAVE_FAILED);
+      const json = await res.json().catch(() => ({}));
+      setProblem(json.error === "accessory" ? ACCESSORY_NOT_ADDED : SAVE_FAILED);
     } catch {
       setProblem(OFFLINE);
     }
@@ -209,6 +211,7 @@ export function AddByScreenshot() {
           draft={step.draft}
           saving={step.saving}
           onSave={(edited) => save(step.draft, edited, step.original)}
+          categories={CLOTHING_LABELS}
         />
       )}
     </div>

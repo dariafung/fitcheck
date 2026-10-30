@@ -27,6 +27,8 @@ describe("closetCategory", () => {
     expect(closetCategory("one_piece")).toBeNull();
     expect(closetCategory("Bottom")).toBeNull();
     expect(closetCategory("hats")).toBeNull();
+    // Accessories can't be added, so there is no filter for them.
+    expect(closetCategory("accessory")).toBeNull();
     expect(closetCategory(undefined)).toBeNull();
     expect(closetCategory(["bottom", "top"])).toBeNull();
   });
@@ -91,6 +93,12 @@ describe("inCategory / categoryFilters", () => {
       { cat: "bottom", count: 1 },
       { cat: "shoes", count: 1 },
     ]);
+  });
+
+  it("never offers accessories", () => {
+    expect(categoryFilters([...items, { id: "hoops", category: "accessory" }], null).map((f) => f.cat)).not.toContain(
+      "accessory",
+    );
   });
 
   it("keeps the picked category even when it is empty", () => {

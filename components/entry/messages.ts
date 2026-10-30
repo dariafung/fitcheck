@@ -1,6 +1,9 @@
 import { aiNotice } from "@/lib/ai/notices";
 import type { EntryErrorCode } from "@/lib/entry/draft";
 
+// The closet holds clothes and shoes only; accessories are turned away.
+export const ACCESSORY_NOT_ADDED = "We only do clothes and shoes for now.";
+
 // Short, spoken-style copy for every way adding a screenshot can fail.
 const UPLOAD_ERRORS: Record<EntryErrorCode, string> = {
   no_file: "Pick a screenshot first.",
@@ -8,6 +11,7 @@ const UPLOAD_ERRORS: Record<EntryErrorCode, string> = {
   too_large: "That picture is too big. Try a smaller screenshot.",
   too_small: "That picture is too small to read.",
   unrecognized: "Couldn't spot a product there. Try another screenshot?",
+  accessory: ACCESSORY_NOT_ADDED,
 };
 
 export function extractErrorMessage(code: string | undefined): string {

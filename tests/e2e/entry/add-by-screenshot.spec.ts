@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { AiBudgetError } from "../../../lib/ai/errors";
 import { aiErrorResponse } from "../../../lib/ai/http";
 import { AI_BUDGET_NOTICE } from "../../../lib/ai/notices";
+import { ACCESSORY_NOT_ADDED } from "../../../components/entry/messages";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
@@ -195,4 +196,28 @@ test("a cut-out photo is what gets saved", async ({ page }) => {
   expect(row.image_paths[0]).not.toBe(originalPath);
   expect(row.on_model).toBe(false);
   expect(row.raw_source).toMatchObject({ cutOutByAi: true });
+});
+
+test("accessories are turned away, and the card doesn't offer them", async ({ page }) => {
+  await page.goto("/closet/add");
+  const extracted = page.waitForResponse((res) => res.url().endsWith("/api/items/extract"));
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  created.push({ paths: (await (await extracted).json()).draft.imagePaths });
+  const card = page.getByRole("form", { name: "Item details" });
+  await expect(card.getByLabel("Type").locator("option")).toHaveText(["Top", "Bottom", "One-piece", "Outerwear", "Shoes"]);
+
+  // Answer exactly as the route does when the model reads an accessory.
+  await page.route("**/api/items/extract", (route) => route.fulfill({ json: { error: "accessory" } }));
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "hoops.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  await expect(page.getByRole("status")).toContainText(ACCESSORY_NOT_ADDED);
+  await expect(card).toBeHidden();
+  await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
 });

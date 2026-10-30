@@ -58,6 +58,7 @@ export function ItemCard({
   heading = "Look right?",
   hint = "Fix anything that's off, then save.",
   actions,
+  categories = CATEGORY_LABELS,
 }: {
   draft: ItemDraft;
   saving: boolean;
@@ -68,6 +69,8 @@ export function ItemCard({
   hint?: string;
   // Shown next to the submit button, e.g. Cancel and an error when editing.
   actions?: ReactNode;
+  // The types offered; all of them unless a page narrows it.
+  categories?: [Category, string][];
 }) {
   const [title, setTitle] = useState(draft.title);
   const [brand, setBrand] = useState(draft.brand ?? "");
@@ -181,7 +184,7 @@ export function ItemCard({
           <Field label={FIELD_LABELS.category} unsure={unsure.has("category")}>
             {(id) => (
               <select id={id} className={FIELD} value={tags.category} onChange={(e) => update("category", e.target.value as Category)}>
-                {CATEGORY_LABELS.map(([value, label]) => (
+                {categories.map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>

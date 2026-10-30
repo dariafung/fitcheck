@@ -25,6 +25,10 @@ export const CATEGORY_LABELS: [Category, string][] = [
   ["accessory", "Accessory"],
 ];
 
+// What the closet takes: accessories can't be added (the buy check still
+// takes them, to say so).
+export const CLOTHING_LABELS = CATEGORY_LABELS.filter(([category]) => category !== "accessory");
+
 // formality 1–5, in order.
 export const FORMALITY_LABELS = ["Lounge", "Casual", "Smart casual", "Business", "Formal"] as const;
 

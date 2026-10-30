@@ -5,7 +5,7 @@ import { aiErrorResponse } from "../../../lib/ai/http";
 import { MOCK_INCOMPLETE_TITLE } from "../../../lib/ai/mock/score-purchase";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { CANDIDATE_ITEM_ID } from "../../../lib/check/pairings";
-import { INCOMPLETE_NOTICE } from "../../../lib/check/reasons";
+import { ACCESSORY_NOTICE, INCOMPLETE_NOTICE } from "../../../lib/check/reasons";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
@@ -136,12 +136,12 @@ test("when the AI doesn't finish, try again sends the same item", async ({ page 
   await expect(page.getByRole("button", { name: "Try again" })).toBeEnabled();
 });
 
-test("accessories aren't scored yet", async ({ page }) => {
+test("accessories aren't scored", async ({ page }) => {
   await page.goto("/check");
   const card = await upload(page);
   await card.getByLabel("Type").selectOption("accessory");
   await card.getByRole("button", { name: "Check it" }).click();
-  await expect(page.getByRole("status")).toContainText("Accessories aren't supported yet");
+  await expect(page.getByRole("status")).toContainText(ACCESSORY_NOTICE);
   await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
 
   await page.getByRole("button", { name: "Use another screenshot" }).click();

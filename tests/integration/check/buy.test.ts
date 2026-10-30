@@ -7,7 +7,7 @@ import type { ItemTags } from "@/lib/ai/schemas/common";
 import type { BuyCheck, BuyCheckResult } from "@/lib/check/buy-check";
 import { FIT_QUESTIONS } from "@/lib/check/fit-questions";
 import { CANDIDATE_ITEM_ID } from "@/lib/check/pairings";
-import { INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
+import { ACCESSORY_NOTICE, INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
 import { roundPart } from "@/lib/check/score";
 import { createServerClient } from "@/lib/db/server";
 
@@ -214,7 +214,7 @@ describe("POST /api/checks", () => {
 
   it("doesn't score accessories", async () => {
     const json = await check({ title: "Gold hoops", tags: tags({ category: "accessory" }) });
-    expect(json).toEqual({ unsupported: "accessory", message: expect.stringContaining("Accessories") });
+    expect(json).toEqual({ unsupported: "accessory", message: ACCESSORY_NOTICE });
     expect(ai.judgePairing).not.toHaveBeenCalled();
     expect(ai.scorePurchase).not.toHaveBeenCalled();
     expect(ai.judgeRepeat).not.toHaveBeenCalled();

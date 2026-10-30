@@ -39,4 +39,4 @@ export const SaveItemRequest = z.object({
 export type SaveItemRequest = z.infer<typeof SaveItemRequest>;
 
 // Expected outcomes of an upload; the extract route answers them with 200.
-export type EntryErrorCode = "no_file" | "not_image" | "too_large" | "too_small" | "unrecognized";
+export type EntryErrorCode = "no_file" | "not_image" | "too_large" | "too_small" | "unrecognized" | "accessory";
