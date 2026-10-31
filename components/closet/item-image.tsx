@@ -3,8 +3,8 @@ import { categoryLabel } from "@/lib/closet/tags";
 import { Silhouette } from "./silhouette";
 
 // A photo, or the item's color in the shape of its category when it has none
-// yet. Photos sit on the shelf tile with room around them (object-contain),
-// so cut-outs and screenshots line up the same way.
+// yet. Stored photos are already framed on white with the margin built in
+// (lib/entry/frame.ts), so the tile is white too and adds no padding.
 // Signed storage URLs expire, so images skip the optimizer.
 export function ItemImage({
   src,
@@ -24,7 +24,7 @@ export function ItemImage({
   aspect?: string;
 }) {
   return (
-    <div className={`relative ${aspect} overflow-hidden bg-tile text-ink`}>
+    <div className={`relative ${aspect} overflow-hidden bg-paper text-ink`}>
       {src ? (
         <Image
           src={src}
@@ -33,7 +33,7 @@ export function ItemImage({
           sizes={sizes}
           unoptimized
           priority={priority}
-          className="object-contain p-[9%]"
+          className="object-contain"
         />
       ) : swatch ? (
         <Silhouette category={category} color={swatch} />
