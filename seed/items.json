@@ -1365,6 +1365,7 @@
     "on_model": false,
     "raw_source": {
       "cropped": true,
+      "cutOutByAi": true,
       "productBox": {
         "x": 0.034,
         "y": 0,
