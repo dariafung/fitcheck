@@ -122,7 +122,7 @@ export function ItemCard({
       className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12"
     >
       <div className="flex w-3/5 flex-col gap-3 md:sticky md:top-10 md:col-span-5 md:w-full md:self-start">
-        <div className="relative aspect-[4/5] overflow-hidden bg-tile">
+        <div className="relative aspect-[4/5] overflow-hidden bg-paper">
           {draft.imageUrls[shown] ? (
             <Image
               src={draft.imageUrls[shown]}
@@ -130,7 +130,7 @@ export function ItemCard({
               fill
               unoptimized
               sizes="(min-width: 768px) 40vw, 60vw"
-              className="object-contain p-[9%]"
+              className="object-contain"
             />
           ) : (
             <p className="flex h-full items-end p-4 text-sm text-ink-2">No photo</p>
@@ -145,9 +145,9 @@ export function ItemCard({
                 onClick={() => setShown(i)}
                 aria-label={`Photo ${i + 1}`}
                 aria-pressed={i === shown}
-                className="relative aspect-[4/5] w-14 overflow-hidden border border-transparent bg-tile transition-colors duration-150 aria-pressed:border-ink"
+                className="relative aspect-[4/5] w-14 overflow-hidden border border-transparent bg-paper transition-colors duration-150 aria-pressed:border-ink"
               >
-                <Image src={url} alt="" fill unoptimized sizes="56px" className="object-contain p-1" />
+                <Image src={url} alt="" fill unoptimized sizes="56px" className="object-contain" />
               </button>
             ))}
           </div>

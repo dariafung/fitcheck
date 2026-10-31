@@ -3,6 +3,7 @@ import { requireWriter } from "@/lib/auth/guard";
 import { createServerClient } from "@/lib/db/server";
 import { alignBrand } from "@/lib/entry/brands";
 import type { EntryErrorCode, ItemDraft } from "@/lib/entry/draft";
+import { frameOriginal, needsCutout } from "@/lib/entry/frame";
 import { signImages, storeImage } from "@/lib/entry/images";
 import { savedBrands } from "@/lib/entry/saved-brands";
 import { productPhoto, readScreenshot } from "@/lib/entry/screenshot";
@@ -44,8 +45,13 @@ export async function POST(request: Request) {
   if (extracted.tags.category === "accessory") return fail("accessory");
 
   const photo = await productPhoto(shot, extracted.productBox);
+  // A flat-lay or ghost-mannequin photo is framed on white here, for free. An
+  // on-model one, or one whose backdrop can't be turned white for free, is
+  // kept as cropped for the model to cut out (/api/items/cutout).
+  const cutOut = extracted.onModel || (await needsCutout(photo.webp));
+  const webp = cutOut ? photo.webp : await frameOriginal(photo.webp);
   const db = createServerClient();
-  const imagePaths = [await storeImage(db, writer.userId, photo.webp)];
+  const imagePaths = [await storeImage(db, writer.userId, webp)];
   const lowConfidence = photo.cropped
     ? extracted.lowConfidence
     : [...extracted.lowConfidence, "image"];
@@ -58,6 +64,7 @@ export async function POST(request: Request) {
     size: extracted.size,
     tags: extracted.tags,
     onModel: extracted.onModel,
+    cutOut,
     lowConfidence,
     webSources: extracted.sources,
     imagePaths,

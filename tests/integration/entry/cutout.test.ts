@@ -6,6 +6,7 @@ import * as ai from "@/lib/ai";
 import { AiBudgetError } from "@/lib/ai/errors";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { createServerClient } from "@/lib/db/server";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/entry/frame";
 import { ITEM_IMAGES_BUCKET, storeImage } from "@/lib/entry/images";
 import { createTestUser, jsonRequest, removeTestUser } from "./helpers";
 
@@ -35,7 +36,7 @@ async function cutout(body: unknown) {
 }
 
 describe("POST /api/items/cutout", () => {
-  it("stores the cut-out photo next to the original and hands back both its path and URL", async () => {
+  it("stores the cut-out and the framed original next to the photo and hands back their paths and URLs", async () => {
     const { status, body } = await cutout({ path: photoPath, title: "White mini skirt", tags });
     expect(status).toBe(200);
     expect(body.path).toMatch(new RegExp(`^${user.id}/[0-9a-f-]{36}\\.webp$`));
@@ -46,18 +47,27 @@ describe("POST /api/items/cutout", () => {
     expect(input).toMatchObject({ category: "bottom", image: { kind: "inline", mime: "image/png" } });
     expect(input.description).toContain("White mini skirt");
 
-    const { data } = await db.storage.from(ITEM_IMAGES_BUCKET).download(body.path);
-    expect(await sharp(Buffer.from(await data!.arrayBuffer())).metadata()).toMatchObject({ format: "webp", width: 120 });
+    // Both are framed on the white 4:5 canvas.
+    expect(body.original.path).toMatch(new RegExp(`^${user.id}/[0-9a-f-]{36}\\.webp$`));
+    expect(body.original.path).not.toBe(body.path);
+    expect(body.original.url).toMatch(/^http/);
+    for (const path of [body.path, body.original.path]) {
+      const { data } = await db.storage.from(ITEM_IMAGES_BUCKET).download(path);
+      expect(await sharp(Buffer.from(await data!.arrayBuffer())).metadata()).toMatchObject({
+        format: "webp",
+        width: CANVAS_WIDTH,
+        height: CANVAS_HEIGHT,
+      });
+    }
     // The original stays until the daily cleanup; the item is saved with one of them.
     expect((await db.storage.from(ITEM_IMAGES_BUCKET).download(photoPath)).error).toBeNull();
   });
 
-  it("keeps the original, without an error status, when the model can't do it", async () => {
+  it("hands back the framed original, without an error status, when the model can't do it", async () => {
     vi.mocked(ai.segmentGarment).mockRejectedValueOnce(new AiBudgetError("segmentGarment"));
-    expect(await cutout({ path: photoPath, title: "White mini skirt", tags })).toEqual({
-      status: 200,
-      body: { error: "not_cleaned" },
-    });
+    const { status, body } = await cutout({ path: photoPath, title: "White mini skirt", tags });
+    expect(status).toBe(200);
+    expect(body).toEqual({ error: "not_cleaned", original: { path: expect.any(String), url: expect.any(String) } });
   });
 
   it("only takes the user's own photos", async () => {

@@ -14,7 +14,7 @@ type Step =
   | { kind: "idle" }
   | { kind: "loading"; preview: string }
   | { kind: "cutting"; draft: ItemDraft }
-  // `original` is the draft before the model cut its photo out.
+  // `original` is the draft with the store's own photo, after the model cut it out.
   | { kind: "draft"; draft: ItemDraft; original?: ItemDraft; saving: boolean }
   | { kind: "saved"; title: string };
 
@@ -26,10 +26,12 @@ export function AddByScreenshot() {
   const inputRef = useRef<HTMLInputElement>(null);
   const busy = step.kind === "loading" || step.kind === "cutting" || (step.kind === "draft" && step.saving);
 
-  // An on-model photo is redrawn as the garment alone on white before the
-  // card shows. If that fails the card keeps the original, without a word.
+  // An on-model photo, or one on a backdrop that can't be turned white for
+  // free, is redrawn as the garment alone on white before the card shows. If that fails the card keeps the store's photo, framed on
+  // white like every other, without a word.
   async function cutOut(draft: ItemDraft) {
     setStep({ kind: "cutting", draft });
+    let original = draft;
     try {
       const res = await fetch("/api/items/cutout", {
         method: "POST",
@@ -37,6 +39,9 @@ export function AddByScreenshot() {
         body: JSON.stringify({ path: draft.imagePaths[0], title: draft.title, tags: draft.tags }),
       });
       const json = await res.json().catch(() => ({}));
+      if (res.ok && json.original?.path && json.original?.url) {
+        original = { ...draft, imagePaths: [json.original.path], imageUrls: [json.original.url] };
+      }
       if (res.ok && json.path && json.url) {
         const cleaned: ItemDraft = {
           ...draft,
@@ -45,13 +50,13 @@ export function AddByScreenshot() {
           onModel: false,
           rawSource: { ...draft.rawSource, cutOutByAi: true },
         };
-        setStep({ kind: "draft", draft: cleaned, original: draft, saving: false });
+        setStep({ kind: "draft", draft: cleaned, original, saving: false });
         return;
       }
     } catch {
       // Keep the original.
     }
-    setStep({ kind: "draft", draft, saving: false });
+    setStep({ kind: "draft", draft: original, saving: false });
   }
 
   async function upload(file: File) {
@@ -65,7 +70,7 @@ export function AddByScreenshot() {
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.draft) {
         setRound((r) => r + 1);
-        if (json.draft.onModel && json.draft.imagePaths[0]) await cutOut(json.draft);
+        if (json.draft.cutOut && json.draft.imagePaths[0]) await cutOut(json.draft);
         else setStep({ kind: "draft", draft: json.draft, saving: false });
       } else {
         setProblem(extractErrorMessage(json.error));

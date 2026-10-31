@@ -22,7 +22,7 @@ const PARTS: [keyof BuyCheckResult["parts"], string][] = [
 // name instead.
 function Thumb({ src, alt }: { src: string | null; alt: string }) {
   return (
-    <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-tile md:w-28">
+    <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-paper md:w-28">
       {src ? (
         <Image src={src} alt={alt} fill unoptimized sizes="112px" className="object-contain p-[10%]" />
       ) : (
@@ -88,7 +88,7 @@ export function BuyResult({
       aria-label="Result"
       className="grid grid-cols-[2fr_3fr] gap-x-4 gap-y-10 md:grid-cols-12 md:gap-y-0"
     >
-      <div className="relative aspect-[4/5] self-start overflow-hidden bg-tile md:col-span-5 md:row-span-2">
+      <div className="relative aspect-[4/5] self-start overflow-hidden bg-paper md:col-span-5 md:row-span-2">
         {photo ? (
           <Image
             src={photo}

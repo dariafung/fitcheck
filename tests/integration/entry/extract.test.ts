@@ -15,6 +15,11 @@ beforeAll(async () => {
 });
 afterAll(() => removeTestUser(user.id));
 
+async function download(path: string): Promise<Buffer> {
+  const { data } = await createServerClient().storage.from(ITEM_IMAGES_BUCKET).download(path);
+  return Buffer.from(await data!.arrayBuffer());
+}
+
 async function extract(file?: Blob) {
   const res = await POST(uploadRequest(file));
   return { status: res.status, body: await res.json() };
@@ -31,15 +36,11 @@ describe("POST /api/items/extract", () => {
     expect(draft.imageUrls).toHaveLength(1);
     expect(draft.rawSource).toMatchObject({ cropped: true, screenshot: { width: 1170, height: 2000 } });
 
-    const { data: blob } = await createServerClient()
-      .storage.from(ITEM_IMAGES_BUCKET)
-      .download(draft.imagePaths[0]);
-    const stored = Buffer.from(await blob!.arrayBuffer());
-    expect(await sharp(stored).metadata()).toMatchObject({
-      format: "webp",
-      width: PHOTO.width,
-      height: PHOTO.height,
-    });
+    // A photo that is colour edge to edge can't be put on white for free:
+    // it is kept as cropped for the model to cut out.
+    expect(draft.cutOut).toBe(true);
+    const stored = await download(draft.imagePaths[0]);
+    expect(await sharp(stored).metadata()).toMatchObject({ format: "webp", width: PHOTO.width, height: PHOTO.height });
     const { dominant } = await sharp(stored).stats();
     expect(dominant.r).toBeGreaterThan(150);
   });
