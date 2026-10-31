@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${schibsted.variable} ${newsreader.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <header className="border-b border-line">
-          {/* Logo and sections on the left; the purchase check and the account on the right. */}
+          {/* Logo, sections and the purchase check on the left; the account on the right. */}
           <nav className="shell flex h-14 items-center gap-4 md:gap-5">
             <Link href="/" className="mr-1 text-sm font-medium tracking-[0.25em] uppercase md:mr-3">
               fitcheck
@@ -45,16 +45,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Suspense>
               <CalendarNavLink className={NAV_LINK} />
             </Suspense>
+            {/* The one filled button in the bar: it's what the app is for. A
+                phone has room for one word. */}
+            <Link
+              href="/check"
+              className="inline-flex h-9 items-center bg-ink px-3 text-[13px] font-medium whitespace-nowrap text-paper transition-colors duration-150 ease-quiet hover:bg-press md:px-4"
+            >
+              <span className="md:hidden">Buy?</span>
+              <span className="hidden md:inline">Should I buy this?</span>
+            </Link>
             <div className="ml-auto flex items-center gap-4 text-sm md:gap-5">
-              {/* The one filled button in the bar: it's what the app is for. A
-                  phone has room for one word. */}
-              <Link
-                href="/check"
-                className="inline-flex h-9 items-center bg-ink px-3 text-[13px] font-medium whitespace-nowrap text-paper transition-colors duration-150 ease-quiet hover:bg-press md:px-4"
-              >
-                <span className="md:hidden">Buy?</span>
-                <span className="hidden md:inline">Should I buy this?</span>
-              </Link>
               <Link href="/profile" className={NAV_LINK}>
                 Profile
               </Link>
