@@ -92,6 +92,10 @@ export const EDGE_TOLERANCE = 10;
 // garment cropped at the edge or a pale garment on white touches the sides
 // only here and there.
 export const MIN_BACKDROP_SIDE = 0.8;
+// Sides of that area a backdrop that can't be lifted must fill for the
+// photo to go to the model instead. Two, because a gradient backdrop often
+// fades to white on the other two.
+export const MIN_FILLED_SIDES = 2;
 // Share of a row or column that must be shaded to be inside the backdrop.
 const MIN_BACKDROP_LINE = 0.05;
 // Pixels this light are white already (the store page around the photo).
@@ -105,12 +109,10 @@ function lowerQuartile(values: number[]): number {
   return sorted[Math.floor(sorted.length / 4)];
 }
 
-// The colour of a plain light backdrop behind the garment (studio grey,
-// off-white), or null when there is none: the photo is on white already, or
-// the backdrop is busy, dark or uneven. Store photos are often cropped with a
-// strip of the white page around them, so the backdrop is looked for inside
-// whatever white surrounds it.
-async function liftableBackground(photo: Buffer): Promise<[number, number, number] | null> {
+// The pixels along each side (top, bottom, left, right) of the area inside
+// whatever white surrounds the photo: store photos are often cropped with a
+// strip of the white page around them. Null when the photo is all white.
+async function backdropSides(photo: Buffer): Promise<number[][][] | null> {
   const { data, info } = await sharp(photo)
     .rotate()
     .flatten({ background: WHITE })
@@ -123,7 +125,6 @@ async function liftableBackground(photo: Buffer): Promise<[number, number, numbe
     const i = (y * width + x) * 3;
     return [data[i], data[i + 1], data[i + 2]];
   };
-  const shaded = (p: number[]) => Math.min(...p) < WHITE_LEVEL;
 
   // Rows and columns with a fair share of shading, so JPEG noise on the
   // white page doesn't count.
@@ -151,6 +152,17 @@ async function liftableBackground(photo: Buffer): Promise<[number, number, numbe
     sides[2].push(pixel(left, y));
     sides[3].push(pixel(right, y));
   }
+  return sides;
+}
+
+function shaded(p: number[]): boolean {
+  return Math.min(...p) < WHITE_LEVEL;
+}
+
+// The colour of a plain light backdrop behind the garment (studio grey,
+// off-white), or null when there is none: the photo is on white already, or
+// the backdrop is busy, dark or uneven.
+function liftableBackground(sides: number[][][]): [number, number, number] | null {
   const edge = sides.flat().filter(shaded);
   const background = [0, 1, 2].map((c) => lowerQuartile(edge.map((p) => p[c]))) as [number, number, number];
   if (Math.min(...background) < MIN_LIFT_LEVEL) return null;
@@ -159,13 +171,24 @@ async function liftableBackground(photo: Buffer): Promise<[number, number, numbe
   return plain ? background : null;
 }
 
+// True when a flat-lay photo can't be put on white for free: a backdrop
+// (gradient, busy, dark) still fills whole sides of the area, where a
+// garment on white touches its bounding box only here and there.
+export async function needsCutout(photo: Buffer): Promise<boolean> {
+  const sides = await backdropSides(photo);
+  if (!sides || liftableBackground(sides)) return false;
+  const filled = sides.filter((side) => side.filter(shaded).length >= side.length * MIN_BACKDROP_SIDE);
+  return filled.length >= MIN_FILLED_SIDES;
+}
+
 // The store's own photo, framed like a cut-out. A plain light background
 // (studio grey, off-white) is lifted to white by brightening the whole photo
 // in proportion, for free: nothing is cut away, so a white or pale garment
 // stays whole, only a few percent lighter. Anything else (a model, a busy or
 // dark background) keeps its background.
 export async function frameOriginal(photo: Buffer): Promise<Buffer> {
-  const background = await liftableBackground(photo);
+  const sides = await backdropSides(photo);
+  const background = sides && liftableBackground(sides);
   if (!background) return frameOnWhite(photo);
   const lifted = await sharp(photo)
     .rotate()

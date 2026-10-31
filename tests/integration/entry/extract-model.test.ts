@@ -6,6 +6,7 @@ import { POST } from "@/app/api/items/extract/route";
 import type { ExtractItemOutput } from "@/lib/ai";
 import { createServerClient } from "@/lib/db/server";
 import { fakeScreenshot, PHOTO } from "@/lib/entry/fake-screenshot";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/entry/frame";
 import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
 import { createTestUser, removeTestUser, uploadRequest } from "./helpers";
 
@@ -40,8 +41,8 @@ beforeAll(async () => {
 });
 afterAll(() => removeTestUser(user.id));
 
-async function extract() {
-  const res = await POST(uploadRequest(new Blob([new Uint8Array(await fakeScreenshot())])));
+async function extract(color?: string) {
+  const res = await POST(uploadRequest(new Blob([new Uint8Array(await fakeScreenshot(color))])));
   return { status: res.status, body: await res.json() };
 }
 
@@ -65,12 +66,30 @@ describe("POST /api/items/extract with real-shaped model answers", () => {
 
   it("keeps an on-model photo as cropped, for the model to cut out next", async () => {
     answer.value = BASE;
-    const { body } = await extract();
+    // A light grey photo would be framed for free if it weren't on a model.
+    const { body } = await extract("#efefed");
+    expect(body.draft.cutOut).toBe(true);
     const { data } = await createServerClient().storage.from(ITEM_IMAGES_BUCKET).download(body.draft.imagePaths[0]);
     expect(await sharp(Buffer.from(await data!.arrayBuffer())).metadata()).toMatchObject({
       width: PHOTO.width,
       height: PHOTO.height,
     });
+  });
+
+  it("lifts a flat-lay's plain light grey backdrop to white and frames it, for free", async () => {
+    answer.value = { ...BASE, onModel: false };
+    const { body } = await extract("#efefed");
+    expect(body.draft.cutOut).toBe(false);
+    const { data } = await createServerClient().storage.from(ITEM_IMAGES_BUCKET).download(body.draft.imagePaths[0]);
+    const stored = sharp(Buffer.from(await data!.arrayBuffer()));
+    expect(await stored.metadata()).toMatchObject({ width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+    expect(Math.min(...(await stored.stats()).channels.map((c) => c.min))).toBeGreaterThanOrEqual(250);
+  });
+
+  it("sends a flat-lay on a backdrop it can't whiten to the model", async () => {
+    answer.value = { ...BASE, onModel: false };
+    const { body } = await extract("#3f4a7a");
+    expect(body.draft.cutOut).toBe(true);
   });
 
   it("passes web sources through to the card", async () => {

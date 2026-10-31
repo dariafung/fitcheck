@@ -163,7 +163,7 @@ test("an on-model photo is cut out by AI before the card shows, and can be undon
   await page.route("**/api/items/extract", async (route) => {
     const res = await route.fetch();
     const json = await res.json();
-    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
+    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true, cutOut: true } } });
   });
   const cutout = page.waitForResponse((res) => res.url().endsWith("/api/items/cutout"));
   await page.goto("/closet/add");
@@ -197,7 +197,7 @@ test("a cut-out photo is what gets saved", async ({ page }) => {
     const res = await route.fetch();
     const json = await res.json();
     originalPath = json.draft.imagePaths[0];
-    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
+    await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true, cutOut: true } } });
   });
   await page.goto("/closet/add");
   await page.getByLabel("Choose a screenshot").setInputFiles({

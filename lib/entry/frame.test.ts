@@ -1,6 +1,6 @@
 import sharp, { type OverlayOptions } from "sharp";
 import { describe, expect, it } from "vitest";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, MARGIN, frameOnWhite, frameOriginal } from "./frame";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MARGIN, frameOnWhite, frameOriginal, needsCutout } from "./frame";
 
 const WHITE = { r: 255, g: 255, b: 255 };
 const NAVY = { r: 20, g: 30, b: 80 };
@@ -168,5 +168,52 @@ describe("frameOriginal", () => {
     // The whole photo is the "garment": a square touching the side margins.
     expectCentered(box);
     expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("needsCutout", () => {
+  // A grey backdrop that fades to white towards the bottom right, floating on
+  // the white page, with a pale tee on it.
+  async function fadingBackdrop() {
+    const width = 300;
+    const height = 300;
+    const rgb = Buffer.alloc(width * height * 3, 255);
+    for (let y = 0; y < 280; y++) {
+      for (let x = 10; x < 290; x++) {
+        const fade = Math.max(0, (x - 150) / 140, (y - 140) / 140);
+        rgb.fill(Math.round(232 + 23 * Math.min(1, fade)), (y * width + x) * 3, (y * width + x) * 3 + 3);
+      }
+    }
+    return sharp(rgb, { raw: { width, height, channels: 3 } })
+      .composite([{ input: { create: { width: 120, height: 140, channels: 3, background: { r: 215, g: 215, b: 218 } } }, left: 90, top: 70 }])
+      .png()
+      .toBuffer();
+  }
+
+  it("sends a photo on a backdrop that can't be lifted to white to the model", async () => {
+    expect(await needsCutout(await fadingBackdrop())).toBe(true);
+    expect(await needsCutout(await photo({ background: { r: 60, g: 90, b: 40 } }))).toBe(true);
+  });
+
+  it("keeps a photo that is on white, or on a plain light backdrop, for free", async () => {
+    // A garment's outline touches its bounding box only here and there.
+    const round = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#fff"/><ellipse cx="200" cy="200" rx="120" ry="160" fill="#142050"/></svg>',
+    );
+    expect(await needsCutout(await sharp(round).png().toBuffer())).toBe(false);
+    expect(await needsCutout(await photo({ background: { r: 236, g: 236, b: 234 } }))).toBe(false);
+    expect(await needsCutout(await photo({ boxes: [] }))).toBe(false);
+  });
+
+  it("doesn't mistake a pale garment cropped at the edge for a backdrop", async () => {
+    const pale = { r: 236, g: 238, b: 240 };
+    const tee = await sharp({ create: { width: 400, height: 400, channels: 3, background: WHITE } })
+      .composite([
+        { input: { create: { width: 300, height: 60, channels: 3, background: pale } }, left: 50, top: 150 },
+        { input: { create: { width: 180, height: 250, channels: 3, background: pale } }, left: 110, top: 150 },
+      ])
+      .png()
+      .toBuffer();
+    expect(await needsCutout(tee)).toBe(false);
   });
 });

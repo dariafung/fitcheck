@@ -17,6 +17,9 @@ export const ItemDraft = z.object({
   size: z.string().max(MAX_ITEM_SIZE_LENGTH).optional(),
   tags: ItemTags,
   onModel: z.boolean(),
+  // The photo goes to the model to be cut out before the card shows: it is
+  // on a model, or on a backdrop that can't be turned white for free.
+  cutOut: z.boolean().optional(),
   // Field names the model is unsure of; "image" when the photo is the whole screenshot.
   lowConfidence: z.array(z.string()),
   webSources: z.array(WebSource),

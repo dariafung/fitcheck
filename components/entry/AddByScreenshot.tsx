@@ -26,8 +26,8 @@ export function AddByScreenshot() {
   const inputRef = useRef<HTMLInputElement>(null);
   const busy = step.kind === "loading" || step.kind === "cutting" || (step.kind === "draft" && step.saving);
 
-  // An on-model photo is redrawn as the garment alone on white before the
-  // card shows. If that fails the card keeps the store's photo, framed on
+  // An on-model photo, or one on a backdrop that can't be turned white for
+  // free, is redrawn as the garment alone on white before the card shows. If that fails the card keeps the store's photo, framed on
   // white like every other, without a word.
   async function cutOut(draft: ItemDraft) {
     setStep({ kind: "cutting", draft });
@@ -70,7 +70,7 @@ export function AddByScreenshot() {
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.draft) {
         setRound((r) => r + 1);
-        if (json.draft.onModel && json.draft.imagePaths[0]) await cutOut(json.draft);
+        if (json.draft.cutOut && json.draft.imagePaths[0]) await cutOut(json.draft);
         else setStep({ kind: "draft", draft: json.draft, saving: false });
       } else {
         setProblem(extractErrorMessage(json.error));
