@@ -21,6 +21,11 @@ describe("strongMatches", () => {
   });
 
   it("says no one is a strong match when every score is under it", () => {
-    expect(strongMatches(ITEM, [{ buyer_id: "a", score: 41 }])).toEqual({ state: "none_strong" });
+    expect(strongMatches(ITEM, [{ buyer_id: "a", score: 41 }])).toEqual({ state: "none_strong", someUnchecked: false });
+  });
+
+  it("says when some buyers weren't checked yet", () => {
+    expect(strongMatches(ITEM, [{ buyer_id: "a", score: 41 }], true)).toEqual({ state: "none_strong", someUnchecked: true });
+    expect(strongMatches(ITEM, [{ buyer_id: "a", score: 70 }], true)).toMatchObject({ someUnchecked: true });
   });
 });
