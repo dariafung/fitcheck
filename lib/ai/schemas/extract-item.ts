@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { COLOR_FAMILIES } from "@/lib/color-families";
+import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 import { TempRangeF } from "@/lib/temperature";
 import { ItemTags, MediaRef } from "./common";
 
-export const PROMPT_VERSION = "extract-item@4";
+export const PROMPT_VERSION = "extract-item@5";
 
 export const ExtractItemInput = z.object({
   sourceUrl: z.url().optional(),
@@ -27,6 +28,9 @@ export const ExtractItemOutput = z.object({
   brand: z.string().optional(),
   priceCents: z.int().nonnegative().optional(),
   currency: z.string().optional(),
+  // The size chosen on the screenshot, as written (S, 27, 7.5); none when
+  // it shows no choice.
+  size: z.string().trim().min(1).max(MAX_ITEM_SIZE_LENGTH).optional(),
   // Extraction always gives a color family and a temperature range (estimated
   // from type and material); older items may lack them.
   tags: ItemTags.extend({ colorFamily: z.enum(COLOR_FAMILIES), tempRangeF: TempRangeF }),

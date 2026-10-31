@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     brand: extracted.brand,
     priceCents: extracted.priceCents,
     currency: extracted.currency,
+    size: extracted.size,
     tags: extracted.tags,
     onModel: extracted.onModel,
     lowConfidence,
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
     rawSource: {
       screenshot: { width: shot.width, height: shot.height, mime: shot.mime },
       productBox: extracted.productBox ?? null,
+      aiSize: extracted.size ?? null,
       cropped: photo.cropped,
       webSources: extracted.sources,
       lowConfidence,

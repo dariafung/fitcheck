@@ -190,7 +190,7 @@ export function ItemCard({
           )}
         </Field>
         {withSize && (
-          <Field label="Size">
+          <Field label="Size" unsure={unsure.has("size")}>
             {(id) => (
               <input
                 id={id}

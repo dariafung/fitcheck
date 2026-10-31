@@ -27,6 +27,7 @@ export function mockExtractItem(
     brand,
     priceCents,
     currency,
+    size: "S",
     tags: {
       colors: [{ name: "black" }],
       materials: ["cotton"],

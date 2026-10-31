@@ -211,6 +211,7 @@ export function AddByScreenshot() {
           key={round}
           draft={step.draft}
           withSize
+          initialSize={step.draft.size}
           saving={step.saving}
           onSave={(edited) => save(step.draft, edited, step.original)}
           categories={CLOTHING_LABELS}
