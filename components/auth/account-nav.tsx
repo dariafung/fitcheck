@@ -17,20 +17,11 @@ export async function AccountNav() {
       </Link>
     );
   }
+  // Not on a phone: it's at the bottom of Profile there (PhoneLogOut).
   return (
-    <div className="flex items-center gap-5">
-      {user.readOnly && (
-        // Not on a phone: the top bar has no room, and the read-only notes
-        // link to sign-up too.
-        <Link href="/signup" className="hidden text-sm font-medium underline underline-offset-4 transition-colors duration-150 hover:text-ink-2 md:inline">
-          Sign up
-        </Link>
-      )}
-      {/* Not on a phone either: it's at the bottom of Profile there (PhoneLogOut). */}
-      <form action={logOut} className="hidden md:block">
-        <LogOutButton />
-      </form>
-    </div>
+    <form action={logOut} className="hidden md:block">
+      <LogOutButton />
+    </form>
   );
 }
 

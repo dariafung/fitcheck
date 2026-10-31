@@ -107,6 +107,10 @@ test("on a phone, Log out moves from the top bar to Profile", async ({ page }) =
 
 test("Try the demo account opens the persona's closet", async ({ page }) => {
   await tryDemo(page);
+  // Signing up starts from the login page or the read-only notes, not the top bar.
+  const nav = page.getByRole("navigation");
+  await expect(nav.getByRole("button", { name: "Log out" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Sign up" })).toHaveCount(0);
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
 });
