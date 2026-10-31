@@ -92,28 +92,42 @@ function judgedVersion(a: ClosetItem | undefined, b: ClosetItem | undefined): st
   return stamps.reduce((x, y) => (Date.parse(y) > Date.parse(x) ? y : x));
 }
 
+// Postgres: the row points at an item (or user) that is gone.
+const FOREIGN_KEY_VIOLATION = "23503";
+
+// Verdicts are only a cache. An item deleted while its pairs were being
+// judged (say, from another tab) leaves its rows unsaveable: save the pairs
+// whose items are still there and let the caller carry on with every verdict.
 async function saveVerdicts(
   db: Db,
   userId: string,
   verdicts: PairVerdict[],
   byId: ReadonlyMap<string, ClosetItem>,
 ) {
-  await db
-    .from("pairings")
-    .upsert(
-      verdicts.map((v) => ({
-        user_id: userId,
-        item_a_id: v.aId,
-        item_b_id: v.bId,
-        pairs: v.pairs,
-        reason: v.reason,
-        source: "ai",
-        prompt_version: PROMPT_VERSION,
-        created_at: judgedVersion(byId.get(v.aId), byId.get(v.bId)),
-      })),
-      { onConflict: "item_a_id,item_b_id" },
-    )
-    .throwOnError();
+  const rows = verdicts.map((v) => ({
+    user_id: userId,
+    item_a_id: v.aId,
+    item_b_id: v.bId,
+    pairs: v.pairs,
+    reason: v.reason,
+    source: "ai",
+    prompt_version: PROMPT_VERSION,
+    created_at: judgedVersion(byId.get(v.aId), byId.get(v.bId)),
+  }));
+  const upsert = (batch: typeof rows) =>
+    db.from("pairings").upsert(batch, { onConflict: "item_a_id,item_b_id" });
+
+  const { error } = await upsert(rows);
+  if (!error) return;
+  if (error.code !== FOREIGN_KEY_VIOLATION) throw error;
+  const ids = [...new Set(rows.flatMap((r) => [r.item_a_id, r.item_b_id]))];
+  const { data } = await db.from("items").select("id").in("id", ids).throwOnError();
+  const left = new Set(data.map((r) => r.id));
+  const kept = rows.filter((r) => left.has(r.item_a_id) && left.has(r.item_b_id));
+  if (kept.length === 0) return;
+  // Another delete may land in between; that batch then goes unsaved.
+  const retry = await upsert(kept);
+  if (retry.error && retry.error.code !== FOREIGN_KEY_VIOLATION) throw retry.error;
 }
 
 export interface PairingStats {
