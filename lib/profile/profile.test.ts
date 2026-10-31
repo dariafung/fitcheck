@@ -14,6 +14,7 @@ const VALID = {
   topSize: "M",
   bottomSize: "M",
   shoeSize: "W7.5",
+  tempUnit: "C",
   resaleOptIn: false,
 };
 
@@ -38,6 +39,13 @@ describe("ProfileInput", () => {
     expect(parses({ shoeSize: "7.5" })).toBe(false);
     expect(parses({ shoeSize: "M15" })).toBe(true);
     expect(parses({ resaleOptIn: "yes" })).toBe(false);
+  });
+
+  it("requires a temperature unit, F or C", () => {
+    expect(parses({ tempUnit: undefined })).toBe(false);
+    expect(parses({ tempUnit: null })).toBe(false);
+    expect(parses({ tempUnit: "K" })).toBe(false);
+    expect(parses({ tempUnit: "F" })).toBe(true);
   });
 
   it("keeps measurements within sane bounds", () => {

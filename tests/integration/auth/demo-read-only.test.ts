@@ -98,6 +98,7 @@ const WRITES: [string, () => Promise<Response>][] = [
             topSize: "XL",
             bottomSize: "XL",
             shoeSize: "M12",
+            tempUnit: "C",
             resaleOptIn: false,
           }),
         }),

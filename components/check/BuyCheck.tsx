@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
 import { CleanedNote } from "@/components/entry/CleanedNote";
 import { CUTTING_OUT, extractErrorMessage, OFFLINE } from "@/components/entry/messages";
@@ -10,6 +10,7 @@ import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { BuyCheck as BuyCheckResponse, BuyCheckResult } from "@/lib/check/buy-check";
 import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
+import type { TempUnit } from "@/lib/profile/temp-unit";
 import { BuyResult } from "./BuyResult";
 
 const CHECK_FAILED = "Couldn't check it. Try again?";
@@ -32,7 +33,8 @@ type Step =
 
 // Upload a screenshot → confirm the card → see the score. One item at a
 // time; nothing is kept once you check another.
-export function BuyCheck() {
+// tempUnit streams in after the page; only the card reads it, long after.
+export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
   const [step, setStep] = useState<Step>({ kind: "idle" });
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
@@ -227,6 +229,7 @@ export function BuyCheck() {
           submitLabel="Check it"
           busyLabel="Checking…"
           hint="Fix anything that's off, then check."
+          tempUnit={use(tempUnit)}
         />
       )}
       {step.kind === "result" && (

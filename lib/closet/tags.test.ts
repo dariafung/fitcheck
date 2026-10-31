@@ -87,6 +87,12 @@ describe("tagGroups", () => {
       "Good for": ["Home", "Social"],
     });
   });
+
+  it("shows the range in °C for a profile set to °C", () => {
+    const tags = itemTags({ category: "top", ai_tags: { ...AI_TAGS, tempRangeF: { min: 55, max: 85 } }, user_tags: {} });
+    const range = tagGroups(tags, "C").find((g) => g.label === "Comfortable in");
+    expect(range?.values).toEqual(["13 to 29°C"]);
+  });
 });
 
 describe("aiTags", () => {
