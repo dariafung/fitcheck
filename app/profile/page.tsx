@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PhoneLogOut } from "@/components/auth/account-nav";
 import { isReadOnly } from "@/lib/auth/session";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
@@ -24,6 +25,9 @@ export default function ProfilePage() {
       </Suspense>
       <Suspense>
         <WearLog />
+      </Suspense>
+      <Suspense>
+        <PhoneLogOut />
       </Suspense>
     </div>
   );

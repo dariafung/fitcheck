@@ -92,6 +92,19 @@ test("log in with the account you made, then log out", async ({ page }) => {
   await expect(page).toHaveURL("/");
 });
 
+test("on a phone, Log out moves from the top bar to Profile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signUp(page);
+  const nav = page.getByRole("navigation");
+  await expect(nav.getByRole("link", { name: "Buy?", exact: true })).toBeVisible();
+  await expect(nav.getByRole("button", { name: "Log out" })).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  await nav.getByRole("link", { name: "Profile", exact: true }).click();
+  await page.getByRole("main").getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL("/login");
+});
+
 test("Try the demo account opens the persona's closet", async ({ page }) => {
   await tryDemo(page);
   await page.goto("/closet");
