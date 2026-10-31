@@ -1,0 +1,31 @@
+{
+  "fn": "summarizeWear",
+  "promptVersion": "summarize-wear@2",
+  "inputHash": "3621d4ea3cfa829f93008d27ecb5e242b454cfe5637cb577d7e0a354944a535f",
+  "inputPreview": "{\"items\":[{\"addedDaysAgo\":null,\"feeling\":{\"aspects\":[{\"area\":\"overall\",\"aspect\":\"fit\",\"means\":\"fits just right\",\"said\":\"fits just right\",\"sentiment\":\"positive\"},{\"area\":\"neckline\",\"aspect\":\"fit\",\"means\":\"prefers shallower V necklines\",\"said\":\"V is a bit too deep\",\"sentiment\":\"negative\"}],\"flattering",
+  "output": {
+    "insights": [
+      {
+        "kind": "say_vs_wear",
+        "text": "The stone v-neck tee washes you out, and you haven't worn it once in the log.",
+        "itemIds": [
+          "8e169881-6d10-4f5e-93b1-c00a1e1efe69"
+        ]
+      },
+      {
+        "kind": "say_vs_wear",
+        "text": "You love the black-and-white sneakers and blue straight jeans, and you wore them for most of your school outfits.",
+        "itemIds": [
+          "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+          "d54193d3-7afa-4da9-9af7-efc08b13427a"
+        ]
+      },
+      {
+        "kind": "occasion",
+        "text": "You want three sport outfits a season but logged only two different ones across six outfits.",
+        "itemIds": []
+      }
+    ]
+  },
+  "recordedAt": "2026-10-31T18:20:39.749Z"
+}

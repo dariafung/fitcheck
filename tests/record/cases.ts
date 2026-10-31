@@ -11,6 +11,7 @@ import { MAX_FELT_PHOTOS, type FeltFeeling, type ScorePurchaseInput } from "@/li
 import { readFileSync } from "node:fs";
 import judgeTwenty from "./judge-pairing-20.json";
 import photoCloset from "./score-photo-closet.json";
+import { personaProfileInput, personaWearInput } from "./persona";
 
 // The seed persona's three items (seed/items.json).
 export const SHIRT: ItemSummary = {
@@ -392,6 +393,8 @@ export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
       feelings: PHOTO_CLOSET.map(({ id, feeling }) => ({ ...feeling, itemId: id })),
     },
   },
+  // The seed closet; seed/style-profile.json is this recording.
+  { name: "the persona's seed closet", input: personaProfileInput() },
 ];
 
 // The same two candidates scored against the seven-piece closet with the
@@ -490,6 +493,9 @@ export const WEAR_CASES: { name: string; input: SummarizeWearInput }[] = [
       ],
     },
   },
+  // seed/wear-plan.json on the seed closet; the calendar caches what the
+  // model writes for it, so this shows what the demo will say.
+  { name: "the persona's seed log", input: personaWearInput() },
 ];
 
 const photo = (id: string): MediaRef => ({

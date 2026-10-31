@@ -145,11 +145,19 @@ export function visibleCard(card: StoredCard, activeIds: ReadonlySet<string>): V
   if (!backed(card.headline)) return null;
   const rows = PROFILE_TOPICS.flatMap((topic): CardRow[] => {
     const suits = card.suits.find((s) => s.topic === topic && backed(s))?.text;
-    const avoid = card.avoid.find((s) => s.topic === topic && backed(s))?.text;
+    const found = card.avoid.find((s) => s.topic === topic && backed(s))?.text;
+    const avoid = found && skipText(found);
     return suits || avoid ? [{ topic, ...(suits && { suits }), ...(avoid && { avoid }) }] : [];
   });
   if (rows.length < MIN_ROWS) return null;
   return { headline: card.headline.text, rows, generatedAt: card.generatedAt };
+}
+
+// The card puts "Skip:" in front of what to avoid, so a "Skip" or "Avoid"
+// the model wrote itself goes. Done on show, so older cards read right too.
+export function skipText(text: string): string {
+  const rest = text.replace(/^\s*(skip|avoid)\b[\s:,-]*/i, "");
+  return rest ? rest.charAt(0).toUpperCase() + rest.slice(1) : text;
 }
 
 export interface StyleCardState {

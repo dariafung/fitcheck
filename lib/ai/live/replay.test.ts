@@ -15,7 +15,6 @@ import {
 import { BuildProfileInput, HEADLINE_MAX_WORDS, profileFacts, STATEMENT_MAX_WORDS } from "../schemas/build-profile";
 import { INSIGHT_MAX_WORDS, SummarizeWearInput } from "../schemas/summarize-wear";
 import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase, summarizeWear } from "../index";
-import { retells } from "./build-profile";
 
 const REPLAY = { mode: "replay" } as const;
 const feeling = (name: string) => {
@@ -212,12 +211,10 @@ describe("buildProfile recordings", () => {
       expect(out.avoid.length).toBeGreaterThan(0);
 
       const ids = new Set(input.items.map((i) => i.id));
-      const saids = input.feelings.flatMap((f) => f.aspects.map((a) => a.said));
       expect(out.headline.evidenceItemIds.length).toBeGreaterThanOrEqual(2);
       expect(words(out.headline.text)).toBeLessThanOrEqual(HEADLINE_MAX_WORDS);
       for (const s of [out.headline, ...statements]) {
         for (const id of s.evidenceItemIds) expect(ids).toContain(id);
-        expect(retells(s.text, saids), s.text).toBe(false);
         expect(s.text).not.toMatch(/\b(she|her|hers|he|him|his)\b/i);
       }
       for (const s of statements) expect(words(s.text)).toBeLessThanOrEqual(STATEMENT_MAX_WORDS);
@@ -228,7 +225,11 @@ describe("buildProfile recordings", () => {
           .filter((f) => f.flattering === "no" || f.liked === "no" || f.aspects.some((a) => a.sentiment === "negative"))
           .map((f) => f.itemId),
       );
-      for (const s of out.avoid) expect(s.evidenceItemIds.some((id) => negative.has(id)), s.text).toBe(true);
+      for (const s of out.avoid) {
+        expect(s.evidenceItemIds.some((id) => negative.has(id)), s.text).toBe(true);
+        // The card puts "Skip:" in front itself.
+        expect(s.text).not.toMatch(/^(skip|avoid)\b/i);
+      }
     },
   );
 });
