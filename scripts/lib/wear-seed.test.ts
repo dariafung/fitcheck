@@ -2,9 +2,14 @@ import { describe, expect, it } from "vitest";
 import feelings from "../../seed/feelings.json";
 import items from "../../seed/items.json";
 import persona from "../../seed/persona.json";
-import { addDays, SEED_DAYS, seedOutfitLog, type SeedFeeling, type SeedItem } from "./wear-seed.mjs";
+import plan from "../../seed/wear-plan.json";
+import { addDays, SEED_DAYS, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./wear-seed.mjs";
 
 const LAST_DAY = "2026-10-28";
+// Seed pieces the persona's story is about (seed/items.json).
+const BEIGE_TEE = "8e169881-6d10-4f5e-93b1-c00a1e1efe69";
+const JEANS = "d54193d3-7afa-4da9-9af7-efc08b13427a";
+const LOAFERS = "84709d1e-9f8a-4f71-ac84-43ecd8c7f603";
 const OCCASIONS = ["work", "school", "social", "sport", "home"];
 const MIX = { work: 0, school: 3, social: 2, sport: 3, home: 3 };
 
@@ -147,8 +152,8 @@ describe("seedOutfitLog", () => {
     expectValidRows(rows, [...CLOSET, passedOn]);
   });
 
-  it("works on the seed closet as it is today", () => {
-    const { rows, roles } = seedOutfitLog({
+  it("works on the seed closet as it is today, without a plan", () => {
+    const { rows } = seedOutfitLog({
       personaId: persona.id,
       items: items as SeedItem[],
       feelings: feelings as SeedFeeling[],
@@ -157,8 +162,33 @@ describe("seedOutfitLog", () => {
     });
     expectValidRows(rows, items as SeedItem[]);
     expect(rows.length).toBeGreaterThan(0);
-    // The shirt they love is worn once; the jeans they never wear are the knocked piece.
-    expect(roles.get("852c8e3d-abf7-4955-ab65-9d83194a02ae")).toBe("rare");
-    expect(roles.get("c81b2b56-1f62-4284-83b6-7307a6355ac5")).toBe("often");
+  });
+
+  it("tells the persona's story from seed/wear-plan.json", () => {
+    const { rows } = seedOutfitLog({
+      personaId: persona.id,
+      items: items as SeedItem[],
+      feelings: feelings as SeedFeeling[],
+      lifestyleMix: persona.lifestyle_mix,
+      plan: plan as DayPlan,
+      lastDay: LAST_DAY,
+    });
+    expectValidRows(rows, items as SeedItem[]);
+    expect(new Set(rows.map((r) => r.worn_on)).size).toBe(SEED_DAYS);
+    const c = counts(rows);
+    // The beige tee that "washes me out" is never worn.
+    expect(c.get(BEIGE_TEE) ?? 0).toBe(0);
+    // The jeans are the go-to for class.
+    const school = rows.filter((r) => r.occasion === "school");
+    expect(school.every((r) => r.item_ids.includes(JEANS))).toBe(true);
+    // The loafers they praise, and both pieces now passed on, are worn once.
+    for (const once of [LOAFERS, ...items.filter((i) => i.status === "passing_on").map((i) => i.id)]) {
+      expect(c.get(once)).toBe(1);
+    }
+    for (const item of items.filter((i) => i.id !== BEIGE_TEE)) expect(c.get(item.id) ?? 0).toBeGreaterThan(0);
+    // One running set does most of the sport days.
+    const sport = rows.filter((r) => r.occasion === "sport").map((r) => r.item_ids.join());
+    const top = Math.max(...[...new Set(sport)].map((k) => sport.filter((s) => s === k).length));
+    expect(top).toBeGreaterThan(sport.length / 2);
   });
 });

@@ -1,0 +1,213 @@
+{
+  "days": [
+    {
+      "daysAgo": 9,
+      "outfits": [
+        {
+          "items": [
+            "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+            "5e8bd85a-3e3a-40fc-9028-bb7d2695596c"
+          ],
+          "occasion": "sport"
+        }
+      ]
+    },
+    {
+      "daysAgo": 8,
+      "outfits": [
+        {
+          "items": [
+            "907d76cc-98b7-4e29-8755-fc734a761987",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "825788d8-8548-43da-9a26-40f5af91c0f3",
+            "f4678e3e-ef86-4510-87ba-7fa834cc08d6"
+          ],
+          "occasion": "home"
+        }
+      ]
+    },
+    {
+      "daysAgo": 7,
+      "outfits": [
+        {
+          "items": [
+            "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+            "5e8bd85a-3e3a-40fc-9028-bb7d2695596c"
+          ],
+          "occasion": "sport"
+        }
+      ]
+    },
+    {
+      "daysAgo": 6,
+      "outfits": [
+        {
+          "items": [
+            "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+            "b4411873-c7b0-44eb-bb1d-542889641915",
+            "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+            "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
+          ],
+          "occasion": "social"
+        },
+        {
+          "items": [
+            "825788d8-8548-43da-9a26-40f5af91c0f3",
+            "e749b166-b703-413a-80f2-36b6e2864ed6"
+          ],
+          "occasion": "home"
+        }
+      ]
+    },
+    {
+      "daysAgo": 5,
+      "outfits": [
+        {
+          "items": [
+            "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+            "b91ce162-a22b-4d6f-a443-65547e082181"
+          ],
+          "occasion": "sport"
+        }
+      ]
+    },
+    {
+      "daysAgo": 4,
+      "outfits": [
+        {
+          "items": [
+            "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "ab426b49-f3b7-42bd-9527-b71176656fbb",
+            "f4678e3e-ef86-4510-87ba-7fa834cc08d6"
+          ],
+          "occasion": "home"
+        }
+      ]
+    },
+    {
+      "daysAgo": 3,
+      "outfits": [
+        {
+          "items": [
+            "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+            "5e8bd85a-3e3a-40fc-9028-bb7d2695596c"
+          ],
+          "occasion": "sport"
+        }
+      ]
+    },
+    {
+      "daysAgo": 2,
+      "outfits": [
+        {
+          "items": [
+            "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+            "b4411873-c7b0-44eb-bb1d-542889641915",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+            "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
+          ],
+          "occasion": "social"
+        },
+        {
+          "items": [
+            "825788d8-8548-43da-9a26-40f5af91c0f3",
+            "e749b166-b703-413a-80f2-36b6e2864ed6"
+          ],
+          "occasion": "home"
+        }
+      ]
+    },
+    {
+      "daysAgo": 1,
+      "outfits": [
+        {
+          "items": [
+            "907d76cc-98b7-4e29-8755-fc734a761987",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+            "5e8bd85a-3e3a-40fc-9028-bb7d2695596c"
+          ],
+          "occasion": "sport"
+        },
+        {
+          "items": [
+            "825788d8-8548-43da-9a26-40f5af91c0f3",
+            "f4678e3e-ef86-4510-87ba-7fa834cc08d6"
+          ],
+          "occasion": "home"
+        }
+      ]
+    },
+    {
+      "daysAgo": 0,
+      "outfits": [
+        {
+          "items": [
+            "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+            "d54193d3-7afa-4da9-9af7-efc08b13427a",
+            "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+          ],
+          "occasion": "school"
+        },
+        {
+          "items": [
+            "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+            "b91ce162-a22b-4d6f-a443-65547e082181"
+          ],
+          "occasion": "sport"
+        }
+      ]
+    }
+  ]
+}
