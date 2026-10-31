@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alignBrand, BRANDS, brandKey, MAX_BRAND_SUGGESTIONS, savedBrandNames, suggestBrands } from "./brands";
+import { alignBrand, BRANDS, brandKey, brandKeys, MAX_BRAND_SUGGESTIONS, savedBrandNames, suggestBrands } from "./brands";
 
 describe("brandKey", () => {
   it("ignores case, spaces, punctuation and accents, and reads & as and", () => {
@@ -18,6 +18,16 @@ describe("brandKey", () => {
     const keys = BRANDS.flatMap((b) => [b.name, ...(b.aliases ?? [])]).map(brandKey);
     expect(keys.every(Boolean)).toBe(true);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+describe("brandKeys", () => {
+  it("gives the brand's own key and those of its built-in entry", () => {
+    expect(brandKeys("Hollister")).toEqual(["hollister", "hollisterco", "hollistercalifornia"]);
+    expect(brandKeys("A&F")).toEqual(["aandf", "abercrombieandfitch", "abercrombie"]);
+    expect(brandKeys("Some Small Label")).toEqual(["somesmalllabel"]);
+    expect(brandKeys(undefined)).toEqual([]);
+    expect(brandKeys(" - ")).toEqual([]);
   });
 });
 

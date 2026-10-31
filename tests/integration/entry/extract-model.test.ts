@@ -94,6 +94,20 @@ describe("POST /api/items/extract with real-shaped model answers", () => {
     expect((await extract()).body.draft.brand).toBeUndefined();
   });
 
+  // Names as the stores in the demo screenshots write them.
+  it.each([
+    ['Speed Up High-Rise Short 4" *Updated', "lululemon", 'Speed Up High-Rise Short 4"'],
+    ["Swiftly Tech Short-Sleeve Shirt 2.0 *Waist Length", "lululemon", "Swiftly Tech Short-Sleeve Shirt 2.0"],
+    ["SUPIMA® LONG SLEEVE T-SHIRT", "ZARA", "Supima Long Sleeve T-Shirt"],
+    ["Hollister Feel Good Oversized Hoodie", "HOLLISTER", "Feel Good Oversized Hoodie"],
+    ["FAUX SUEDE BELTED JACKET", "ZARA", "Faux Suede Belted Jacket"],
+  ])("cleans the name %s, and keeps the model's in the raw source", async (title, brand, clean) => {
+    answer.value = { ...BASE, title, brand };
+    const { body } = await extract();
+    expect(body.draft.title).toBe(clean);
+    expect(body.draft.rawSource).toMatchObject({ aiTitle: title });
+  });
+
   it("writes the brand the way the user already saved it", async () => {
     const db = createServerClient();
     const { data: saved } = await db

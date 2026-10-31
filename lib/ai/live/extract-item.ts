@@ -53,7 +53,8 @@ export const EXTRACT_ITEM_INSTRUCTIONS = `You turn a screenshot of an online sto
 
 Rules:
 - recognized: false when the screenshot shows no single clothing product you can identify. Then fill the other fields with placeholders (title "unknown") and stop.
-- title: the product name as the store shows it. brand, price (number in the store's currency, e.g. 49.9) and currency (ISO code like USD) only if visible or found by search, else null.
+- title: the product name as the store shows it, with three fixes: drop store notes after an asterisk ("*Updated", "*Regular", "*Waist Length") and ® ™ © signs; drop the brand when the name starts with it ("Hollister Feel Good Oversized Hoodie" → "Feel Good Oversized Hoodie"); write an all-caps name in title case but keep real acronyms ("FAUX SUEDE BELTED JACKET" → "Faux Suede Belted Jacket", "ZW COLLECTION" → "ZW Collection"). Keep every other word as shown: do not shorten, reword or complete it.
+- brand, price (number in the store's currency, e.g. 49.9) and currency (ISO code like USD) only if visible or found by search, else null.
 - size: the size chosen for this item, copied as written: a selected size button, or the size printed next to the product in a cart, order or bag line (e.g. "S" from "S | WHITE", "27 (US 4)", "XS", "7½"). Only the size, not the color. null when no size is chosen or the page only lists the sizes on offer. Never guess it from search.
 - Known facts, when given, are true. Do not contradict them.
 - tags.category: one of top, bottom, one_piece (dresses, jumpsuits), shoes, outerwear, accessory.

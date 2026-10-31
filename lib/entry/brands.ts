@@ -227,6 +227,15 @@ export function alignBrand(brand: string | undefined, saved: string[]): string |
   return own ?? BUILT_IN.get(key)?.name ?? text;
 }
 
+// Every key a brand goes by: its own, plus the name and aliases of its
+// built-in entry ("HOLLISTER" → hollister, hollisterco, hollistercalifornia).
+export function brandKeys(brand: string | undefined): string[] {
+  const key = brandKey(brand ?? "");
+  if (!key) return [];
+  const entry = BUILT_IN.get(key);
+  return [...new Set([key, ...(entry ? [entry.name, ...(entry.aliases ?? [])].map(brandKey) : [])])];
+}
+
 export const MAX_BRAND_SUGGESTIONS = 8;
 
 const BUILT_IN_SORTED = [...BRANDS]
