@@ -2,11 +2,12 @@ import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_USER_ID } from "../../../lib/db/current-user";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
+import seedItems from "../../../seed/items.json";
 import { expect, test } from "../fixtures";
 
 // A passing-on item's page: its size and who'd want it. The demo persona is
-// only matched with seeded sample buyers, and there are none yet, so the
-// buyer list is always empty here. Each test adds its own item.
+// only matched with the seeded sample buyers (pnpm seed), checked here with
+// the mock models. Tests that change an item add their own.
 const env = readLocalSupabase();
 const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
@@ -24,7 +25,8 @@ test.beforeEach(async () => {
       title,
       category: "outerwear",
       status: "passing_on",
-      size: "M",
+      // Bigger than any sample buyer.
+      size: "XXL",
       ai_tags: {
         category: "outerwear",
         colors: [{ name: "indigo" }],
@@ -43,18 +45,29 @@ test.afterEach(async () => {
   await db.from("items").delete().eq("id", item.id);
 });
 
-test("a passing-on item shows its size and who'd want it", async ({ page }) => {
+test("a passing-on item shows its size, and says when no buyer fits it", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
-  await expect(page.getByText("Size M")).toBeVisible();
+  await expect(page.getByText("Size XXL")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who'd want it" })).toBeVisible();
-  await expect(page.getByText("No active buyers right now.")).toBeVisible();
+  await expect(page.getByText("No buyers in this size right now.")).toBeVisible();
+});
+
+test("the persona's baby tee has one strong sample buyer, shown anonymously", async ({ page }) => {
+  const tee = seedItems.find((i) => i.title === "100% Cotton Crew Baby Tee")!;
+  await page.goto(`/closet/${tee.id}`);
+  const buyers = page.getByRole("region", { name: "Who'd want it" });
+  await expect(buyers.getByRole("listitem")).toHaveCount(1);
+  await expect(buyers.getByRole("img", { name: /^Anonymous buyer, \d+(\.\d)? match$/ })).toBeVisible();
+  await expect(buyers.getByText("Sample buyers, not real people.")).toBeVisible();
+  // No sample buyer's name ("Sample buyer Maya").
+  await expect(buyers).not.toContainText(/Sample buyer [A-Z]/);
 });
 
 test("edit the size; one code can't read still saves, with a note", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
   await page.getByRole("button", { name: "Edit size" }).click();
   const size = page.getByLabel("What size is it?");
-  await expect(size).toHaveValue("M");
+  await expect(size).toHaveValue("XXL");
 
   // A passing-on item can't lose its size.
   await size.fill("");

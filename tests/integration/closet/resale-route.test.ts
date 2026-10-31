@@ -1,18 +1,40 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/items/[id]/buyers/route";
+import * as ai from "@/lib/ai";
+import { AiBudgetError } from "@/lib/ai/errors";
+import { toSellerItem } from "@/lib/resale/buyers";
+import { MAX_NEW_CHECKS } from "@/lib/resale/check-buyers";
+import { buyerStates, fingerprint } from "@/lib/resale/fingerprint";
 import { buyerPool } from "@/lib/resale/pool";
+import { FALLBACK_SUMMARY } from "@/lib/resale/reason-filter";
 import { createTestCloset } from "./helpers";
+
+// Spies on the model calls while keeping the mock answers.
+vi.mock("@/lib/ai", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ai")>();
+  return {
+    ...actual,
+    judgePairing: vi.fn(actual.judgePairing),
+    judgeRepeat: vi.fn(actual.judgeRepeat),
+    scorePurchase: vi.fn(actual.scorePurchase),
+    renderOutfit: vi.fn(actual.renderOutfit),
+    segmentGarment: vi.fn(actual.segmentGarment),
+  };
+});
 
 const user = vi.hoisted(() => ({ id: "" }));
 vi.mock("@/lib/db/current-user", () => ({ currentUserId: () => user.id }));
 
 // The local database is shared, so other users may be opted in too: these
 // tests only look at the buyers they make, never at who else is in the pool.
+// Their buyers want 30 social outfits a season, the most there is, so they
+// come first for the seller's social top.
 let closet: Awaited<ReturnType<typeof createTestCloset>>;
 const made: string[] = [];
 
 beforeEach(async () => {
+  vi.clearAllMocks();
   closet = await createTestCloset();
   user.id = closet.userId;
   await closet.db
@@ -34,6 +56,12 @@ interface BuyerSetup {
   closet?: number;
 }
 
+function itemTags(category: string) {
+  return { category, colors: [{ name: "black" }], materials: [], formality: 2, occasions: ["social"] };
+}
+
+// Bottoms and shoes, so the seller's top makes outfits; one liked feeling,
+// so the fit questions go to the model.
 async function buyer({ top = "M", optIn = true, seed = false, closet: count = 3 }: BuyerSetup = {}) {
   const id = randomUUID();
   made.push(id);
@@ -48,35 +76,94 @@ async function buyer({ top = "M", optIn = true, seed = false, closet: count = 3 
       top_size: top,
       bottom_size: "M",
       shoe_size: "W8",
+      body_shape: "pear",
+      lifestyle_mix: { work: 0, school: 0, social: 30, sport: 0, home: 0 },
     })
     .throwOnError();
   if (count > 0) {
-    await db
+    const { data: items } = await db
       .from("items")
       .insert(
-        Array.from({ length: count }, (_, i) => ({
-          user_id: id,
-          entry_method: "manual",
-          title: `Buyer item ${i}`,
-          category: "top",
-        })),
+        Array.from({ length: count }, (_, i) => {
+          const category = i % 2 === 0 ? "bottom" : "shoes";
+          return {
+            user_id: id,
+            entry_method: "manual",
+            title: `Buyer ${category} ${i}`,
+            category,
+            ai_tags: itemTags(category),
+          };
+        }),
       )
+      .select("id")
+      .throwOnError();
+    await db
+      .from("item_feelings")
+      .insert({
+        user_id: id,
+        item_id: items[0].id,
+        raw_text: "Love the color.",
+        source: "typed",
+        structured: {
+          liked: "yes",
+          flattering: "yes",
+          mood: [],
+          occasions: [],
+          summary: "Loves the color.",
+          aspects: [{ aspect: "color", sentiment: "positive", said: "Love the color", means: "Love the color" }],
+        },
+        parsed_at: new Date().toISOString(),
+      })
       .throwOnError();
   }
   return id;
 }
 
+// A cached check that's up to date, so opening the item asks no model.
 async function cached(buyerId: string, score: number) {
+  const { data: item } = await closet.db
+    .from("items")
+    .select("title, category, ai_tags, user_tags, image_paths")
+    .eq("id", closet.itemId)
+    .single()
+    .throwOnError();
+  const state = (await buyerStates(closet.db, [buyerId])).get(buyerId)!;
   await closet.db
     .from("resale_matches")
-    .insert({ item_id: closet.itemId, buyer_id: buyerId, seller_id: closet.userId, fingerprint: "test", score })
+    .insert({
+      item_id: closet.itemId,
+      buyer_id: buyerId,
+      seller_id: closet.userId,
+      fingerprint: fingerprint(toSellerItem(item), state, "mock"),
+      score,
+    })
     .throwOnError();
+}
+
+async function rows() {
+  const { data } = await closet.db
+    .from("resale_matches")
+    .select("buyer_id, fingerprint, score, highlights, buyer_reasons")
+    .eq("item_id", closet.itemId)
+    .throwOnError();
+  return data;
+}
+
+// Buy checks run, counted by judgeRepeat: one call per buyer with clothes.
+function checksRun() {
+  return vi.mocked(ai.judgeRepeat).mock.calls.length;
 }
 
 function post(id: string) {
   return POST(new Request(`http://test/api/items/${id}/buyers`, { method: "POST" }), {
     params: Promise.resolve({ id }),
   });
+}
+
+async function open() {
+  const res = await post(closet.itemId);
+  expect(res.status).toBe(200);
+  return res.json();
 }
 
 describe("buyerPool", () => {
@@ -115,21 +202,120 @@ describe("buyerPool", () => {
 });
 
 describe("POST /api/items/[id]/buyers", () => {
+  it("checks new buyers from their side, caches the scores, and asks no model the second time", async () => {
+    const [a, b] = await Promise.all([buyer(), buyer()]);
+    const body = await open();
+    expect(["matches", "none_strong"]).toContain(body.state);
+    expect(body.sample).toBe(false);
+    const saved = await rows();
+    expect(saved.map((r) => r.buyer_id).sort()).toEqual([a, b].sort());
+    for (const r of saved) {
+      expect(r.score).toBeGreaterThan(0);
+      expect(r.highlights.length).toBeGreaterThan(0);
+      expect(r.buyer_reasons.length).toBeGreaterThan(0);
+    }
+    expect(ai.scorePurchase).toHaveBeenCalled();
+
+    vi.clearAllMocks();
+    expect((await open()).state).toBe(body.state);
+    expect(ai.judgePairing).not.toHaveBeenCalled();
+    expect(ai.judgeRepeat).not.toHaveBeenCalled();
+    expect(ai.scorePurchase).not.toHaveBeenCalled();
+  });
+
+  it("checks again only the buyer whose closet changed", async () => {
+    const [changed, same] = await Promise.all([buyer(), buyer()]);
+    await open();
+    const before = new Map((await rows()).map((r) => [r.buyer_id, r.fingerprint]));
+
+    await closet.db.from("items").update({ title: "Renamed" }).eq("user_id", changed).eq("category", "shoes").throwOnError();
+    vi.clearAllMocks();
+    await open();
+    expect(checksRun()).toBe(1);
+    const after = new Map((await rows()).map((r) => [r.buyer_id, r.fingerprint]));
+    expect(after.get(changed)).not.toBe(before.get(changed));
+    expect(after.get(same)).toBe(before.get(same));
+  });
+
+  it("checks everyone again when the seller changes the item's tags", async () => {
+    await Promise.all([buyer(), buyer()]);
+    await open();
+    await closet.db.from("items").update({ user_tags: { fit: "slim" } }).eq("id", closet.itemId).throwOnError();
+    vi.clearAllMocks();
+    await open();
+    expect(checksRun()).toBeGreaterThanOrEqual(2);
+  });
+
+  it(`checks at most ${MAX_NEW_CHECKS} new buyers at a time, and says some are still waiting`, async () => {
+    await Promise.all(Array.from({ length: MAX_NEW_CHECKS + 1 }, () => buyer()));
+    const body = await open();
+    expect(checksRun()).toBe(MAX_NEW_CHECKS);
+    expect(body.someUnchecked).toBe(true);
+
+    vi.clearAllMocks();
+    expect((await open()).someUnchecked).toBe(false);
+    expect(checksRun()).toBe(1);
+  });
+
+  it("runs one set of checks when the item is opened twice at once", async () => {
+    await Promise.all([buyer(), buyer()]);
+    const [first, second] = await Promise.all([open(), open()]);
+    expect(checksRun()).toBe(2);
+    expect(second).toEqual(first);
+  });
+
+  it("keeps the checks that finished when one fails, and says the rest are waiting", async () => {
+    await Promise.all([buyer(), buyer()]);
+    vi.mocked(ai.judgeRepeat).mockRejectedValueOnce(new AiBudgetError("judgeRepeat"));
+    const body = await open();
+    expect(body.someUnchecked).toBe(true);
+    expect(await rows()).toHaveLength(1);
+  });
+
+  it("says when no buyer could be checked yet", async () => {
+    await buyer();
+    vi.mocked(ai.judgeRepeat).mockRejectedValueOnce(new AiBudgetError("judgeRepeat"));
+    expect(await open()).toEqual({ state: "unchecked", sample: false });
+  });
+
+  it("leaves the buyer's own rows alone and draws nothing", async () => {
+    const id = await buyer();
+    const snapshot = async () =>
+      Promise.all([
+        closet.db.from("users").select("*").eq("id", id).single().throwOnError(),
+        closet.db.from("items").select("*").eq("user_id", id).order("id").throwOnError(),
+        closet.db.from("item_feelings").select("*").eq("user_id", id).order("id").throwOnError(),
+      ]).then((results) => results.map((r) => r.data));
+    const before = await snapshot();
+    await open();
+    expect(await snapshot()).toEqual(before);
+    expect(ai.renderOutfit).not.toHaveBeenCalled();
+    expect(ai.segmentGarment).not.toHaveBeenCalled();
+  });
+
+  it("keeps only reasons a buyer should read", async () => {
+    await closet.db.from("items").update({ title: "Tee that hides your hips" }).eq("id", closet.itemId).throwOnError();
+    await buyer();
+    await open();
+    const [row] = await rows();
+    expect(row.buyer_reasons[0]).toBe(FALLBACK_SUMMARY);
+    expect(row.buyer_reasons.join(" ")).not.toMatch(/hides/i);
+  });
+
   it("lists cached matches at 60 or more, best first, with nothing about who they are", async () => {
     const [a, b, c] = await Promise.all([buyer(), buyer(), buyer()]);
     await cached(a, 72);
     await cached(b, 91);
     await cached(c, 59);
 
-    const res = await post(closet.itemId);
-    expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = await open();
+    expect(checksRun()).toBe(0);
     expect(body.state).toBe("matches");
     expect(body.matches.map((m: { score: number }) => m.score)).toEqual([91, 72]);
     for (const m of body.matches) expect(Object.keys(m).sort()).toEqual(["color", "key", "score"]);
     const text = JSON.stringify(body);
     for (const id of [a, b, c]) expect(text).not.toContain(id);
-    expect(text).not.toContain("Resale test buyer");
+    expect(text).not.toMatch(/Resale test buyer|Buyer (bottom|shoes)|Loves the color|pear/);
   });
 
   it("drops buyers who opted out or no longer fit the size", async () => {
@@ -138,13 +324,13 @@ describe("POST /api/items/[id]/buyers", () => {
     await closet.db.from("users").update({ resale_opt_in: false }).eq("id", gone).throwOnError();
     await closet.db.from("users").update({ top_size: "XXL" }).eq("id", resized).throwOnError();
 
-    const body = await (await post(closet.itemId)).json();
+    const body = await open();
     expect(body.matches.map((m: { score: number }) => m.score)).toEqual([70]);
   });
 
-  it("says no one is a strong match when every cached score is under 60", async () => {
+  it("says no one is a strong match when every score is under 60", async () => {
     await cached(await buyer(), 45);
-    expect(await (await post(closet.itemId)).json()).toEqual({ state: "none_strong" });
+    expect(await open()).toEqual({ state: "none_strong", someUnchecked: false, sample: false });
   });
 
   it("refuses items that aren't passing on, accessories, and items that aren't the user's", async () => {

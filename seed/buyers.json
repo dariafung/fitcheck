@@ -1,0 +1,880 @@
+{
+  "users": [
+    {
+      "id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "display_name": "Sample buyer Maya",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "height_cm": 160,
+      "weight_kg": 54,
+      "body_shape": "hourglass",
+      "lifestyle_mix": {
+        "work": 0,
+        "school": 4,
+        "social": 1,
+        "sport": 0,
+        "home": 1
+      },
+      "top_size": "S",
+      "bottom_size": "S",
+      "shoe_size": "W7",
+      "temp_unit": "F"
+    },
+    {
+      "id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "display_name": "Sample buyer Jordan",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "height_cm": 155,
+      "weight_kg": 47,
+      "body_shape": "rectangle",
+      "lifestyle_mix": {
+        "work": 0,
+        "school": 1,
+        "social": 0,
+        "sport": 2,
+        "home": 4
+      },
+      "top_size": "XS",
+      "bottom_size": "XS",
+      "shoe_size": "W6",
+      "temp_unit": "F"
+    },
+    {
+      "id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "display_name": "Sample buyer Priya",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "height_cm": 163,
+      "weight_kg": 56,
+      "body_shape": "pear",
+      "lifestyle_mix": {
+        "work": 0,
+        "school": 2,
+        "social": 0,
+        "sport": 0,
+        "home": 2
+      },
+      "top_size": "S",
+      "bottom_size": "S",
+      "shoe_size": "W8",
+      "temp_unit": "F"
+    },
+    {
+      "id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "display_name": "Sample buyer Lena",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "height_cm": 168,
+      "weight_kg": 60,
+      "body_shape": "inverted_triangle",
+      "lifestyle_mix": {
+        "work": 0,
+        "school": 3,
+        "social": 2,
+        "sport": 0,
+        "home": 0
+      },
+      "top_size": "S",
+      "bottom_size": "S",
+      "shoe_size": "W7.5",
+      "temp_unit": "F"
+    },
+    {
+      "id": "1d083039-7fd7-430c-80c4-bed5007f5a66",
+      "display_name": "Sample buyer Theo",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "height_cm": 182,
+      "weight_kg": 80,
+      "body_shape": "rectangle",
+      "lifestyle_mix": {
+        "work": 0,
+        "school": 2,
+        "social": 0,
+        "sport": 2,
+        "home": 0
+      },
+      "top_size": "L",
+      "bottom_size": "L",
+      "shoe_size": "M10",
+      "temp_unit": "F"
+    }
+  ],
+  "items": [
+    {
+      "id": "e825eee1-4ab8-43f9-af66-c0f0f3cb843d",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Wide-leg jeans",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "jeans",
+        "colors": [
+          {
+            "name": "light wash"
+          }
+        ],
+        "colorFamily": "denim",
+        "materials": [
+          "cotton"
+        ],
+        "fit": "relaxed",
+        "formality": 2,
+        "tempRangeF": {
+          "min": 40,
+          "max": 80
+        },
+        "occasions": [
+          "school"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "3862b023-67af-47a7-bb7a-4598c0fb9d99",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Pleated mini skirt",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "skirt",
+        "colors": [
+          {
+            "name": "black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "polyester"
+        ],
+        "fit": "regular",
+        "formality": 2,
+        "tempRangeF": {
+          "min": 55,
+          "max": 85
+        },
+        "occasions": [
+          "school",
+          "social"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "4944b907-98ee-4812-ac14-854b9e03b2ee",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Canvas sneakers",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "sneakers",
+        "colors": [
+          {
+            "name": "white"
+          }
+        ],
+        "colorFamily": "white",
+        "materials": [
+          "canvas"
+        ],
+        "formality": 2,
+        "tempRangeF": {
+          "min": 40,
+          "max": 90
+        },
+        "occasions": [
+          "school",
+          "social"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "af0ee6b0-b847-4104-a34b-0c2bb9b811ab",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Ballet flats",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "flats",
+        "colors": [
+          {
+            "name": "black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "leather"
+        ],
+        "formality": 3,
+        "tempRangeF": {
+          "min": 50,
+          "max": 90
+        },
+        "occasions": [
+          "school",
+          "social"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "8825a85f-5114-4832-bbd5-dfcdd22c2c11",
+      "user_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Cropped fleece hoodie",
+      "category": "top",
+      "ai_tags": {
+        "category": "top",
+        "subcategory": "hoodie",
+        "colors": [
+          {
+            "name": "oatmeal"
+          }
+        ],
+        "colorFamily": "cream",
+        "materials": [
+          "cotton",
+          "polyester"
+        ],
+        "fit": "relaxed",
+        "formality": 1,
+        "tempRangeF": {
+          "min": 45,
+          "max": 75
+        },
+        "occasions": [
+          "home"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "e6e540bc-6280-4732-b534-787b9cb5a855",
+      "user_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Ribbed tank top",
+      "category": "top",
+      "ai_tags": {
+        "category": "top",
+        "subcategory": "tank",
+        "colors": [
+          {
+            "name": "black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "cotton",
+          "elastane"
+        ],
+        "fit": "slim",
+        "formality": 1,
+        "tempRangeF": {
+          "min": 65,
+          "max": 95
+        },
+        "occasions": [
+          "home",
+          "sport"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "d6e48c7e-899f-4f74-a359-da81d48cbac0",
+      "user_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Slide sandals",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "slides",
+        "colors": [
+          {
+            "name": "gray"
+          }
+        ],
+        "colorFamily": "gray",
+        "materials": [
+          "rubber"
+        ],
+        "formality": 1,
+        "tempRangeF": {
+          "min": 60,
+          "max": 95
+        },
+        "occasions": [
+          "home"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "ad684a95-4daf-4323-bba6-dcd9af3538bf",
+      "user_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Running sneakers",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "sneakers",
+        "colors": [
+          {
+            "name": "white"
+          }
+        ],
+        "colorFamily": "white",
+        "materials": [
+          "mesh"
+        ],
+        "formality": 1,
+        "tempRangeF": {
+          "min": 35,
+          "max": 90
+        },
+        "occasions": [
+          "sport",
+          "home"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "bcaccf99-506b-4fcb-bf41-c369bdf90c86",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Cotton crew tee",
+      "category": "top",
+      "ai_tags": {
+        "category": "top",
+        "subcategory": "t-shirt",
+        "colors": [
+          {
+            "name": "heather gray"
+          }
+        ],
+        "colorFamily": "gray",
+        "materials": [
+          "cotton"
+        ],
+        "fit": "slim",
+        "formality": 2,
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "occasions": [
+          "school"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "2fad84ae-cfb3-4421-a3bf-2cf5ccc79280",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Fleece lounge shorts",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "shorts",
+        "colors": [
+          {
+            "name": "heather gray"
+          }
+        ],
+        "colorFamily": "gray",
+        "materials": [
+          "cotton",
+          "polyester"
+        ],
+        "fit": "regular",
+        "formality": 1,
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "occasions": [
+          "home"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "1f723b90-04a6-40a5-9926-27c3145959af",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Straight jeans",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "jeans",
+        "colors": [
+          {
+            "name": "black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "cotton"
+        ],
+        "fit": "regular",
+        "formality": 2,
+        "tempRangeF": {
+          "min": 40,
+          "max": 80
+        },
+        "occasions": [
+          "school"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "df97afe9-6fd6-489c-93a0-01cae8866ace",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Leather sneakers",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "sneakers",
+        "colors": [
+          {
+            "name": "white"
+          }
+        ],
+        "colorFamily": "white",
+        "materials": [
+          "leather"
+        ],
+        "formality": 2,
+        "tempRangeF": {
+          "min": 40,
+          "max": 90
+        },
+        "occasions": [
+          "school",
+          "home"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "6a94794e-5ed9-449b-8a8e-d4089d5fef8e",
+      "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Chunky knit sweater",
+      "category": "top",
+      "ai_tags": {
+        "category": "top",
+        "subcategory": "sweater",
+        "colors": [
+          {
+            "name": "cherry red"
+          }
+        ],
+        "colorFamily": "red",
+        "materials": [
+          "wool"
+        ],
+        "fit": "oversized",
+        "formality": 3,
+        "tempRangeF": {
+          "min": 30,
+          "max": 60
+        },
+        "occasions": [
+          "school"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "1833f32f-e6e6-4508-9657-b7a19e9f5e78",
+      "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Floral midi skirt",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "skirt",
+        "colors": [
+          {
+            "name": "floral print"
+          }
+        ],
+        "colorFamily": "multi",
+        "materials": [
+          "viscose"
+        ],
+        "fit": "regular",
+        "formality": 3,
+        "tempRangeF": {
+          "min": 55,
+          "max": 85
+        },
+        "occasions": [
+          "school",
+          "social"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "47479ade-06a1-4fe4-82e4-5d764716be50",
+      "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Leather ankle boots",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "boots",
+        "colors": [
+          {
+            "name": "brown"
+          }
+        ],
+        "colorFamily": "brown",
+        "materials": [
+          "leather"
+        ],
+        "formality": 3,
+        "tempRangeF": {
+          "min": 30,
+          "max": 70
+        },
+        "occasions": [
+          "school",
+          "social"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "267915ce-14ff-4499-8739-708902fe7e98",
+      "user_id": "1d083039-7fd7-430c-80c4-bed5007f5a66",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Basketball shorts",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "shorts",
+        "colors": [
+          {
+            "name": "black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "polyester"
+        ],
+        "fit": "relaxed",
+        "formality": 1,
+        "tempRangeF": {
+          "min": 60,
+          "max": 95
+        },
+        "occasions": [
+          "sport"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "154a39d6-b415-480e-a0b2-d80e58dc7e7d",
+      "user_id": "1d083039-7fd7-430c-80c4-bed5007f5a66",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "Graphic tee",
+      "category": "top",
+      "ai_tags": {
+        "category": "top",
+        "subcategory": "t-shirt",
+        "colors": [
+          {
+            "name": "white"
+          }
+        ],
+        "colorFamily": "white",
+        "materials": [
+          "cotton"
+        ],
+        "fit": "relaxed",
+        "formality": 2,
+        "tempRangeF": {
+          "min": 60,
+          "max": 90
+        },
+        "occasions": [
+          "school",
+          "sport"
+        ]
+      },
+      "image_paths": []
+    },
+    {
+      "id": "998c14d0-0968-4307-ad0e-319cc5f4b604",
+      "user_id": "1d083039-7fd7-430c-80c4-bed5007f5a66",
+      "status": "active",
+      "entry_method": "manual",
+      "title": "High-top sneakers",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "sneakers",
+        "colors": [
+          {
+            "name": "black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "canvas"
+        ],
+        "formality": 2,
+        "tempRangeF": {
+          "min": 35,
+          "max": 85
+        },
+        "occasions": [
+          "school",
+          "sport"
+        ]
+      },
+      "image_paths": []
+    }
+  ],
+  "feelings": [
+    {
+      "id": "5edbb299-1686-4dfc-ba1e-9eb1191e9977",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "item_id": "e825eee1-4ab8-43f9-af66-c0f0f3cb843d",
+      "raw_text": "Love these with a simple tee. Soft cotton feels best on me.",
+      "source": "typed",
+      "structured": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "style",
+            "sentiment": "positive",
+            "said": "Love these with a simple tee",
+            "means": "Love these with a simple tee"
+          },
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "Soft cotton feels best on me",
+            "means": "Soft cotton feels best on me"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Loves the jeans with simple tees; prefers soft cotton."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "32b50a34-d5e6-4c7b-8dbd-f8c21dc0edc7",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "item_id": "3862b023-67af-47a7-bb7a-4598c0fb9d99",
+      "raw_text": "The high waist works for me and the length is just right.",
+      "source": "typed",
+      "structured": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "said": "The high waist works for me",
+            "means": "The high waist works for me"
+          },
+          {
+            "aspect": "length",
+            "sentiment": "positive",
+            "said": "the length is just right",
+            "means": "the length is just right"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "High-waisted skirt fits well at a good length."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "703f40e7-db7e-40cb-8ab4-fbea5371b182",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "item_id": "4944b907-98ee-4812-ac14-854b9e03b2ee",
+      "raw_text": "Go with everything. Light gray and white are my colors.",
+      "source": "typed",
+      "structured": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "Light gray and white are my colors",
+            "means": "Light gray and white are my colors"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Versatile sneakers; likes light gray and white."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "53a74b53-d70f-4806-be50-38c73036d25d",
+      "user_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "item_id": "8825a85f-5114-4832-bbd5-dfcdd22c2c11",
+      "raw_text": "So cozy. Fleece is my favorite and soft neutrals are easy for me.",
+      "source": "typed",
+      "structured": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "Fleece is my favorite",
+            "means": "Fleece is my favorite"
+          },
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "soft neutrals are easy for me",
+            "means": "soft neutrals are easy for me"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Cozy fleece hoodie; likes soft neutrals."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "88f5fa98-f72a-4cae-9e55-2deff97f97b2",
+      "user_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "item_id": "e6e540bc-6280-4732-b534-787b9cb5a855",
+      "raw_text": "Fits close without squeezing. Great for lounging.",
+      "source": "typed",
+      "structured": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "said": "Fits close without squeezing",
+            "means": "Fits close without squeezing"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Comfortable close fit for lounging."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "a0ad8f30-824d-43fe-a924-8712430dbaef",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "item_id": "bcaccf99-506b-4fcb-bf41-c369bdf90c86",
+      "raw_text": "My go-to tee. Soft and easy.",
+      "source": "typed",
+      "structured": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "Soft and easy",
+            "means": "Soft and easy"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Go-to soft tee."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "507a8f0a-bf59-4bf3-9083-4d7351ecf14b",
+      "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "item_id": "6a94794e-5ed9-449b-8a8e-d4089d5fef8e",
+      "raw_text": "Bright colors make me happy. This red is perfect.",
+      "source": "typed",
+      "structured": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "Bright colors make me happy",
+            "means": "Bright colors make me happy"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Loves the bright red."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    },
+    {
+      "id": "959ea59b-2a48-44ed-a170-6fd204858291",
+      "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "item_id": "1833f32f-e6e6-4508-9657-b7a19e9f5e78",
+      "raw_text": "Love the print. Gray and dull colors wash me out, so I stick to color.",
+      "source": "typed",
+      "structured": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "Love the print",
+            "means": "Love the print"
+          },
+          {
+            "aspect": "color",
+            "sentiment": "negative",
+            "said": "Gray and dull colors wash me out",
+            "means": "Gray and dull colors wash me out"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Likes bold prints; gray washes her out."
+      },
+      "parsed_at": "2026-10-31T12:00:00Z"
+    }
+  ]
+}
