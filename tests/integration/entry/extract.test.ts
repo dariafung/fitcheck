@@ -25,7 +25,7 @@ describe("POST /api/items/extract", () => {
     const { status, body } = await extract(new Blob([new Uint8Array(await fakeScreenshot())], { type: "image/png" }));
     expect(status).toBe(200);
     const draft = body.draft as ItemDraft;
-    expect(draft).toMatchObject({ title: "Mock item", size: "S", tags: { category: "top", colorFamily: "black", tempRangeF: { min: 50, max: 85 } } });
+    expect(draft).toMatchObject({ title: "Mock item", brand: "lululemon", size: "S", tags: { category: "top", colorFamily: "black", tempRangeF: { min: 50, max: 85 } } });
     expect(draft.lowConfidence).not.toContain("image");
     expect(draft.imagePaths).toEqual([expect.stringMatching(new RegExp(`^${user.id}/[0-9a-f-]{36}\\.webp$`))]);
     expect(draft.imageUrls).toHaveLength(1);

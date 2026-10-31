@@ -20,7 +20,7 @@ describe("POST /api/checks/extract", () => {
     const res = await POST(uploadRequest(shot));
     expect(res.status).toBe(200);
     const draft = (await res.json()).draft as ItemDraft;
-    expect(draft).toMatchObject({ title: "Mock item", tags: { category: "top" }, imagePaths: [], rawSource: {} });
+    expect(draft).toMatchObject({ title: "Mock item", brand: "lululemon", tags: { category: "top" }, imagePaths: [], rawSource: {} });
     expect(draft.imageUrls).toEqual([expect.stringMatching(/^data:image\/webp;base64,/)]);
     expect(draft.lowConfidence).not.toContain("image");
 

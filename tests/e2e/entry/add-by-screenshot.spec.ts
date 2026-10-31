@@ -39,6 +39,8 @@ test("upload a screenshot, fix the details, save it", async ({ page }) => {
   const card = page.getByRole("form", { name: "Item details" });
   await expect(card.getByRole("heading", { name: "Look right?" })).toBeVisible();
   await expect(card.getByLabel("Name")).toHaveValue("Mock item");
+  // The mock reads LULULEMON; the card shows the brand list's spelling.
+  await expect(card.getByLabel("Brand")).toHaveValue("lululemon");
   await expect(card.getByRole("img", { name: "Mock item" })).toBeVisible();
   await expect(card.getByText("Photo is the whole screenshot")).toBeHidden();
 

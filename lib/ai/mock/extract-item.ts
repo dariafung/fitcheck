@@ -24,7 +24,8 @@ export function mockExtractItem(
   const { title, brand, priceCents, currency, ...known } = input.knownFields;
   return {
     title: title ?? "Mock item",
-    brand,
+    // Shouting on purpose: the routes line it up with the brand list.
+    brand: brand ?? "LULULEMON",
     priceCents,
     currency,
     size: "S",
