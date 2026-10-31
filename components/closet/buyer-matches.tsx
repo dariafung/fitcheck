@@ -13,6 +13,20 @@ export const TRY_DEMO = "Try the demo account to see how matching works.";
 export const SOME_UNCHECKED = "Some buyers weren't checked yet. Try again later.";
 export const SAMPLE_BUYERS = "Sample buyers, not real people.";
 
+// At most this many avatars; the rest show as "+N".
+export const MAX_AVATARS = 5;
+
+export function avatarRow(count: number): { shown: number; more: number } {
+  const shown = Math.min(count, MAX_AVATARS);
+  return { shown, more: count - shown };
+}
+
+export function buyerCount(count: number): string {
+  return count === 1
+    ? "1 person in your size would likely want this."
+    : `${count} people in your size would likely want this.`;
+}
+
 async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
   const res = await fetch(`/api/items/${itemId}/buyers`, { method: "POST" }).catch(() => null);
   if (!res?.ok) return "error";
@@ -21,6 +35,19 @@ async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
 
 function Note({ children }: { children: string }) {
   return <p className="text-sm text-ink-2">{children}</p>;
+}
+
+// One identical avatar per match, up to MAX_AVATARS.
+function Avatars({ count }: { count: number }) {
+  const { shown, more } = avatarRow(count);
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: shown }, (_, i) => (
+        <AnonAvatar key={i} />
+      ))}
+      {more > 0 && <span className="text-sm text-ink-2 tabular-nums">+{more}</span>}
+    </div>
+  );
 }
 
 function Result({ result }: { result: BuyersResult }) {
@@ -46,14 +73,8 @@ function Result({ result }: { result: BuyersResult }) {
     case "matches":
       return (
         <>
-          <ul className="flex flex-col gap-3">
-            {result.matches.map((m) => (
-              <li key={m.key} className="flex items-center gap-3">
-                <AnonAvatar color={m.color} label={`Anonymous buyer, ${m.score} match`} />
-                <span className="text-base tabular-nums">{m.score} match</span>
-              </li>
-            ))}
-          </ul>
+          <Avatars count={result.count} />
+          <p className="text-base">{buyerCount(result.count)}</p>
           {result.someUnchecked && <Note>{SOME_UNCHECKED}</Note>}
           {result.sample && <Note>{SAMPLE_BUYERS}</Note>}
         </>
@@ -61,8 +82,8 @@ function Result({ result }: { result: BuyersResult }) {
   }
 }
 
-// "Who'd want it" on a passing-on item: anonymous buyers with their scores,
-// or why there are none. Asked for once the page is up, since checking new
+// "Who'd want it" on a passing-on item: how many buyers would likely want it
+// (with identical anonymous avatars), or why there are none. Asked for once the page is up, since checking new
 // buyers takes a while.
 export function BuyerMatches({ itemId, size }: { itemId: string; size: string | null }) {
   const [result, setResult] = useState<BuyersResult | "error" | null>(null);
