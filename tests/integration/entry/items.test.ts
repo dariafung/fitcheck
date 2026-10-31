@@ -93,6 +93,18 @@ describe("POST /api/items", () => {
     expect(res.status).toBe(400);
   });
 
+  it("refuses an item without a photo", async () => {
+    const res = await POST(jsonRequest("/api/items", request({ title: "No photo tee", imagePaths: [] })));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: "invalid_item" });
+    const { count } = await createServerClient()
+      .from("items")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("title", "No photo tee");
+    expect(count).toBe(0);
+  });
+
   it("refuses an invalid item", async () => {
     const res = await POST(jsonRequest("/api/items", { ...request(), title: " " }));
     expect(res.status).toBe(400);
