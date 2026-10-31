@@ -54,8 +54,9 @@ Take screenshots of real product pages from different stores (one screen: produc
 | --- | --- | --- |
 | 4.1 | Profile: fill height, weight, body shape and outfits wanted per occasion; Save; reload | Values kept |
 | 4.2 | Switch units in · lb ↔ cm · kg | Numbers convert; switching back gives the same numbers |
-| 4.3 | Weather: search a city, pick it | Home shows that city's low–high in °F |
+| 4.3 | Weather: search a city, pick it | Home shows that city's low–high in your Profile's unit |
 | 4.4 | Home | "Good for today" shows clothes whose range fits today's weather; the top bar has a black "Should I buy this?" button ("Buy?" on a phone) on every page |
+| 4.5 | Profile: pick °C, Save; open home, an item, Edit details, then a purchase check card | Today's low–high, "Comfortable in" and the temperature boxes are all in whole °C; a box you don't touch saves its old value unchanged |
 
 ### 5. Should I buy this?
 
