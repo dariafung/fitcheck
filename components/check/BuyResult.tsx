@@ -3,11 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { Category } from "@/lib/ai/schemas/common";
+import { AI_BUDGET_NOTICE } from "@/lib/ai/notices";
+import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
-import { OutfitBoard } from "./OutfitBoard";
+import { StyledOutfit, useStyleIt } from "./StyleIt";
 
 const PARTS: [keyof BuyCheckResult["parts"], string][] = [
   ["suitsYou", "Suits you"],
@@ -66,6 +67,7 @@ export function BuyResult({
   title,
   photo,
   category,
+  tags,
   onModel,
   result,
   onCheckAnother,
@@ -73,12 +75,14 @@ export function BuyResult({
   title: string;
   photo: string | null;
   category: Category;
+  tags: ItemTags;
   onModel: boolean;
   result: BuyCheckResult;
   onCheckAnother: () => void;
 }) {
   const { parts } = result;
   const cutouts = useCutouts(result.sampleOutfits, photo, onModel);
+  const styleIt = useStyleIt(photo ? { photo, title, tags } : null);
   return (
     <section
       aria-label="Result"
@@ -195,8 +199,11 @@ export function BuyResult({
             {cutouts ? (
               <div className="-mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 md:mx-0 md:grid md:grid-cols-3 md:px-0">
                 {result.sampleOutfits.map((outfit) => (
-                  <OutfitBoard
+                  <StyledOutfit
                     key={outfit.id}
+                    outfitId={outfit.id}
+                    itemIds={outfit.pieces.filter((p) => !p.isCandidate).map((p) => p.id)}
+                    styleIt={styleIt}
                     pieces={outfit.pieces.flatMap((piece) => {
                       if (piece.isCandidate) {
                         return [{ ...piece, category, src: cutouts.candidate ?? photo, cutout: !!cutouts.candidate }];
@@ -219,6 +226,7 @@ export function BuyResult({
                 </ul>
               ))
             )}
+            {styleIt.outOfBudget && <p className="text-sm text-ink-2">{AI_BUDGET_NOTICE}</p>}
           </div>
         )}
 

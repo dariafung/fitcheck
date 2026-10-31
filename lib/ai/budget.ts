@@ -25,7 +25,8 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   // Three minutes of audio, the longest recording, is $0.009.
   transcribe: 0.01,
   scorePurchase: 0.05,
-  renderOutfit: 0.05,
+  // One Muse Image picture.
+  renderOutfit: PRICE_PER_IMAGE,
   buildProfile: 0.03,
   // One Muse Image picture.
   segmentGarment: PRICE_PER_IMAGE,

@@ -6,7 +6,7 @@ import { CleanedNote } from "@/components/entry/CleanedNote";
 import { CUTTING_OUT, extractErrorMessage, OFFLINE } from "@/components/entry/messages";
 import { shrinkScreenshot } from "@/components/entry/shrink";
 import { aiNotice } from "@/lib/ai/notices";
-import type { Category } from "@/lib/ai/schemas/common";
+import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { BuyCheck as BuyCheckResponse, BuyCheckResult } from "@/lib/check/buy-check";
 import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
@@ -25,6 +25,7 @@ type Step =
       title: string;
       photo: string | null;
       category: Category;
+      tags: ItemTags;
       onModel: boolean;
       result: BuyCheckResult;
     };
@@ -116,6 +117,7 @@ export function BuyCheck() {
           title: edited.title,
           photo: draft.imageUrls[0] ?? null,
           category: edited.tags.category,
+          tags: edited.tags,
           onModel: draft.onModel,
           result: json.result,
         });
@@ -232,6 +234,7 @@ export function BuyCheck() {
           title={step.title}
           photo={step.photo}
           category={step.category}
+          tags={step.tags}
           onModel={step.onModel}
           result={step.result}
           onCheckAnother={checkAnother}
