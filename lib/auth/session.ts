@@ -8,6 +8,8 @@ export interface SessionUser {
   email: string | null;
   // The shared demo persona: can look, can't change anything.
   readOnly: boolean;
+  // This login's session, for the demo account's per-login AI limits.
+  sessionId: string | null;
 }
 
 // The signed-in user from the session cookie, or null. getClaims checks the
@@ -21,6 +23,7 @@ export const sessionUser = cache(async (): Promise<SessionUser | null> => {
     id: claims.sub,
     email: typeof claims.email === "string" ? claims.email : null,
     readOnly: claims.sub === DEMO_USER_ID,
+    sessionId: typeof claims.session_id === "string" ? claims.session_id : null,
   };
 });
 

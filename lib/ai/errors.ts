@@ -50,6 +50,24 @@ export class AiBudgetError extends AiError {
   }
 }
 
+// One caller's daily count for an action is used up (lib/limits/daily.ts).
+// retryAfterSeconds runs to the next Chicago midnight, when counts reset.
+export class AiDailyLimitError extends AiError {
+  override name = "AiDailyLimitError";
+  constructor(
+    action: string,
+    readonly retryAfterSeconds: number,
+  ) {
+    super(`${action}: daily limit reached`, action, 429);
+  }
+}
+
+// The same for the shared demo account: its login session or the whole
+// account used up today's count.
+export class AiDemoLimitError extends AiDailyLimitError {
+  override name = "AiDemoLimitError";
+}
+
 // The model API itself failed (after the SDK's retry): network, 4xx or 5xx.
 export class AiUpstreamError extends AiError {
   override name = "AiUpstreamError";

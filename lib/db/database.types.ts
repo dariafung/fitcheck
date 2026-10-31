@@ -37,6 +37,20 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"ai_usage_days": {
+                  Row: {
+                    "action": string,"count": number,"day": string,"subject": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"count"?: number,"day": string,"subject": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "action"?: string,"count"?: number,"day"?: string,"subject"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"item_feelings": {
                   Row: {
                     "audio_path": string | null,"created_at": string,"id": string,"item_id": string,"parsed_at": string | null,"raw_text": string,"source": string,"structured": Json | null,"user_id": string
@@ -241,11 +255,17 @@ isOneToOne: true
             [_ in never]: never
           }
           Functions: {
-            "ai_reserve":
+            "ai_give_back":
+{ Args: { "p_action": string,"p_day": string,"p_subject": string }; Returns: undefined
+                           },
+"ai_reserve":
 { Args: { "p_day": string,"p_limit": number,"p_usd": number }; Returns: boolean
                            },
 "ai_settle":
 { Args: { "p_day": string,"p_usd": number }; Returns: undefined
+                           },
+"ai_take":
+{ Args: { "p_action": string,"p_day": string,"p_limit": number,"p_subject": string }; Returns: boolean
                            },
 "orphan_item_images":
 { Args: { "p_before": string,"p_limit": number,"p_prefix"?: string }; Returns: string[]
