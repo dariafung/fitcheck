@@ -9,6 +9,9 @@ export const BUYER_STATES = {
   no_size_match: "No buyers in this size right now.",
   none_strong: "No one's a strong match yet.",
 } as const;
+export const TRY_DEMO = "Try the demo account to see how matching works.";
+export const SOME_UNCHECKED = "Some buyers weren't checked yet. Try again later.";
+export const SAMPLE_BUYERS = "Sample buyers, not real people.";
 
 async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
   const res = await fetch(`/api/items/${itemId}/buyers`, { method: "POST" }).catch(() => null);
@@ -16,9 +19,51 @@ async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
   return ((await res.json().catch(() => null)) as BuyersResult | null) ?? "error";
 }
 
+function Note({ children }: { children: string }) {
+  return <p className="text-sm text-ink-2">{children}</p>;
+}
+
+function Result({ result }: { result: BuyersResult }) {
+  switch (result.state) {
+    case "no_buyers":
+      return (
+        <>
+          <Note>{BUYER_STATES.no_buyers}</Note>
+          {!result.sample && <Note>{TRY_DEMO}</Note>}
+        </>
+      );
+    case "no_size_match":
+      return <Note>{BUYER_STATES.no_size_match}</Note>;
+    case "unchecked":
+      return <Note>{SOME_UNCHECKED}</Note>;
+    case "none_strong":
+      return (
+        <>
+          <Note>{BUYER_STATES.none_strong}</Note>
+          {result.someUnchecked && <Note>{SOME_UNCHECKED}</Note>}
+        </>
+      );
+    case "matches":
+      return (
+        <>
+          <ul className="flex flex-col gap-3">
+            {result.matches.map((m) => (
+              <li key={m.key} className="flex items-center gap-3">
+                <AnonAvatar color={m.color} label={`Anonymous buyer, ${m.score} match`} />
+                <span className="text-base tabular-nums">{m.score} match</span>
+              </li>
+            ))}
+          </ul>
+          {result.someUnchecked && <Note>{SOME_UNCHECKED}</Note>}
+          {result.sample && <Note>{SAMPLE_BUYERS}</Note>}
+        </>
+      );
+  }
+}
+
 // "Who'd want it" on a passing-on item: anonymous buyers with their scores,
-// or why there are none. Asked for once the page is up, since finding
-// buyers can take a while.
+// or why there are none. Asked for once the page is up, since checking new
+// buyers takes a while.
 export function BuyerMatches({ itemId, size }: { itemId: string; size: string | null }) {
   const [result, setResult] = useState<BuyersResult | "error" | null>(null);
 
@@ -46,17 +91,8 @@ export function BuyerMatches({ itemId, size }: { itemId: string; size: string | 
         <p role="alert" className="text-sm font-medium">
           Couldn&apos;t look for buyers. Try again later.
         </p>
-      ) : result.state === "matches" ? (
-        <ul className="flex flex-col gap-3">
-          {result.matches.map((m) => (
-            <li key={m.key} className="flex items-center gap-3">
-              <AnonAvatar color={m.color} label={`Anonymous buyer, ${m.score} match`} />
-              <span className="text-base tabular-nums">{m.score} match</span>
-            </li>
-          ))}
-        </ul>
       ) : (
-        <p className="text-sm text-ink-2">{BUYER_STATES[result.state]}</p>
+        <Result result={result} />
       )}
     </section>
   );

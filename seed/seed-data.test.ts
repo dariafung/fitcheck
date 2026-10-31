@@ -5,7 +5,9 @@ import { z } from "zod";
 import { ProfileStatement } from "@/lib/ai/schemas/build-profile";
 import { Category, FeelingStructured, ItemTags, LifestyleMix } from "@/lib/ai/schemas/common";
 import { profileHash, profileInput, visibleCard } from "@/lib/closet/style-profile";
+import { MIN_BUYER_CLOSET, filterBySize } from "@/lib/resale/pool";
 import { LetterSize, ShoeSize } from "@/lib/resale/size";
+import buyers from "./buyers.json";
 import feelings from "./feelings.json";
 import items from "./items.json";
 import persona from "./persona.json";
@@ -95,5 +97,59 @@ describe("seed style card", () => {
     const input = profileInput(active, feelings);
     expect(input).not.toBeNull();
     expect(card.inputHash).toBe(profileHash(input!));
+  });
+});
+
+describe("seed sample buyers", () => {
+  const Buyer = z.object({
+    id: z.uuid(),
+    display_name: z.string().startsWith("Sample buyer "),
+    is_seed: z.literal(true),
+    resale_opt_in: z.literal(true),
+    lifestyle_mix: LifestyleMix,
+    top_size: LetterSize,
+    bottom_size: LetterSize,
+    shoe_size: ShoeSize,
+  });
+
+  it("are opted-in seed users with sizes, apart from the persona", () => {
+    for (const buyer of buyers.users) Buyer.parse(buyer);
+    expect(buyers.users.map((b) => b.id)).not.toContain(persona.id);
+  });
+
+  it("each have a closet big enough to be checked, with valid tags and no photos", () => {
+    const Item = z.object({
+      id: z.uuid(),
+      user_id: z.uuid(),
+      status: z.literal("active"),
+      category: Category,
+      ai_tags: ItemTags,
+      image_paths: z.array(z.string()).length(0),
+    });
+    for (const item of buyers.items) {
+      const parsed = Item.parse(item);
+      expect(parsed.ai_tags.category).toBe(parsed.category);
+    }
+    for (const buyer of buyers.users) {
+      expect(buyers.items.filter((i) => i.user_id === buyer.id).length).toBeGreaterThanOrEqual(MIN_BUYER_CLOSET);
+    }
+  });
+
+  it("have valid feelings on their own clothes", () => {
+    for (const feeling of buyers.feelings) {
+      FeelingStructured.strict().parse(feeling.structured);
+      expect(buyers.items.find((i) => i.id === feeling.item_id)?.user_id).toBe(feeling.user_id);
+    }
+  });
+
+  it("all but one fit the persona's passing-on pieces", () => {
+    const pool = buyers.users.map((b) => ({
+      id: b.id,
+      sizes: { top: LetterSize.parse(b.top_size), bottom: LetterSize.parse(b.bottom_size), shoe: ShoeSize.parse(b.shoe_size) },
+    }));
+    for (const item of items.filter((i) => i.status === "passing_on")) {
+      const fit = filterBySize(pool, item.size, Category.parse(item.category));
+      expect(fit.state === "ok" && fit.buyerIds).toHaveLength(buyers.users.length - 1);
+    }
   });
 });

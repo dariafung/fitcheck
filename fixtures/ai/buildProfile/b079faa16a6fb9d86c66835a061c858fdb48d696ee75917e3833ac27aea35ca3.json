@@ -1,0 +1,93 @@
+{
+  "fn": "buildProfile",
+  "promptVersion": "build-profile@4",
+  "inputHash": "b079faa16a6fb9d86c66835a061c858fdb48d696ee75917e3833ac27aea35ca3",
+  "inputPreview": "{\"feelings\":[{\"aspects\":[{\"area\":\"overall\",\"aspect\":\"fit\",\"means\":\"fits just right\",\"said\":\"fits just right\",\"sentiment\":\"positive\"},{\"area\":\"neckline\",\"aspect\":\"fit\",\"means\":\"prefers shallower V necklines\",\"said\":\"V is a bit too deep\",\"sentiment\":\"negative\"}],\"flattering\":\"yes\",\"itemId\":\"0d20089b-c",
+  "output": {
+    "headline": {
+      "text": "You mix polished social loafers with school-ready sneakers and cozy home fleece",
+      "evidenceItemIds": [
+        "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+        "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+        "e749b166-b703-413a-80f2-36b6e2864ed6"
+      ]
+    },
+    "suits": [
+      {
+        "topic": "color",
+        "text": "You glow in soft pink and rich toffee",
+        "evidenceItemIds": [
+          "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+          "b91ce162-a22b-4d6f-a443-65547e082181",
+          "e749b166-b703-413a-80f2-36b6e2864ed6"
+        ]
+      },
+      {
+        "topic": "fit",
+        "text": "You shine in slim tops, shaped waist and flowing wide legs",
+        "evidenceItemIds": [
+          "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+          "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+          "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+          "b4411873-c7b0-44eb-bb1d-542889641915"
+        ]
+      },
+      {
+        "topic": "feel",
+        "text": "You love sweat-wicking fabrics and soft cozy fleece",
+        "evidenceItemIds": [
+          "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+          "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+          "825788d8-8548-43da-9a26-40f5af91c0f3",
+          "e749b166-b703-413a-80f2-36b6e2864ed6"
+        ]
+      },
+      {
+        "topic": "style",
+        "text": "You wear polished loafers, versatile sneakers and cozy loungewear",
+        "evidenceItemIds": [
+          "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+          "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+          "f4678e3e-ef86-4510-87ba-7fa834cc08d6"
+        ]
+      },
+      {
+        "topic": "occasion",
+        "text": "You dress mostly for school, plus social, sport and home",
+        "evidenceItemIds": [
+          "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
+          "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+          "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+          "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+          "825788d8-8548-43da-9a26-40f5af91c0f3"
+        ]
+      }
+    ],
+    "avoid": [
+      {
+        "topic": "color",
+        "text": "Beige that washes you out",
+        "evidenceItemIds": [
+          "8e169881-6d10-4f5e-93b1-c00a1e1efe69"
+        ]
+      },
+      {
+        "topic": "fit",
+        "text": "Boxy shoulders and deep V necklines",
+        "evidenceItemIds": [
+          "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+          "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
+        ]
+      },
+      {
+        "topic": "feel",
+        "text": "Thin knits that pill or turn see-through",
+        "evidenceItemIds": [
+          "907d76cc-98b7-4e29-8755-fc734a761987",
+          "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b"
+        ]
+      }
+    ]
+  },
+  "recordedAt": "2026-10-31T18:21:13.000Z"
+}

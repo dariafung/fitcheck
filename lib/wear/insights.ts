@@ -12,7 +12,7 @@ import {
 import type { Db } from "@/lib/db/server";
 import { chicagoDay, daysBetween } from "./day";
 import type { WearLog } from "./log";
-import { MIN_LOGGED_DAYS, WINDOW_DAYS } from "./stats";
+import { MIN_LOGGED_DAYS, NEW_ITEM_DAYS, WINDOW_DAYS } from "./stats";
 
 export type SummarizeFn = (input: SummarizeWearInput) => Promise<SummarizeWearOutput>;
 
@@ -37,7 +37,7 @@ export function wearInput(log: WearLog): Input | null {
         tags: item.tags,
         wornCount: wear?.count ?? 0,
         lastWornDaysAgo: wear?.lastWorn ? daysBetween(wear.lastWorn, stats.to) : null,
-        addedDaysAgo: item.addedOn > stats.from ? Math.max(0, daysBetween(item.addedOn, stats.to)) : null,
+        addedDaysAgo: addedDaysAgo(item.addedOn, stats.to),
         feeling: item.feeling && {
           flattering: item.feeling.flattering,
           liked: item.feeling.liked,
@@ -47,6 +47,13 @@ export function wearInput(log: WearLog): Input | null {
     }),
     occasions: stats.occasions,
   });
+}
+
+// Only a piece added under a week before the log's last day counts as new,
+// the same line the stats draw for not worn.
+function addedDaysAgo(addedOn: string, to: string): number | null {
+  const days = Math.max(0, daysBetween(addedOn, to));
+  return days < NEW_ITEM_DAYS ? days : null;
 }
 
 export function wearHash(input: Input): string {

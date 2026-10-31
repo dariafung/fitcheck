@@ -1,5 +1,6 @@
 // Loads the fictional demo persona, items, feelings, style card and 10 days
-// of outfits (ending yesterday) into the database. The persona's old items,
+// of outfits (ending yesterday) into the database, plus the sample buyers its
+// passing-on pieces are matched with. The persona's old items,
 // card, outfits, insights and photos are cleared first, so the persona ends
 // up exactly as seeded. Item photos listed in items.json image_paths are
 // uploaded from seed/images/.
@@ -130,8 +131,22 @@ const { rows: outfits } = seedOutfitLog({
 const logged = await db.from("outfit_logs").insert(outfits);
 if (logged.error) throw logged.error;
 
+// Sample buyers: opted-in seed users with a few clothes and feelings, no
+// photos and no sign-in. Their old clothes go first, taking feelings and
+// pairings with them.
+const buyers = readJson("buyers.json") as { users: { id: string }[]; items: object[]; feelings: object[] };
+const buyerIds = buyers.users.map((u) => u.id);
+const oldBuyerItems = await db.from("items").delete().in("user_id", buyerIds);
+if (oldBuyerItems.error) throw oldBuyerItems.error;
+const buyerUsers = await db.from("users").upsert(buyers.users);
+if (buyerUsers.error) throw buyerUsers.error;
+const buyerItems = await db.from("items").insert(buyers.items);
+if (buyerItems.error) throw buyerItems.error;
+const buyerFeelings = await db.from("item_feelings").insert(buyers.feelings);
+if (buyerFeelings.error) throw buyerFeelings.error;
+
 console.log(
   `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card, ` +
-    `${outfits.length} outfits to ${lastDay} and ${imagePaths.length} images` +
+    `${outfits.length} outfits to ${lastDay}, ${imagePaths.length} images and ${buyerIds.length} sample buyers` +
     (remote ? " into the hosted project." : "."),
 );

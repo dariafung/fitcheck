@@ -1,86 +1,85 @@
 {
   "fn": "buildProfile",
-  "promptVersion": "build-profile@3",
-  "inputHash": "5eef07dce0619ef3b32804a3ed099b3f911cbf3a1ba0b8fa18373e242740cd8d",
+  "promptVersion": "build-profile@4",
+  "inputHash": "cbddd1ad2d074f2697ecf72ede626cc6215d61dc7197688fb53402604031175b",
   "inputPreview": "{\"feelings\":[{\"aspects\":[{\"area\":\"overall\",\"aspect\":\"fit\",\"means\":\"fits just right\",\"said\":\"fits just right\",\"sentiment\":\"positive\"},{\"area\":\"neckline\",\"aspect\":\"fit\",\"means\":\"prefers shallower V necklines\",\"said\":\"V is a bit too deep\",\"sentiment\":\"negative\"}],\"flattering\":\"yes\",\"itemId\":\"0d20089b-c",
   "output": {
     "headline": {
-      "text": "You shine in relaxed sporty pink hoodies and black sneakers",
+      "text": "You mix slim school tees, pink fleece and polished loafers",
       "evidenceItemIds": [
-        "e749b166-b703-413a-80f2-36b6e2864ed6",
-        "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+        "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+        "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+        "e749b166-b703-413a-80f2-36b6e2864ed6"
       ]
     },
     "suits": [
       {
         "topic": "color",
-        "text": "Pink and rich neutrals brighten you best",
+        "text": "Soft pink and warm toffee flatter you",
         "evidenceItemIds": [
-          "b91ce162-a22b-4d6f-a443-65547e082181",
-          "e749b166-b703-413a-80f2-36b6e2864ed6",
-          "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
-        ]
-      },
-      {
-        "topic": "fit",
-        "text": "Slim fitted tops and relaxed wide or oversized bottoms suit you",
-        "evidenceItemIds": [
-          "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
-          "11fc83de-be0d-42f0-b9f7-d7051467f79d",
-          "b4411873-c7b0-44eb-bb1d-542889641915",
+          "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+          "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
           "e749b166-b703-413a-80f2-36b6e2864ed6"
         ]
       },
       {
+        "topic": "fit",
+        "text": "Slim tops with straight or flowing wide legs suit you",
+        "evidenceItemIds": [
+          "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+          "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+          "b4411873-c7b0-44eb-bb1d-542889641915",
+          "d54193d3-7afa-4da9-9af7-efc08b13427a"
+        ]
+      },
+      {
         "topic": "feel",
-        "text": "Soft sweat-wicking and fleece fabrics keep you comfortable",
+        "text": "Soft fleece and sweat-wicking knits keep you comfortable",
         "evidenceItemIds": [
           "11fc83de-be0d-42f0-b9f7-d7051467f79d",
           "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
           "825788d8-8548-43da-9a26-40f5af91c0f3",
-          "b91ce162-a22b-4d6f-a443-65547e082181"
+          "e749b166-b703-413a-80f2-36b6e2864ed6"
         ]
       },
       {
         "topic": "style",
-        "text": "Casual hoodies, sneakers and loafers suit you daily",
+        "text": "Versatile casual basics and polished loafers complete you",
         "evidenceItemIds": [
           "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
-          "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
-          "f4678e3e-ef86-4510-87ba-7fa834cc08d6"
+          "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+          "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
         ]
       },
       {
         "topic": "occasion",
-        "text": "You live in school, social, sport and home dressing",
+        "text": "You dress mostly for school, sport and home",
         "evidenceItemIds": [
-          "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
-          "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
-          "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+          "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
           "11fc83de-be0d-42f0-b9f7-d7051467f79d",
-          "825788d8-8548-43da-9a26-40f5af91c0f3"
+          "825788d8-8548-43da-9a26-40f5af91c0f3",
+          "d54193d3-7afa-4da9-9af7-efc08b13427a"
         ]
       }
     ],
     "avoid": [
       {
         "topic": "color",
-        "text": "Skip beige tones washing you out",
+        "text": "Beige that washes you out",
         "evidenceItemIds": [
           "8e169881-6d10-4f5e-93b1-c00a1e1efe69"
         ]
       },
       {
         "topic": "fit",
-        "text": "Avoid deep V-necks and tight jacket shoulders",
+        "text": "Boxy shoulders",
         "evidenceItemIds": [
-          "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
           "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
         ]
       },
       {
         "topic": "feel",
-        "text": "Skip uncomfortable plain cotton tops",
+        "text": "Pilling or see-through knits",
         "evidenceItemIds": [
           "907d76cc-98b7-4e29-8755-fc734a761987",
           "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b"
@@ -88,5 +87,5 @@
       }
     ]
   },
-  "recordedAt": "2026-10-31T02:38:39.404Z"
+  "recordedAt": "2026-10-31T18:26:27.218Z"
 }

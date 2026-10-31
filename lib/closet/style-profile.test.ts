@@ -5,6 +5,7 @@ import {
   profileHash,
   profileInput,
   scoringLines,
+  skipText,
   visibleCard,
   type StoredCard,
 } from "./style-profile";
@@ -108,6 +109,12 @@ describe("visibleCard", () => {
     expect(rows?.[0]).toEqual({ topic: "color", suits: "Light colors." });
   });
 
+  it("drops a Skip or Avoid the model wrote, since the card says Skip: itself", () => {
+    const skipped = { ...card, avoid: [{ topic: "color" as const, text: "Skip beige tones that wash you out", evidenceItemIds: [id(4)] }] };
+    expect(visibleCard(skipped, all)?.rows[0].avoid).toBe("Beige tones that wash you out");
+    expect(scoringLines(skipped, all)?.[1]).toEqual({ topic: "color", kind: "avoid", text: "Beige tones that wash you out" });
+  });
+
   it(`is null without the headline or with fewer than ${MIN_ROWS} rows`, () => {
     expect(visibleCard(card, new Set([3, 4].map(id)))).toBeNull();
     expect(visibleCard(card, new Set([2].map(id)))).toBeNull();
@@ -135,5 +142,16 @@ describe("visibleCard", () => {
       expect(scoringLines({ ...card, promptVersion: PLACEHOLDER_VERSION }, all)).toBeNull();
       expect(scoringLines(card, new Set([3, 4].map(id)))).toBeNull();
     });
+  });
+});
+
+describe("skipText", () => {
+  it("takes a leading Skip or Avoid off and capitalizes what's left", () => {
+    expect(skipText("Skip beige tones")).toBe("Beige tones");
+    expect(skipText("Avoid deep V necklines")).toBe("Deep V necklines");
+    expect(skipText("skip: boxy shoulders")).toBe("Boxy shoulders");
+    expect(skipText("Skipped hems that ride up")).toBe("Skipped hems that ride up");
+    expect(skipText("Muddy browns.")).toBe("Muddy browns.");
+    expect(skipText("Skip")).toBe("Skip");
   });
 });

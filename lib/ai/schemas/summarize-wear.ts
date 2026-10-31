@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { FeelingStructured, ItemSummary, Occasion } from "./common";
 
-export const PROMPT_VERSION = "summarize-wear@1";
+export const PROMPT_VERSION = "summarize-wear@2";
 
 export const MAX_INSIGHTS = 3;
 export const INSIGHT_MAX_WORDS = 30;
 
 // What an insight is about. say_vs_wear: how the owner talks about a piece
-// against how often they wear it; occasion: outfits wanted for an occasion
+// next to how often they wear it, clashing or matching; occasion: outfits wanted for an occasion
 // against what they wore to it.
 export const InsightKind = z.enum(["say_vs_wear", "idle", "favorite", "occasion", "pattern"]);
 export type InsightKind = z.infer<typeof InsightKind>;
@@ -19,8 +19,8 @@ const WornItem = ItemSummary.extend({
   wornCount: z.int().min(0),
   // Null when it wasn't worn in the window.
   lastWornDaysAgo: z.int().min(0).nullable(),
-  // Days since it was added, when that's inside the window; null when it was
-  // owned all along. A piece added a week ago isn't idle.
+  // Days since it was added, when that's under a week (NEW_ITEM_DAYS); null
+  // when it was there long enough to count as owned all along.
   addedDaysAgo: z.int().min(0).nullable(),
   feeling: FeelingStructured.pick({ flattering: true, liked: true, aspects: true }).nullable(),
 });

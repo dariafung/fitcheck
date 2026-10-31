@@ -1,0 +1,30 @@
+{
+  "fn": "summarizeWear",
+  "promptVersion": "summarize-wear@2",
+  "inputHash": "f8a09cfdea5c94acf088e1467a81ddee6d773366cebd4fcb766a5b8519d3e5b0",
+  "inputPreview": "{\"items\":[{\"addedDaysAgo\":null,\"feeling\":{\"aspects\":[{\"aspect\":\"feel\",\"means\":\"so comfy\",\"said\":\"so comfy\",\"sentiment\":\"positive\"},{\"aspect\":\"color\",\"means\":\"looks awake in white\",\"said\":\"color makes me look awake\",\"sentiment\":\"positive\"},{\"area\":\"shoulders\",\"aspect\":\"fit\",\"means\":\"shoulders need mo",
+  "output": {
+    "insights": [
+      {
+        "kind": "say_vs_wear",
+        "text": "You don't like the dark straight-leg jeans and say the waist digs when you sit, yet they show up in 11 outfits.",
+        "itemIds": [
+          "c81b2b56-1f62-4284-83b6-7307a6355ac5"
+        ]
+      },
+      {
+        "kind": "say_vs_wear",
+        "text": "You love how the mustard ribbed midi dress makes you glow, but it only got into 1 outfit.",
+        "itemIds": [
+          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04"
+        ]
+      },
+      {
+        "kind": "occasion",
+        "text": "You want 3 different sport outfits a season, but logged 5 sport outfits that were all the same one.",
+        "itemIds": []
+      }
+    ]
+  },
+  "recordedAt": "2026-10-31T18:21:23.639Z"
+}
