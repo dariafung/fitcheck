@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "386d7edc5a1625fdd075cc435155a45127d7dca5037cc58c2196f3b7f182e58c",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"yellow\",\"colors\":[{\"name\":\"mustard\"}],\"fit\":\"slim\",\"formality\":2,\"materials\":[\"polyester\",\"elastane\"],\"notes\":\"cropped above the waist\",\"occasions\":[\"social\"],\"pattern\":\"ribbed\",\"tempRangeF\":{\"max\":85,\"",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 0,
+        "reason": "You love regular relaxed tops, but this slim cropped cut mirrors your clingy mustard dress and short tee."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 0,
+        "reason": "Its slim cropped shape and wide neckline highlight your hips, waist and shoulders trouble spots."
+      },
+      {
+        "id": "color_liked",
+        "score": 0,
+        "reason": "This mustard shade matches your mustard dress that washed you out, unlike your brightening white shirt."
+      },
+      {
+        "id": "style_liked",
+        "score": 4,
+        "reason": "You like casual tops like your tees and shirt, but its ribbed social look recalls your disliked mustard dress."
+      },
+      {
+        "id": "feel_liked",
+        "score": 4,
+        "reason": "None of your notes on soft cotton or itchy wool tell how this polyester blend will feel."
+      }
+    ],
+    "summary": "This slim cropped mustard top repeats the fit and color issues you disliked and suits you poorly overall."
+  },
+  "recordedAt": "2026-10-31T02:39:48.778Z"
+}

@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "a5a0e566344be2c482d559c50c96fedbf69b3ca508100b7ef38b98df48027c09",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"navy\",\"colors\":[{\"name\":\"navy\"}],\"fit\":\"relaxed\",\"formality\":3,\"materials\":[\"wool blend\"],\"notes\":\"elastic back waist, full-length\",\"occasions\":[\"school\",\"work\"],\"subcategory\":\"trousers\",\"tempRangeF\"",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 8,
+        "reason": "You struggled with dark jeans digging at waist and shortening legs, these give room and length."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 2,
+        "reason": "These sit right at your waist trouble area, though they stay away from your shoulders."
+      },
+      {
+        "id": "color_liked",
+        "score": 4,
+        "reason": "You have no feelings mentioning navy, so there's nothing to compare."
+      },
+      {
+        "id": "style_liked",
+        "score": 6,
+        "reason": "You liked your white shirt at this dressiness for work, matching these trousers."
+      },
+      {
+        "id": "feel_liked",
+        "score": 4,
+        "reason": "You have no feelings about wool blend comfort to compare here."
+      }
+    ],
+    "summary": "These trousers fix your jeans waist and leg issues and match your work dressiness, despite highlighting your waist."
+  },
+  "recordedAt": "2026-10-31T02:39:13.205Z"
+}

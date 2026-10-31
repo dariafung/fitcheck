@@ -182,7 +182,7 @@ test("style it with AI: a failure keeps the board, the budget running out hides 
   await expect(result.getByText(STYLE_FAILED)).toBeHidden();
 });
 
-test("when the AI doesn't finish, try again sends the same item", async ({ page }) => {
+test("when the AI doesn't finish, try again sends the same item and photo", async ({ page }) => {
   const sent: string[] = [];
   page.on("request", (r) => {
     if (r.method() === "POST" && new URL(r.url()).pathname === "/api/checks") sent.push(r.postData() ?? "");
@@ -197,6 +197,7 @@ test("when the AI doesn't finish, try again sends the same item", async ({ page 
   await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
   await page.getByRole("button", { name: "Try again" }).click();
   await expect.poll(() => sent.length).toBe(2);
+  expect(JSON.parse(sent[0]).photo).toMatch(/^data:image\//);
   expect(sent[1]).toBe(sent[0]);
   await expect(page.getByRole("status")).toContainText(INCOMPLETE_NOTICE);
   await expect(page.getByRole("button", { name: "Try again" })).toBeEnabled();

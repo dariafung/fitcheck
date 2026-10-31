@@ -2,7 +2,16 @@
 // network and no cost; a miss means the case or PROMPT_VERSION changed
 // without a new recording.
 import { describe, expect, it } from "vitest";
-import { FEELING_CASES, PAIRING_CASES, PROFILE_CASES, REPEAT_CASES, SCORE_CASES, WEAR_CASES } from "@/tests/record/cases";
+import {
+  FEELING_CASES,
+  PAIRING_CASES,
+  PHOTO_SCORE_CASES,
+  PROFILE_CASES,
+  REPEAT_CASES,
+  SCORE_CASES,
+  STYLED_SCORE_CASES,
+  WEAR_CASES,
+} from "@/tests/record/cases";
 import { BuildProfileInput, HEADLINE_MAX_WORDS, profileFacts, STATEMENT_MAX_WORDS } from "../schemas/build-profile";
 import { INSIGHT_MAX_WORDS, SummarizeWearInput } from "../schemas/summarize-wear";
 import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase, summarizeWear } from "../index";
@@ -83,14 +92,15 @@ describe("judgePairing recordings", () => {
 });
 
 describe("scorePurchase recordings", () => {
+  const ALL_SCORE_CASES = [...SCORE_CASES, ...STYLED_SCORE_CASES, ...PHOTO_SCORE_CASES];
   const score = (name: string) => {
-    const found = SCORE_CASES.find((c) => c.name === name);
+    const found = ALL_SCORE_CASES.find((c) => c.name === name);
     if (!found) throw new Error(`no case ${name}`);
     return scorePurchase(found.input, REPLAY);
   };
   const scoreOf = (out: Awaited<ReturnType<typeof score>>, id: string) => out.answers.find((a) => a.id === id)?.score;
 
-  it.each(SCORE_CASES.map((c) => [c.name, c.input] as const))(
+  it.each(ALL_SCORE_CASES.map((c) => [c.name, c.input] as const))(
     "%s: answers every question once, in order, with short reasons and no numbers",
     async (_, input) => {
       const out = await scorePurchase(input, REPLAY);
@@ -119,6 +129,45 @@ describe("scorePurchase recordings", () => {
       expect(scoreOf(await scorePurchase(input, REPLAY), "color_liked")).toBe(4);
     }
   });
+
+  it("with the style card, still scores the cropped top low and the trousers high", async () => {
+    const top = await score("seven pieces with a style card, slim cropped boat-neck top");
+    expect(scoreOf(top, "cut_flatters")).toBeLessThanOrEqual(3);
+    expect(scoreOf(top, "spares_trouble_areas")).toBeLessThanOrEqual(3);
+    // The mustard dress washed their face out.
+    expect(scoreOf(top, "color_liked")).toBeLessThanOrEqual(3);
+    const trousers = await score("seven pieces with a style card, high-waisted wide-leg trousers");
+    expect(scoreOf(trousers, "cut_flatters")).toBeGreaterThanOrEqual(6);
+  });
+
+  it("with photos, scores the pink fitted tee above the gray cropped tee, card or not", async () => {
+    const total = (out: Awaited<ReturnType<typeof score>>) => out.answers.reduce((sum, a) => sum + a.score, 0);
+    for (const prefix of ["persona with photos", "persona with photos and a style card"]) {
+      const pink = await score(`${prefix}, pink fitted tech tee`);
+      expect(scoreOf(pink, "color_liked")).toBeGreaterThanOrEqual(6);
+      expect(total(pink)).toBeGreaterThan(total(await score(`${prefix}, gray cropped baby tee`)));
+    }
+  });
+
+  it.each(
+    [...STYLED_SCORE_CASES, ...PHOTO_SCORE_CASES]
+      .filter((c) => c.input.styleProfile)
+      .map((c) => [c.name, c.input] as const),
+  )(
+    "%s: doesn't quote the style card",
+    async (_, input) => {
+      const out = await scorePurchase(input, REPLAY);
+      // Any four words in a row from a card line.
+      const runs = (input.styleProfile ?? []).flatMap(({ text }) => {
+        const w = text.toLowerCase().split(/\s+/);
+        return w.slice(0, -3).map((_, i) => w.slice(i, i + 4).join(" "));
+      });
+      for (const text of [...out.answers.map((a) => a.reason), out.summary]) {
+        const said = text.toLowerCase().replace(/[^a-z\s-]/g, "").split(/\s+/).join(" ");
+        for (const run of runs) expect(said).not.toContain(run);
+      }
+    },
+  );
 });
 
 describe("judgeRepeat recordings", () => {

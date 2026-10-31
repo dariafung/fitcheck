@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "2f7986830c3cb4125fd6dcbf5de7e9f59b37823f418e0be8cdb16a6aa389f7ad",
+  "inputPreview": "{\"candidate\":{\"id\":\"dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9\",\"photo\":{\"base64\":\"UklGRogFAABXRUJQVlA4IHwFAADQPQCdASoSAQ4BPm02lEgkJiIhpdXaiMANiWlugb9ntWK3IDtfMa/XPH/43a/gTQGQg351eqFunJxZH9g3M8z7kg3RwRBhHB+/A2MnwieCXeG8XgZoxqgqCng6BlNnuOGfMgoK0XZpgDuy2iYRHx9a5J3eX5OJQlbQ7yIy6Kc++nrQ7bnssac2XgRsNGjJ8ScpjRA",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 7,
+        "reason": "You loved the slim fitted cut of your white V-neck and Swiftly Tech tee."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 7,
+        "reason": "Your shallow crew avoids the deep V you disliked and boxy shoulders."
+      },
+      {
+        "id": "color_liked",
+        "score": 6,
+        "reason": "Your light heather gray hoodie shows you enjoy versatile gray that hides stains."
+      },
+      {
+        "id": "style_liked",
+        "score": 4,
+        "reason": "Nothing you said about style clearly covers this casual school tee."
+      },
+      {
+        "id": "feel_liked",
+        "score": 2,
+        "reason": "Your cotton boat-neck tee pilled and white Supima tee looked see-through."
+      }
+    ],
+    "summary": "Slim gray crew matches your flattering fitted tees and avoids trouble spots, though cotton feel is risky."
+  },
+  "recordedAt": "2026-10-31T02:40:21.246Z"
+}

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { MIN_ROWS, profileHash, profileInput, visibleCard, type StoredCard } from "./style-profile";
+import {
+  MIN_ROWS,
+  PLACEHOLDER_VERSION,
+  profileHash,
+  profileInput,
+  scoringLines,
+  visibleCard,
+  type StoredCard,
+} from "./style-profile";
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const row = (n: number, userTags: unknown = {}) => ({
@@ -103,5 +111,29 @@ describe("visibleCard", () => {
   it(`is null without the headline or with fewer than ${MIN_ROWS} rows`, () => {
     expect(visibleCard(card, new Set([3, 4].map(id)))).toBeNull();
     expect(visibleCard(card, new Set([2].map(id)))).toBeNull();
+  });
+
+  describe("scoringLines", () => {
+    it("sends the shown lines with their topic, stale or not, without occasions", () => {
+      expect(scoringLines({ ...card, inputHash: "old" }, all)).toEqual([
+        { topic: "color", kind: "suits", text: "Light colors." },
+        { topic: "color", kind: "avoid", text: "Muddy browns." },
+        { topic: "feel", kind: "suits", text: "Cotton." },
+        { topic: "style", kind: "suits", text: "Simple pieces." },
+      ]);
+    });
+
+    it("drops lines whose items have all left the closet", () => {
+      expect(scoringLines(card, new Set([1, 2, 3].map(id)))?.map((l) => l.text)).toEqual([
+        "Light colors.",
+        "Cotton.",
+        "Simple pieces.",
+      ]);
+    });
+
+    it("sends nothing for the placeholder card or a card that wouldn't show", () => {
+      expect(scoringLines({ ...card, promptVersion: PLACEHOLDER_VERSION }, all)).toBeNull();
+      expect(scoringLines(card, new Set([3, 4].map(id)))).toBeNull();
+    });
   });
 });

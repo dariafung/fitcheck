@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "07612216b5e8fd8df46fa8a893ef01300fdf32794608a724b6b1dffcacdca667",
+  "inputPreview": "{\"candidate\":{\"id\":\"5674a27b-87a6-4929-8099-28b5a3b2b9e3\",\"photo\":{\"base64\":\"UklGRlAMAABXRUJQVlA4IEQMAAAQfwCdASqcAQACPm02l0kkLCokIvNo2YANiWlu+/mc7hWd45SxZQ8KvPeqxzd/IL9uowYIUUvcWd8ope4s75RS9xZ3yil7izvlFL3FnfKKXuLO+UUvcWd8ope4s75RS9xZ3yil7izvlFL3FnfKKXuLO+UUvcWd8ope4s75RS9w1kuTVD/x3/BNlikTSiYJt+EphQm",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 8,
+        "reason": "You love the fitted cut of your black Swiftly tee, and this matches it exactly."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 7,
+        "reason": "You prefer shallow necklines like your boat tee over deep Vs, and this crew avoids depth."
+      },
+      {
+        "id": "color_liked",
+        "score": 8,
+        "reason": "You love soft pink in your oversized hoodie and pink shorts, and this matches that love."
+      },
+      {
+        "id": "style_liked",
+        "score": 8,
+        "reason": "You wear your black Swiftly tee and pink running shorts for sport, just like this tee."
+      },
+      {
+        "id": "feel_liked",
+        "score": 8,
+        "reason": "You love sweat-wicking comfort in your black Swiftly tee and pink shorts, which this shares."
+      }
+    ],
+    "summary": "This pink sweat-wicking tee mirrors your loved black Swiftly and pink favorites for a perfect sport match."
+  },
+  "recordedAt": "2026-10-31T02:40:30.366Z"
+}

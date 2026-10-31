@@ -1,0 +1,896 @@
+{
+  "candidates": [
+    {
+      "id": "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+      "title": "Swiftly Tech Short-Sleeve Shirt 2.0",
+      "tags": {
+        "fit": "slim",
+        "notes": "Waist length, seamless construction, lightweight sweat-wicking fabric with Silverescent technology. Designed for running and training.",
+        "colors": [
+          {
+            "name": "Pink Pearl/Pink Pearl"
+          }
+        ],
+        "category": "top",
+        "formality": 1,
+        "materials": [
+          "nylon",
+          "polyester",
+          "elastane",
+          "x-static nylon"
+        ],
+        "occasions": [
+          "sport"
+        ],
+        "subcategory": "t-shirt",
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "colorFamily": "pink"
+      }
+    },
+    {
+      "id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+      "title": "100% Cotton Crew Baby Tee",
+      "tags": {
+        "fit": "slim",
+        "notes": "Women's crew neckline short sleeve baby tee, 100% cotton",
+        "colors": [
+          {
+            "name": "LIGHT HEATHER GRAY"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "cotton"
+        ],
+        "occasions": [
+          "school"
+        ],
+        "subcategory": "baby tee",
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "colorFamily": "gray"
+      }
+    }
+  ],
+  "closet": [
+    {
+      "id": "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+      "title": "V-Neck T-Shirt",
+      "tags": {
+        "fit": "slim",
+        "notes": "Slim fit short sleeve V-neck, REF 4174/315",
+        "colors": [
+          {
+            "name": "White",
+            "hex": "#FFFFFF"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "cotton",
+          "elastane"
+        ],
+        "occasions": [
+          "social"
+        ],
+        "subcategory": "t-shirt",
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "colorFamily": "white"
+      },
+      "feeling": {
+        "flattering": "yes",
+        "liked": "unknown",
+        "aspects": [
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "area": "overall",
+            "said": "fits just right",
+            "means": "fits just right"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "negative",
+            "area": "neckline",
+            "said": "V is a bit too deep",
+            "means": "prefers shallower V necklines"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Fits well overall but neckline too deep for class."
+      }
+    },
+    {
+      "id": "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+      "title": "Swiftly Tech Short-Sleeve Shirt 2.0",
+      "tags": {
+        "fit": "slim",
+        "notes": "Seamless sweat-wicking running/training tee with waist length, Silverescent anti-odour technology",
+        "colors": [
+          {
+            "name": "Black/Black"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 1,
+        "materials": [
+          "nylon",
+          "polyester",
+          "elastane"
+        ],
+        "occasions": [
+          "sport"
+        ],
+        "subcategory": "t-shirt",
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "colorFamily": "black"
+      },
+      "feeling": {
+        "flattering": "yes",
+        "liked": "unknown",
+        "aspects": [
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "wicks sweat",
+            "means": "wicks sweat"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "said": "fitted cut looks clean",
+            "means": "fitted cuts look clean"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Sweat-wicking tee with clean-looking fitted cut."
+      }
+    },
+    {
+      "id": "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+      "title": "Faux Suede Belted Jacket",
+      "tags": {
+        "notes": "Lapel collar, matching fabric belt, peplum hem, double-breasted front with hidden zip closure, tonal interior lining.",
+        "colors": [
+          {
+            "name": "Toffee"
+          }
+        ],
+        "category": "outerwear",
+        "formality": 3,
+        "materials": [
+          "polyester"
+        ],
+        "occasions": [
+          "social"
+        ],
+        "subcategory": "jacket",
+        "tempRangeF": {
+          "min": 45,
+          "max": 65
+        },
+        "colorFamily": "brown"
+      },
+      "feeling": {
+        "flattering": "mixed",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "Love the color",
+            "means": "Love the color"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "area": "waist",
+            "said": "belt shapes my waist",
+            "means": "belt shapes my waist"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "negative",
+            "area": "shoulders",
+            "said": "boxy in the shoulders",
+            "means": "boxy in the shoulders"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Toffee jacket loved for color and waist shaping but boxy at shoulders."
+      }
+    },
+    {
+      "id": "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+      "title": "Speed Up High-Rise Short 4\"",
+      "tags": {
+        "fit": "relaxed",
+        "notes": "High-rise 4\" running shorts with built-in liner and Swift lightweight sweat-wicking fabric",
+        "colors": [
+          {
+            "name": "Black"
+          }
+        ],
+        "pattern": "solid",
+        "category": "bottom",
+        "formality": 1,
+        "materials": [
+          "polyester",
+          "elastane",
+          "nylon"
+        ],
+        "occasions": [
+          "sport"
+        ],
+        "subcategory": "shorts",
+        "tempRangeF": {
+          "min": 55,
+          "max": 90
+        },
+        "colorFamily": "black"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "wicks sweat really well",
+            "means": "wicks sweat really well"
+          }
+        ],
+        "occasions": [
+          "sport"
+        ],
+        "mood": [],
+        "summary": "Sweat-wicking running shorts worn for every run."
+      }
+    },
+    {
+      "id": "825788d8-8548-43da-9a26-40f5af91c0f3",
+      "title": "Feel Good Low-Rise Baggy Sweatpants",
+      "tags": {
+        "fit": "relaxed",
+        "notes": "Low-rise drawstring waist, baggy leg, pockets, embroidered logo, signature soft fleece",
+        "colors": [
+          {
+            "name": "Light Heather Grey"
+          }
+        ],
+        "pattern": "solid",
+        "category": "bottom",
+        "formality": 1,
+        "materials": [
+          "cotton",
+          "recycled polyester"
+        ],
+        "occasions": [
+          "home"
+        ],
+        "subcategory": "sweatpants",
+        "tempRangeF": {
+          "min": 50,
+          "max": 70
+        },
+        "colorFamily": "gray"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "comfiest thing I own",
+            "means": "comfiest thing I own"
+          }
+        ],
+        "occasions": [
+          "home"
+        ],
+        "mood": [],
+        "summary": "Most comfortable sweatpants, worn constantly at home."
+      }
+    },
+    {
+      "id": "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+      "title": "Soft Ruched Loafers",
+      "tags": {
+        "notes": "Soft moccasin-style flats. Tassel and raised vamp detail. Ruching on the front. Sole height: 1 inch (2.5 cm)",
+        "colors": [
+          {
+            "name": "BLACK"
+          }
+        ],
+        "category": "shoes",
+        "formality": 3,
+        "materials": [
+          "polyurethane",
+          "polyester"
+        ],
+        "occasions": [
+          "social"
+        ],
+        "subcategory": "loafers",
+        "tempRangeF": {
+          "min": 50,
+          "max": 80
+        },
+        "colorFamily": "black"
+      },
+      "feeling": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "style",
+            "sentiment": "positive",
+            "said": "look polished",
+            "means": "look polished"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Polished loafers are a go-to for dressing up."
+      }
+    },
+    {
+      "id": "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
+      "title": "V-Neck T-Shirt",
+      "tags": {
+        "fit": "slim",
+        "notes": "Slim fit V-neck short sleeve T-shirt in Stone, regular length with straight hem, cotton-blend yarn.",
+        "colors": [
+          {
+            "name": "STONE"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "cotton",
+          "elastane"
+        ],
+        "occasions": [
+          "school"
+        ],
+        "subcategory": "t-shirt",
+        "tempRangeF": {
+          "min": 60,
+          "max": 85
+        },
+        "colorFamily": "cream"
+      },
+      "feeling": {
+        "flattering": "no",
+        "liked": "no",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "negative",
+            "said": "beige washes me out",
+            "means": "beige washes out complexion"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Beige shirt washes out complexion and remains unworn."
+      }
+    },
+    {
+      "id": "907d76cc-98b7-4e29-8755-fc734a761987",
+      "title": "Fitted Boat Neck T-Shirt",
+      "tags": {
+        "fit": "slim",
+        "notes": "Long sleeves, boat neck, straight hem, fitted / slim fit, made of cotton yarn",
+        "colors": [
+          {
+            "name": "GRAY MARL"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "cotton"
+        ],
+        "occasions": [
+          "school"
+        ],
+        "subcategory": "t-shirt",
+        "tempRangeF": {
+          "min": 55,
+          "max": 75
+        },
+        "colorFamily": "gray"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "mixed",
+        "aspects": [
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "area": "neckline",
+            "said": "love the boat neckline",
+            "means": "love the boat neckline"
+          },
+          {
+            "aspect": "feel",
+            "sentiment": "negative",
+            "said": "knit pills after a few washes",
+            "means": "knit pills after a few washes"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Loved boat neckline but knit pills after washing."
+      }
+    },
+    {
+      "id": "b4411873-c7b0-44eb-bb1d-542889641915",
+      "title": "Softstreme High-Rise Pant",
+      "tags": {
+        "fit": "relaxed",
+        "notes": "Peach-fuzz soft Softstreme fabric, high-rise with elastic waistband and shockcord, full-length straight leg",
+        "colors": [
+          {
+            "name": "Strawberry Milkshake"
+          }
+        ],
+        "category": "bottom",
+        "formality": 1,
+        "materials": [
+          "polyester",
+          "modal",
+          "elastane"
+        ],
+        "occasions": [
+          "social"
+        ],
+        "subcategory": "wide-leg pants",
+        "tempRangeF": {
+          "min": 60,
+          "max": 75
+        },
+        "colorFamily": "pink"
+      },
+      "feeling": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "area": "overall",
+            "said": "love how they flow",
+            "means": "flowing wide legs suit well"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "area": "hips",
+            "said": "wide leg balances my hips",
+            "means": "wide legs balance hips"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Flowing wide-leg pants balance hips."
+      }
+    },
+    {
+      "id": "b91ce162-a22b-4d6f-a443-65547e082181",
+      "title": "Speed Up High-Rise Short 4\"",
+      "tags": {
+        "fit": "regular",
+        "notes": "High-rise lined running shorts with 4\" inseam, lightweight Swift fabric",
+        "colors": [
+          {
+            "name": "Pink Pearl",
+            "hex": "#F8CBD3"
+          }
+        ],
+        "pattern": "solid",
+        "category": "bottom",
+        "formality": 1,
+        "materials": [
+          "polyester",
+          "nylon",
+          "elastane"
+        ],
+        "occasions": [
+          "sport"
+        ],
+        "subcategory": "shorts",
+        "tempRangeF": {
+          "min": 60,
+          "max": 90
+        },
+        "colorFamily": "pink"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "feel",
+            "sentiment": "positive",
+            "said": "Wicks sweat",
+            "means": "likes sweat-wicking fabrics"
+          },
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "love the pink with matching tee",
+            "means": "likes pink clothing"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Sweat-wicking pink shorts worn with matching tee."
+      }
+    },
+    {
+      "id": "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+      "title": "Supima Long Sleeve T-Shirt",
+      "tags": {
+        "fit": "slim",
+        "notes": "100% Supima cotton yarn, round neck, straight hem, regular length",
+        "colors": [
+          {
+            "name": "WHITE",
+            "hex": "#FFFFFF"
+          }
+        ],
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "cotton"
+        ],
+        "occasions": [
+          "school"
+        ],
+        "subcategory": "long sleeve t-shirt",
+        "tempRangeF": {
+          "min": 55,
+          "max": 75
+        },
+        "colorFamily": "white"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "unknown",
+        "aspects": [
+          {
+            "aspect": "other",
+            "sentiment": "positive",
+            "said": "Goes with everything",
+            "means": "Goes with everything"
+          },
+          {
+            "aspect": "feel",
+            "sentiment": "negative",
+            "said": "a little see-through",
+            "means": "a little see-through"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Versatile top that is a little see-through."
+      }
+    },
+    {
+      "id": "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+      "title": "Japan Pro",
+      "tags": {
+        "fit": "regular",
+        "notes": "JAPAN PRO skate shoe based on 1981 FABRE JAPAN S basketball shoe with suede paneling and triple-stitching",
+        "colors": [
+          {
+            "name": "Black/White"
+          }
+        ],
+        "pattern": "color-block",
+        "category": "shoes",
+        "formality": 2,
+        "materials": [
+          "suede",
+          "leather",
+          "rubber"
+        ],
+        "occasions": [
+          "school"
+        ],
+        "subcategory": "sneakers",
+        "tempRangeF": {
+          "min": 35,
+          "max": 85
+        },
+        "colorFamily": "black"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "style",
+            "sentiment": "positive",
+            "said": "Goes with everything",
+            "means": "Goes with everything"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Everyday sneaker that goes with everything."
+      }
+    },
+    {
+      "id": "d54193d3-7afa-4da9-9af7-efc08b13427a",
+      "title": "ZW Collection High-Rise Straight Fit Jeans",
+      "tags": {
+        "fit": "regular",
+        "notes": "High-rise straight-leg full-length five-pocket washed jeans with belt loops, front zip and metal button closure. ZARA WOMAN COLLECTION.",
+        "colors": [
+          {
+            "name": "Blue"
+          }
+        ],
+        "pattern": "solid",
+        "category": "bottom",
+        "formality": 2,
+        "materials": [
+          "cotton",
+          "viscose",
+          "polyester"
+        ],
+        "occasions": [
+          "school"
+        ],
+        "subcategory": "jeans",
+        "tempRangeF": {
+          "min": 40,
+          "max": 75
+        },
+        "colorFamily": "denim"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "dark wash",
+            "means": "dark wash"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "area": "legs",
+            "said": "straight leg",
+            "means": "straight leg"
+          }
+        ],
+        "occasions": [
+          "school"
+        ],
+        "mood": [],
+        "summary": "Dark-wash straight-leg jeans, a go-to for class."
+      }
+    },
+    {
+      "id": "e749b166-b703-413a-80f2-36b6e2864ed6",
+      "title": "Feel Good Oversized Hoodie",
+      "tags": {
+        "fit": "oversized",
+        "notes": "Signature soft fleece with front pouch pocket and long sleeves; oversized fit",
+        "colors": [
+          {
+            "name": "Light Pink"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "fleece"
+        ],
+        "occasions": [
+          "home"
+        ],
+        "subcategory": "hoodie",
+        "tempRangeF": {
+          "min": 40,
+          "max": 65
+        },
+        "colorFamily": "pink"
+      },
+      "feeling": {
+        "flattering": "yes",
+        "liked": "yes",
+        "aspects": [
+          {
+            "aspect": "color",
+            "sentiment": "positive",
+            "said": "soft pink",
+            "means": "soft pink"
+          },
+          {
+            "aspect": "fit",
+            "sentiment": "positive",
+            "said": "oversized fit looks relaxed and cute",
+            "means": "oversized fit suits relaxed look"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Soft pink oversized hoodie looks relaxed and cute."
+      }
+    },
+    {
+      "id": "f4678e3e-ef86-4510-87ba-7fa834cc08d6",
+      "title": "Feel Good Oversized Hoodie",
+      "tags": {
+        "fit": "oversized",
+        "notes": "Oversized fit with hood and front pouch pocket in soft fleece",
+        "colors": [
+          {
+            "name": "Light Heather Gray"
+          }
+        ],
+        "pattern": "solid",
+        "category": "top",
+        "formality": 2,
+        "materials": [
+          "fleece"
+        ],
+        "occasions": [
+          "home"
+        ],
+        "subcategory": "hoodie",
+        "tempRangeF": {
+          "min": 40,
+          "max": 65
+        },
+        "colorFamily": "gray"
+      },
+      "feeling": {
+        "flattering": "unknown",
+        "liked": "unknown",
+        "aspects": [
+          {
+            "aspect": "style",
+            "sentiment": "positive",
+            "said": "Goes with all my loungewear",
+            "means": "Goes with all my loungewear"
+          },
+          {
+            "aspect": "other",
+            "sentiment": "positive",
+            "said": "gray hides stains",
+            "means": "gray hides stains"
+          }
+        ],
+        "occasions": [],
+        "mood": [],
+        "summary": "Versatile gray hoodie pairs with loungewear and hides stains."
+      }
+    }
+  ],
+  "cases": [
+    {
+      "candidateId": "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+      "feltIds": [
+        "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+        "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+        "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
+        "907d76cc-98b7-4e29-8755-fc734a761987",
+        "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+        "e749b166-b703-413a-80f2-36b6e2864ed6",
+        "f4678e3e-ef86-4510-87ba-7fa834cc08d6",
+        "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+        "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+        "825788d8-8548-43da-9a26-40f5af91c0f3",
+        "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+        "b4411873-c7b0-44eb-bb1d-542889641915",
+        "b91ce162-a22b-4d6f-a443-65547e082181",
+        "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+        "d54193d3-7afa-4da9-9af7-efc08b13427a"
+      ],
+      "troubleAreas": [
+        "neckline",
+        "shoulders"
+      ],
+      "questions": [
+        {
+          "id": "cut_flatters",
+          "text": "Is its cut, fit and length like the felt items the user says flatter them or fit well, and unlike the ones that don't?"
+        },
+        {
+          "id": "spares_trouble_areas",
+          "text": "Does it avoid drawing attention to the body areas listed in troubleAreas?"
+        },
+        {
+          "id": "color_liked",
+          "text": "Is its color like the colors the user felt good about, and unlike the ones they felt bad about?"
+        },
+        {
+          "id": "style_liked",
+          "text": "Is its style (formality, pattern, kind of piece) like the felt items the user likes, and unlike the ones they don't?"
+        },
+        {
+          "id": "feel_liked",
+          "text": "Would its material and feel likely suit what the user says about how their clothes feel, good and bad?"
+        }
+      ]
+    },
+    {
+      "candidateId": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+      "feltIds": [
+        "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+        "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+        "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
+        "907d76cc-98b7-4e29-8755-fc734a761987",
+        "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+        "e749b166-b703-413a-80f2-36b6e2864ed6",
+        "f4678e3e-ef86-4510-87ba-7fa834cc08d6",
+        "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+        "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+        "825788d8-8548-43da-9a26-40f5af91c0f3",
+        "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+        "b4411873-c7b0-44eb-bb1d-542889641915",
+        "b91ce162-a22b-4d6f-a443-65547e082181",
+        "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+        "d54193d3-7afa-4da9-9af7-efc08b13427a"
+      ],
+      "troubleAreas": [
+        "neckline",
+        "shoulders"
+      ],
+      "questions": [
+        {
+          "id": "cut_flatters",
+          "text": "Is its cut, fit and length like the felt items the user says flatter them or fit well, and unlike the ones that don't?"
+        },
+        {
+          "id": "spares_trouble_areas",
+          "text": "Does it avoid drawing attention to the body areas listed in troubleAreas?"
+        },
+        {
+          "id": "color_liked",
+          "text": "Is its color like the colors the user felt good about, and unlike the ones they felt bad about?"
+        },
+        {
+          "id": "style_liked",
+          "text": "Is its style (formality, pattern, kind of piece) like the felt items the user likes, and unlike the ones they don't?"
+        },
+        {
+          "id": "feel_liked",
+          "text": "Would its material and feel likely suit what the user says about how their clothes feel, good and bad?"
+        }
+      ]
+    }
+  ]
+}
