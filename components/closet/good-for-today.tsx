@@ -12,7 +12,7 @@ import { todayWeather } from "@/lib/weather/today";
 import { ClosetGridSkeleton, EmptyCloset, ItemList } from "./closet-grid";
 import { LocationSync } from "./location-sync";
 
-// Three across next to the black tile on a desktop, so each slot lines up
+// Three across next to the style card on a desktop, so each slot lines up
 // with the closet's four-across shelf.
 const TODAY_GRID = "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4";
 
@@ -72,7 +72,7 @@ export function GoodForTodaySkeleton() {
 function Section({ note, children }: { note?: string; children: ReactNode }) {
   return (
     <section aria-labelledby="good-for-today" className="flex flex-col gap-6">
-      {/* Fixed height: the black tile beside it starts where the shelf does. */}
+      {/* Fixed height: matches the style card's heading bar beside it. */}
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line pb-3 lg:h-12 lg:flex-nowrap lg:items-end">
           <h2 id="good-for-today" className="text-lg leading-none font-medium">
             Good for today
