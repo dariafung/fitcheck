@@ -377,6 +377,55 @@ export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
   },
 ];
 
+// The same two candidates scored against the seven-piece closet with the
+// style card recorded for it (fixtures/ai/buildProfile, occasion left out),
+// so the card and the felt items come from the same feelings, as in the app.
+// Without a card they're only run by hand, to compare.
+const SEVEN_FEELINGS = PROFILE_CASES[0].input.feelings;
+const feltIn = (item: ItemSummary) => {
+  const found = SEVEN_FEELINGS.find((f) => f.itemId === item.id);
+  if (!found) throw new Error(`no feeling for ${item.id}`);
+  const { flattering, liked, aspects, mood, summary } = found;
+  return { ...item, feeling: { flattering, liked, aspects, mood, summary } };
+};
+const SEVEN_STYLE: NonNullable<ScorePurchaseInput["styleProfile"]> = [
+  { topic: "color", kind: "suits", text: "Crisp white and soft neutrals brighten you" },
+  { topic: "color", kind: "avoid", text: "Mustard yellow washes you out" },
+  { topic: "fit", kind: "suits", text: "Relaxed cuts with roomy stretchy waistbands suit you" },
+  { topic: "fit", kind: "avoid", text: "Clingy slim fits and tight waistbands restrict you" },
+  { topic: "feel", kind: "suits", text: "Soft cotton keeps you comfortable" },
+  { topic: "feel", kind: "avoid", text: "Scratchy wool feels uncomfortable on you" },
+  { topic: "length", kind: "suits", text: "Full-length hems create a longer leg line for you" },
+  { topic: "length", kind: "avoid", text: "Cropped lengths ride up on you" },
+  { topic: "style", kind: "suits", text: "Polished staples like trousers and button-downs suit you" },
+];
+const SEVEN_TROUBLE = ["hips", "shoulders", "waist"];
+
+export const STYLED_SCORE_CASES: { name: string; input: ScorePurchaseInput }[] = [
+  {
+    name: "seven pieces with a style card, high-waisted wide-leg trousers",
+    input: {
+      candidate: TROUSERS,
+      profile: SEED_PROFILE,
+      feltItems: [PROFILE_TROUSERS, JEANS, PROFILE_TEE, PROFILE_SWEATER, PROFILE_DRESS, SHIRT, SNEAKERS].map(feltIn),
+      troubleAreas: SEVEN_TROUBLE,
+      questions: FIT_QUESTIONS_1026,
+      styleProfile: SEVEN_STYLE,
+    },
+  },
+  {
+    name: "seven pieces with a style card, slim cropped boat-neck top",
+    input: {
+      candidate: CROPPED_TOP,
+      profile: SEED_PROFILE,
+      feltItems: [PROFILE_TEE, PROFILE_SWEATER, SHIRT, PROFILE_TROUSERS, PROFILE_DRESS, JEANS, SNEAKERS].map(feltIn),
+      troubleAreas: SEVEN_TROUBLE,
+      questions: FIT_QUESTIONS_1026,
+      styleProfile: SEVEN_STYLE,
+    },
+  },
+];
+
 // 30 days of outfits over the seven-piece closet: a praised dress worn once,
 // knocked jeans worn 11 times, a sweater never worn, and sport always in the
 // same outfit though three are wanted.

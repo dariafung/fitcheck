@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@5",
+  "inputHash": "0aa5300a5f212d810e07a314e43175fff0021b8658b3d2d9730065ed083d587b",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"navy\",\"colors\":[{\"name\":\"navy\"}],\"fit\":\"relaxed\",\"formality\":3,\"materials\":[\"wool blend\"],\"notes\":\"elastic back waist, full-length\",\"occasions\":[\"school\",\"work\"],\"subcategory\":\"trousers\",\"tempRangeF\"",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 7,
+        "reason": "You get roomier waist and longer line than your dark straight-leg jeans."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 2,
+        "reason": "Your high waist sits right on your troubled waist area."
+      },
+      {
+        "id": "color_liked",
+        "score": 4,
+        "reason": "You loved white for looking awake, with nothing said about navy."
+      },
+      {
+        "id": "style_liked",
+        "score": 6,
+        "reason": "You liked your work-ready white shirt at this dress level, unlike the casual jeans."
+      },
+      {
+        "id": "feel_liked",
+        "score": 4,
+        "reason": "You found cotton comfy, with nothing said about wool blend feel."
+      }
+    ],
+    "summary": "You get comfortable waist and work-ready polish in an untested color and fabric."
+  },
+  "recordedAt": "2026-10-31T02:24:51.096Z"
+}

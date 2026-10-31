@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { ProfileTopic } from "./build-profile";
 import { FeelingStructured, ItemSummary, ProfileSummary } from "./common";
 
-export const PROMPT_VERSION = "score-purchase@4";
+export const PROMPT_VERSION = "score-purchase@5";
 
 // Each fit question is scored 0 to this, higher is better.
 export const FIT_SCORE_MAX = 8;
@@ -22,6 +23,15 @@ export const FeltItem = ItemSummary.omit({ flattering: true, liked: true }).exte
 });
 export type FeltItem = z.input<typeof FeltItem>;
 
+// One line of the user's style card (P1-3): what suits them or what to skip,
+// on one topic. Occasions aren't sent; they don't bear on the questions.
+export const StyleLine = z.object({
+  topic: ProfileTopic.exclude(["occasion"]),
+  kind: z.enum(["suits", "avoid"]),
+  text: z.string().min(1),
+});
+export type StyleLine = z.infer<typeof StyleLine>;
+
 // The model judges one candidate against every owned item the user wrote a
 // feeling about, good and bad. It scores each question 0-FIT_SCORE_MAX with a
 // reason; lib/check adds the scores into the 0-100 match score and computes
@@ -32,6 +42,9 @@ export const ScorePurchaseInput = z.object({
   feltItems: z.array(FeltItem),
   // Body areas of fit aspects the user felt bad about, across all feelings.
   troubleAreas: z.array(z.string()).default([]),
+  // Left out entirely when the user has no usable card, so the request is
+  // the same as before cards existed.
+  styleProfile: z.array(StyleLine).min(1).optional(),
   questions: z
     .array(z.object({ id: z.string().min(1), text: z.string().min(1) }))
     .min(1)

@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@5",
+  "inputHash": "d16789aa650b0ee8a5c0b0c5c14ba6cb60a5d01334ef528cdad0615137855863",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"yellow\",\"colors\":[{\"name\":\"mustard\"}],\"fit\":\"slim\",\"formality\":2,\"materials\":[\"polyester\",\"elastane\"],\"notes\":\"cropped above the waist\",\"occasions\":[\"social\"],\"pattern\":\"ribbed\",\"tempRangeF\":{\"max\":85,\"",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 1,
+        "reason": "You loved regular tops like gray crewneck, while slim cropped like mustard dress clung and rode up."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 0,
+        "reason": "Your mustard dress clung at hips and cropped tops expose your waist, while boat neck widens shoulders."
+      },
+      {
+        "id": "color_liked",
+        "score": 0,
+        "reason": "You felt awake in white shirt, but mustard dress washed you out."
+      },
+      {
+        "id": "style_liked",
+        "score": 5,
+        "reason": "You love easy tops like white shirt and black tee for social, though ribbed mustard dress felt off."
+      },
+      {
+        "id": "feel_liked",
+        "score": 4,
+        "reason": "None of your felt tops mention polyester-elastane comfort, so there's nothing to compare."
+      }
+    ],
+    "summary": "This mustard cropped top repeats the color and clingy cropped fit you disliked despite being an easy social top."
+  },
+  "recordedAt": "2026-10-31T02:25:25.090Z"
+}

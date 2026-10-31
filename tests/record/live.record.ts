@@ -20,7 +20,15 @@ import { PROMPT_VERSION as PAIRING_VERSION, JudgePairingInput } from "@/lib/ai/s
 import { PROMPT_VERSION as REPEAT_VERSION, JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
 import { PROMPT_VERSION as SCORE_VERSION, ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
 import { PROMPT_VERSION as WEAR_VERSION, SummarizeWearInput } from "@/lib/ai/schemas/summarize-wear";
-import { FEELING_CASES, PAIRING_CASES, PROFILE_CASES, REPEAT_CASES, SCORE_CASES, WEAR_CASES } from "./cases";
+import {
+  FEELING_CASES,
+  PAIRING_CASES,
+  PROFILE_CASES,
+  REPEAT_CASES,
+  SCORE_CASES,
+  STYLED_SCORE_CASES,
+  WEAR_CASES,
+} from "./cases";
 
 // One run never spends more than this, whatever the daily budget says.
 const RUN_LIMIT_USD = 0.45;
@@ -110,7 +118,7 @@ describe("judgeRepeat", () => {
 });
 
 describe("scorePurchase", () => {
-  for (const { name, input } of SCORE_CASES) {
+  for (const { name, input } of [...SCORE_CASES, ...STYLED_SCORE_CASES]) {
     it(name, async () => {
       const hash = inputHash("scorePurchase", SCORE_VERSION, ScorePurchaseInput.parse(input));
       const output = await recorded("scorePurchase", name, hash, () => scorePurchase(input, LIVE));

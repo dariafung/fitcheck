@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@5",
+  "inputHash": "0f0f012f7335a52d8565d5523f7a2e787f7c2b69b9b9b19429cb919f43e7cce9",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"navy\",\"colors\":[{\"name\":\"navy\"}],\"fit\":\"relaxed\",\"formality\":3,\"materials\":[\"wool blend\"],\"notes\":\"elastic back waist, full-length\",\"occasions\":[\"school\",\"work\"],\"subcategory\":\"trousers\",\"tempRangeF\"",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 8,
+        "reason": "You loved your navy wide-leg trousers with stretchy waist and long leg line."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 8,
+        "reason": "You found the same navy trousers flattering without clinging at your hips."
+      },
+      {
+        "id": "color_liked",
+        "score": 4,
+        "reason": "You never mentioned navy itself, so there's nothing to compare here."
+      },
+      {
+        "id": "style_liked",
+        "score": 8,
+        "reason": "You liked your identical navy trousers for feeling put together at work."
+      },
+      {
+        "id": "feel_liked",
+        "score": 6,
+        "reason": "You found the same wool-blend trousers comfortable, unlike the itchy gray sweater."
+      }
+    ],
+    "summary": "These trousers match your loved comfortable pair and should flatter and suit your work wardrobe."
+  },
+  "recordedAt": "2026-10-31T02:25:12.786Z"
+}

@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { FIT_SCORE_MAX, type FeltItem, type ScorePurchaseInput, type ScorePurchaseOutput } from "../schemas/score-purchase";
+import {
+  FIT_SCORE_MAX,
+  type FeltItem,
+  type ScorePurchaseInput,
+  type ScorePurchaseOutput,
+  type StyleLine,
+} from "../schemas/score-purchase";
 import { describeItem } from "./describe";
 import { respondStructured } from "./respond";
 
@@ -79,7 +85,20 @@ export function scorePrompt(input: Input): string {
     "",
     "Questions:",
     ...input.questions.map((q, i) => `Q${i + 1}: ${q.text}`),
+    ...(input.styleProfile ? ["", ...styleSection(input.styleProfile)] : []),
   ].join("\n");
+}
+
+// The style card goes last and only when there is one, with its rules, so
+// the request without a card stays as it was.
+function styleSection(lines: readonly StyleLine[]): string[] {
+  return [
+    "Style summary of their whole closet (a digest of the same feelings, not new evidence):",
+    "- It only shows the patterns across the felt items above. When it and a felt item disagree, the felt item wins.",
+    "- When no feeling bears on the candidate for a question, the summary doesn't move that score from 4.",
+    "- Do not quote it in reasons.",
+    ...lines.map((l) => `${l.kind === "suits" ? "+" : "-"} ${l.topic}: ${l.text}`),
+  ];
 }
 
 // Answers come back in question order. Numbers out of range are dropped and
