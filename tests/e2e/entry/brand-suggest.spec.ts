@@ -78,6 +78,14 @@ test("the brand box suggests brands: keys, a click, or anything typed", async ({
 
 test("editing an item suggests the user's own brands first", async ({ page }) => {
   const own = `Tiny Studio ${randomUUID().slice(0, 6)}`;
+  // With a photo, like every item saved from the add page: buy.spec styles
+  // the persona's outfits, which needs every piece to have one.
+  const photo = `${DEMO_USER_ID}/${randomUUID()}.png`;
+  created.push({ paths: [photo] });
+  const upload = await db.storage
+    .from("item-images")
+    .upload(photo, await fakeScreenshot(), { contentType: "image/png" });
+  if (upload.error) throw upload.error;
   const { data: item } = await db
     .from("items")
     .insert({
@@ -85,6 +93,7 @@ test("editing an item suggests the user's own brands first", async ({ page }) =>
       entry_method: "manual",
       title: `E2E brand tee ${randomUUID().slice(0, 8)}`,
       category: "top",
+      image_paths: [photo],
       brand: own,
       ai_tags: { category: "top", colors: [{ name: "navy" }], materials: ["cotton"], formality: 2, occasions: ["social"] },
     })

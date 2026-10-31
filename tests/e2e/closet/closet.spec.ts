@@ -29,6 +29,14 @@ test.beforeEach(async () => {
   const persona = await db.from("users").select("id").eq("id", DEMO_USER_ID).maybeSingle();
   if (!persona.data) throw new Error("Demo persona missing: run `pnpm seed` first.");
 
+  // With a photo, like every item saved from the add page: buy.spec styles
+  // the persona's outfits, which needs every piece to have one.
+  const photo = `${DEMO_USER_ID}/${randomUUID()}.webp`;
+  imagePaths.push(photo);
+  const webp = await sharp(await fakeScreenshot()).webp().toBuffer();
+  const upload = await db.storage.from("item-images").upload(photo, webp, { contentType: "image/webp" });
+  if (upload.error) throw upload.error;
+
   const title = `E2E striped tee ${randomUUID().slice(0, 8)}`;
   const { data, error } = await db
     .from("items")
@@ -37,6 +45,7 @@ test.beforeEach(async () => {
       entry_method: "manual",
       title,
       category: "top",
+      image_paths: [photo],
       ai_tags: {
         category: "top",
         colors: [{ name: "navy" }],

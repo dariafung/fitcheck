@@ -9,6 +9,7 @@ import {
   computeClosetOutfits,
   type ClosetOutfits,
 } from "@/lib/check/pairings";
+import type { JudgeFn } from "@/lib/check/judge";
 import { pairKey } from "@/lib/check/types";
 import { createServerClient } from "@/lib/db/server";
 
@@ -220,5 +221,34 @@ describe("POST /api/pairings", () => {
     const keys = rows.map((r) => pairKey(r.item_a_id, r.item_b_id));
     expect(new Set(keys).size).toBe(rows.length);
     expect(rows.every((r) => r.item_a_id < r.item_b_id)).toBe(true);
+  });
+
+  it("goes on when an item is deleted while its pairs are judged, caching the rest", async () => {
+    const id = randomUUID();
+    const top = SAMPLE_CLOSET.find((i) => i.tags.category === "top")!;
+    await db
+      .from("items")
+      .insert({ id, user_id: userId, entry_method: "manual", title: "Deleted mid-check", category: "top", ai_tags: top.tags })
+      .throwOnError();
+    let deleted = false;
+    const judge: JudgeFn = async (input) => {
+      if (!deleted) {
+        deleted = true;
+        await db.from("items").delete().eq("id", id).throwOnError();
+      }
+      return ai.judgePairing(input);
+    };
+
+    const result = await computeClosetOutfits(db, userId, judge);
+    expect(deleted).toBe(true);
+    expect(result.outfits.some((o) => o.itemIds.includes(id))).toBe(true);
+    const { data: rows } = await db
+      .from("pairings")
+      .select("id")
+      .or(`item_a_id.eq.${id},item_b_id.eq.${id}`)
+      .throwOnError();
+    expect(rows).toEqual([]);
+    // Every other pair was saved: the next run asks nothing.
+    expect((await outfits()).stats.judged).toBe(0);
   });
 });

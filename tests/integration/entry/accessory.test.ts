@@ -44,7 +44,7 @@ describe("accessories can't be added", () => {
       jsonRequest("/api/items", {
         entryMethod: "screenshot",
         title: "Gold hoops",
-        imagePaths: [],
+        imagePaths: [`${user.id}/hoops.webp`],
         aiTags: { ...hoops, category: "top" },
         tags: hoops,
         onModel: false,

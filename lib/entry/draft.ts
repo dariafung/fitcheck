@@ -37,7 +37,8 @@ export const SaveItemRequest = z.object({
   size: z.string().trim().max(MAX_ITEM_SIZE_LENGTH).optional(),
   priceCents: z.int().nonnegative().optional(),
   currency: z.string().max(8).optional(),
-  imagePaths: z.array(z.string()).max(3),
+  // The add page always has a photo; only a direct call could leave it out.
+  imagePaths: z.array(z.string()).min(1).max(3),
   // The model's tags as extracted, and the tags after the user's edits.
   aiTags: ItemTags,
   tags: ItemTags,
