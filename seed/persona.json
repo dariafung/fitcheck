@@ -12,6 +12,7 @@
   "top_size": "S",
   "bottom_size": "S",
   "shoe_size": "W7.5",
+  "temp_unit": "F",
   "resale_opt_in": true,
   "is_seed": true
 }

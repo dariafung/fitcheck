@@ -20,6 +20,7 @@ const INPUT = {
   topSize: "M",
   bottomSize: "L",
   shoeSize: "W8.5",
+  tempUnit: "C",
   resaleOptIn: true,
 };
 
@@ -59,6 +60,7 @@ describe("GET /api/profile", () => {
       topSize: null,
       bottomSize: null,
       shoeSize: null,
+      tempUnit: null,
       resaleOptIn: false,
     });
   });
@@ -90,7 +92,7 @@ describe("PUT /api/profile", () => {
 
     const { data } = await db
       .from("users")
-      .select("height_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, resale_opt_in")
+      .select("height_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in")
       .eq("id", user.id)
       .single()
       .throwOnError();
@@ -101,6 +103,7 @@ describe("PUT /api/profile", () => {
       top_size: "M",
       bottom_size: "L",
       shoe_size: "W8.5",
+      temp_unit: "C",
       resale_opt_in: true,
     });
   });
@@ -120,18 +123,28 @@ describe("PUT /api/profile", () => {
     expect((await (await GET()).json()).profile.topSize).toBeNull();
   });
 
+  it("requires a temperature unit", async () => {
+    for (const bad of [{ ...INPUT, tempUnit: undefined }, { ...INPUT, tempUnit: null }, { ...INPUT, tempUnit: "K" }]) {
+      expect((await put(bad)).status).toBe(400);
+    }
+    expect((await (await GET()).json()).profile.tempUnit).toBeNull();
+  });
+
   it("keeps the sizes when the user stops taking secondhand clothes", async () => {
     await put(INPUT);
     const { profile } = await (await put({ ...INPUT, resaleOptIn: false })).json();
     expect(profile).toMatchObject({ resaleOptIn: false, topSize: "M", shoeSize: "W8.5" });
   });
 
-  it("has the database refuse sizes off the lists", async () => {
+  it("has the database refuse sizes and units off the lists", async () => {
     await expect(
       db.from("users").update({ shoe_size: "W8.0" }).eq("id", user.id).throwOnError(),
     ).rejects.toThrow();
     await expect(
       db.from("users").update({ top_size: "XXXL" }).eq("id", user.id).throwOnError(),
+    ).rejects.toThrow();
+    await expect(
+      db.from("users").update({ temp_unit: "K" }).eq("id", user.id).throwOnError(),
     ).rejects.toThrow();
   });
 

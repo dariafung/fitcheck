@@ -12,7 +12,7 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
 });
 
 const COLUMNS =
-  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, resale_opt_in";
+  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in";
 const BLANK = {
   height_cm: null,
   weight_kg: null,
@@ -25,6 +25,7 @@ const BLANK = {
   top_size: null,
   bottom_size: null,
   shoe_size: null,
+  temp_unit: null,
   resale_opt_in: false,
 };
 
@@ -68,6 +69,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(page.getByText("Add your weight.")).toBeVisible();
   await expect(page.getByText("Pick one.")).toBeVisible();
   await expect(page.getByText("Pick a size.")).toHaveCount(3);
+  await expect(page.getByText("Pick °F or °C.")).toBeVisible();
 
   await height.fill("65");
   await expect(page.getByText("5 ft 5 in")).toBeVisible();
@@ -80,6 +82,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await page.getByLabel("Shoes").selectOption({ label: "Women's 7.5" });
   await page.getByLabel("School", { exact: true }).fill("4");
   await page.getByLabel("Social", { exact: true }).fill("2");
+  await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°F" }).click();
   await page.getByRole("checkbox", { name: /I'd take secondhand clothes/ }).check();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status")).toHaveText("Saved");
@@ -94,6 +97,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
     top_size: "M",
     bottom_size: "S",
     shoe_size: "W7.5",
+    temp_unit: "F",
     resale_opt_in: true,
   });
   expect(saved?.height_cm).toBeCloseTo(165.1, 1);
