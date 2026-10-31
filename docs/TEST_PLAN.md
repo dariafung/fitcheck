@@ -150,7 +150,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.3 | Open an item and Profile | No Edit, Save, Delete, "Pass it on" or voice button; instead "Demo account is read-only. Sign up to add your own." No Resale section in Profile |
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
-| 10.6 | Open the gray tee, then the gray fleece shorts | "Who'd want it" on each: a line saying 5 people would want it, and 5 identical anonymous avatars; no names or scores |
+| 10.6 | Open the gray tee, then the gray fleece shorts | "Who'd want it" on each: a line saying how many people would want it (at least 1), and that many identical anonymous avatars (up to 5); no names or scores |
 | 10.7 | Run "Should I buy this?" | Works and shows a score |
 | 10.8 | "Style it with AI" under a sample outfit | Works as in 7.10 |
 
