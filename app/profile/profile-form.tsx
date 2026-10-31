@@ -26,6 +26,7 @@ import {
   unitsCookieString,
   type Units,
 } from "@/lib/profile/units";
+import type { TempUnit } from "@/lib/profile/temp-unit";
 import { LETTER_SIZES, SHOE_SIZE_OPTIONS } from "@/lib/resale/size";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -111,8 +112,11 @@ export function ProfileForm({
     bottomSize: initial.bottomSize ?? "",
     shoeSize: initial.shoeSize ?? "",
   }));
+  const [tempUnit, setTempUnit] = useState<TempUnit | null>(initial.tempUnit);
   const [resaleOptIn, setResaleOptIn] = useState(initial.resaleOptIn);
-  const [errors, setErrors] = useState<Partial<Record<Measurement | Occasion | SizeField | "shape", string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<Measurement | Occasion | SizeField | "shape" | "tempUnit", string>>
+  >({});
   const [status, setStatus] = useState<Status>("idle");
 
   function edited() {
@@ -159,6 +163,7 @@ export function ProfileForm({
     for (const s of SIZES) {
       if (!sizes[s]) found[s] = "Pick a size.";
     }
+    if (!tempUnit) found.tempUnit = "Pick °F or °C.";
     for (const o of Occasion.options) {
       const n = Number(mix[o]);
       if (mix[o].trim() === "" || !Number.isInteger(n) || n < 0 || n > MAX_OUTFITS_WANTED) {
@@ -178,6 +183,7 @@ export function ProfileForm({
       bodyShape: shape,
       lifestyleMix: Object.fromEntries(Occasion.options.map((o) => [o, Number(mix[o])])),
       ...sizes,
+      tempUnit,
       resaleOptIn,
     });
     if (Object.keys(found).length > 0 || !input.success) {
@@ -221,6 +227,34 @@ export function ProfileForm({
               </button>
             ))}
           </div>
+          {/* Saved with the profile: everywhere switches after Save. */}
+          <div
+            role="group"
+            aria-label="Temperature"
+            aria-describedby={errors.tempUnit ? "tempUnit-error" : undefined}
+            className="mt-1 flex self-start border border-ink text-sm"
+          >
+            {(["F", "C"] as const).map((u) => (
+              <button
+                key={u}
+                type="button"
+                aria-pressed={tempUnit === u}
+                disabled={readOnly}
+                onClick={() => {
+                  setTempUnit(u);
+                  edited();
+                }}
+                className="h-8 cursor-pointer px-3 transition-colors duration-150 disabled:cursor-default aria-pressed:bg-ink aria-pressed:text-paper"
+              >
+                °{u}
+              </button>
+            ))}
+          </div>
+          {errors.tempUnit && (
+            <p id="tempUnit-error" className={ERROR}>
+              {errors.tempUnit}
+            </p>
+          )}
         </div>
 
         <div className={SECTION_BODY}>

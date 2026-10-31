@@ -1,5 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_USER_ID } from "../../../lib/db/current-user";
+import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
+import { toUnit } from "../../../lib/profile/temp-unit";
+import { FIXED_WEATHER } from "../../../lib/weather/today";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
@@ -12,7 +16,7 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
 });
 
 const COLUMNS =
-  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, resale_opt_in";
+  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in";
 const BLANK = {
   height_cm: null,
   weight_kg: null,
@@ -25,6 +29,7 @@ const BLANK = {
   top_size: null,
   bottom_size: null,
   shoe_size: null,
+  temp_unit: null,
   resale_opt_in: false,
 };
 
@@ -68,6 +73,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(page.getByText("Add your weight.")).toBeVisible();
   await expect(page.getByText("Pick one.")).toBeVisible();
   await expect(page.getByText("Pick a size.")).toHaveCount(3);
+  await expect(page.getByText("Pick °F or °C.")).toBeVisible();
 
   await height.fill("65");
   await expect(page.getByText("5 ft 5 in")).toBeVisible();
@@ -80,6 +86,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await page.getByLabel("Shoes").selectOption({ label: "Women's 7.5" });
   await page.getByLabel("School", { exact: true }).fill("4");
   await page.getByLabel("Social", { exact: true }).fill("2");
+  await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°F" }).click();
   await page.getByRole("checkbox", { name: /I'd take secondhand clothes/ }).check();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status")).toHaveText("Saved");
@@ -94,6 +101,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
     top_size: "M",
     bottom_size: "S",
     shoe_size: "W7.5",
+    temp_unit: "F",
     resale_opt_in: true,
   });
   expect(saved?.height_cm).toBeCloseTo(165.1, 1);
@@ -138,4 +146,68 @@ test("outfit counts over 30 are not saved", async ({ page }) => {
   await expect(page.getByText("0 to 30.")).toBeVisible();
   await expect(page.getByRole("status")).toHaveCount(0);
   expect((await savedProfile())?.height_cm).toBeNull();
+});
+
+test("after picking °C, home, the item page and its editor all use °C and save °F", async ({ page }) => {
+  // A filled-in profile from before units were asked: only the unit is missing.
+  await db
+    .from("users")
+    .update({ height_cm: 165, weight_kg: 58, body_shape: "pear", top_size: "S", bottom_size: "S", shoe_size: "W7.5" })
+    .eq("id", DEMO_USER_ID)
+    .throwOnError();
+  // 51°F shows as 11°C, which would save as 52°F if converted back.
+  const title = `E2E unit tee ${randomUUID().slice(0, 8)}`;
+  const { data: item } = await db
+    .from("items")
+    .insert({
+      user_id: DEMO_USER_ID,
+      entry_method: "manual",
+      title,
+      category: "top",
+      ai_tags: { category: "top", colors: [], materials: [], formality: 2, occasions: [], tempRangeF: { min: 51, max: 70 } },
+    })
+    .select("id")
+    .single()
+    .throwOnError();
+
+  try {
+    await page.goto("/profile");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Pick °F or °C.")).toBeVisible();
+    await expect(page.getByRole("status")).toHaveCount(0);
+    await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°C" }).click();
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByRole("status")).toHaveText("Saved");
+    expect((await savedProfile())?.temp_unit).toBe("C");
+
+    await page.goto("/");
+    const today = `${toUnit(FIXED_WEATHER.lowF, "C")}–${toUnit(FIXED_WEATHER.highF, "C")}°C`;
+    await expect(page.getByRole("region", { name: "Good for today" })).toContainText(today);
+
+    await page.goto(`/closet/${item.id}`);
+    await expect(page.getByText("11 to 21°C")).toBeVisible();
+    await page.getByRole("button", { name: "Edit details" }).click();
+    const card = page.getByRole("form", { name: "Item details" });
+    await expect(card.getByRole("spinbutton", { name: "Lowest °C" })).toHaveValue("11");
+    await card.getByRole("spinbutton", { name: "Highest °C" }).fill("25");
+    await card.getByRole("button", { name: "Save changes" }).click();
+    await expect(card).toHaveCount(0);
+    await expect(page.getByText("11 to 25°C")).toBeVisible();
+
+    // The untouched low keeps its exact °F; the typed high is converted.
+    const { data } = await db.from("items").select("user_tags").eq("id", item.id).single().throwOnError();
+    expect((data.user_tags as { tempRangeF: unknown }).tempRangeF).toEqual({ min: 51, max: 77 });
+
+    // The purchase check's card too (it stores nothing).
+    await page.goto("/check");
+    await page.getByLabel("Choose a screenshot").setInputFiles({
+      name: "tee.png",
+      mimeType: "image/png",
+      buffer: await fakeScreenshot(),
+    });
+    const draft = page.getByRole("form", { name: "Item details" });
+    await expect(draft.getByRole("spinbutton", { name: "Lowest °C" })).toBeVisible();
+  } finally {
+    await db.from("items").delete().eq("id", item.id);
+  }
 });

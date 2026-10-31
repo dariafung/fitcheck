@@ -1,5 +1,6 @@
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { effectiveTags } from "@/lib/db/items";
+import { DEFAULT_TEMP_UNIT, toUnit, type TempUnit } from "@/lib/profile/temp-unit";
 import { CATEGORY_LABELS, FIELD_LABELS, capitalize, formalityLabel } from "./labels";
 
 const UserTags = ItemTags.partial();
@@ -60,8 +61,9 @@ export interface TagGroup {
 
 // Display groups for the item page, named and ordered like the entry card's
 // fields; empty groups are dropped. The AI's finer type ("button-down") rides
-// along with the type, since the card has no field for it.
-export function tagGroups(tags: ItemTags): TagGroup[] {
+// along with the type, since the card has no field for it. Temperatures show
+// in the profile's unit.
+export function tagGroups(tags: ItemTags, unit: TempUnit = DEFAULT_TEMP_UNIT): TagGroup[] {
   const type = categoryLabel(tags.category);
   const groups: TagGroup[] = [
     {
@@ -76,7 +78,11 @@ export function tagGroups(tags: ItemTags): TagGroup[] {
     { label: FIELD_LABELS.formality, values: [formalityLabel(tags.formality)] },
     {
       label: FIELD_LABELS.tempRangeF,
-      values: [tags.tempRangeF ? `${tags.tempRangeF.min} to ${tags.tempRangeF.max}°F` : "any weather"],
+      values: [
+        tags.tempRangeF
+          ? `${toUnit(tags.tempRangeF.min, unit)} to ${toUnit(tags.tempRangeF.max, unit)}°${unit}`
+          : "any weather",
+      ],
     },
     { label: FIELD_LABELS.occasions, values: tags.occasions },
   ];

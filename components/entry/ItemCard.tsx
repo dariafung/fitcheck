@@ -6,8 +6,8 @@ import type { Category, ItemTags, Occasion } from "@/lib/ai/schemas/common";
 import { CATEGORY_LABELS, FIELD_LABELS, FORMALITY_LABELS, capitalize } from "@/lib/closet/labels";
 import { COLOR_FAMILIES, COLOR_FAMILY_HEX, type ColorFamily } from "@/lib/color-families";
 import type { ItemDraft } from "@/lib/entry/draft";
+import { DEFAULT_TEMP_UNIT, tempBounds, toUnit, type TempUnit } from "@/lib/profile/temp-unit";
 import { ITEM_SIZE_PLACEHOLDER, MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
-import { TEMP_F_MAX, TEMP_F_MIN } from "@/lib/temperature";
 import { BrandInput } from "./BrandInput";
 import { readTempRange } from "./temp-range";
 
@@ -65,6 +65,7 @@ export function ItemCard({
   categories = CATEGORY_LABELS,
   withSize = false,
   initialSize = null,
+  tempUnit = DEFAULT_TEMP_UNIT,
 }: {
   draft: ItemDraft;
   saving: boolean;
@@ -80,6 +81,8 @@ export function ItemCard({
   // An optional, typed size: for items saved to the closet, not buy checks.
   withSize?: boolean;
   initialSize?: string | null;
+  // The profile's unit for the temperature boxes; saved values are °F.
+  tempUnit?: TempUnit;
 }) {
   const [title, setTitle] = useState(draft.title);
   const [brand, setBrand] = useState(draft.brand ?? "");
@@ -87,9 +90,11 @@ export function ItemCard({
   const [tags, setTags] = useState<ItemTags>(draft.tags);
   const [colors, setColors] = useState(draft.tags.colors.map((c) => c.name).join(", "));
   const [materials, setMaterials] = useState(draft.tags.materials.join(", "));
-  const [tempLow, setTempLow] = useState(String(draft.tags.tempRangeF?.min ?? ""));
-  const [tempHigh, setTempHigh] = useState(String(draft.tags.tempRangeF?.max ?? ""));
-  const temp = readTempRange(tempLow, tempHigh);
+  const storedTemp = draft.tags.tempRangeF;
+  const [tempLow, setTempLow] = useState(storedTemp ? String(toUnit(storedTemp.min, tempUnit)) : "");
+  const [tempHigh, setTempHigh] = useState(storedTemp ? String(toUnit(storedTemp.max, tempUnit)) : "");
+  const temp = readTempRange(tempLow, tempHigh, tempUnit, storedTemp);
+  const tempLimits = tempBounds(tempUnit);
   const [shown, setShown] = useState(0);
   const unsure = new Set(draft.lowConfidence);
   const price = formatPrice(draft.priceCents, draft.currency);
@@ -285,12 +290,12 @@ export function ItemCard({
           </legend>
           <div className="flex items-center gap-2">
             <input
-              aria-label="Lowest °F"
+              aria-label={`Lowest °${tempUnit}`}
               type="number"
               inputMode="numeric"
               step={1}
-              min={TEMP_F_MIN}
-              max={TEMP_F_MAX}
+              min={tempLimits.min}
+              max={tempLimits.max}
               required={!!draft.tags.tempRangeF}
               value={tempLow}
               onChange={(e) => setTempLow(e.target.value)}
@@ -298,18 +303,18 @@ export function ItemCard({
             />
             <span className="text-ink-2">to</span>
             <input
-              aria-label="Highest °F"
+              aria-label={`Highest °${tempUnit}`}
               type="number"
               inputMode="numeric"
               step={1}
-              min={TEMP_F_MIN}
-              max={TEMP_F_MAX}
+              min={tempLimits.min}
+              max={tempLimits.max}
               required={!!draft.tags.tempRangeF}
               value={tempHigh}
               onChange={(e) => setTempHigh(e.target.value)}
               className={`${FIELD} min-w-0 flex-1`}
             />
-            <span className="text-ink-2">°F</span>
+            <span className="text-ink-2">°{tempUnit}</span>
           </div>
           {temp.problem && (
             <p className="text-sm font-medium">{temp.problem}</p>

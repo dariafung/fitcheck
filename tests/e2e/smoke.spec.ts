@@ -31,6 +31,18 @@ test("the top bar leads to the purchase check from any page", async ({ page }) =
   await expect(page.getByRole("heading", { name: "Should I buy this?" })).toBeVisible();
 });
 
+test("the purchase check sits right after Calendar, away from Profile", async ({ page }) => {
+  await page.goto("/");
+  const nav = page.getByRole("navigation");
+  const calendar = await nav.getByRole("link", { name: "Calendar", exact: true }).boundingBox();
+  const buy = await nav.getByRole("link", { name: "Should I buy this?", exact: true }).boundingBox();
+  const profile = await nav.getByRole("link", { name: "Profile", exact: true }).boundingBox();
+  const gap = buy!.x - (calendar!.x + calendar!.width);
+  expect(gap).toBeGreaterThan(0);
+  expect(gap).toBeLessThan(40);
+  expect(profile!.x - (buy!.x + buy!.width)).toBeGreaterThan(200);
+});
+
 test("home puts the style card left of today's clothes", async ({ page }) => {
   await page.goto("/");
   const today = await page.getByRole("heading", { name: "Good for today" }).boundingBox();

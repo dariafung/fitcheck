@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ReadOnlyNote } from "@/components/auth/read-only-note";
 import { AddByScreenshot } from "@/components/entry/AddByScreenshot";
 import { isReadOnly } from "@/lib/auth/session";
+import { currentTempUnit } from "@/lib/profile/temp-setting";
 
 export const metadata: Metadata = { title: "Add clothes · fitcheck" };
 
@@ -20,7 +21,7 @@ export default function AddPage() {
         <DemoNote />
       </Suspense>
       <div className="slot-body min-w-0 group-has-[[data-read-only]]/add:hidden">
-        <AddByScreenshot />
+        <AddByScreenshot tempUnit={currentTempUnit()} />
       </div>
     </div>
   );
