@@ -1,13 +1,14 @@
 import sharp from "sharp";
 import { z } from "zod";
-import { AiError, renderOutfit } from "@/lib/ai";
-import { AiBudgetError } from "@/lib/ai/errors";
+import { AiError, aiErrorResponse, renderOutfit } from "@/lib/ai";
+import { AiBudgetError, AiDailyLimitError } from "@/lib/ai/errors";
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { decodeDataUrl } from "@/lib/check/board-pieces";
 import { candidatePiece, ownedStylePieces, styleInput } from "@/lib/check/style";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { toItemWebp } from "@/lib/entry/images";
+import { withDaily } from "@/lib/limits/daily";
 
 // A whole board took about 14 s on Muse Image; see lib/ai/live/render-outfit.ts.
 export const maxDuration = 300;
@@ -26,7 +27,8 @@ const StyleRequest = z.object({
 });
 
 // POST { candidate: { photo, title, tags }, itemIds } → { image } of the
-// whole outfit drawn by AI as one board, or { error: "budget" | "failed" }.
+// whole outfit drawn by AI as one board, or { error: "budget" | "failed" };
+// 429 with a Retry-After once the caller's daily count is used up.
 // Nothing is stored or cached: the image goes straight back to the page.
 // Like the rest of the check it writes nothing, so the read-only demo
 // account can use it too, on the shared daily budget.
@@ -45,8 +47,9 @@ export async function POST(request: Request) {
   if (!input) return Response.json({ error: "failed" });
   let output;
   try {
-    output = await renderOutfit(input);
+    output = await withDaily("style", () => renderOutfit(input));
   } catch (err) {
+    if (err instanceof AiDailyLimitError) return aiErrorResponse(err);
     if (err instanceof AiBudgetError) return Response.json({ error: "budget" });
     if (err instanceof AiError) return Response.json({ error: "failed" });
     throw err;

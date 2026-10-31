@@ -1,4 +1,5 @@
 import { inject, vi } from "vitest";
+import { memoryUsageStore, setUsageStore } from "@/lib/limits/usage-store";
 
 Object.assign(process.env, inject("supabaseEnv"));
 
@@ -8,3 +9,8 @@ vi.mock("next/server", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/server")>()),
   connection: async () => {},
 }));
+
+// Daily AI counts live in memory, per test file: runs never add up in the
+// shared local database (tests/integration/limits/usage-db.test.ts covers
+// the table itself).
+setUsageStore(memoryUsageStore());

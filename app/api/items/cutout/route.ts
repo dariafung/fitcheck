@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { requireWriter } from "@/lib/auth/guard";
 import { createServerClient, type Db } from "@/lib/db/server";
-import { cleanUpPhoto } from "@/lib/entry/cleanup";
+import { cleanUpPhotoWithinLimit } from "@/lib/entry/cleanup";
 import { frameOriginal } from "@/lib/entry/frame";
 import { isOwnImagePath, ITEM_IMAGES_BUCKET, signImages, storeImage } from "@/lib/entry/images";
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   if (error) return Response.json({ error: "invalid_photo" }, { status: 404 });
 
   const photo = Buffer.from(await data.arrayBuffer());
-  const [cleaned, framed] = await Promise.all([cleanUpPhoto(photo, body.data), frameOriginal(photo)]);
+  const [cleaned, framed] = await Promise.all([cleanUpPhotoWithinLimit(photo, body.data), frameOriginal(photo)]);
   const original = await stored(db, writer.userId, framed);
   if (!cleaned) return Response.json({ error: "not_cleaned", original });
   return Response.json({ ...(await stored(db, writer.userId, cleaned)), original });

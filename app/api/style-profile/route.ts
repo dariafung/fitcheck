@@ -3,6 +3,7 @@ import { requireWriter } from "@/lib/auth/guard";
 import { refreshStyleCard } from "@/lib/closet/style-profile";
 import { DEMO_USER_ID } from "@/lib/db/demo-user";
 import { createServerClient } from "@/lib/db/server";
+import { withDaily } from "@/lib/limits/daily";
 
 // Called by home when the style card is stale; there is no button. Answers
 // the card, 202 when another request is already rebuilding it (or one just
@@ -16,7 +17,11 @@ export async function POST() {
   }
 
   try {
-    const result = await refreshStyleCard(createServerClient(), writer.userId, (input) => buildProfile(input));
+    // Counted only when the card is really rebuilt; over the count the old
+    // card stays (home says nothing about a failed rebuild).
+    const result = await refreshStyleCard(createServerClient(), writer.userId, (input) =>
+      withDaily("style_card", () => buildProfile(input)),
+    );
     if (result.status === "not_enough") return Response.json({ error: "NotEnoughFeelings" }, { status: 400 });
     if (result.status === "busy") return Response.json({ busy: true }, { status: 202 });
     return Response.json({ card: result.card });

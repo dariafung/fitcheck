@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { AI_BUDGET_NOTICE, aiNotice } from "@/lib/ai/notices";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { STYLE_FAILED, STYLE_IT, STYLING } from "@/lib/check/reasons";
 import { OutfitBoard, type BoardPiece } from "./OutfitBoard";
@@ -14,13 +15,14 @@ export interface StyleCandidate {
 
 // "Style it with AI" for the sample outfits on one result: one outfit at a
 // time, each picture kept only while the page shows this result. Over
-// budget, every button goes away.
+// budget or over the daily limit, every button goes away and `stopped`
+// says why.
 export function useStyleIt(candidate: StyleCandidate | null) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [failedId, setFailedId] = useState<string | null>(null);
   const [images, setImages] = useState<Record<string, string>>({});
   const [showing, setShowing] = useState<Record<string, boolean>>({});
-  const [outOfBudget, setOutOfBudget] = useState(false);
+  const [stopped, setStopped] = useState<string | null>(null);
 
   async function style(outfitId: string, itemIds: string[]) {
     if (!candidate || busyId) return;
@@ -37,7 +39,9 @@ export function useStyleIt(candidate: StyleCandidate | null) {
         setImages((all) => ({ ...all, [outfitId]: json.image }));
         setShowing((all) => ({ ...all, [outfitId]: true }));
       } else if (json.error === "budget") {
-        setOutOfBudget(true);
+        setStopped(AI_BUDGET_NOTICE);
+      } else if (aiNotice(json.error)) {
+        setStopped(aiNotice(json.error) ?? null);
       } else {
         setFailedId(outfitId);
       }
@@ -50,7 +54,7 @@ export function useStyleIt(candidate: StyleCandidate | null) {
 
   const toggle = (outfitId: string) => setShowing((all) => ({ ...all, [outfitId]: !all[outfitId] }));
 
-  return { enabled: candidate !== null, busyId, failedId, images, showing, outOfBudget, style, toggle };
+  return { enabled: candidate !== null, busyId, failedId, images, showing, stopped, style, toggle };
 }
 
 export type StyleIt = ReturnType<typeof useStyleIt>;
@@ -72,7 +76,7 @@ export function StyledOutfit({
   const busy = styleIt.busyId === outfitId;
   // Every piece, the candidate plus each owned item, needs a photo to copy.
   const canStyle =
-    styleIt.enabled && pieces.length === itemIds.length + 1 && pieces.every((p) => p.src) && !styleIt.outOfBudget;
+    styleIt.enabled && pieces.length === itemIds.length + 1 && pieces.every((p) => p.src) && !styleIt.stopped;
   return (
     <div className="flex w-56 shrink-0 snap-start flex-col items-start gap-2 md:w-auto">
       {image && styleIt.showing[outfitId] ? (
