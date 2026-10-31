@@ -3,7 +3,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/items/extract/route";
 import { createServerClient } from "@/lib/db/server";
 import type { ItemDraft } from "@/lib/entry/draft";
-import { fakeScreenshot, PHOTO } from "@/lib/entry/fake-screenshot";
+import { fakeScreenshot } from "@/lib/entry/fake-screenshot";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/entry/frame";
 import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
 import { createTestUser, removeTestUser, uploadRequest } from "./helpers";
 
@@ -21,7 +22,7 @@ async function extract(file?: Blob) {
 }
 
 describe("POST /api/items/extract", () => {
-  it("turns a screenshot into a draft with the product photo cropped out", async () => {
+  it("turns a screenshot into a draft with the product photo cropped out and framed on white", async () => {
     const { status, body } = await extract(new Blob([new Uint8Array(await fakeScreenshot())], { type: "image/png" }));
     expect(status).toBe(200);
     const draft = body.draft as ItemDraft;
@@ -37,9 +38,12 @@ describe("POST /api/items/extract", () => {
     const stored = Buffer.from(await blob!.arrayBuffer());
     expect(await sharp(stored).metadata()).toMatchObject({
       format: "webp",
-      width: PHOTO.width,
-      height: PHOTO.height,
+      width: CANVAS_WIDTH,
+      height: CANVAS_HEIGHT,
     });
+    // The photo's own (busy) background stays; the canvas around it is white.
+    const corner = await sharp(stored).extract({ left: 0, top: 0, width: 8, height: 8 }).toBuffer();
+    expect((await sharp(corner).stats()).channels[1].min).toBeGreaterThanOrEqual(250);
     const { dominant } = await sharp(stored).stats();
     expect(dominant.r).toBeGreaterThan(150);
   });

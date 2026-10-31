@@ -4,6 +4,7 @@ import { POST } from "@/app/api/checks/cutout/route";
 import * as ai from "@/lib/ai";
 import { AiUpstreamError } from "@/lib/ai/errors";
 import type { ItemTags } from "@/lib/ai/schemas/common";
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/entry/frame";
 import { jsonRequest } from "../entry/helpers";
 
 // Spies on the model call while keeping the mock answer (the photo as it came).
@@ -30,7 +31,8 @@ describe("POST /api/checks/cutout", () => {
     expect(status).toBe(200);
     expect(body.photo).toMatch(/^data:image\/webp;base64,/);
     const meta = await sharp(Buffer.from(body.photo.split(",")[1], "base64")).metadata();
-    expect(meta).toMatchObject({ format: "webp", width: 90, height: 120 });
+    // Framed like every item photo.
+    expect(meta).toMatchObject({ format: "webp", width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
     expect(vi.mocked(ai.segmentGarment).mock.calls[0][0]).toMatchObject({ category: "top", image: { mime: "image/png" } });
   });
 

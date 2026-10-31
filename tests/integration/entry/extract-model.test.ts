@@ -1,10 +1,12 @@
 // What the extract route does with model answers the mock never gives:
 // a product it can't identify, and a box it can't use.
+import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/items/extract/route";
 import type { ExtractItemOutput } from "@/lib/ai";
 import { createServerClient } from "@/lib/db/server";
-import { fakeScreenshot } from "@/lib/entry/fake-screenshot";
+import { fakeScreenshot, PHOTO } from "@/lib/entry/fake-screenshot";
+import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
 import { createTestUser, removeTestUser, uploadRequest } from "./helpers";
 
 const user = vi.hoisted(() => ({ id: "" }));
@@ -59,6 +61,16 @@ describe("POST /api/items/extract with real-shaped model answers", () => {
     expect(body.draft.lowConfidence).toContain("image");
     expect(body.draft.rawSource).toMatchObject({ cropped: false });
     expect(body.draft.imagePaths).toHaveLength(1);
+  });
+
+  it("keeps an on-model photo as cropped, for the model to cut out next", async () => {
+    answer.value = BASE;
+    const { body } = await extract();
+    const { data } = await createServerClient().storage.from(ITEM_IMAGES_BUCKET).download(body.draft.imagePaths[0]);
+    expect(await sharp(Buffer.from(await data!.arrayBuffer())).metadata()).toMatchObject({
+      width: PHOTO.width,
+      height: PHOTO.height,
+    });
   });
 
   it("passes web sources through to the card", async () => {

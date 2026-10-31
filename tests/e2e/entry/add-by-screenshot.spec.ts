@@ -21,6 +21,27 @@ test.beforeAll(async () => {
   await db.from("users").upsert(persona, { ignoreDuplicates: true }).throwOnError();
 });
 
+// Each upload stores up to three photos (the crop, the AI cut-out and the
+// store's photo framed on white); collect them all, saved or not.
+const pending: Promise<void>[] = [];
+test.beforeEach(({ page }) => {
+  page.on("response", (res) => {
+    if (!/\/api\/items\/(extract|cutout)$/.test(new URL(res.url()).pathname)) return;
+    pending.push(
+      res.json().then(
+        (json) => {
+          const paths = [...(json?.draft?.imagePaths ?? []), json?.path, json?.original?.path].filter(Boolean);
+          if (paths.length) created.push({ paths });
+        },
+        () => {},
+      ),
+    );
+  });
+});
+test.afterEach(async () => {
+  await Promise.all(pending.splice(0));
+});
+
 test.afterAll(async () => {
   for (const { id, paths } of created) {
     if (paths.length) await db.storage.from("item-images").remove(paths);
@@ -139,25 +160,25 @@ test("when the day's AI budget is spent, the page says so", async ({ page }) => 
 
 test("an on-model photo is cut out by AI before the card shows, and can be undone", async ({ page }) => {
   // Mark the mock draft as on-model; everything else is the real flow.
-  let originalPath = "";
   await page.route("**/api/items/extract", async (route) => {
     const res = await route.fetch();
     const json = await res.json();
-    originalPath = json.draft.imagePaths[0];
     await route.fulfill({ response: res, json: { draft: { ...json.draft, onModel: true } } });
   });
+  const cutout = page.waitForResponse((res) => res.url().endsWith("/api/items/cutout"));
   await page.goto("/closet/add");
   await page.getByLabel("Choose a screenshot").setInputFiles({
     name: "on-model.png",
     mimeType: "image/png",
     buffer: await fakeScreenshot(),
   });
+  const { original } = await (await cutout).json();
 
   const card = page.getByRole("form", { name: "Item details" });
   await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
   await card.getByLabel("Name").fill("Cut-out tee");
 
-  // Back to the original and then save: the name typed above stays.
+  // Back to the store's photo (framed on white) and then save: the name typed above stays.
   await page.getByRole("button", { name: "Use original photo" }).click();
   await expect(page.getByText("Photo cleaned up by AI.")).toBeHidden();
   await expect(card.getByLabel("Name")).toHaveValue("Cut-out tee");
@@ -167,7 +188,7 @@ test("an on-model photo is cut out by AI before the card shows, and can be undon
 
   const { data: row } = await db.from("items").select("image_paths, on_model").eq("id", item.id).single().throwOnError();
   created.push({ id: item.id, paths: row.image_paths });
-  expect(row).toEqual({ image_paths: [originalPath], on_model: true });
+  expect(row).toEqual({ image_paths: [original.path], on_model: true });
 });
 
 test("a cut-out photo is what gets saved", async ({ page }) => {

@@ -5,9 +5,9 @@ import sharp from "sharp";
 import { AiError, segmentGarment } from "@/lib/ai";
 import { describeItem } from "@/lib/ai/live/describe";
 import type { ItemTags } from "@/lib/ai/schemas/common";
-import { toItemWebp } from "./images";
+import { frameOnWhite } from "./frame";
 
-// The cleaned-up photo as our usual item WebP, or null when the model
+// The cleaned-up photo framed like every item photo, or null when the model
 // couldn't do it (over budget, refused, failed): callers keep the original.
 export async function cleanUpPhoto(photo: Buffer, garment: { title: string; tags: ItemTags }): Promise<Buffer | null> {
   const png = await sharp(photo)
@@ -27,5 +27,5 @@ export async function cleanUpPhoto(photo: Buffer, garment: { title: string; tags
     if (err instanceof AiError) return null;
     throw err;
   }
-  return toItemWebp(sharp(Buffer.from(output.image.base64, "base64")));
+  return frameOnWhite(Buffer.from(output.image.base64, "base64"));
 }
