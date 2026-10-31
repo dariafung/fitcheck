@@ -1,12 +1,11 @@
-// An anonymous buyer: a colored circle with a plain figure, nothing that
-// tells who they are.
-export function AnonAvatar({ color, label }: { color: string; label: string }) {
+// An anonymous buyer: a plain gray circle with a figure. Every one looks the
+// same, so nothing tells buyers apart.
+export function AnonAvatar() {
   return (
     <span
       role="img"
-      aria-label={label}
-      className="inline-flex size-10 shrink-0 items-center justify-center rounded-full"
-      style={{ background: color }}
+      aria-label="Anonymous buyer"
+      className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-ink-2"
     >
       <svg viewBox="0 0 24 24" aria-hidden className="size-5 fill-paper">
         <circle cx="12" cy="8" r="4" />
