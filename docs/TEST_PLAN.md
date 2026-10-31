@@ -75,7 +75,7 @@ Do this after 2.4 and 4.1, so there is a closet and a profile to check against.
 
 | # | Do | Expect |
 | --- | --- | --- |
-| 6.1 | Log out → "Try the demo account" | Home with the demo persona's closet; "Sign up" and "Log out" top right (on a phone, no "Sign up" in the top bar and "Log out" at the bottom of Profile) |
+| 6.1 | Log out → "Try the demo account" | Home with the demo persona's closet; "Log out" top right (on a phone, at the bottom of Profile) and no "Sign up" in the top bar |
 | 6.2 | Open an item and Profile | No Edit, Save, Delete or voice button; instead "Demo account is read-only. Sign up to add your own." |
 | 6.3 | Run "Should I buy this?" | Works and shows a score |
 
