@@ -11,6 +11,7 @@ import {
   type ProfileTopic,
 } from "@/lib/ai/schemas/build-profile";
 import { FeelingStructured } from "@/lib/ai/schemas/common";
+import type { StyleLine } from "@/lib/ai/schemas/score-purchase";
 import { DEMO_USER_ID } from "@/lib/db/demo-user";
 import type { Db } from "@/lib/db/server";
 import { itemTags } from "./tags";
@@ -172,6 +173,34 @@ export async function loadStyleCardState(db: Db, userId: string): Promise<StyleC
     stale: input !== null && stored?.inputHash !== profileHash(input),
     canRegenerate: userId !== DEMO_USER_ID,
   };
+}
+
+// What the purchase check sends scorePurchase: the lines of the card as it
+// shows (stale or not), minus occasions. Null for the seed's placeholder
+// card or when the card wouldn't show at all.
+export function scoringLines(card: StoredCard, activeIds: ReadonlySet<string>): StyleLine[] | null {
+  if (card.promptVersion === PLACEHOLDER_VERSION) return null;
+  const visible = visibleCard(card, activeIds);
+  if (!visible) return null;
+  const lines = visible.rows.flatMap(({ topic, suits, avoid }): StyleLine[] =>
+    topic === "occasion"
+      ? []
+      : [
+          ...(suits ? [{ topic, kind: "suits" as const, text: suits }] : []),
+          ...(avoid ? [{ topic, kind: "avoid" as const, text: avoid }] : []),
+        ],
+  );
+  return lines.length > 0 ? lines : null;
+}
+
+// activeIds: the user's active items, which the purchase check has loaded.
+export async function loadStyleCardForScoring(
+  db: Db,
+  userId: string,
+  activeIds: ReadonlySet<string>,
+): Promise<StyleLine[] | null> {
+  const stored = await loadStoredCard(db, userId);
+  return stored && scoringLines(stored, activeIds);
 }
 
 export type RefreshResult =

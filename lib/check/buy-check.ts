@@ -11,8 +11,9 @@ import {
 } from "../ai/schemas/common";
 import { AiOutputError } from "../ai/errors";
 import type { JudgeRepeatInput, JudgeRepeatOutput } from "../ai/schemas/judge-repeat";
-import type { ScorePurchaseInput, ScorePurchaseOutput } from "../ai/schemas/score-purchase";
+import type { ScorePurchaseInput, ScorePurchaseOutput, StyleLine } from "../ai/schemas/score-purchase";
 import { imageUrls } from "../closet/images";
+import { loadStyleCardForScoring } from "../closet/style-profile";
 import type { Db } from "../db/server";
 import {
   FIT_QUESTIONS,
@@ -169,6 +170,7 @@ async function askFit(
   closet: readonly ClosetItem[],
   feelings: Map<string, FeelingStructured>,
   profile: ProfileSummary,
+  styleProfile: StyleLine[] | null,
 ): Promise<{ answers: FitAnswer[]; summary: string }> {
   const rows = pickFeltItems(closet, feelings, candidate);
   const trouble = troubleAreas(rows.map((r) => r.feeling));
@@ -180,6 +182,7 @@ async function askFit(
     feltItems: rows.map(toFeltItem),
     troubleAreas: trouble,
     questions: asked.map(({ id, text }) => ({ id, text })),
+    ...(styleProfile && { styleProfile }),
   });
   return { answers: fitAnswers(asked, output), summary: output.summary };
 }
@@ -244,17 +247,23 @@ export async function runBuyCheck(
     return { unsupported: "accessory", message: ACCESSORY_NOTICE };
   }
 
-  const [profile, { items: closet }] = await Promise.all([
+  const [profile, { items: closet, skippedItemIds }] = await Promise.all([
     loadProfile(db, userId),
     loadClosetItems(db, userId),
   ]);
   if (!profile) return null;
-  const feelings = await loadFeelings(db, userId, new Set(closet.map((i) => i.id)));
+  const closetIds = closet.map((i) => i.id);
+  // The style card helps the fit questions, stale or not; without one the
+  // model gets the same request as before cards existed.
+  const [feelings, styleProfile] = await Promise.all([
+    loadFeelings(db, userId, new Set(closetIds)),
+    loadStyleCardForScoring(db, userId, new Set([...closetIds, ...skippedItemIds])),
+  ]);
 
   // The model never sees the gap numbers, so all the calls can run at once.
   const [comparison, fit, repeat] = await Promise.all([
     compareWithCandidate(db, userId, closet, ai.judge, candidate),
-    askFit(ai.score, candidate, closet, feelings, profile.summary),
+    askFit(ai.score, candidate, closet, feelings, profile.summary, styleProfile),
     askRepeat(ai.repeat, candidate, closet),
   ]);
   const { before, after } = comparison;

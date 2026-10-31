@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/checks/route";
 import * as ai from "@/lib/ai";
 import { MOCK_INCOMPLETE_TITLE } from "@/lib/ai/mock/score-purchase";
@@ -9,6 +9,7 @@ import { FIT_QUESTIONS } from "@/lib/check/fit-questions";
 import { CANDIDATE_ITEM_ID } from "@/lib/check/pairings";
 import { ACCESSORY_NOTICE, INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
 import { roundPart } from "@/lib/check/score";
+import { PLACEHOLDER_VERSION } from "@/lib/closet/style-profile";
 import { createServerClient } from "@/lib/db/server";
 
 // Spies on the model calls while keeping the mock answers.
@@ -257,5 +258,56 @@ describe("POST /api/checks", () => {
         .eq("id", userId)
         .throwOnError();
     }
+  });
+
+  describe("with a style card", () => {
+    const goneId = randomUUID();
+    const statement = (topic: string, text: string, ids: string[]) => ({ topic, text, evidenceItemIds: ids });
+    // Built for an older closet: stale, and one line is about an item that's gone.
+    const CARD = {
+      headline: { text: "Easy basics.", evidenceItemIds: [shirtId, trousersId] },
+      suits: [
+        statement("color", "Light colors.", [shirtId]),
+        statement("feel", "Soft cotton.", [shirtId]),
+        statement("style", "Bold prints.", [goneId]),
+        statement("occasion", "Mostly work.", [shirtId, trousersId]),
+      ],
+      avoid: [statement("fit", "Tight hips.", [shirtId])],
+      input_hash: "an older closet",
+      prompt_version: "build-profile@3",
+    };
+    const saveCard = (card: Record<string, unknown>) =>
+      db.from("style_profiles").upsert({ user_id: userId, ...card }, { onConflict: "user_id" }).throwOnError();
+    const scoreInput = async () => {
+      vi.mocked(ai.scorePurchase).mockClear();
+      await result(LOAFERS);
+      return vi.mocked(ai.scorePurchase).mock.calls[0][0];
+    };
+
+    afterEach(async () => {
+      await db.from("style_profiles").delete().eq("user_id", userId).throwOnError();
+    });
+
+    it("sends the card's lines, stale too, without occasions or lines about items that are gone", async () => {
+      const without = await scoreInput();
+      await saveCard(CARD);
+      const input = await scoreInput();
+      expect(input.styleProfile).toEqual([
+        { topic: "color", kind: "suits", text: "Light colors." },
+        { topic: "fit", kind: "avoid", text: "Tight hips." },
+        { topic: "feel", kind: "suits", text: "Soft cotton." },
+      ]);
+      expect({ ...input, styleProfile: undefined }).toEqual(without);
+    });
+
+    it("sends the same input as without a card for the placeholder or a card too thin to show", async () => {
+      const without = await scoreInput();
+      expect(without).not.toHaveProperty("styleProfile");
+      await saveCard({ ...CARD, prompt_version: PLACEHOLDER_VERSION });
+      expect(await scoreInput()).toEqual(without);
+      // Only the headline, color and occasion rows are left.
+      await saveCard({ ...CARD, suits: CARD.suits.filter((x) => x.topic === "color" || x.topic === "occasion"), avoid: [] });
+      expect(await scoreInput()).toEqual(without);
+    });
   });
 });
