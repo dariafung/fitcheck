@@ -6,6 +6,7 @@ import type { EntryErrorCode, ItemDraft } from "@/lib/entry/draft";
 import { signImages, storeImage } from "@/lib/entry/images";
 import { savedBrands } from "@/lib/entry/saved-brands";
 import { productPhoto, readScreenshot } from "@/lib/entry/screenshot";
+import { cleanTitle } from "@/lib/entry/title";
 
 // A screenshot we can't use is an expected outcome, not a server error:
 // answer 200 so the browser console stays clean, and let the page explain.
@@ -16,7 +17,8 @@ function fail(error: EntryErrorCode) {
 // POST multipart { screenshot } → { draft } for the user to check before
 // saving, or { error }. The model identifies the product, fills in details
 // with web search, and points at the product photo, which we crop and keep.
-// The brand is written the way the user (or the built-in list) writes it.
+// The brand is written the way the user (or the built-in list) writes it,
+// and the name is cleaned of store notes, marks and the brand.
 export async function POST(request: Request) {
   const writer = await requireWriter();
   if ("denied" in writer) return writer.denied;
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
     : [...extracted.lowConfidence, "image"];
 
   const draft: ItemDraft = {
-    title: extracted.title,
+    title: cleanTitle(extracted.title, extracted.brand),
     brand: alignBrand(extracted.brand, await savedBrands(db, writer.userId)),
     priceCents: extracted.priceCents,
     currency: extracted.currency,
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
     rawSource: {
       screenshot: { width: shot.width, height: shot.height, mime: shot.mime },
       productBox: extracted.productBox ?? null,
+      aiTitle: extracted.title,
       aiBrand: extracted.brand ?? null,
       aiSize: extracted.size ?? null,
       cropped: photo.cropped,

@@ -5,6 +5,7 @@ import { alignBrand } from "@/lib/entry/brands";
 import type { EntryErrorCode, ItemDraft } from "@/lib/entry/draft";
 import { savedBrands } from "@/lib/entry/saved-brands";
 import { productPhoto, readScreenshot } from "@/lib/entry/screenshot";
+import { cleanTitle } from "@/lib/entry/title";
 
 // A screenshot we can't use is an expected outcome: answer 200 so the
 // browser console stays clean, and let the page explain.
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
 
   const photo = await productPhoto(shot, extracted.productBox);
   const draft: ItemDraft = {
-    title: extracted.title,
+    title: cleanTitle(extracted.title, extracted.brand),
     brand: alignBrand(extracted.brand, await savedBrands(createServerClient(), await currentUserId())),
     priceCents: extracted.priceCents,
     currency: extracted.currency,
