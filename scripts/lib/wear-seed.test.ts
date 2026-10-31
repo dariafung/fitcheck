@@ -73,10 +73,10 @@ describe("seedOutfitLog", () => {
     expect(run()).toEqual(run());
   });
 
-  it("logs most of the 30 days, as real outfits", () => {
+  it("logs most of the days, as real outfits", () => {
     const { rows } = run();
     expectValidRows(rows, CLOSET);
-    expect(new Set(rows.map((r) => r.worn_on)).size).toBeGreaterThanOrEqual(22);
+    expect(new Set(rows.map((r) => r.worn_on)).size).toBeGreaterThanOrEqual(Math.ceil(SEED_DAYS * 0.7));
     const category = new Map(CLOSET.map((i) => [i.id, i.category]));
     for (const row of rows.filter((r) => r.occasion !== "sport")) {
       const kinds = row.item_ids.map((i) => category.get(i));
@@ -114,6 +114,37 @@ describe("seedOutfitLog", () => {
     const c = counts(rows);
     expect(c.get(id(2))).toBe(1);
     expect(c.get(id(5)) ?? 0).toBe(0);
+  });
+
+  it("writes a day-by-day plan as it is", () => {
+    const passedOn = { ...piece(16, "top"), status: "passing_on" };
+    const { rows, roles } = run({
+      items: [...CLOSET, passedOn],
+      plan: {
+        days: [
+          { daysAgo: 0, outfits: [{ items: [id(2), id(5), id(9)], occasion: "school" }] },
+          {
+            daysAgo: 2,
+            outfits: [
+              { items: [id(16), id(7)], occasion: "home" },
+              { items: [id(10), id(3), "not-in-closet"], occasion: "sport" },
+              // The same pieces twice in a day, and nothing left: dropped.
+              { items: [id(7), id(16)] },
+              { items: ["not-in-closet"] },
+            ],
+          },
+          // Outside the window: dropped.
+          { daysAgo: SEED_DAYS, outfits: [{ items: [id(1)] }] },
+        ],
+      },
+    });
+    expect(roles.size).toBe(0);
+    expect(rows.map((r) => [r.worn_on, r.item_ids, r.occasion])).toEqual([
+      [addDays(LAST_DAY, -2), [id(16), id(7)].sort(), "home"],
+      [addDays(LAST_DAY, -2), [id(10), id(3)].sort(), "sport"],
+      [LAST_DAY, [id(2), id(5), id(9)].sort(), "school"],
+    ]);
+    expectValidRows(rows, [...CLOSET, passedOn]);
   });
 
   it("works on the seed closet as it is today", () => {

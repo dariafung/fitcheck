@@ -1,8 +1,8 @@
-// Loads the fictional demo persona, items, feelings, style card and 30 days
-// of outfits (made up from the items, ending yesterday) into the database.
-// The persona's old items, card, outfits, insights and photos are cleared
-// first, so the persona ends up exactly as seeded. Item photos listed in
-// items.json image_paths are uploaded from seed/images/.
+// Loads the fictional demo persona, items, feelings, style card and 10 days
+// of outfits (ending yesterday) into the database. The persona's old items,
+// card, outfits, insights and photos are cleared first, so the persona ends
+// up exactly as seeded. Item photos listed in items.json image_paths are
+// uploaded from seed/images/.
 //
 // Local by default (.env.local) and refuses any other URL. SEED_REMOTE=1
 // seeds the hosted project instead: SUPABASE_URL and SUPABASE_SECRET_KEY come
@@ -16,7 +16,7 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
-import { addDays, SEED_DAYS, seedOutfitLog, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
+import { addDays, SEED_DAYS, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -117,7 +117,7 @@ if (styled.error) throw styled.error;
 // Dates move with the day the seed runs; the old log and its insights went
 // with the rest of the persona above.
 const plan = existsSync(new URL("../seed/wear-plan.json", import.meta.url))
-  ? (readJson("wear-plan.json") as Record<string, "rare" | "often" | "never">)
+  ? (readJson("wear-plan.json") as Record<string, "rare" | "often" | "never"> | DayPlan)
   : null;
 const { rows: outfits } = seedOutfitLog({
   personaId: persona.id,
