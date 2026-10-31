@@ -1,21 +1,20 @@
 {
   "fn": "buildProfile",
-  "promptVersion": "build-profile@3",
-  "inputHash": "cc0a955005f76aa182194919d12d2ddb89394dd24fa32467848cb9f6f9a5fd86",
+  "promptVersion": "build-profile@4",
+  "inputHash": "a57961361f6b9b51fa25df94d11bf8d9c676a01a0dabb2c827eda907e2fb9d8d",
   "inputPreview": "{\"feelings\":[{\"aspects\":[{\"aspect\":\"feel\",\"means\":\"so comfy\",\"said\":\"so comfy\",\"sentiment\":\"positive\"},{\"aspect\":\"color\",\"means\":\"looks awake in white\",\"said\":\"color makes me look awake\",\"sentiment\":\"positive\"},{\"area\":\"shoulders\",\"aspect\":\"fit\",\"means\":\"shoulders need more room\",\"said\":\"tight acros",
   "output": {
     "headline": {
-      "text": "You shine in polished neutrals with comfortable relaxed staples",
+      "text": "You shine in polished neutrals like white button-down and navy trousers.",
       "evidenceItemIds": [
         "852c8e3d-abf7-4955-ab65-9d83194a02ae",
-        "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
-        "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03"
+        "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01"
       ]
     },
     "suits": [
       {
         "topic": "color",
-        "text": "Crisp white and soft neutrals brighten you",
+        "text": "Crisp white and soft neutrals that keep you looking awake",
         "evidenceItemIds": [
           "852c8e3d-abf7-4955-ab65-9d83194a02ae",
           "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03"
@@ -23,15 +22,15 @@
       },
       {
         "topic": "fit",
-        "text": "Relaxed cuts with roomy stretchy waistbands suit you",
+        "text": "Relaxed fits with stretchy waists that keep you comfortable sitting",
         "evidenceItemIds": [
-          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
-          "852c8e3d-abf7-4955-ab65-9d83194a02ae"
+          "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01"
         ]
       },
       {
         "topic": "feel",
-        "text": "Soft cotton keeps you comfortable",
+        "text": "Soft cotton that keeps you comfortable all day",
         "evidenceItemIds": [
           "852c8e3d-abf7-4955-ab65-9d83194a02ae",
           "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c02"
@@ -39,7 +38,7 @@
       },
       {
         "topic": "length",
-        "text": "Full-length hems create a longer leg line for you",
+        "text": "Full-length hems that lengthen your leg line",
         "evidenceItemIds": [
           "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
           "c81b2b56-1f62-4284-83b6-7307a6355ac5"
@@ -47,54 +46,53 @@
       },
       {
         "topic": "style",
-        "text": "Polished staples like trousers and button-downs suit you",
+        "text": "Polished button-downs, trousers and crewnecks that keep you put together",
         "evidenceItemIds": [
           "852c8e3d-abf7-4955-ab65-9d83194a02ae",
-          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01"
+          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
+          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03"
         ]
       },
       {
         "topic": "occasion",
-        "text": "You dress for work and social, with school home sport mixed in",
+        "text": "You dress mostly for work and social, plus school and home",
         "evidenceItemIds": [
           "852c8e3d-abf7-4955-ab65-9d83194a02ae",
-          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c02",
-          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03",
-          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04"
+          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
+          "23c59091-9b18-4c24-92c3-1072a5581d8e"
         ]
       }
     ],
     "avoid": [
       {
         "topic": "color",
-        "text": "Mustard yellow washes you out",
+        "text": "Mustard yellow that washes your face out",
         "evidenceItemIds": [
           "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04"
         ]
       },
       {
         "topic": "fit",
-        "text": "Clingy slim fits and tight waistbands restrict you",
+        "text": "Clingy slim fits that grip over your hips",
         "evidenceItemIds": [
-          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04",
-          "c81b2b56-1f62-4284-83b6-7307a6355ac5"
+          "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04"
         ]
       },
       {
         "topic": "feel",
-        "text": "Scratchy wool feels uncomfortable on you",
+        "text": "Scratchy wool that bothers your skin",
         "evidenceItemIds": [
           "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03"
         ]
       },
       {
         "topic": "length",
-        "text": "Cropped lengths ride up on you",
+        "text": "Cropped tops that ride up as you move",
         "evidenceItemIds": [
           "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c02"
         ]
       }
     ]
   },
-  "recordedAt": "2026-10-29T22:43:40.761Z"
+  "recordedAt": "2026-10-31T18:21:02.756Z"
 }

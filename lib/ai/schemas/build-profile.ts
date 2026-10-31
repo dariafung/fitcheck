@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { FeelingStructured, ItemSummary, Occasion, type FeelingAspectKind } from "./common";
 
-export const PROMPT_VERSION = "build-profile@3";
+export const PROMPT_VERSION = "build-profile@4";
 
 // What a statement on the style card is about. The first five match feeling
 // aspects; feel covers fabrics and how they feel.

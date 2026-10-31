@@ -6,7 +6,7 @@ import { AiOutputError } from "../errors";
 import { buildProfile } from "../index";
 import { BuildProfileInput, profileFacts } from "../schemas/build-profile";
 import type { ItemSummary } from "../schemas/common";
-import { BUILD_PROFILE_INSTRUCTIONS, profilePrompt, ProfileWire, retells, toProfileOutput } from "./build-profile";
+import { BUILD_PROFILE_INSTRUCTIONS, profilePrompt, ProfileWire, toProfileOutput } from "./build-profile";
 
 const create = vi.fn();
 vi.mock("./client", () => ({ getClient: async () => ({ responses: { create } }) }));
@@ -123,16 +123,16 @@ describe("profileFacts", () => {
 });
 
 describe("profilePrompt", () => {
-  it("numbers items and gives conclusions, never the owner's own words", () => {
+  it("numbers items and gives what each aspect means, not the summary", () => {
     const prompt = profilePrompt(INPUT);
     expect(prompt).toContain("Topics to cover: color, fit, feel, style, occasion");
     expect(prompt).toContain("school: 2 items, 1 feeling");
     expect(prompt).toMatch(/^I1: White shirt:/m);
     expect(prompt).toContain("+ color: white brightens your face");
     expect(prompt).toContain("- fit (waist): waistbands need give");
-    // means that only repeats what was said is left out.
-    expect(prompt).toMatch(/\+ feel(;|\s\|)/);
-    for (const said of ["look awake", "so comfy", "digs in", "Comfy white shirt", "Waist digs in"]) {
+    // means is sent even when it's what was said word for word.
+    expect(prompt).toContain("+ feel: so comfy");
+    for (const said of ["look awake", "digs in", "Comfy white shirt", "Waist digs in"]) {
       expect(prompt).not.toContain(said);
     }
   });
@@ -172,32 +172,10 @@ describe("toProfileOutput", () => {
     expect(out?.avoid).toEqual([]);
   });
 
-  it("drops statements that quote or retell the notes", () => {
-    const out = toProfileOutput(INPUT, {
-      ...WIRE,
-      suits: [
-        { topic: "color", text: "You said white makes you look awake.", items: [1] },
-        { topic: "feel", text: "Cotton that feels \"so comfy\".", items: [1] },
-        { topic: "fit", text: "Nothing where the waist digs in when you sit.", items: [2] },
-        { topic: "style", text: "Simple, easy pieces.", items: [3] },
-      ],
-    });
-    expect(out?.suits.map((s) => s.topic)).toEqual(["style"]);
-  });
-
   it("is null without a usable headline or anything that suits", () => {
-    expect(toProfileOutput(INPUT, { ...WIRE, headline: { text: "You mentioned cotton.", items: [1, 3] } })).toBeNull();
+    expect(toProfileOutput(INPUT, { ...WIRE, headline: { text: "  ", items: [1, 3] } })).toBeNull();
     expect(toProfileOutput(INPUT, { ...WIRE, headline: { text: "Easy basics.", items: [1] } })).toBeNull();
     expect(toProfileOutput(INPUT, { ...WIRE, suits: [] })).toBeNull();
-  });
-});
-
-describe("retells", () => {
-  it("catches quotes, reporting verbs and four words in a row from what was said", () => {
-    expect(retells("Light colors near your face.", ["the color makes me look awake"])).toBe(false);
-    expect(retells("Any color that makes me look awake.", ["the color makes me look awake"])).toBe(true);
-    expect(retells("As you noted, white works.", [])).toBe(true);
-    expect(retells("“Comfy” cotton.", [])).toBe(true);
   });
 });
 
