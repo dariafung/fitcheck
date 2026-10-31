@@ -34,8 +34,7 @@ Things to try first:
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.
 - **Good for today**: clothes that fit today's weather where you are.
 - **Profile**: measurements, body shape, sizes, outfits wanted per occasion, °F / °C.
-
-- **Resale matching** (in progress): pass on an item to see anonymous buyers it would suit.
+- **Resale matching**: pass on an item to see anonymous buyer matches and their scores.
 
 ## Meta models
 
