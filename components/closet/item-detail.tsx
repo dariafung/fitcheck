@@ -7,6 +7,7 @@ import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { tempUnitFor } from "@/lib/profile/temp-setting";
 import { readSize, sizeText } from "@/lib/resale/size";
 import { BuyerMatches } from "./buyer-matches";
 import { DeleteItem } from "./delete-item";
@@ -19,9 +20,11 @@ import { PassOnToggle } from "./pass-on-toggle";
 export async function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const { id } = await params;
-  const [item, readOnly] = await Promise.all([
-    currentUserId().then((userId) => getClosetItem(createServerClient(), userId, id)),
+  const userId = await currentUserId();
+  const [item, readOnly, unit] = await Promise.all([
+    getClosetItem(createServerClient(), userId, id),
     isReadOnly(),
+    tempUnitFor(userId),
   ]);
   if (!item) notFound();
 
@@ -33,7 +36,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   const findsBuyers = status === "passing_on" && item.category !== "accessory";
 
   return (
-    <ItemEditor itemId={item.id} details={details}>
+    <ItemEditor itemId={item.id} details={details} tempUnit={unit}>
       <div className="grid gap-x-4 gap-y-10 md:grid-cols-12">
         <div className="flex flex-col gap-4 md:col-span-6 lg:col-span-6">
           <ItemImage
@@ -82,7 +85,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
             )}
 
             <dl className="border-t border-line text-sm">
-              {tagGroups(item.tags).map((group) => (
+              {tagGroups(item.tags, unit).map((group) => (
                 <div key={group.label} className="grid grid-cols-[7rem_1fr] gap-3 border-b border-line py-3">
                   <dt className="text-ink-2">{group.label}</dt>
                   <dd className="flex flex-wrap gap-x-1">

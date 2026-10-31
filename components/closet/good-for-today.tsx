@@ -6,6 +6,8 @@ import { goodForToday } from "@/lib/closet/fit-today";
 import { listClosetItems } from "@/lib/closet/items";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { tempUnitFor } from "@/lib/profile/temp-setting";
+import { toUnit } from "@/lib/profile/temp-unit";
 import { shortCity } from "@/lib/weather/location";
 import { ATTRIBUTION } from "@/lib/weather/open-meteo";
 import { todayWeather } from "@/lib/weather/today";
@@ -22,15 +24,20 @@ const TODAY_GRID = "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols
 export async function GoodForToday() {
   await connection();
   const userId = await currentUserId();
-  const [items, weather] = await Promise.all([
+  const [items, weather, unit] = await Promise.all([
     listClosetItems(createServerClient(), userId),
     headers().then((h) => todayWeather(userId, h)),
+    tempUnitFor(userId),
   ]);
   const good = goodForToday(items, weather && { min: weather.lowF, max: weather.highF });
 
   return (
     <Section
-      note={weather ? `${weather.city ? shortCity(weather.city) : "Near you"} · ${weather.lowF}–${weather.highF}°F` : undefined}
+      note={
+        weather
+          ? `${weather.city ? shortCity(weather.city) : "Near you"} · ${toUnit(weather.lowF, unit)}–${toUnit(weather.highF, unit)}°${unit}`
+          : undefined
+      }
     >
       <LocationSync />
       {!weather && (

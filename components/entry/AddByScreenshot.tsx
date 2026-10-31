@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft, SaveItemRequest } from "@/lib/entry/draft";
+import type { TempUnit } from "@/lib/profile/temp-unit";
 import { CleanedNote } from "./CleanedNote";
 import { ItemCard, type EditedItem } from "./ItemCard";
 import { ACCESSORY_NOT_ADDED, CUTTING_OUT, extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
@@ -18,7 +19,8 @@ type Step =
   | { kind: "draft"; draft: ItemDraft; original?: ItemDraft; saving: boolean }
   | { kind: "saved"; title: string };
 
-export function AddByScreenshot() {
+// tempUnit streams in after the page; only the card reads it, long after.
+export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
   const [step, setStep] = useState<Step>({ kind: "idle" });
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
@@ -220,6 +222,7 @@ export function AddByScreenshot() {
           saving={step.saving}
           onSave={(edited) => save(step.draft, edited, step.original)}
           categories={CLOTHING_LABELS}
+          tempUnit={use(tempUnit)}
         />
       )}
     </div>

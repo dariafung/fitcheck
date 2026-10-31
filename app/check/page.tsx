@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BuyCheck } from "@/components/check/BuyCheck";
+import { currentTempUnit } from "@/lib/profile/temp-setting";
 
 export const metadata: Metadata = { title: "Should I buy this? · fitcheck" };
 
@@ -13,7 +14,7 @@ export default function CheckPage() {
         <p className="text-base text-ink-2">Show us the item and we&apos;ll check it against your closet.</p>
       </div>
       <div className="min-w-0 md:col-span-12 md:group-has-[.dropzone]/check:col-span-5 md:group-has-[.dropzone]/check:col-start-1 md:group-has-[.dropzone]/check:row-start-1">
-        <BuyCheck />
+        <BuyCheck tempUnit={currentTempUnit()} />
       </div>
     </div>
   );

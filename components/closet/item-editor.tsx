@@ -9,6 +9,7 @@ import { DEMO_READ_ONLY } from "@/lib/auth/messages";
 import type { ClosetItem } from "@/lib/closet/items";
 import { CATEGORY_LABELS, CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft } from "@/lib/entry/draft";
+import type { TempUnit } from "@/lib/profile/temp-unit";
 
 // What the entry card edits on a saved item.
 export interface EditableDetails {
@@ -41,10 +42,12 @@ function asDraft(details: EditableDetails): ItemDraft {
 export function ItemEditor({
   itemId,
   details,
+  tempUnit,
   children,
 }: {
   itemId: string;
   details: EditableDetails;
+  tempUnit: TempUnit;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -104,6 +107,7 @@ export function ItemEditor({
           draft={asDraft(latest ?? details)}
           withSize
           initialSize={(latest ?? details).size}
+          tempUnit={tempUnit}
           saving={saving}
           onSave={save}
           submitLabel="Save changes"
