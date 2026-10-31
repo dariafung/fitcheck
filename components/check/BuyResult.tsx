@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AI_BUDGET_NOTICE } from "@/lib/ai/notices";
 import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
@@ -226,7 +225,7 @@ export function BuyResult({
                 </ul>
               ))
             )}
-            {styleIt.outOfBudget && <p className="text-sm text-ink-2">{AI_BUDGET_NOTICE}</p>}
+            {styleIt.stopped && <p className="text-sm text-ink-2">{styleIt.stopped}</p>}
           </div>
         )}
 

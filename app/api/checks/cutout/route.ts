@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { decodeDataUrl } from "@/lib/check/board-pieces";
-import { cleanUpPhoto } from "@/lib/entry/cleanup";
+import { cleanUpPhotoWithinLimit } from "@/lib/entry/cleanup";
 
 // A live Muse Image call can take a while; see lib/ai/live/segment-garment.ts.
 export const maxDuration = 300;
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const photo = body.success ? decodeDataUrl(body.data.photo) : null;
   if (!body.success || !photo) return Response.json({ error: "invalid_photo" }, { status: 400 });
 
-  const cleaned = await cleanUpPhoto(photo, body.data);
+  const cleaned = await cleanUpPhotoWithinLimit(photo, body.data);
   if (!cleaned) return Response.json({ error: "not_cleaned" });
   return Response.json({ photo: `data:image/webp;base64,${cleaned.toString("base64")}` });
 }

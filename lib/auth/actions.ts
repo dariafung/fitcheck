@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { createServerClient } from "../db/server";
+import { takeSignup } from "../limits/daily";
+import { signupIpHash } from "../limits/ip";
 import { createAuthClient } from "./client";
 import { DEMO_EMAIL, demoPassword } from "./config";
 import { authErrorFor } from "./errors";
@@ -29,14 +31,22 @@ export async function logIn(_prev: AuthFormState, form: FormData): Promise<AuthF
 }
 
 // No email confirmation: the account works as soon as it exists. If the
-// users row fails here, currentUserId makes it on the next request.
+// users row fails here, currentUserId makes it on the next request. Each IP
+// gets SIGNUPS_PER_IP_PER_DAY a day (on Vercel, where the IP can be
+// trusted); a sign-up that fails gives its count back.
 export async function signUp(_prev: AuthFormState, form: FormData): Promise<AuthFormState> {
   const { email, password } = credentials(form);
   if (!email || !password) return { error: "missing", email };
   if (password.length < MIN_PASSWORD_LENGTH) return { error: "weak_password", email };
+  const ipHash = await signupIpHash();
+  const ticket = ipHash ? await takeSignup(ipHash) : null;
+  if (ipHash && !ticket) return { error: "too_many_signups", email };
   const auth = await createAuthClient();
   const { data, error } = await auth.auth.signUp({ email, password });
-  if (error || !data.session) return { error: authErrorFor(error), email };
+  if (error || !data.session) {
+    await ticket?.giveBack();
+    return { error: authErrorFor(error), email };
+  }
   await ensureUserRow(createServerClient(), data.session.user.id, email).catch((err: unknown) => {
     console.error("users row after sign-up", err);
   });

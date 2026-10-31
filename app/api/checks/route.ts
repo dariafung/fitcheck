@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { aiErrorResponse, judgePairing, judgeRepeat, scorePurchase } from "@/lib/ai";
+import { AiError, aiErrorResponse, judgePairing, judgeRepeat, scorePurchase } from "@/lib/ai";
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { decodeDataUrl } from "@/lib/check/board-pieces";
 import { isIncomplete, runBuyCheck } from "@/lib/check/buy-check";
 import { INCOMPLETE_ERROR, INCOMPLETE_NOTICE } from "@/lib/check/reasons";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { withDaily } from "@/lib/limits/daily";
 
 // Vercel caps request bodies at 4.5 MB.
 const MAX_PHOTO_LENGTH = 4_000_000;
@@ -31,11 +32,19 @@ export async function POST(request: Request) {
   try {
     const { title, tags, photo } = parsed.data;
     const image = photo && photo.length <= MAX_PHOTO_LENGTH ? decodeDataUrl(photo) : null;
-    const check = await runBuyCheck(createServerClient(), await currentUserId(), { title, tags, photo: image }, {
-      judge: judgePairing,
-      score: scorePurchase,
-      repeat: judgeRepeat,
-    });
+    const userId = await currentUserId();
+    // An accessory or a missing user never reaches the model; a model that
+    // failed or never finished scoring is on us. Neither counts.
+    const check = await withDaily(
+      "check",
+      () =>
+        runBuyCheck(createServerClient(), userId, { title, tags, photo: image }, {
+          judge: judgePairing,
+          score: scorePurchase,
+          repeat: judgeRepeat,
+        }),
+      { result: (c) => !c || "unsupported" in c, error: (err) => err instanceof AiError || isIncomplete(err) },
+    );
     if (!check) return Response.json({ error: "User not found" }, { status: 404 });
     return Response.json(check);
   } catch (err) {

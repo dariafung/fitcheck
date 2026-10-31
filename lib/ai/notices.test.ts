@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_READ_ONLY } from "../auth/messages";
-import { AiBudgetError, AiNotConfiguredError, AiOutputError, AiReplayMissError, AiUpstreamError } from "./errors";
-import { AI_BUDGET_NOTICE, aiNotice, isAiFailure } from "./notices";
+import { AiBudgetError, AiDailyLimitError, AiDemoLimitError, AiNotConfiguredError, AiOutputError, AiReplayMissError, AiUpstreamError } from "./errors";
+import { AI_BUDGET_NOTICE, aiNotice, DAILY_LIMIT_NOTICE, DEMO_LIMIT_NOTICE, isAiFailure } from "./notices";
 
 describe("aiNotice", () => {
   it("names the spent budget", () => {
     expect(aiNotice(new AiBudgetError("extractItem").name)).toBe(AI_BUDGET_NOTICE);
+  });
+
+  it("names a used-up daily limit, for an account and for the demo", () => {
+    expect(aiNotice(new AiDailyLimitError("check", 60).name)).toBe(DAILY_LIMIT_NOTICE);
+    expect(aiNotice(new AiDemoLimitError("check", 60).name)).toBe(DEMO_LIMIT_NOTICE);
   });
 
   it("names the read-only demo account", () => {
@@ -33,6 +38,7 @@ describe("isAiFailure", () => {
 
   it("is false for the budget, read-only and other errors", () => {
     expect(isAiFailure("AiBudgetError")).toBe(false);
+    expect(isAiFailure("AiDailyLimitError")).toBe(false);
     expect(isAiFailure("demo_read_only")).toBe(false);
     expect(isAiFailure(undefined)).toBe(false);
   });

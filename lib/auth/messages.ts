@@ -10,6 +10,7 @@ export type AuthError =
   | "weak_password"
   | "bad_email"
   | "demo_unavailable"
+  | "too_many_signups"
   | "failed";
 
 export const AUTH_ERRORS: Record<AuthError, string> = {
@@ -19,6 +20,7 @@ export const AUTH_ERRORS: Record<AuthError, string> = {
   weak_password: "Use at least 6 characters.",
   bad_email: "That email doesn't look right.",
   demo_unavailable: "The demo account isn't set up here.",
+  too_many_signups: "Too many sign-ups from here today. Try again tomorrow.",
   failed: "Something went wrong. Try again.",
 };
 
