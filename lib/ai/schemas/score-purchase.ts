@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { ProfileTopic } from "./build-profile";
-import { FeelingStructured, ItemSummary, ProfileSummary } from "./common";
+import { FeelingStructured, ItemSummary, MediaRef, ProfileSummary } from "./common";
 
-export const PROMPT_VERSION = "score-purchase@5";
+export const PROMPT_VERSION = "score-purchase@6";
 
 // Each fit question is scored 0 to this, higher is better.
 export const FIT_SCORE_MAX = 8;
@@ -17,9 +17,14 @@ export const FeltFeeling = FeelingStructured.pick({
 });
 export type FeltFeeling = z.infer<typeof FeltFeeling>;
 
+// At most this many felt items, the closest ones, go with a photo.
+export const MAX_FELT_PHOTOS = 6;
+
 // The verdicts live in the feeling, unflattened: "no" and "mixed" count too.
+// A photo only when there is one; without it the item is text alone.
 export const FeltItem = ItemSummary.omit({ flattering: true, liked: true }).extend({
   feeling: FeltFeeling,
+  photo: MediaRef.optional(),
 });
 export type FeltItem = z.input<typeof FeltItem>;
 
@@ -37,7 +42,7 @@ export type StyleLine = z.infer<typeof StyleLine>;
 // reason; lib/check adds the scores into the 0-100 match score and computes
 // the gap metrics.
 export const ScorePurchaseInput = z.object({
-  candidate: ItemSummary,
+  candidate: ItemSummary.extend({ photo: MediaRef.optional() }),
   profile: ProfileSummary,
   feltItems: z.array(FeltItem),
   // Body areas of fit aspects the user felt bad about, across all feelings.

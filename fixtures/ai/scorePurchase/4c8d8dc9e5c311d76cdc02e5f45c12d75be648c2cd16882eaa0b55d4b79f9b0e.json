@@ -1,37 +1,37 @@
 {
   "fn": "scorePurchase",
-  "promptVersion": "score-purchase@5",
-  "inputHash": "0f0f012f7335a52d8565d5523f7a2e787f7c2b69b9b9b19429cb919f43e7cce9",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "4c8d8dc9e5c311d76cdc02e5f45c12d75be648c2cd16882eaa0b55d4b79f9b0e",
   "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"navy\",\"colors\":[{\"name\":\"navy\"}],\"fit\":\"relaxed\",\"formality\":3,\"materials\":[\"wool blend\"],\"notes\":\"elastic back waist, full-length\",\"occasions\":[\"school\",\"work\"],\"subcategory\":\"trousers\",\"tempRangeF\"",
   "output": {
     "answers": [
       {
         "id": "cut_flatters",
         "score": 8,
-        "reason": "You loved your navy wide-leg trousers with stretchy waist and long leg line."
+        "reason": "You loved your navy wide-leg trousers with stretchy waist and long leg."
       },
       {
         "id": "spares_trouble_areas",
         "score": 8,
-        "reason": "You found the same navy trousers flattering without clinging at your hips."
+        "reason": "Your similar navy trousers skimmed your hips and the elastic waist never dug in."
       },
       {
         "id": "color_liked",
         "score": 4,
-        "reason": "You never mentioned navy itself, so there's nothing to compare here."
+        "reason": "You haven't shared feelings about navy, so there's nothing to go on."
       },
       {
         "id": "style_liked",
         "score": 8,
-        "reason": "You liked your identical navy trousers for feeling put together at work."
+        "reason": "You love polished staples like your navy trousers and white button-down."
       },
       {
         "id": "feel_liked",
         "score": 6,
-        "reason": "You found the same wool-blend trousers comfortable, unlike the itchy gray sweater."
+        "reason": "Your same wool-blend trousers felt comfortable despite wool sometimes itching your neck."
       }
     ],
-    "summary": "These trousers match your loved comfortable pair and should flatter and suit your work wardrobe."
+    "summary": "These trousers match your loved fit, length and polished style perfectly."
   },
-  "recordedAt": "2026-10-31T02:25:12.786Z"
+  "recordedAt": "2026-10-31T02:39:38.712Z"
 }

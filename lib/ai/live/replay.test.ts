@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   FEELING_CASES,
   PAIRING_CASES,
+  PHOTO_SCORE_CASES,
   PROFILE_CASES,
   REPEAT_CASES,
   SCORE_CASES,
@@ -91,7 +92,7 @@ describe("judgePairing recordings", () => {
 });
 
 describe("scorePurchase recordings", () => {
-  const ALL_SCORE_CASES = [...SCORE_CASES, ...STYLED_SCORE_CASES];
+  const ALL_SCORE_CASES = [...SCORE_CASES, ...STYLED_SCORE_CASES, ...PHOTO_SCORE_CASES];
   const score = (name: string) => {
     const found = ALL_SCORE_CASES.find((c) => c.name === name);
     if (!found) throw new Error(`no case ${name}`);
@@ -139,7 +140,20 @@ describe("scorePurchase recordings", () => {
     expect(scoreOf(trousers, "cut_flatters")).toBeGreaterThanOrEqual(6);
   });
 
-  it.each(STYLED_SCORE_CASES.map((c) => [c.name, c.input] as const))(
+  it("with photos, scores the pink fitted tee above the gray cropped tee, card or not", async () => {
+    const total = (out: Awaited<ReturnType<typeof score>>) => out.answers.reduce((sum, a) => sum + a.score, 0);
+    for (const prefix of ["persona with photos", "persona with photos and a style card"]) {
+      const pink = await score(`${prefix}, pink fitted tech tee`);
+      expect(scoreOf(pink, "color_liked")).toBeGreaterThanOrEqual(6);
+      expect(total(pink)).toBeGreaterThan(total(await score(`${prefix}, gray cropped baby tee`)));
+    }
+  });
+
+  it.each(
+    [...STYLED_SCORE_CASES, ...PHOTO_SCORE_CASES]
+      .filter((c) => c.input.styleProfile)
+      .map((c) => [c.name, c.input] as const),
+  )(
     "%s: doesn't quote the style card",
     async (_, input) => {
       const out = await scorePurchase(input, REPLAY);

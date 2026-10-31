@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "4a87b9f34e698c6ee687f32cd79bc84cd5624b99c369a8a8ee44a001676221d3",
+  "inputPreview": "{\"candidate\":{\"id\":\"5674a27b-87a6-4929-8099-28b5a3b2b9e3\",\"photo\":{\"base64\":\"UklGRlAMAABXRUJQVlA4IEQMAAAQfwCdASqcAQACPm02l0kkLCokIvNo2YANiWlu+/mc7hWd45SxZQ8KvPeqxzd/IL9uowYIUUvcWd8ope4s75RS9xZ3yil7izvlFL3FnfKKXuLO+UUvcWd8ope4s75RS9xZ3yil7izvlFL3FnfKKXuLO+UUvcWd8ope4s75RS9w1kuTVD/x3/BNlikTSiYJt+EphQm",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 8,
+        "reason": "You love the fitted cut of your black Swiftly tee, and this matches it exactly."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 7,
+        "reason": "Your shallow crew avoids your deep-V issue and looks cleaner than boxy shoulders."
+      },
+      {
+        "id": "color_liked",
+        "score": 8,
+        "reason": "You love soft pink in your hoodie and pink shorts with matching tee."
+      },
+      {
+        "id": "style_liked",
+        "score": 6,
+        "reason": "Your sport sweat-wicking pieces are go-tos, matching this tee's casual sport style."
+      },
+      {
+        "id": "feel_liked",
+        "score": 8,
+        "reason": "You love sweat-wicking fabric in your black tee and running shorts."
+      }
+    ],
+    "summary": "This pink sweat-wicking tee duplicates your loved black tee in a flattering pink you enjoy."
+  },
+  "recordedAt": "2026-10-31T02:40:00.543Z"
+}

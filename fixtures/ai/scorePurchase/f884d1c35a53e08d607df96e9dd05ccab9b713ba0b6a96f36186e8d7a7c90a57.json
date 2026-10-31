@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "f884d1c35a53e08d607df96e9dd05ccab9b713ba0b6a96f36186e8d7a7c90a57",
+  "inputPreview": "{\"candidate\":{\"id\":\"dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9\",\"photo\":{\"base64\":\"UklGRogFAABXRUJQVlA4IHwFAADQPQCdASoSAQ4BPm02lEgkJiIhpdXaiMANiWlugb9ntWK3IDtfMa/XPH/43a/gTQGQg351eqFunJxZH9g3M8z7kg3RwRBhHB+/A2MnwieCXeG8XgZoxqgqCng6BlNnuOGfMgoK0XZpgDuy2iYRHx9a5J3eX5OJQlbQ7yIy6Kc++nrQ7bnssac2XgRsNGjJ8ScpjRA",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 8,
+        "reason": "You love slim fitted tees like your white V-neck and black Swiftly Tech."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 7,
+        "reason": "Its shallow crew avoids your deep-V concern and its slim shoulders avoid boxiness."
+      },
+      {
+        "id": "color_liked",
+        "score": 6,
+        "reason": "Its light gray matches your versatile gray hoodie, unlike the beige that washed you out."
+      },
+      {
+        "id": "style_liked",
+        "score": 6,
+        "reason": "Its casual school tee style matches your go-to white tee and class jeans."
+      },
+      {
+        "id": "feel_liked",
+        "score": 2,
+        "reason": "Its plain cotton risks the pilling and sheerness you disliked in your gray and white cotton tops."
+      }
+    ],
+    "summary": "Slim gray school tee fits your flattering cut and color but plain cotton may feel less comfortable."
+  },
+  "recordedAt": "2026-10-31T02:40:41.827Z"
+}

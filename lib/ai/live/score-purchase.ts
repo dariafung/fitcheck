@@ -1,4 +1,6 @@
+import type { ResponseInputContent } from "openai/resources/responses/responses";
 import { z } from "zod";
+import type { MediaRef } from "../schemas/common";
 import {
   FIT_SCORE_MAX,
   type FeltItem,
@@ -101,6 +103,39 @@ function styleSection(lines: readonly StyleLine[]): string[] {
   ];
 }
 
+// Photos go after the text, each with the number it belongs to, and their
+// rules with them, so a request without photos stays as it was.
+export function photoContent(input: Input): ResponseInputContent[] {
+  const photos = [
+    { label: "Candidate", photo: input.candidate.photo },
+    ...input.feltItems.map((item, i) => ({ label: `F${i + 1}`, photo: item.photo })),
+  ].flatMap(({ label, photo }) => {
+    const url = photo && photoUrl(photo);
+    return url ? [{ label, url }] : [];
+  });
+  if (photos.length === 0) return [];
+  return [
+    {
+      type: "input_text",
+      text: [
+        "Photos of some of these items follow, each after its label.",
+        "- Where a photo shows the color shade, cut or length better than the tags, go by the photo; the tags fill in the rest.",
+        "- A photo is not a feeling. When no feeling bears on the candidate for a question, it still gets 4.",
+      ].join("\n"),
+    },
+    ...photos.flatMap(({ label, url }): ResponseInputContent[] => [
+      { type: "input_text", text: `${label}:` },
+      { type: "input_image", image_url: url, detail: "auto" },
+    ]),
+  ];
+}
+
+// Stored images are read and inlined by lib/check before this.
+function photoUrl(ref: MediaRef): string | null {
+  if (ref.kind === "inline") return `data:${ref.mime};base64,${ref.base64}`;
+  return ref.kind === "url" ? ref.url : null;
+}
+
 // Answers come back in question order. Numbers out of range are dropped and
 // only the first answer to a number counts. A question left out gives null,
 // so runAi asks once more.
@@ -125,7 +160,7 @@ export async function liveScorePurchase(input: Input): Promise<z.input<typeof Sc
   const { data } = await respondStructured({
     fn: "scorePurchase",
     instructions: SCORE_PURCHASE_INSTRUCTIONS,
-    content: [{ type: "input_text", text: scorePrompt(input) }],
+    content: [{ type: "input_text", text: scorePrompt(input) }, ...photoContent(input)],
     schemaName: "fit_answers",
     schema: ScoreWire,
     maxOutputTokens: 4000,

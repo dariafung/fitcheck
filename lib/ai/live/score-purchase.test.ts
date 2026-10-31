@@ -1,6 +1,6 @@
 import type { Response } from "openai/resources/responses/responses";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SCORE_CASES, STYLED_SCORE_CASES } from "@/tests/record/cases";
+import { PHOTO_SCORE_CASES, SCORE_CASES, STYLED_SCORE_CASES } from "@/tests/record/cases";
 import { memoryBudgetStore, setBudgetStore } from "../budget";
 import { scorePurchase } from "../index";
 import type { ScorePurchaseInput } from "../schemas/score-purchase";
@@ -84,5 +84,38 @@ describe("scorePurchase request with a style card", () => {
     const lines = section.split("\n").filter((l) => /^[+-] (color|fit|feel|length|style): /.test(l));
     expect(lines).toHaveLength(styleProfile!.length);
     expect(section).not.toMatch(/occasion|[0-9a-f]{8}-[0-9a-f]{4}/);
+  });
+});
+
+describe("scorePurchase request with photos", () => {
+  const input = PHOTO_SCORE_CASES[0].input;
+  const content = async (i: ScorePurchaseInput) =>
+    (await request(i)).input[0].content as { type: string; text?: string; image_url?: string }[];
+
+  it("puts the photos after the text, each after its label", async () => {
+    const [text, rules, ...photos] = await content(input);
+    expect(text.text).toMatch(/^Candidate: /);
+    expect(rules.text).toMatch(/^Photos of some of these items follow/);
+    const labels = photos.filter((c) => c.type === "input_text").map((c) => c.text);
+    expect(labels).toEqual(["Candidate:", "F1:", "F2:", "F3:", "F4:", "F5:", "F6:"]);
+    expect(photos.filter((c) => c.type === "input_image")).toHaveLength(labels.length);
+    expect(photos[1].image_url).toBe(`data:image/webp;base64,${input.candidate.photo?.kind === "inline" && input.candidate.photo.base64}`);
+  });
+
+  it("labels felt photos by their number, and skips stored ones", async () => {
+    const felt = input.feltItems.map((item, i) => {
+      if (i === 2) return { ...item, photo: { kind: "storage" as const, path: "a/b.webp" } };
+      return i === 4 ? item : { ...item, photo: undefined };
+    });
+    const { photo, ...candidate } = input.candidate;
+    expect(photo).toBeDefined();
+    const labels = (await content({ ...input, candidate, feltItems: felt }))
+      .filter((c) => c.type === "input_text")
+      .map((c) => c.text);
+    expect(labels.slice(2)).toEqual(["F5:"]);
+  });
+
+  it("sends the text alone without photos", async () => {
+    expect(await content(SCORE_CASES[0].input)).toHaveLength(1);
   });
 });

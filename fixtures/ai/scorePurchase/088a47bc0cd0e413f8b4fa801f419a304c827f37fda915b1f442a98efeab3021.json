@@ -1,0 +1,37 @@
+{
+  "fn": "scorePurchase",
+  "promptVersion": "score-purchase@6",
+  "inputHash": "088a47bc0cd0e413f8b4fa801f419a304c827f37fda915b1f442a98efeab3021",
+  "inputPreview": "{\"candidate\":{\"id\":\"00000000-0000-4000-8000-000000000000\",\"tags\":{\"category\":\"top\",\"colorFamily\":\"yellow\",\"colors\":[{\"name\":\"mustard\"}],\"fit\":\"slim\",\"formality\":2,\"materials\":[\"polyester\",\"elastane\"],\"notes\":\"cropped above the waist\",\"occasions\":[\"social\"],\"pattern\":\"ribbed\",\"tempRangeF\":{\"max\":85,\"",
+  "output": {
+    "answers": [
+      {
+        "id": "cut_flatters",
+        "score": 3,
+        "reason": "Your white shirt flattered but pulled at shoulders, like this slim boat-neck might."
+      },
+      {
+        "id": "spares_trouble_areas",
+        "score": 2,
+        "reason": "This boat neckline and cropped slim cut spotlight your shoulders and waist like your tight pieces did."
+      },
+      {
+        "id": "color_liked",
+        "score": 4,
+        "reason": "You felt awake in white, but you said nothing about mustard yellow to compare."
+      },
+      {
+        "id": "style_liked",
+        "score": 4,
+        "reason": "You liked your white top for social wear but disliked your jeans at a similar dressiness."
+      },
+      {
+        "id": "feel_liked",
+        "score": 4,
+        "reason": "You loved the comfy cotton shirt, but you said nothing about polyester stretch feel."
+      }
+    ],
+    "summary": "This mustard top risks spotlighting shoulders and waist despite your love of social tops."
+  },
+  "recordedAt": "2026-10-31T02:39:29.434Z"
+}

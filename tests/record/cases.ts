@@ -3,12 +3,14 @@
 // answers for free. Changing an input or a PROMPT_VERSION needs a new recording.
 import type { BuildProfileInput } from "@/lib/ai/schemas/build-profile";
 import type { SummarizeWearInput } from "@/lib/ai/schemas/summarize-wear";
-import type { ItemSummary } from "@/lib/ai/schemas/common";
+import type { FeelingStructured, ItemSummary, MediaRef } from "@/lib/ai/schemas/common";
 import type { JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import type { JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
 import type { ParseFeelingInput } from "@/lib/ai/schemas/parse-feeling";
-import type { FeltFeeling, ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
+import { MAX_FELT_PHOTOS, type FeltFeeling, type ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
+import { readFileSync } from "node:fs";
 import judgeTwenty from "./judge-pairing-20.json";
+import photoCloset from "./score-photo-closet.json";
 
 // The seed persona's three items (seed/items.json).
 export const SHIRT: ItemSummary = {
@@ -315,6 +317,14 @@ const PROFILE_DRESS: ItemSummary = {
   },
 };
 
+// The persona's closet with photos (local seed, frozen 10-30): two of its
+// pieces are the candidates, the other fifteen active ones are felt items.
+// tests/record/score-photo-closet.json holds the tags, feelings and the
+// felt items in lib/check's order; fixtures/images/score/ the photos, as
+// lib/check shrinks them (score-photos.ts).
+type PhotoClosetItem = ItemSummary & { feeling: FeelingStructured };
+const PHOTO_CLOSET = photoCloset.closet as PhotoClosetItem[];
+
 export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
   {
     name: "seven pieces, good and bad on every topic",
@@ -373,6 +383,13 @@ export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
           summary: "Mustard dress washes the face out and clings at the hips.",
         },
       ],
+    },
+  },
+  {
+    name: "the persona's fifteen pieces on 10-30, for the photo cases",
+    input: {
+      items: PHOTO_CLOSET.map(({ id, title, tags }) => ({ id, title, tags })),
+      feelings: PHOTO_CLOSET.map(({ id, feeling }) => ({ ...feeling, itemId: id })),
     },
   },
 ];
@@ -473,4 +490,48 @@ export const WEAR_CASES: { name: string; input: SummarizeWearInput }[] = [
       ],
     },
   },
+];
+
+const photo = (id: string): MediaRef => ({
+  kind: "inline",
+  mime: "image/webp",
+  base64: readFileSync(new URL(`../../fixtures/images/score/${id}.webp`, import.meta.url)).toString("base64"),
+});
+
+// The style card buildProfile wrote for the fifteen pieces
+// (fixtures/ai/buildProfile), occasion left out.
+const PHOTO_STYLE: NonNullable<ScorePurchaseInput["styleProfile"]> = [
+  { topic: "color", kind: "suits", text: "Pink and rich neutrals brighten you best" },
+  { topic: "color", kind: "avoid", text: "Skip beige tones washing you out" },
+  { topic: "fit", kind: "suits", text: "Slim fitted tops and relaxed wide or oversized bottoms suit you" },
+  { topic: "fit", kind: "avoid", text: "Avoid deep V-necks and tight jacket shoulders" },
+  { topic: "feel", kind: "suits", text: "Soft sweat-wicking and fleece fabrics keep you comfortable" },
+  { topic: "feel", kind: "avoid", text: "Skip uncomfortable plain cotton tops" },
+  { topic: "style", kind: "suits", text: "Casual hoodies, sneakers and loafers suit you daily" },
+];
+
+function photoCase(index: number, withCard: boolean): ScorePurchaseInput {
+  const { candidateId, feltIds, troubleAreas, questions } = photoCloset.cases[index];
+  const candidate = (photoCloset.candidates as ItemSummary[]).find((c) => c.id === candidateId)!;
+  const felt = feltIds.map((id) => PHOTO_CLOSET.find((c) => c.id === id)!);
+  return {
+    candidate: { ...candidate, photo: photo(candidate.id) },
+    profile: SEED_PROFILE,
+    feltItems: felt.map(({ feeling, ...item }, i) => {
+      const { flattering, liked, aspects, mood, summary } = feeling;
+      return { ...item, feeling: { flattering, liked, aspects, mood, summary }, ...(i < MAX_FELT_PHOTOS && { photo: photo(item.id) }) };
+    }),
+    troubleAreas,
+    questions,
+    ...(withCard && { styleProfile: PHOTO_STYLE }),
+  };
+}
+
+// With photos, as lib/check sends them: the candidate's and the closest
+// MAX_FELT_PHOTOS felt items'.
+export const PHOTO_SCORE_CASES: { name: string; input: ScorePurchaseInput }[] = [
+  { name: "persona with photos, pink fitted tech tee", input: photoCase(0, false) },
+  { name: "persona with photos, gray cropped baby tee", input: photoCase(1, false) },
+  { name: "persona with photos and a style card, pink fitted tech tee", input: photoCase(0, true) },
+  { name: "persona with photos and a style card, gray cropped baby tee", input: photoCase(1, true) },
 ];

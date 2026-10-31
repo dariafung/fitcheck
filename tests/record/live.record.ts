@@ -23,6 +23,7 @@ import { PROMPT_VERSION as WEAR_VERSION, SummarizeWearInput } from "@/lib/ai/sch
 import {
   FEELING_CASES,
   PAIRING_CASES,
+  PHOTO_SCORE_CASES,
   PROFILE_CASES,
   REPEAT_CASES,
   SCORE_CASES,
@@ -118,7 +119,7 @@ describe("judgeRepeat", () => {
 });
 
 describe("scorePurchase", () => {
-  for (const { name, input } of [...SCORE_CASES, ...STYLED_SCORE_CASES]) {
+  for (const { name, input } of [...SCORE_CASES, ...STYLED_SCORE_CASES, ...PHOTO_SCORE_CASES]) {
     it(name, async () => {
       const hash = inputHash("scorePurchase", SCORE_VERSION, ScorePurchaseInput.parse(input));
       const output = await recorded("scorePurchase", name, hash, () => scorePurchase(input, LIVE));
