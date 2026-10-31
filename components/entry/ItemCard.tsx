@@ -8,6 +8,7 @@ import { COLOR_FAMILIES, COLOR_FAMILY_HEX, type ColorFamily } from "@/lib/color-
 import type { ItemDraft } from "@/lib/entry/draft";
 import { ITEM_SIZE_PLACEHOLDER, MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 import { TEMP_F_MAX, TEMP_F_MIN } from "@/lib/temperature";
+import { BrandInput } from "./BrandInput";
 import { readTempRange } from "./temp-range";
 
 const FITS = ["slim", "regular", "relaxed", "oversized"] as const;
@@ -186,11 +187,11 @@ export function ItemCard({
         </Field>
         <Field label="Brand" unsure={unsure.has("brand")}>
           {(id) => (
-            <input id={id} className={FIELD} value={brand} maxLength={120} onChange={(e) => setBrand(e.target.value)} />
+            <BrandInput id={id} className={FIELD} value={brand} maxLength={120} onChange={setBrand} />
           )}
         </Field>
         {withSize && (
-          <Field label="Size">
+          <Field label="Size" unsure={unsure.has("size")}>
             {(id) => (
               <input
                 id={id}

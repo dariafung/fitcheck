@@ -3,6 +3,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/items/extract/route";
 import type { ExtractItemOutput } from "@/lib/ai";
+import { createServerClient } from "@/lib/db/server";
 import { fakeScreenshot } from "@/lib/entry/fake-screenshot";
 import { createTestUser, removeTestUser, uploadRequest } from "./helpers";
 
@@ -65,5 +66,47 @@ describe("POST /api/items/extract with real-shaped model answers", () => {
     const { body } = await extract();
     expect(body.draft.webSources).toEqual(BASE.sources);
     expect(body.draft.lowConfidence).not.toContain("image");
+  });
+
+  it("starts the card from the size the model read, and keeps it in the raw source", async () => {
+    answer.value = { ...BASE, size: "27 (US 4)" };
+    const { body } = await extract();
+    expect(body.draft.size).toBe("27 (US 4)");
+    expect(body.draft.rawSource).toMatchObject({ aiSize: "27 (US 4)" });
+
+    answer.value = BASE;
+    const none = await extract();
+    expect(none.body.draft.size).toBeUndefined();
+    expect(none.body.draft.rawSource).toMatchObject({ aiSize: null });
+  });
+
+  it("writes the brand the way the built-in list does, and keeps the model's in the raw source", async () => {
+    answer.value = { ...BASE, brand: "zara" };
+    const { body } = await extract();
+    expect(body.draft.brand).toBe("ZARA");
+    expect(body.draft.rawSource).toMatchObject({ aiBrand: "zara" });
+  });
+
+  it("keeps a brand neither the user nor the list knows as read", async () => {
+    answer.value = { ...BASE, brand: " Tiny Studio " };
+    expect((await extract()).body.draft.brand).toBe("Tiny Studio");
+    answer.value = BASE;
+    expect((await extract()).body.draft.brand).toBeUndefined();
+  });
+
+  it("writes the brand the way the user already saved it", async () => {
+    const db = createServerClient();
+    const { data: saved } = await db
+      .from("items")
+      .insert({ user_id: user.id, entry_method: "manual", title: "Align tee", category: "top", brand: "Lululemon" })
+      .select("id")
+      .single()
+      .throwOnError();
+    try {
+      answer.value = { ...BASE, brand: "LULULEMON ATHLETICA" };
+      expect((await extract()).body.draft.brand).toBe("Lululemon");
+    } finally {
+      await db.from("items").delete().eq("id", saved.id).throwOnError();
+    }
   });
 });

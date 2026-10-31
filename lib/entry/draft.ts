@@ -13,6 +13,8 @@ export const ItemDraft = z.object({
   brand: z.string().optional(),
   priceCents: z.int().nonnegative().optional(),
   currency: z.string().max(8).optional(),
+  // The size read off the screenshot, for the card to start from.
+  size: z.string().max(MAX_ITEM_SIZE_LENGTH).optional(),
   tags: ItemTags,
   onModel: z.boolean(),
   // Field names the model is unsure of; "image" when the photo is the whole screenshot.
