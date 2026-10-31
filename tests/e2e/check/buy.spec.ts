@@ -1,11 +1,12 @@
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import { AiUpstreamError } from "../../../lib/ai/errors";
+import { AI_BUDGET_NOTICE } from "../../../lib/ai/notices";
 import { aiErrorResponse } from "../../../lib/ai/http";
 import { MOCK_INCOMPLETE_TITLE } from "../../../lib/ai/mock/score-purchase";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { CANDIDATE_ITEM_ID } from "../../../lib/check/pairings";
-import { ACCESSORY_NOTICE, INCOMPLETE_NOTICE } from "../../../lib/check/reasons";
+import { ACCESSORY_NOTICE, INCOMPLETE_NOTICE, STYLE_FAILED, STYLE_IT, STYLING } from "../../../lib/check/reasons";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
@@ -114,6 +115,71 @@ test("when the boards can't load, the plain rows of photos stay", async ({ page 
   const result = page.getByRole("region", { name: "Result" });
   await expect(result.getByRole("list", { name: "Outfit" }).first()).toBeVisible();
   await expect(result.getByTestId("outfit-board")).toHaveCount(0);
+});
+
+// Checks the mock loafers and waits for the outfit boards.
+async function boards(page: import("@playwright/test").Page) {
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Name").fill("Black loafers");
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("outfit-board").first()).toBeVisible();
+  return result;
+}
+
+test("style it with AI: loading, the AI-generated board, and back to the real photos", async ({ page }) => {
+  let styled = 0;
+  page.on("request", (r) => {
+    if (new URL(r.url()).pathname === "/api/checks/style") styled++;
+  });
+  // Hold the answer until the loading state has been seen.
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.route("**/api/checks/style", async (route) => {
+    await held;
+    await route.continue();
+  });
+  const result = await boards(page);
+  const buttons = result.getByRole("button", { name: STYLE_IT });
+  await buttons.first().click();
+
+  await expect(result.getByText(STYLING)).toBeVisible();
+  // One outfit at a time.
+  for (const other of await buttons.all()) await expect(other).toBeDisabled();
+  release();
+
+  const ai = result.getByTestId("ai-board");
+  await expect(ai).toBeVisible();
+  await expect(ai.getByText("AI-generated", { exact: true })).toBeVisible();
+  await expect(ai.getByRole("img", { name: /^AI-generated look: .*Black loafers/ })).toBeVisible();
+  await expect(result.getByText(STYLING)).toBeHidden();
+
+  await result.getByRole("button", { name: "Show real photos" }).click();
+  await expect(ai).toBeHidden();
+  await expect(result.getByTestId("outfit-board").first().getByRole("img", { name: "Black loafers" })).toBeVisible();
+  await result.getByRole("button", { name: "Show AI look" }).click();
+  await expect(result.getByTestId("ai-board")).toBeVisible();
+  // The picture is kept on the page, not drawn again.
+  expect(styled).toBe(1);
+});
+
+test("style it with AI: a failure keeps the board, the budget running out hides the button", async ({ page }) => {
+  let answer = { error: "failed" };
+  await page.route("**/api/checks/style", (route) => route.fulfill({ json: answer }));
+  const result = await boards(page);
+  const button = result.getByRole("button", { name: STYLE_IT }).first();
+  await button.click();
+  await expect(result.getByText(STYLE_FAILED)).toBeVisible();
+  await expect(result.getByTestId("ai-board")).toHaveCount(0);
+  await expect(result.getByTestId("outfit-board").first()).toBeVisible();
+
+  answer = { error: "budget" };
+  await button.click();
+  await expect(result.getByText(AI_BUDGET_NOTICE)).toBeVisible();
+  await expect(result.getByRole("button", { name: STYLE_IT })).toHaveCount(0);
+  await expect(result.getByText(STYLE_FAILED)).toBeHidden();
 });
 
 test("when the AI doesn't finish, try again sends the same item", async ({ page }) => {

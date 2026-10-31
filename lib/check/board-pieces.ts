@@ -40,7 +40,7 @@ export function candidateCutout(photo: string, onModel: boolean): Promise<string
   return cutOutOrNull(decodeDataUrl(photo), onModel);
 }
 
-async function readPhoto(db: Db, path: string): Promise<Buffer | null> {
+export async function readPhoto(db: Db, path: string): Promise<Buffer | null> {
   try {
     if (isExternalUrl(path)) {
       const res = await fetch(path, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });

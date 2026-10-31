@@ -20,7 +20,7 @@ export function OutfitBoard({ pieces }: { pieces: BoardPiece[] }) {
     <ul
       aria-label="Outfit"
       data-testid="outfit-board"
-      className="relative aspect-[4/5] w-56 shrink-0 snap-start border border-line bg-paper md:w-auto"
+      className="relative aspect-[4/5] w-full border border-line bg-paper"
     >
       {pieces.map((piece, i) => {
         const box = boxes[i];
