@@ -13,7 +13,7 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
 });
 const PASSWORD = "e2e-password";
-const SEED_ITEM = { id: "852c8e3d-abf7-4955-ab65-9d83194a02ae", title: "White cotton button-down" };
+const SEED_ITEM = { id: "2262ce87-2107-4b70-8e85-33f8ecb2b8bb", title: "Faux Suede Belted Jacket" };
 const created: string[] = [];
 
 test.afterAll(async () => {
@@ -73,6 +73,8 @@ test("a new account can add its first item", async ({ page }) => {
 
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: "First tee" })).toBeVisible();
+  await page.goto("/closet?tab=passing-on");
+  await expect(page.getByText("Nothing to pass on.")).toBeVisible();
 });
 
 test("log in with the account you made, then log out", async ({ page }) => {
@@ -90,6 +92,19 @@ test("log in with the account you made, then log out", async ({ page }) => {
   await expect(page).toHaveURL("/");
 });
 
+test("on a phone, Log out moves from the top bar to Profile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signUp(page);
+  const nav = page.getByRole("navigation");
+  await expect(nav.getByRole("link", { name: "Buy?", exact: true })).toBeVisible();
+  await expect(nav.getByRole("button", { name: "Log out" })).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+
+  await nav.getByRole("link", { name: "Profile", exact: true }).click();
+  await page.getByRole("main").getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL("/login");
+});
+
 test("Try the demo account opens the persona's closet", async ({ page }) => {
   await tryDemo(page);
   await page.goto("/closet");
@@ -105,6 +120,7 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /save/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /delete/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /edit|pass it on/i })).toHaveCount(0);
 
   await page.goto("/closet/add");
   await expect(page.getByText(DEMO_READ_ONLY)).toBeVisible();
@@ -113,6 +129,9 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await page.goto("/profile");
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);
+  // Sizes show; the demo account is never anyone's buyer, so no Resale.
+  await expect(page.getByLabel("Tops & dresses")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resale" })).toHaveCount(0);
 
   // The server says no even when the page is skipped. The body is invalid on
   // purpose: if the block ever goes missing this fails with 400 and writes nothing.

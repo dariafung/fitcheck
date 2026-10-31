@@ -15,6 +15,11 @@ beforeAll(async () => {
 });
 afterAll(() => removeTestUser(user.id));
 
+async function download(path: string): Promise<Buffer> {
+  const { data } = await createServerClient().storage.from(ITEM_IMAGES_BUCKET).download(path);
+  return Buffer.from(await data!.arrayBuffer());
+}
+
 async function extract(file?: Blob) {
   const res = await POST(uploadRequest(file));
   return { status: res.status, body: await res.json() };
@@ -25,21 +30,17 @@ describe("POST /api/items/extract", () => {
     const { status, body } = await extract(new Blob([new Uint8Array(await fakeScreenshot())], { type: "image/png" }));
     expect(status).toBe(200);
     const draft = body.draft as ItemDraft;
-    expect(draft).toMatchObject({ title: "Mock item", tags: { category: "top", colorFamily: "black", tempRangeF: { min: 50, max: 85 } } });
+    expect(draft).toMatchObject({ title: "Mock item", brand: "lululemon", size: "S", tags: { category: "top", colorFamily: "black", tempRangeF: { min: 50, max: 85 } } });
     expect(draft.lowConfidence).not.toContain("image");
     expect(draft.imagePaths).toEqual([expect.stringMatching(new RegExp(`^${user.id}/[0-9a-f-]{36}\\.webp$`))]);
     expect(draft.imageUrls).toHaveLength(1);
     expect(draft.rawSource).toMatchObject({ cropped: true, screenshot: { width: 1170, height: 2000 } });
 
-    const { data: blob } = await createServerClient()
-      .storage.from(ITEM_IMAGES_BUCKET)
-      .download(draft.imagePaths[0]);
-    const stored = Buffer.from(await blob!.arrayBuffer());
-    expect(await sharp(stored).metadata()).toMatchObject({
-      format: "webp",
-      width: PHOTO.width,
-      height: PHOTO.height,
-    });
+    // A photo that is colour edge to edge can't be put on white for free:
+    // it is kept as cropped for the model to cut out.
+    expect(draft.cutOut).toBe(true);
+    const stored = await download(draft.imagePaths[0]);
+    expect(await sharp(stored).metadata()).toMatchObject({ format: "webp", width: PHOTO.width, height: PHOTO.height });
     const { dominant } = await sharp(stored).stats();
     expect(dominant.r).toBeGreaterThan(150);
   });

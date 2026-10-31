@@ -8,8 +8,10 @@ export const PRICE_PER_M_TOKENS = { input: 1.25, cachedInput: 0.15, output: 4.25
 export const PRICE_PER_WEB_SEARCH = 0.0025;
 // Muse Voice Transcribe, billed per whole second of audio (same page).
 export const PRICE_PER_AUDIO_HOUR = 0.18;
+// Muse Image, a flat price per returned image (same page).
+export const PRICE_PER_IMAGE = 0.01;
 
-export const DEFAULT_DAILY_BUDGET_USD = 4;
+export const DEFAULT_DAILY_BUDGET_USD = 7;
 
 // Worst-case cost of one live attempt: a generous input estimate plus the
 // function's max_output_tokens (reasoning included; even "low" effort used
@@ -23,9 +25,12 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   // Three minutes of audio, the longest recording, is $0.009.
   transcribe: 0.01,
   scorePurchase: 0.05,
-  renderOutfit: 0.05,
-  buildProfile: 0.05,
-  segmentGarment: 0.05,
+  // One Muse Image picture.
+  renderOutfit: PRICE_PER_IMAGE,
+  buildProfile: 0.03,
+  // One Muse Image picture.
+  segmentGarment: PRICE_PER_IMAGE,
+  summarizeWear: 0.02,
 };
 
 export interface TokenUsage {

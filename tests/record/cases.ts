@@ -1,12 +1,16 @@
 // Inputs for the recorded live calls. The recorder (live.record.ts) sends
 // them to the real model once; lib/ai/live/replay.test.ts replays the saved
 // answers for free. Changing an input or a PROMPT_VERSION needs a new recording.
-import type { ItemSummary } from "@/lib/ai/schemas/common";
+import type { BuildProfileInput } from "@/lib/ai/schemas/build-profile";
+import type { SummarizeWearInput } from "@/lib/ai/schemas/summarize-wear";
+import type { FeelingStructured, ItemSummary, MediaRef } from "@/lib/ai/schemas/common";
 import type { JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import type { JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
 import type { ParseFeelingInput } from "@/lib/ai/schemas/parse-feeling";
-import type { FeltFeeling, ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
+import { MAX_FELT_PHOTOS, type FeltFeeling, type ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
+import { readFileSync } from "node:fs";
 import judgeTwenty from "./judge-pairing-20.json";
+import photoCloset from "./score-photo-closet.json";
 
 // The seed persona's three items (seed/items.json).
 export const SHIRT: ItemSummary = {
@@ -254,4 +258,280 @@ export const REPEAT_CASES: { name: string; input: JudgeRepeatInput }[] = [
   { name: "sample closet, white oxford shirt", input: { candidate: OXFORD_SHIRT, closet: SAMPLE_ITEMS } },
   { name: "sample closet, navy wide-leg trousers", input: { candidate: TROUSERS, closet: SAMPLE_ITEMS } },
   { name: "sample closet, mustard cropped top", input: { candidate: CROPPED_TOP, closet: SAMPLE_ITEMS } },
+];
+
+// A seven-piece closet whose feelings cover color, fit, fabric and length,
+// good and bad, so the style card has something for every topic.
+const PROFILE_TROUSERS: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c01",
+  title: "Navy wide-leg trousers",
+  tags: {
+    category: "bottom",
+    subcategory: "trousers",
+    colors: [{ name: "navy" }],
+    colorFamily: "navy",
+    materials: ["wool blend"],
+    fit: "relaxed",
+    formality: 3,
+    occasions: ["school", "work"],
+    notes: "elastic back waist, full-length",
+  },
+};
+const PROFILE_TEE: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c02",
+  title: "Black cropped boxy tee",
+  tags: {
+    category: "top",
+    colors: [{ name: "black" }],
+    colorFamily: "black",
+    materials: ["cotton"],
+    fit: "oversized",
+    formality: 1,
+    occasions: ["home", "sport"],
+  },
+};
+const PROFILE_SWEATER: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c03",
+  title: "Gray merino crewneck",
+  tags: {
+    category: "top",
+    colors: [{ name: "heather gray" }],
+    colorFamily: "gray",
+    materials: ["merino wool"],
+    fit: "regular",
+    formality: 3,
+    occasions: ["school", "work"],
+  },
+};
+const PROFILE_DRESS: ItemSummary = {
+  id: "7a1e0c52-3b4d-4f6a-9c8e-1d2f3a4b5c04",
+  title: "Mustard ribbed midi dress",
+  tags: {
+    category: "one_piece",
+    colors: [{ name: "mustard" }],
+    colorFamily: "yellow",
+    materials: ["viscose"],
+    fit: "slim",
+    formality: 3,
+    occasions: ["social"],
+  },
+};
+
+// The persona's closet with photos (local seed, frozen 10-30): two of its
+// pieces are the candidates, the other fifteen active ones are felt items.
+// tests/record/score-photo-closet.json holds the tags, feelings and the
+// felt items in lib/check's order; fixtures/images/score/ the photos, as
+// lib/check shrinks them (score-photos.ts).
+type PhotoClosetItem = ItemSummary & { feeling: FeelingStructured };
+const PHOTO_CLOSET = photoCloset.closet as PhotoClosetItem[];
+
+export const PROFILE_CASES: { name: string; input: BuildProfileInput }[] = [
+  {
+    name: "seven pieces, good and bad on every topic",
+    input: {
+      items: [SHIRT, JEANS, SNEAKERS, PROFILE_TROUSERS, PROFILE_TEE, PROFILE_SWEATER, PROFILE_DRESS],
+      feelings: [
+        { ...SHIRT_FEELING, itemId: SHIRT.id, occasions: ["school"] },
+        { ...JEANS_FEELING, itemId: JEANS.id, occasions: [] },
+        { ...SNEAKERS_FEELING, itemId: SNEAKERS.id, occasions: ["social", "sport"] },
+        {
+          itemId: PROFILE_TROUSERS.id,
+          flattering: "yes",
+          liked: "yes",
+          aspects: [
+            { aspect: "fit", sentiment: "positive", area: "waist", said: "the elastic back never digs in", means: "stretchy waistbands work" },
+            { aspect: "length", sentiment: "positive", said: "full length makes my legs look long", means: "full-length hems lengthen legs" },
+          ],
+          occasions: ["school"],
+          mood: ["put together"],
+          summary: "Comfortable trousers that never dig in and lengthen the legs.",
+        },
+        {
+          itemId: PROFILE_TEE.id,
+          flattering: "mixed",
+          liked: "yes",
+          aspects: [
+            { aspect: "feel", sentiment: "positive", said: "soft and easy", means: "soft cotton is comfortable" },
+            { aspect: "length", sentiment: "negative", said: "too short when I lift my arms", means: "cropped tops ride up" },
+          ],
+          occasions: ["home"],
+          mood: ["relaxed"],
+          summary: "Soft tee that rides up when arms are raised.",
+        },
+        {
+          itemId: PROFILE_SWEATER.id,
+          flattering: "yes",
+          liked: "mixed",
+          aspects: [
+            { aspect: "color", sentiment: "positive", said: "gray goes with everything", means: "soft neutrals are easy to wear" },
+            { aspect: "feel", sentiment: "negative", said: "itchy at the neck", means: "scratchy wool bothers the skin" },
+          ],
+          occasions: ["school"],
+          mood: [],
+          summary: "Easy gray sweater that itches at the neck.",
+        },
+        {
+          itemId: PROFILE_DRESS.id,
+          flattering: "no",
+          liked: "no",
+          aspects: [
+            { aspect: "color", sentiment: "negative", said: "mustard makes me look sick", means: "mustard washes the face out" },
+            { aspect: "fit", sentiment: "negative", area: "hips", said: "clings to my hips", means: "clingy fits over the hips don't work" },
+          ],
+          occasions: ["social"],
+          mood: ["self-conscious"],
+          summary: "Mustard dress washes the face out and clings at the hips.",
+        },
+      ],
+    },
+  },
+  {
+    name: "the persona's fifteen pieces on 10-30, for the photo cases",
+    input: {
+      items: PHOTO_CLOSET.map(({ id, title, tags }) => ({ id, title, tags })),
+      feelings: PHOTO_CLOSET.map(({ id, feeling }) => ({ ...feeling, itemId: id })),
+    },
+  },
+];
+
+// The same two candidates scored against the seven-piece closet with the
+// style card recorded for it (fixtures/ai/buildProfile, occasion left out),
+// so the card and the felt items come from the same feelings, as in the app.
+// Without a card they're only run by hand, to compare.
+const SEVEN_FEELINGS = PROFILE_CASES[0].input.feelings;
+const feltIn = (item: ItemSummary) => {
+  const found = SEVEN_FEELINGS.find((f) => f.itemId === item.id);
+  if (!found) throw new Error(`no feeling for ${item.id}`);
+  const { flattering, liked, aspects, mood, summary } = found;
+  return { ...item, feeling: { flattering, liked, aspects, mood, summary } };
+};
+const SEVEN_STYLE: NonNullable<ScorePurchaseInput["styleProfile"]> = [
+  { topic: "color", kind: "suits", text: "Crisp white and soft neutrals brighten you" },
+  { topic: "color", kind: "avoid", text: "Mustard yellow washes you out" },
+  { topic: "fit", kind: "suits", text: "Relaxed cuts with roomy stretchy waistbands suit you" },
+  { topic: "fit", kind: "avoid", text: "Clingy slim fits and tight waistbands restrict you" },
+  { topic: "feel", kind: "suits", text: "Soft cotton keeps you comfortable" },
+  { topic: "feel", kind: "avoid", text: "Scratchy wool feels uncomfortable on you" },
+  { topic: "length", kind: "suits", text: "Full-length hems create a longer leg line for you" },
+  { topic: "length", kind: "avoid", text: "Cropped lengths ride up on you" },
+  { topic: "style", kind: "suits", text: "Polished staples like trousers and button-downs suit you" },
+];
+const SEVEN_TROUBLE = ["hips", "shoulders", "waist"];
+
+export const STYLED_SCORE_CASES: { name: string; input: ScorePurchaseInput }[] = [
+  {
+    name: "seven pieces with a style card, high-waisted wide-leg trousers",
+    input: {
+      candidate: TROUSERS,
+      profile: SEED_PROFILE,
+      feltItems: [PROFILE_TROUSERS, JEANS, PROFILE_TEE, PROFILE_SWEATER, PROFILE_DRESS, SHIRT, SNEAKERS].map(feltIn),
+      troubleAreas: SEVEN_TROUBLE,
+      questions: FIT_QUESTIONS_1026,
+      styleProfile: SEVEN_STYLE,
+    },
+  },
+  {
+    name: "seven pieces with a style card, slim cropped boat-neck top",
+    input: {
+      candidate: CROPPED_TOP,
+      profile: SEED_PROFILE,
+      feltItems: [PROFILE_TEE, PROFILE_SWEATER, SHIRT, PROFILE_TROUSERS, PROFILE_DRESS, JEANS, SNEAKERS].map(feltIn),
+      troubleAreas: SEVEN_TROUBLE,
+      questions: FIT_QUESTIONS_1026,
+      styleProfile: SEVEN_STYLE,
+    },
+  },
+];
+
+// 30 days of outfits over the seven-piece closet: a praised dress worn once,
+// knocked jeans worn 11 times, a sweater never worn, and sport always in the
+// same outfit though three are wanted.
+const pick = ({ flattering, liked, aspects }: FeltFeeling) => ({ flattering, liked, aspects });
+const worn = (item: ItemSummary, wornCount: number, lastWornDaysAgo: number | null, feeling: FeltFeeling | null = null) => ({
+  ...item,
+  wornCount,
+  lastWornDaysAgo,
+  addedDaysAgo: null,
+  feeling: feeling && pick(feeling),
+});
+
+export const WEAR_CASES: { name: string; input: SummarizeWearInput }[] = [
+  {
+    name: "thirty days, say vs wear and a short occasion",
+    input: {
+      windowDays: 30,
+      loggedDays: 26,
+      outfitCount: 31,
+      items: [
+        worn(SHIRT, 3, 9, SHIRT_FEELING),
+        worn(JEANS, 11, 0, JEANS_FEELING),
+        worn(SNEAKERS, 14, 1, SNEAKERS_FEELING),
+        worn(PROFILE_TROUSERS, 9, 2, {
+          flattering: "yes",
+          liked: "yes",
+          aspects: [{ aspect: "fit", sentiment: "positive", area: "waist", said: "the elastic back never digs in", means: "stretchy waistbands work" }],
+          mood: [],
+          summary: "",
+        }),
+        worn(PROFILE_TEE, 6, 3),
+        worn(PROFILE_SWEATER, 0, null),
+        worn(PROFILE_DRESS, 1, 24, {
+          flattering: "yes",
+          liked: "yes",
+          aspects: [{ aspect: "color", sentiment: "positive", said: "the mustard makes me glow", means: "warm yellows suit you" }],
+          mood: ["confident"],
+          summary: "",
+        }),
+      ],
+      occasions: [
+        { occasion: "school", wanted: 3, outfitsLogged: 18, distinctOutfits: 6 },
+        { occasion: "social", wanted: 2, outfitsLogged: 2, distinctOutfits: 2 },
+        { occasion: "sport", wanted: 3, outfitsLogged: 5, distinctOutfits: 1 },
+      ],
+    },
+  },
+];
+
+const photo = (id: string): MediaRef => ({
+  kind: "inline",
+  mime: "image/webp",
+  base64: readFileSync(new URL(`../../fixtures/images/score/${id}.webp`, import.meta.url)).toString("base64"),
+});
+
+// The style card buildProfile wrote for the fifteen pieces
+// (fixtures/ai/buildProfile), occasion left out.
+const PHOTO_STYLE: NonNullable<ScorePurchaseInput["styleProfile"]> = [
+  { topic: "color", kind: "suits", text: "Pink and rich neutrals brighten you best" },
+  { topic: "color", kind: "avoid", text: "Skip beige tones washing you out" },
+  { topic: "fit", kind: "suits", text: "Slim fitted tops and relaxed wide or oversized bottoms suit you" },
+  { topic: "fit", kind: "avoid", text: "Avoid deep V-necks and tight jacket shoulders" },
+  { topic: "feel", kind: "suits", text: "Soft sweat-wicking and fleece fabrics keep you comfortable" },
+  { topic: "feel", kind: "avoid", text: "Skip uncomfortable plain cotton tops" },
+  { topic: "style", kind: "suits", text: "Casual hoodies, sneakers and loafers suit you daily" },
+];
+
+function photoCase(index: number, withCard: boolean): ScorePurchaseInput {
+  const { candidateId, feltIds, troubleAreas, questions } = photoCloset.cases[index];
+  const candidate = (photoCloset.candidates as ItemSummary[]).find((c) => c.id === candidateId)!;
+  const felt = feltIds.map((id) => PHOTO_CLOSET.find((c) => c.id === id)!);
+  return {
+    candidate: { ...candidate, photo: photo(candidate.id) },
+    profile: SEED_PROFILE,
+    feltItems: felt.map(({ feeling, ...item }, i) => {
+      const { flattering, liked, aspects, mood, summary } = feeling;
+      return { ...item, feeling: { flattering, liked, aspects, mood, summary }, ...(i < MAX_FELT_PHOTOS && { photo: photo(item.id) }) };
+    }),
+    troubleAreas,
+    questions,
+    ...(withCard && { styleProfile: PHOTO_STYLE }),
+  };
+}
+
+// With photos, as lib/check sends them: the candidate's and the closest
+// MAX_FELT_PHOTOS felt items'.
+export const PHOTO_SCORE_CASES: { name: string; input: ScorePurchaseInput }[] = [
+  { name: "persona with photos, pink fitted tech tee", input: photoCase(0, false) },
+  { name: "persona with photos, gray cropped baby tee", input: photoCase(1, false) },
+  { name: "persona with photos and a style card, pink fitted tech tee", input: photoCase(0, true) },
+  { name: "persona with photos and a style card, gray cropped baby tee", input: photoCase(1, true) },
 ];

@@ -1,11 +1,12 @@
 import { z } from "zod";
 import type { ItemSummary, ItemTags } from "@/lib/ai/schemas/common";
-import type { Json } from "@/lib/db/database.types";
 import type { Db } from "@/lib/db/server";
 import { latestFeeling } from "./feelings";
 import type { TempRangeF } from "@/lib/temperature";
 import { itemTempRange } from "./fit-today";
 import { ITEM_IMAGES_BUCKET, imageUrls, isExternalUrl } from "./images";
+import type { ItemPatch } from "./item-patch";
+import { itemUpdate, needsSize } from "./item-update";
 import { swatchHex } from "./swatch";
 import { itemTags } from "./tags";
 
@@ -27,6 +28,10 @@ export interface ClosetItem {
   retailer: string | null;
   sourceUrl: string | null;
   category: string;
+  // "active" or "passing_on".
+  status: string;
+  // As the owner typed it; needed while passing_on.
+  size: string | null;
   tags: ItemTags;
   tempRangeF: TempRangeF | null;
   swatch: string;
@@ -93,7 +98,7 @@ export async function getClosetItem(
   if (!isItemId(id)) return null;
   const { data } = await db
     .from("items")
-    .select("id, title, brand, retailer, source_url, category, image_paths, ai_tags, user_tags")
+    .select("id, title, brand, retailer, source_url, category, status, size, image_paths, ai_tags, user_tags")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle()
@@ -111,6 +116,8 @@ export async function getClosetItem(
     retailer: data.retailer,
     sourceUrl: data.source_url,
     category: data.category,
+    status: data.status,
+    size: data.size,
     tags: itemTags(data),
     tempRangeF: itemTempRange(data),
     swatch: swatchHex(data),
@@ -119,33 +126,32 @@ export async function getClosetItem(
   };
 }
 
-// A range the user set by hand goes into user_tags, next to any other
-// corrections already there; AI tags are left as they are.
-export async function updateItemTempRange(
+// Applies a PATCH to one of the user's items: new details (name, brand, tags
+// as user corrections), a new status and/or a new size. "not_found" when it
+// is not theirs; "size_required" when it would be passing on without a size.
+// Changing tags bumps updated_at, which marks its cached pairings stale.
+export async function updateClosetItem(
   db: Db,
   userId: string,
   id: string,
-  tempRangeF: TempRangeF,
-): Promise<TempRangeF | null> {
-  if (!isItemId(id)) return null;
+  patch: ItemPatch,
+): Promise<"updated" | "not_found" | "size_required"> {
+  if (!isItemId(id)) return "not_found";
   const { data } = await db
     .from("items")
-    .select("user_tags")
+    .select("title, brand, category, status, size, ai_tags, user_tags")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle()
     .throwOnError();
-  if (!data) return null;
+  if (!data) return "not_found";
+  if (needsSize(data, patch)) return "size_required";
 
-  const userTags = isRecord(data.user_tags) ? data.user_tags : {};
-  const { data: updated } = await db
-    .from("items")
-    .update({ user_tags: { ...userTags, tempRangeF } })
-    .eq("id", id)
-    .select("ai_tags, user_tags")
-    .single()
-    .throwOnError();
-  return itemTempRange(updated);
+  const update = itemUpdate(data, patch);
+  if (update) {
+    await db.from("items").update(update).eq("id", id).eq("user_id", userId).throwOnError();
+  }
+  return "updated";
 }
 
 // Deletes one of the user's items; false when it is not theirs. Its feeling
@@ -170,8 +176,4 @@ export async function deleteClosetItem(db: Db, userId: string, id: string): Prom
     if (error) console.error(`Could not delete images of item ${id}:`, error);
   }
   return true;
-}
-
-function isRecord(value: unknown): value is { [key: string]: Json | undefined } {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

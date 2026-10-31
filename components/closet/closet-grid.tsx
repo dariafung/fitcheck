@@ -1,92 +1,110 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 import { listClosetItems, type ClosetCard } from "@/lib/closet/items";
-import { CLOSET_TABS, inTab, type ClosetTab } from "@/lib/closet/tabs";
+import { CLOSET_TABS, closetHref, inCategory, inTab, type ClosetView } from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
+import { isReadOnly } from "@/lib/auth/session";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { ClosetFilters, FILTER } from "./closet-filters";
 import { ItemImage } from "./item-image";
 
-const GRID = "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3";
+// The shelf: 4:5 tiles. Four across on a desktop, 16px apart, 48px between
+// rows. On a phone two across, 4px apart, pulled out to 8px from the screen
+// edge so each tile is about half the screen, as on The Row, H&M, Everlane.
+export const SHELF =
+  "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4 lg:grid-cols-4 lg:gap-y-12";
 
-export async function ClosetGrid({ tab: tabParam }: { tab: Promise<ClosetTab> }) {
+export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView> }) {
   await connection();
-  const [items, tab] = await Promise.all([
+  const [items, view, readOnly] = await Promise.all([
     currentUserId().then((userId) => listClosetItems(createServerClient(), userId)),
-    tabParam,
+    viewParam,
+    isReadOnly(),
   ]);
 
   if (items.length === 0) return <EmptyCloset />;
 
-  const shown = inTab(items, tab);
+  const tabItems = inTab(items, view.tab);
+  const shown = inCategory(tabItems, view.cat);
   return (
-    <div className="flex flex-col gap-6">
-      <ClosetTabs
-        active={tab}
-        counts={{ all: inTab(items, "all").length, "passing-on": inTab(items, "passing-on").length }}
-      />
+    <div className="flex flex-col gap-10">
+      <ClosetFilters items={items} view={view} />
       {shown.length > 0 ? (
-        <ItemList items={shown} />
-      ) : tab === "passing-on" ? (
+        <ItemList items={shown} addSlot={view.tab === "wearing" && !readOnly} />
+      ) : tabItems.length > 0 ? (
+        <Empty title="Nothing in this category." text="Pick another one, or see everything.">
+          <Link href={closetHref({ ...view, cat: null })} scroll={false} className="btn-secondary mt-4">
+            Show all
+          </Link>
+        </Empty>
+      ) : view.tab === "passing-on" ? (
         <Empty title="Nothing to pass on." text="Clothes you plan to sell or give away show up here." />
       ) : (
-        <Empty title="Nothing you're wearing right now." text="Add something new to fill it back up." />
+        <Empty title="Nothing left to wear." text="Everything is in Passing on. Add something new to fill your closet back up." />
       )}
     </div>
   );
 }
 
-const TAB = "-mb-px border-b-2 px-3 py-2 text-sm font-medium";
-
-function ClosetTabs({ active, counts }: { active: ClosetTab; counts: Record<ClosetTab, number> }) {
+// An empty slot on the shelf: a tile outlined in a dashed line, the words
+// beside it.
+function EmptySlot({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-2 border-b border-black/10 dark:border-white/15">
-      {CLOSET_TABS.map((tab) => (
-        <Link
-          key={tab.id}
-          href={tab.href}
-          scroll={false}
-          aria-current={tab.id === active ? "page" : undefined}
-          className={`${TAB} ${
-            tab.id === active
-              ? "border-foreground"
-              : "border-transparent text-foreground/60 hover:text-foreground"
-          }`}
-        >
-          {tab.label} <span className="font-normal text-foreground/50">{counts[tab.id]}</span>
-        </Link>
-      ))}
+    <div className="flex items-end gap-6 md:gap-10">
+      <div
+        aria-hidden
+        className="aspect-[4/5] w-28 shrink-0 bg-tile outline-1 -outline-offset-[10px] outline-ink/30 outline-dashed md:w-56"
+      />
+      <div className="flex max-w-sm flex-col items-start gap-2 pb-1">{children}</div>
     </div>
   );
 }
 
-function Empty({ title, text }: { title: string; text: string }) {
+function Empty({ title, text, children }: { title: string; text: string; children?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
-      <p className="font-medium">{title}</p>
-      <p className="text-sm text-foreground/60">{text}</p>
-    </div>
+    <EmptySlot>
+      <p className="text-lg font-medium">{title}</p>
+      <p className="text-sm text-ink-2">{text}</p>
+      {children}
+    </EmptySlot>
   );
 }
 
 export function EmptyCloset() {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 px-6 py-12 text-center dark:border-white/20">
-      <p className="font-medium">Your closet is empty.</p>
-      <p className="text-sm text-foreground/60">Add a few things you own to get started.</p>
-      <Link
-        href="/closet/add"
-        className="mt-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
-      >
+    <EmptySlot>
+      <p className="text-lg font-medium">Your closet is empty.</p>
+      <p className="text-sm text-ink-2">Add a few things you own to get started.</p>
+      <Link href="/closet/add" className="btn-primary mt-4">
         Add your first piece
       </Link>
-    </div>
+    </EmptySlot>
   );
 }
 
-export function ItemList({ items }: { items: ClosetCard[] }) {
+// Shown only where the last row has a gap at that width (2, 3 or 4 across),
+// so a short row reads as full and the gap becomes the way to add more.
+function addSlotVisibility(count: number): string {
+  return [
+    count % 2 === 0 ? "hidden" : "block",
+    count % 3 === 0 ? "md:hidden" : "md:block",
+    count % 4 === 0 ? "lg:hidden" : "lg:block",
+  ].join(" ");
+}
+
+export function ItemList({
+  items,
+  grid = SHELF,
+  addSlot = false,
+}: {
+  items: ClosetCard[];
+  grid?: string;
+  addSlot?: boolean;
+}) {
   return (
-    <ul className={GRID}>
+    <ul className={grid}>
       {items.map((item, i) => (
         <li key={item.id}>
           <Link href={`/closet/${item.id}`} className="group block">
@@ -95,41 +113,59 @@ export function ItemList({ items }: { items: ClosetCard[] }) {
               alt={item.title}
               category={item.category}
               swatch={item.swatch}
-              sizes="(min-width: 640px) 240px, 50vw"
+              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
               priority={i < 4}
             />
-            <p className="mt-2 line-clamp-2 text-sm font-medium leading-snug group-hover:underline">
-              {item.title}
-            </p>
-            <p className="text-xs text-foreground/60">{categoryLabel(item.category)}</p>
+            <div className="px-1 md:px-0">
+              <p className="mt-2 line-clamp-2 text-sm leading-snug decoration-1 underline-offset-[3px] group-hover:underline">
+                {item.title}
+              </p>
+              <p className="text-sm text-ink-2">{categoryLabel(item.category)}</p>
+            </div>
           </Link>
         </li>
       ))}
+      {addSlot && (
+        <li className={addSlotVisibility(items.length)}>
+          <Link href="/closet/add" className="group block">
+            <div className="flex aspect-[4/5] items-center justify-center bg-tile outline-1 -outline-offset-[10px] outline-ink/30 outline-dashed transition-colors duration-150 group-hover:outline-ink">
+              <span className="text-sm text-ink-2 transition-colors duration-150 group-hover:text-ink">Add clothes</span>
+            </div>
+          </Link>
+        </li>
+      )}
     </ul>
   );
 }
 
-export function ClosetGridSkeleton({ tabs = false }: { tabs?: boolean }) {
+export function ClosetGridSkeleton({ tabs = false, grid = SHELF }: { tabs?: boolean; grid?: string }) {
   const list = (
-    <ul className={GRID} aria-busy="true" aria-label="Loading your closet">
-      {Array.from({ length: 6 }, (_, i) => (
+    <ul className={grid} aria-busy="true" aria-label="Loading your closet">
+      {Array.from({ length: 4 }, (_, i) => (
         <li key={i}>
-          <div className="aspect-[3/4] animate-pulse rounded-xl bg-black/[.06] dark:bg-white/[.08]" />
-          <div className="mt-2 h-4 w-3/4 animate-pulse rounded bg-black/[.06] dark:bg-white/[.08]" />
+          <div className="aspect-[4/5] bg-tile motion-safe:animate-pulse" />
+          <div className="mt-2 h-4 w-3/4 bg-tile motion-safe:animate-pulse" />
+          <div className="mt-1 h-4 w-1/3 bg-tile motion-safe:animate-pulse" />
         </li>
       ))}
     </ul>
   );
   if (!tabs) return list;
-  // Same height as the tab bar, so the grid does not jump when it loads.
+  // Same height as the tab bar and the category row, so the grid does not
+  // jump when it loads.
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex gap-2 border-b border-black/10 dark:border-white/15">
-        {CLOSET_TABS.map((tab) => (
-          <span key={tab.id} className={`${TAB} border-transparent text-foreground/40`}>
-            {tab.label}
-          </span>
-        ))}
+    <div className="flex flex-col gap-10">
+      <div className="flex flex-col">
+        <div className="flex items-center gap-8 border-y border-line py-3.5">
+          {CLOSET_TABS.map((tab) => (
+            <span key={tab.id} className={`${FILTER} text-ink-2/60`}>
+              {tab.label}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-6 pt-4 pb-1">
+          <span className={`${FILTER} py-1 text-ink-2/60`}>All</span>
+        </div>
       </div>
       {list}
     </div>

@@ -1,7 +1,10 @@
 import Image from "next/image";
 import { categoryLabel } from "@/lib/closet/tags";
+import { Silhouette } from "./silhouette";
 
-// A photo, or a color swatch + category when the item has none yet.
+// A photo, or the item's color in the shape of its category when it has none
+// yet. Stored photos are already framed on white with the margin built in
+// (lib/entry/frame.ts), so the tile is white too and adds no padding.
 // Signed storage URLs expire, so images skip the optimizer.
 export function ItemImage({
   src,
@@ -10,7 +13,7 @@ export function ItemImage({
   swatch,
   sizes,
   priority,
-  aspect = "aspect-[3/4]",
+  aspect = "aspect-[4/5]",
 }: {
   src: string | null;
   alt: string;
@@ -21,7 +24,7 @@ export function ItemImage({
   aspect?: string;
 }) {
   return (
-    <div className={`relative ${aspect} overflow-hidden rounded-xl bg-black/[.04] dark:bg-white/[.06]`}>
+    <div className={`relative ${aspect} overflow-hidden bg-paper text-ink`}>
       {src ? (
         <Image
           src={src}
@@ -30,19 +33,14 @@ export function ItemImage({
           sizes={sizes}
           unoptimized
           priority={priority}
-          className="object-cover"
+          className="object-contain"
         />
+      ) : swatch ? (
+        <Silhouette category={category} color={swatch} />
       ) : (
-        <div className="flex h-full flex-col items-center justify-center gap-3 text-foreground/50">
-          {swatch && (
-            <span
-              aria-hidden
-              className="size-12 rounded-full border border-black/10 shadow-inner dark:border-white/20"
-              style={{ backgroundColor: swatch }}
-            />
-          )}
-          <span className="text-xs uppercase tracking-wider">{categoryLabel(category)}</span>
-        </div>
+        <span className="absolute inset-0 flex items-center justify-center text-sm text-ink-2">
+          {categoryLabel(category)}
+        </span>
       )}
     </div>
   );

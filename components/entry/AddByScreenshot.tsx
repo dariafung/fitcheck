@@ -3,23 +3,61 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { CLOTHING_LABELS } from "@/lib/closet/labels";
 import type { ItemDraft, SaveItemRequest } from "@/lib/entry/draft";
+import { CleanedNote } from "./CleanedNote";
 import { ItemCard, type EditedItem } from "./ItemCard";
-import { extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
+import { ACCESSORY_NOT_ADDED, CUTTING_OUT, extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
 import { shrinkScreenshot } from "./shrink";
 
 type Step =
   | { kind: "idle" }
   | { kind: "loading"; preview: string }
-  | { kind: "draft"; draft: ItemDraft; saving: boolean }
+  | { kind: "cutting"; draft: ItemDraft }
+  // `original` is the draft with the store's own photo, after the model cut it out.
+  | { kind: "draft"; draft: ItemDraft; original?: ItemDraft; saving: boolean }
   | { kind: "saved"; title: string };
 
 export function AddByScreenshot() {
   const [step, setStep] = useState<Step>({ kind: "idle" });
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
+  const [round, setRound] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const busy = step.kind === "loading" || (step.kind === "draft" && step.saving);
+  const busy = step.kind === "loading" || step.kind === "cutting" || (step.kind === "draft" && step.saving);
+
+  // An on-model photo, or one on a backdrop that can't be turned white for
+  // free, is redrawn as the garment alone on white before the card shows. If that fails the card keeps the store's photo, framed on
+  // white like every other, without a word.
+  async function cutOut(draft: ItemDraft) {
+    setStep({ kind: "cutting", draft });
+    let original = draft;
+    try {
+      const res = await fetch("/api/items/cutout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ path: draft.imagePaths[0], title: draft.title, tags: draft.tags }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.original?.path && json.original?.url) {
+        original = { ...draft, imagePaths: [json.original.path], imageUrls: [json.original.url] };
+      }
+      if (res.ok && json.path && json.url) {
+        const cleaned: ItemDraft = {
+          ...draft,
+          imagePaths: [json.path],
+          imageUrls: [json.url],
+          onModel: false,
+          rawSource: { ...draft.rawSource, cutOutByAi: true },
+        };
+        setStep({ kind: "draft", draft: cleaned, original, saving: false });
+        return;
+      }
+    } catch {
+      // Keep the original.
+    }
+    setStep({ kind: "draft", draft: original, saving: false });
+  }
 
   async function upload(file: File) {
     setProblem(undefined);
@@ -31,7 +69,9 @@ export function AddByScreenshot() {
       const res = await fetch("/api/items/extract", { method: "POST", body });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.draft) {
-        setStep({ kind: "draft", draft: json.draft, saving: false });
+        setRound((r) => r + 1);
+        if (json.draft.cutOut && json.draft.imagePaths[0]) await cutOut(json.draft);
+        else setStep({ kind: "draft", draft: json.draft, saving: false });
       } else {
         setProblem(extractErrorMessage(json.error));
         setStep({ kind: "idle" });
@@ -57,13 +97,14 @@ export function AddByScreenshot() {
     return () => document.removeEventListener("paste", onPaste);
   });
 
-  async function save(draft: ItemDraft, edited: EditedItem) {
+  async function save(draft: ItemDraft, edited: EditedItem, original?: ItemDraft) {
     setProblem(undefined);
-    setStep({ kind: "draft", draft, saving: true });
+    setStep({ kind: "draft", draft, original, saving: true });
     const body: SaveItemRequest = {
       entryMethod: "screenshot",
       title: edited.title,
       brand: edited.brand,
+      size: edited.size,
       priceCents: draft.priceCents,
       currency: draft.currency,
       imagePaths: draft.imagePaths,
@@ -82,11 +123,12 @@ export function AddByScreenshot() {
         setStep({ kind: "saved", title: edited.title });
         return;
       }
-      setProblem(SAVE_FAILED);
+      const json = await res.json().catch(() => ({}));
+      setProblem(json.error === "accessory" ? ACCESSORY_NOT_ADDED : SAVE_FAILED);
     } catch {
       setProblem(OFFLINE);
     }
-    setStep({ kind: "draft", draft, saving: false });
+    setStep({ kind: "draft", draft, original, saving: false });
   }
 
   function addAnother() {
@@ -95,7 +137,7 @@ export function AddByScreenshot() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -109,7 +151,8 @@ export function AddByScreenshot() {
           if (file && !busy) void upload(file);
         }}
         data-dragging={dragging || undefined}
-        className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-black/15 px-4 py-8 text-center data-dragging:border-foreground dark:border-white/20"
+        data-idle={step.kind === "idle" || undefined}
+        className="dropzone flex min-h-64 flex-col items-center justify-center gap-4 px-8 py-12 text-center md:min-h-80"
       >
         <input
           ref={inputRef}
@@ -125,11 +168,11 @@ export function AddByScreenshot() {
         />
         <label
           htmlFor="screenshot"
-          className="cursor-pointer rounded-full bg-foreground px-5 py-2.5 font-medium text-background peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-disabled:cursor-default peer-disabled:opacity-50"
+          className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
         >
-          {step.kind === "loading" ? "Reading…" : "Choose a screenshot"}
+          {step.kind === "loading" || step.kind === "cutting" ? "Reading…" : "Choose a screenshot"}
         </label>
-        <p className="text-sm opacity-60">
+        <p className="max-w-[40ch] text-sm text-ink-2">
           One screen is enough. Just get the photo and name in it.
           <span className="hidden sm:inline"> You can also drop or paste it.</span>
         </p>
@@ -137,21 +180,22 @@ export function AddByScreenshot() {
 
       <div role="status" aria-live="polite" className="empty:hidden">
         {problem && (
-          <p className="rounded-xl border border-amber-600/30 bg-amber-500/10 px-4 py-3 text-sm font-medium">
+          <p className="notice">
             {problem}
           </p>
         )}
-        {step.kind === "loading" && <p className="text-sm opacity-70">Reading your screenshot…</p>}
+        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
+        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
         {step.kind === "saved" && (
-          <div className="flex flex-col gap-3 rounded-2xl border border-black/10 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/15">
-            <p>
+          <div className="notice flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-lg">
               <span className="font-medium">{step.title}</span> is in your closet.
             </p>
-            <div className="flex gap-2">
-              <Link href="/closet" className="rounded-full border px-4 py-2 text-sm">
+            <div className="flex gap-3">
+              <Link href="/closet" className="btn-secondary">
                 See closet
               </Link>
-              <button type="button" onClick={addAnother} className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background">
+              <button type="button" onClick={addAnother} className="btn-primary">
                 Add another
               </button>
             </div>
@@ -160,12 +204,22 @@ export function AddByScreenshot() {
       </div>
 
       {step.kind === "loading" && <LoadingCard preview={step.preview} />}
+      {step.kind === "cutting" && step.draft.imageUrls[0] && <LoadingCard preview={step.draft.imageUrls[0]} />}
+      {step.kind === "draft" && step.original && (
+        <CleanedNote
+          disabled={step.saving}
+          onUseOriginal={() => step.original && setStep({ kind: "draft", draft: step.original, saving: false })}
+        />
+      )}
       {step.kind === "draft" && (
         <ItemCard
-          key={step.draft.imagePaths.join()}
+          key={round}
           draft={step.draft}
+          withSize
+          initialSize={step.draft.size}
           saving={step.saving}
-          onSave={(edited) => save(step.draft, edited)}
+          onSave={(edited) => save(step.draft, edited, step.original)}
+          categories={CLOTHING_LABELS}
         />
       )}
     </div>
@@ -174,15 +228,15 @@ export function AddByScreenshot() {
 
 function LoadingCard({ preview }: { preview: string }) {
   return (
-    <div aria-hidden className="grid gap-6 rounded-2xl border border-black/10 p-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] sm:p-6 dark:border-white/15">
-      <div className="relative mx-auto aspect-[4/5] w-full max-w-xs overflow-hidden rounded-xl bg-black/5 sm:max-w-none dark:bg-white/10">
-        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 640px) 280px, 100vw" className="object-cover object-top opacity-60" />
+    <div aria-hidden className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12">
+      <div className="relative aspect-[4/5] w-3/5 overflow-hidden bg-tile md:col-span-5 md:w-full">
+        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 768px) 40vw, 60vw" className="object-contain p-[9%] opacity-50" />
       </div>
-      <div className="flex animate-pulse flex-col gap-3">
-        <div className="h-6 w-1/2 rounded bg-black/5 dark:bg-white/10" />
-        <div className="h-10 rounded-lg bg-black/5 dark:bg-white/10" />
-        <div className="h-10 rounded-lg bg-black/5 dark:bg-white/10" />
-        <div className="h-10 w-2/3 rounded-lg bg-black/5 dark:bg-white/10" />
+      <div className="flex flex-col gap-4 md:col-span-6 md:col-start-7 motion-safe:animate-pulse">
+        <div className="h-7 w-1/2 bg-tile" />
+        <div className="h-10 bg-tile" />
+        <div className="h-10 bg-tile" />
+        <div className="h-10 w-2/3 bg-tile" />
       </div>
     </div>
   );

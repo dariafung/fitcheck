@@ -1,52 +1,1400 @@
 [
   {
-    "id": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
+    "id": "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/2262ce87-2107-4b70-8e85-33f8ecb2b8bb.webp"
+    ],
     "status": "active",
-    "entry_method": "manual",
-    "title": "White cotton button-down",
+    "entry_method": "screenshot",
+    "title": "Faux Suede Belted Jacket",
+    "brand": "ZARA",
+    "size": "S",
+    "price_cents": 9990,
+    "currency": "USD",
+    "category": "outerwear",
+    "ai_tags": {
+      "notes": "Lapel collar, matching fabric belt, peplum hem, double-breasted front with hidden zip closure, tonal interior lining.",
+      "colors": [
+        {
+          "name": "Toffee"
+        }
+      ],
+      "category": "outerwear",
+      "formality": 3,
+      "materials": [
+        "polyester"
+      ],
+      "occasions": [
+        "work",
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 65,
+        "min": 45
+      },
+      "colorFamily": "brown",
+      "subcategory": "jacket"
+    },
+    "user_tags": {
+      "occasions": [
+        "social"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.22,
+        "y": 0.07,
+        "width": 0.56,
+        "height": 0.49
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 377,
+        "height": 552
+      },
+      "webSources": [
+        {
+          "url": "https://www.zara.com/us/en/suede-effect-belted-jacket-p08490720.html",
+          "field": "title"
+        },
+        {
+          "url": "https://www.zara.com/us/en/suede-effect-belted-jacket-p08490720.html",
+          "field": "price"
+        },
+        {
+          "url": "https://www.zara.com/us/en/suede-effect-belted-jacket-p08490720.html",
+          "field": "notes"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:22:58.236Z",
+      "lowConfidence": [
+        "materials",
+        "fit",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Supima Long Sleeve T-Shirt",
+    "brand": "ZARA",
+    "size": "S",
+    "price_cents": 3590,
+    "currency": "USD",
     "category": "top",
     "ai_tags": {
+      "fit": "slim",
+      "notes": "100% Supima cotton yarn, round neck, straight hem, regular length",
+      "colors": [
+        {
+          "hex": "#FFFFFF",
+          "name": "WHITE"
+        }
+      ],
       "category": "top",
-      "colors": [{ "name": "white" }],
+      "formality": 2,
+      "materials": [
+        "cotton"
+      ],
+      "occasions": [
+        "school",
+        "social",
+        "home"
+      ],
+      "tempRangeF": {
+        "max": 75,
+        "min": 55
+      },
       "colorFamily": "white",
-      "materials": ["cotton"],
-      "fit": "regular",
-      "formality": 3,
-      "tempRangeF": { "min": 55, "max": 85 },
-      "occasions": ["work", "social"]
+      "subcategory": "long sleeve t-shirt"
+    },
+    "user_tags": {
+      "occasions": [
+        "school"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.335,
+        "y": 0.141,
+        "width": 0.342,
+        "height": 0.311
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 400,
+        "height": 617
+      },
+      "webSources": [
+        {
+          "url": "https://www.zara.com/us/en/supima--long-sleeve-t-shirt-p00858777.html?v1=587652540",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.zara.com/us/en/supima--long-sleeve-t-shirt-p00858777.html?v1=587652540",
+          "field": "fit"
+        },
+        {
+          "url": "https://www.zara.com/us/en/supima--long-sleeve-t-shirt-p00858777.html?v1=587652540",
+          "field": "title"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:23:32.280Z",
+      "lowConfidence": [
+        "tempRangeF"
+      ]
     }
   },
   {
-    "id": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
+    "id": "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/8e169881-6d10-4f5e-93b1-c00a1e1efe69.webp"
+    ],
     "status": "active",
-    "entry_method": "manual",
-    "title": "Dark straight-leg jeans",
+    "entry_method": "screenshot",
+    "title": "V-Neck T-Shirt",
+    "brand": "ZARA",
+    "size": "S",
+    "price_cents": 1790,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "slim",
+      "notes": "Slim fit V-neck short sleeve T-shirt in Stone, regular length with straight hem, cotton-blend yarn.",
+      "colors": [
+        {
+          "name": "STONE"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 2,
+      "materials": [
+        "cotton",
+        "elastane"
+      ],
+      "occasions": [
+        "school",
+        "social",
+        "home"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 60
+      },
+      "colorFamily": "cream",
+      "subcategory": "t-shirt"
+    },
+    "user_tags": {
+      "occasions": [
+        "school"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.1,
+        "y": 0.035,
+        "width": 0.71,
+        "height": 0.64
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 397,
+        "height": 624
+      },
+      "webSources": [
+        {
+          "url": "https://www.zara.com/us/en/v-neck-t-shirt-p04174315.html?v1=545422288",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.zara.com/us/en/v-neck-t-shirt-p04174315.html?v1=545422288",
+          "field": "fit"
+        },
+        {
+          "url": "https://www.zara.com/us/en/v-neck-t-shirt-p04174315.html?v1=545422288",
+          "field": "brand"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:23:56.952Z",
+      "lowConfidence": [
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "d54193d3-7afa-4da9-9af7-efc08b13427a",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/d54193d3-7afa-4da9-9af7-efc08b13427a.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "ZW Collection High-Rise Straight Fit Jeans",
+    "brand": "ZARA",
+    "size": "27 (US 4)",
+    "price_cents": 7990,
+    "currency": "USD",
     "category": "bottom",
     "ai_tags": {
-      "category": "bottom",
-      "colors": [{ "name": "indigo" }],
-      "colorFamily": "denim",
-      "materials": ["denim"],
       "fit": "regular",
+      "notes": "High-rise straight-leg full-length five-pocket washed jeans with belt loops, front zip and metal button closure. ZARA WOMAN COLLECTION.",
+      "colors": [
+        {
+          "name": "Blue"
+        }
+      ],
+      "pattern": "solid",
+      "category": "bottom",
       "formality": 2,
-      "tempRangeF": { "min": 40, "max": 80 },
-      "occasions": ["work", "social"]
+      "materials": [
+        "cotton",
+        "viscose",
+        "polyester"
+      ],
+      "occasions": [
+        "work",
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 75,
+        "min": 40
+      },
+      "colorFamily": "denim",
+      "subcategory": "jeans"
+    },
+    "user_tags": {
+      "occasions": [
+        "school"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.3,
+        "y": 0.08,
+        "width": 0.4,
+        "height": 0.56
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 309,
+        "height": 616
+      },
+      "webSources": [
+        {
+          "url": "https://www.zara.com/us/en/zw-collection-high-rise-straight-fit-jeans-p06840262.html",
+          "field": "title"
+        },
+        {
+          "url": "https://www.zara.com/us/en/zw-collection-high-rise-straight-fit-jeans-p06840262.html",
+          "field": "price"
+        },
+        {
+          "url": "https://www.zara.com/us/en/zw-collection-high-rise-straight-fit-jeans-p06840262.html",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.zara.com/us/en/zw-collection-high-rise-straight-fit-jeans-p06840262.html",
+          "field": "fit"
+        },
+        {
+          "url": "https://www.zara.com/us/en/zw-collection-high-rise-straight-fit-jeans-p06840262.html",
+          "field": "notes"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:24:20.819Z",
+      "lowConfidence": [
+        "fit",
+        "tempRangeF"
+      ]
     }
   },
   {
-    "id": "23c59091-9b18-4c24-92c3-1072a5581d8e",
+    "id": "907d76cc-98b7-4e29-8755-fc734a761987",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/907d76cc-98b7-4e29-8755-fc734a761987.webp"
+    ],
     "status": "active",
-    "entry_method": "manual",
-    "title": "White leather sneakers",
+    "entry_method": "screenshot",
+    "title": "Fitted Boat Neck T-Shirt",
+    "brand": "ZARA",
+    "size": "S",
+    "price_cents": 3590,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "slim",
+      "notes": "Long sleeves, boat neck, straight hem, fitted / slim fit, made of cotton yarn",
+      "colors": [
+        {
+          "name": "GRAY MARL"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 2,
+      "materials": [
+        "cotton"
+      ],
+      "occasions": [
+        "work",
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 75,
+        "min": 55
+      },
+      "colorFamily": "gray",
+      "subcategory": "t-shirt"
+    },
+    "user_tags": {
+      "occasions": [
+        "school"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.285,
+        "y": 0.12,
+        "width": 0.49,
+        "height": 0.395
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 388,
+        "height": 574
+      },
+      "webSources": [
+        {
+          "url": "https://www.zara.com/us/en/fitted-boat-neck-t-shirt-p01044637.html?v1=578237198&v2=2546081",
+          "field": "brand"
+        },
+        {
+          "url": "https://www.zara.com/us/en/fitted-boat-neck-t-shirt-p01044637.html?v1=578237198&v2=2546081",
+          "field": "price"
+        },
+        {
+          "url": "https://www.zara.com/us/en/fitted-boat-neck-t-shirt-p01044637.html?v1=578237198&v2=2546081",
+          "field": "fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:24:46.492Z",
+      "lowConfidence": [
+        "materials",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/0d20089b-caf5-426f-8f27-5cd4b6dfaeca.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "V-Neck T-Shirt",
+    "brand": "ZARA",
+    "size": "S",
+    "price_cents": 1790,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "slim",
+      "notes": "Slim fit short sleeve V-neck, REF 4174/315",
+      "colors": [
+        {
+          "hex": "#FFFFFF",
+          "name": "White"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 2,
+      "materials": [
+        "cotton",
+        "elastane"
+      ],
+      "occasions": [
+        "school",
+        "social",
+        "home"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 60
+      },
+      "colorFamily": "white",
+      "subcategory": "t-shirt"
+    },
+    "user_tags": {
+      "occasions": [
+        "social"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.325,
+        "y": 0.145,
+        "width": 0.38,
+        "height": 0.33
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 397,
+        "height": 539
+      },
+      "webSources": [
+        {
+          "url": "https://www.zara.com/uk/en/v-neck-t-shirt-p04174315.html?v1=577322071",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.zara.com/uk/en/v-neck-t-shirt-p04174315.html?v1=577322071",
+          "field": "fit"
+        },
+        {
+          "url": "https://www.zara.com/uk/en/v-neck-t-shirt-p04174315.html?v1=577322071",
+          "field": "title"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:25:08.506Z",
+      "lowConfidence": [
+        "currency",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/5e8bd85a-3e3a-40fc-9028-bb7d2695596c.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Speed Up High-Rise Short 4\"",
+    "brand": "lululemon",
+    "size": "S",
+    "price_cents": 6800,
+    "currency": "USD",
+    "category": "bottom",
+    "ai_tags": {
+      "fit": "relaxed",
+      "notes": "High-rise 4\" running shorts with built-in liner and Swift lightweight sweat-wicking fabric",
+      "colors": [
+        {
+          "name": "Black"
+        }
+      ],
+      "pattern": "solid",
+      "category": "bottom",
+      "formality": 1,
+      "materials": [
+        "polyester",
+        "elastane",
+        "nylon"
+      ],
+      "occasions": [
+        "sport"
+      ],
+      "tempRangeF": {
+        "max": 90,
+        "min": 55
+      },
+      "colorFamily": "black",
+      "subcategory": "shorts"
+    },
+    "user_tags": {},
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "cutOutByAi": true,
+      "productBox": {
+        "x": 0.034,
+        "y": 0.025,
+        "width": 0.909,
+        "height": 0.843
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 894,
+        "height": 1179
+      },
+      "webSources": [
+        {
+          "url": "https://www.lululemon.co.nz/en-nz/p/speed-up-high-rise-short-4%22-updated/prod11900030.html",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.lululemon.co.nz/en-nz/p/speed-up-high-rise-short-4%22-updated/prod11900030.html",
+          "field": "fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:25:58.343Z",
+      "lowConfidence": [
+        "fit",
+        "tempRangeF",
+        "currency"
+      ]
+    }
+  },
+  {
+    "id": "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/11fc83de-be0d-42f0-b9f7-d7051467f79d.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Swiftly Tech Short-Sleeve Shirt 2.0",
+    "brand": "lululemon",
+    "size": "6",
+    "price_cents": 6800,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "slim",
+      "notes": "Seamless sweat-wicking running/training tee with waist length, Silverescent anti-odour technology",
+      "colors": [
+        {
+          "name": "Black/Black"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 1,
+      "materials": [
+        "nylon",
+        "polyester",
+        "elastane"
+      ],
+      "occasions": [
+        "sport"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 60
+      },
+      "colorFamily": "black",
+      "subcategory": "t-shirt"
+    },
+    "user_tags": {},
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "cutOutByAi": true,
+      "productBox": {
+        "x": 0.032,
+        "y": 0.02,
+        "width": 0.892,
+        "height": 0.851
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 881,
+        "height": 1141
+      },
+      "webSources": [
+        {
+          "url": "https://www.lululemon.com.hk/en-sg/p/swiftly-tech-short-sleeve-shirt-2.0-waist-length/prod9820343.html",
+          "field": "tags.materials"
+        },
+        {
+          "url": "https://www.lululemon.com.hk/en-sg/p/swiftly-tech-short-sleeve-shirt-2.0-waist-length/prod9820343.html",
+          "field": "tags.fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:26:41.458Z",
+      "lowConfidence": [
+        "currency"
+      ]
+    }
+  },
+  {
+    "id": "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/5674a27b-87a6-4929-8099-28b5a3b2b9e3.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Swiftly Tech Short-Sleeve Shirt 2.0",
+    "brand": "lululemon",
+    "size": "6",
+    "price_cents": 6800,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "slim",
+      "notes": "Waist length, seamless construction, lightweight sweat-wicking fabric with Silverescent technology. Designed for running and training.",
+      "colors": [
+        {
+          "name": "Pink Pearl/Pink Pearl"
+        }
+      ],
+      "category": "top",
+      "formality": 1,
+      "materials": [
+        "nylon",
+        "polyester",
+        "elastane",
+        "x-static nylon"
+      ],
+      "occasions": [
+        "sport"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 60
+      },
+      "colorFamily": "pink",
+      "subcategory": "t-shirt"
+    },
+    "user_tags": {},
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "cutOutByAi": true,
+      "productBox": {
+        "x": 0.035,
+        "y": 0.027,
+        "width": 0.93,
+        "height": 0.837
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 858,
+        "height": 1177
+      },
+      "webSources": [
+        {
+          "url": "https://www.lululemon.com.hk/en-th/p/swiftly-tech-short-sleeve-shirt-2.0-waist-length/prod9820343.html",
+          "field": "brand"
+        },
+        {
+          "url": "https://www.lululemon.com.hk/en-th/p/swiftly-tech-short-sleeve-shirt-2.0-waist-length/prod9820343.html",
+          "field": "tags.fit"
+        },
+        {
+          "url": "https://www.lululemon.com.hk/en-th/p/swiftly-tech-short-sleeve-shirt-2.0-waist-length/prod9820343.html",
+          "field": "tags.materials"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:27:18.861Z",
+      "lowConfidence": [
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "b91ce162-a22b-4d6f-a443-65547e082181",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/b91ce162-a22b-4d6f-a443-65547e082181.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Speed Up High-Rise Short 4\"",
+    "brand": "lululemon",
+    "size": "S",
+    "price_cents": 5900,
+    "currency": "USD",
+    "category": "bottom",
+    "ai_tags": {
+      "fit": "regular",
+      "notes": "High-rise lined running shorts with 4\" inseam, lightweight Swift fabric",
+      "colors": [
+        {
+          "hex": "#F8CBD3",
+          "name": "Pink Pearl"
+        }
+      ],
+      "pattern": "solid",
+      "category": "bottom",
+      "formality": 1,
+      "materials": [
+        "polyester",
+        "nylon",
+        "elastane"
+      ],
+      "occasions": [
+        "sport"
+      ],
+      "tempRangeF": {
+        "max": 90,
+        "min": 60
+      },
+      "colorFamily": "pink",
+      "subcategory": "shorts"
+    },
+    "user_tags": {},
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "cutOutByAi": true,
+      "productBox": {
+        "x": 0.014,
+        "y": 0.014,
+        "width": 0.919,
+        "height": 0.879
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 857,
+        "height": 1165
+      },
+      "webSources": [
+        {
+          "url": "https://www.eu.lululemon.com/en-se/p/speed-up-high-rise-lined-short-4%22/prod9890125.html",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.eu.lululemon.com/en-se/p/speed-up-high-rise-lined-short-4%22/prod9890125.html",
+          "field": "brand"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:27:51.721Z",
+      "lowConfidence": [
+        "fit",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "825788d8-8548-43da-9a26-40f5af91c0f3",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/825788d8-8548-43da-9a26-40f5af91c0f3.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Feel Good Low-Rise Baggy Sweatpants",
+    "brand": "HOLLISTER",
+    "size": null,
+    "price_cents": 4495,
+    "currency": "USD",
+    "category": "bottom",
+    "ai_tags": {
+      "fit": "relaxed",
+      "notes": "Low-rise drawstring waist, baggy leg, pockets, embroidered logo, signature soft fleece",
+      "colors": [
+        {
+          "name": "Light Heather Grey"
+        }
+      ],
+      "pattern": "solid",
+      "category": "bottom",
+      "formality": 1,
+      "materials": [
+        "cotton",
+        "recycled polyester"
+      ],
+      "occasions": [
+        "home",
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 70,
+        "min": 50
+      },
+      "colorFamily": "gray",
+      "subcategory": "sweatpants"
+    },
+    "user_tags": {
+      "occasions": [
+        "home"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.118,
+        "y": 0.187,
+        "width": 0.319,
+        "height": 0.703
+      },
+      "screenshot": {
+        "mime": "image/jpeg",
+        "width": 1600,
+        "height": 833
+      },
+      "webSources": [
+        {
+          "url": "https://www.hollisterco.com/shop/ca/p/hollister-feel-good-low-rise-baggy-sweatpants-63157828",
+          "field": "title"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/ca/p/hollister-feel-good-low-rise-baggy-sweatpants-63157828",
+          "field": "price"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/ca/p/hollister-feel-good-low-rise-baggy-sweatpants-63157828",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/ca/p/hollister-feel-good-low-rise-baggy-sweatpants-63157828",
+          "field": "fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:28:21.957Z",
+      "lowConfidence": [
+        "tempRangeF",
+        "fit"
+      ]
+    }
+  },
+  {
+    "id": "e749b166-b703-413a-80f2-36b6e2864ed6",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/e749b166-b703-413a-80f2-36b6e2864ed6.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Feel Good Oversized Hoodie",
+    "brand": "HOLLISTER",
+    "size": null,
+    "price_cents": 4495,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "oversized",
+      "notes": "Signature soft fleece with front pouch pocket and long sleeves; oversized fit",
+      "colors": [
+        {
+          "name": "Light Pink"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 2,
+      "materials": [
+        "fleece"
+      ],
+      "occasions": [
+        "school",
+        "social",
+        "home"
+      ],
+      "tempRangeF": {
+        "max": 65,
+        "min": 40
+      },
+      "colorFamily": "pink",
+      "subcategory": "hoodie"
+    },
+    "user_tags": {
+      "occasions": [
+        "home"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.037,
+        "y": 0.004,
+        "width": 0.66,
+        "height": 0.945
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 1358,
+        "height": 1176
+      },
+      "webSources": [
+        {
+          "url": "https://www.hollisterco.com/shop/ca/p/oversized-butterfly-graphic-hoodie-61735320",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/ca/p/oversized-butterfly-graphic-hoodie-61735320",
+          "field": "fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:29:13.172Z",
+      "lowConfidence": [
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "b4411873-c7b0-44eb-bb1d-542889641915",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/b4411873-c7b0-44eb-bb1d-542889641915.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Softstreme High-Rise Pant",
+    "brand": "lululemon",
+    "size": "4",
+    "price_cents": 6900,
+    "currency": "USD",
+    "category": "bottom",
+    "ai_tags": {
+      "fit": "relaxed",
+      "notes": "Peach-fuzz soft Softstreme fabric, high-rise with elastic waistband and shockcord, full-length straight leg",
+      "colors": [
+        {
+          "name": "Strawberry Milkshake"
+        }
+      ],
+      "category": "bottom",
+      "formality": 1,
+      "materials": [
+        "polyester",
+        "modal",
+        "elastane"
+      ],
+      "occasions": [
+        "home",
+        "social",
+        "sport"
+      ],
+      "tempRangeF": {
+        "max": 75,
+        "min": 60
+      },
+      "colorFamily": "pink",
+      "subcategory": "wide-leg pants"
+    },
+    "user_tags": {
+      "occasions": [
+        "social"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "cutOutByAi": true,
+      "productBox": {
+        "x": 0.008,
+        "y": 0.017,
+        "width": 0.89,
+        "height": 0.835
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 882,
+        "height": 1177
+      },
+      "webSources": [
+        {
+          "url": "https://www.eu.lululemon.com/en-ch/p/softstreme-high-rise-pant-regular/143503915.html",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.eu.lululemon.com/en-ch/p/softstreme-high-rise-pant-regular/143503915.html",
+          "field": "fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:32:14.796Z",
+      "lowConfidence": [
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/c46dd4ac-4545-4190-a86c-b37eb2dbec09.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Japan Pro",
+    "brand": "ASICS",
+    "size": null,
+    "price_cents": 10500,
+    "currency": "USD",
     "category": "shoes",
     "ai_tags": {
+      "fit": "regular",
+      "notes": "JAPAN PRO skate shoe based on 1981 FABRE JAPAN S basketball shoe with suede paneling and triple-stitching",
+      "colors": [
+        {
+          "name": "Black/White"
+        }
+      ],
+      "pattern": "color-block",
       "category": "shoes",
-      "colors": [{ "name": "white" }],
-      "colorFamily": "white",
-      "materials": ["leather"],
       "formality": 2,
-      "tempRangeF": { "min": 40, "max": 90 },
-      "occasions": ["social", "home"]
+      "materials": [
+        "suede",
+        "leather",
+        "rubber"
+      ],
+      "occasions": [
+        "sport",
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 35
+      },
+      "colorFamily": "black",
+      "subcategory": "sneakers"
+    },
+    "user_tags": {
+      "occasions": [
+        "school"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.035,
+        "y": 0.018,
+        "width": 0.865,
+        "height": 0.522
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 341,
+        "height": 511
+      },
+      "webSources": [
+        {
+          "url": "https://www.asics.com/us/en-us/japan-pro/p/ANA_1201A920-001.html",
+          "field": "brand"
+        },
+        {
+          "url": "https://www.asics.com/us/en-us/japan-pro/p/ANA_1201A920-001.html",
+          "field": "price"
+        },
+        {
+          "url": "https://www.asics.com/us/en-us/japan-pro/p/ANA_1201A920-001.html",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.asics.com/us/en-us/japan-pro/p/ANA_1201A920-001.html",
+          "field": "title"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:32:56.084Z",
+      "lowConfidence": [
+        "fit",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "f4678e3e-ef86-4510-87ba-7fa834cc08d6",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/f4678e3e-ef86-4510-87ba-7fa834cc08d6.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Feel Good Oversized Hoodie",
+    "brand": "HOLLISTER",
+    "size": null,
+    "price_cents": 4495,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "oversized",
+      "notes": "Oversized fit with hood and front pouch pocket in soft fleece",
+      "colors": [
+        {
+          "name": "Light Heather Gray"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 2,
+      "materials": [
+        "fleece"
+      ],
+      "occasions": [
+        "school",
+        "social",
+        "sport",
+        "home"
+      ],
+      "tempRangeF": {
+        "max": 65,
+        "min": 40
+      },
+      "colorFamily": "gray",
+      "subcategory": "hoodie"
+    },
+    "user_tags": {
+      "occasions": [
+        "home"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.033,
+        "y": 0.003,
+        "width": 0.681,
+        "height": 0.891
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 1356,
+        "height": 1240
+      },
+      "webSources": [
+        {
+          "url": "https://www.klarna.com/us/shopping/pl/cl10001/3578400102/Clothing/Hollister-Feel-Good-Oversized-Hoodie/",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.klarna.com/us/shopping/pl/cl10001/3578400102/Clothing/Hollister-Feel-Good-Oversized-Hoodie/",
+          "field": "fit"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:34:20.060Z",
+      "lowConfidence": [
+        "pattern",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/84709d1e-9f8a-4f71-ac84-43ecd8c7f603.webp"
+    ],
+    "status": "active",
+    "entry_method": "screenshot",
+    "title": "Soft Ruched Loafers",
+    "brand": "ZARA",
+    "size": "7.5",
+    "price_cents": 5990,
+    "currency": "USD",
+    "category": "shoes",
+    "ai_tags": {
+      "notes": "Soft moccasin-style flats. Tassel and raised vamp detail. Ruching on the front. Sole height: 1 inch (2.5 cm)",
+      "colors": [
+        {
+          "name": "BLACK"
+        }
+      ],
+      "category": "shoes",
+      "formality": 3,
+      "materials": [
+        "polyurethane",
+        "polyester"
+      ],
+      "occasions": [
+        "work",
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 80,
+        "min": 50
+      },
+      "colorFamily": "black",
+      "subcategory": "loafers"
+    },
+    "user_tags": {
+      "occasions": [
+        "social"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.26,
+        "y": 0.19,
+        "width": 0.6,
+        "height": 0.195
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 826,
+        "height": 832
+      },
+      "webSources": [
+        {
+          "url": "https://poshmark.com/listing/ZARA-SOFT-RUCHED-LOAFERS-68cc15f95df8e7e50df2178b",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.zara.com/us/en/soft-ruched-loafers-p12515610.html?v1=464707240&v2=2626160",
+          "field": "notes"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:42:43.429Z",
+      "lowConfidence": [
+        "fit",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "ab426b49-f3b7-42bd-9527-b71176656fbb",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/ab426b49-f3b7-42bd-9527-b71176656fbb.webp"
+    ],
+    "status": "passing_on",
+    "entry_method": "screenshot",
+    "title": "Fleece Shortie Shorts",
+    "brand": "HOLLISTER",
+    "size": "XS",
+    "price_cents": 2495,
+    "currency": "USD",
+    "category": "bottom",
+    "ai_tags": {
+      "fit": "regular",
+      "notes": "Low-rise drawstring waist super soft fleece shortie shorts",
+      "colors": [
+        {
+          "name": "LIGHT HEATHER GREY"
+        }
+      ],
+      "pattern": "solid",
+      "category": "bottom",
+      "formality": 1,
+      "materials": [
+        "cotton",
+        "recycled polyester"
+      ],
+      "occasions": [
+        "home",
+        "sport"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 60
+      },
+      "colorFamily": "gray",
+      "subcategory": "shorts"
+    },
+    "user_tags": {
+      "occasions": [
+        "home"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "productBox": {
+        "x": 0.04,
+        "y": 0.13,
+        "width": 0.295,
+        "height": 0.74
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 853,
+        "height": 320
+      },
+      "webSources": [
+        {
+          "url": "https://hollisterco.id/products/fleece-shortie-shorts-1",
+          "field": "materials"
+        },
+        {
+          "url": "https://hollisterco.id/products/fleece-shortie-shorts-1",
+          "field": "title"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:44:21.607Z",
+      "lowConfidence": [
+        "fit",
+        "tempRangeF"
+      ]
+    }
+  },
+  {
+    "id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+    "image_paths": [
+      "f97fc346-9acc-4404-bc52-9a6ba86a9bce/dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9.webp"
+    ],
+    "status": "passing_on",
+    "entry_method": "screenshot",
+    "title": "100% Cotton Crew Baby Tee",
+    "brand": "HOLLISTER",
+    "size": "XS",
+    "price_cents": 1495,
+    "currency": "USD",
+    "category": "top",
+    "ai_tags": {
+      "fit": "slim",
+      "notes": "Women's crew neckline short sleeve baby tee, 100% cotton",
+      "colors": [
+        {
+          "name": "LIGHT HEATHER GRAY"
+        }
+      ],
+      "pattern": "solid",
+      "category": "top",
+      "formality": 2,
+      "materials": [
+        "cotton"
+      ],
+      "occasions": [
+        "school",
+        "social"
+      ],
+      "tempRangeF": {
+        "max": 85,
+        "min": 60
+      },
+      "colorFamily": "gray",
+      "subcategory": "baby tee"
+    },
+    "user_tags": {
+      "occasions": [
+        "school"
+      ]
+    },
+    "on_model": false,
+    "raw_source": {
+      "cropped": true,
+      "cutOutByAi": true,
+      "productBox": {
+        "x": 0.034,
+        "y": 0,
+        "width": 0.337,
+        "height": 0.842
+      },
+      "screenshot": {
+        "mime": "image/png",
+        "width": 815,
+        "height": 321
+      },
+      "webSources": [
+        {
+          "url": "https://www.hollisterco.com/shop/us/p/cotton-crew-baby-tee-63270321?categoryId=641189253&faceout=model&seq=05&pagefm=navigation-grid&prodvm=navigation-grid",
+          "field": "materials"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/us/p/cotton-crew-baby-tee-63270321?categoryId=641189253&faceout=model&seq=05&pagefm=navigation-grid&prodvm=navigation-grid",
+          "field": "fit"
+        },
+        {
+          "url": "https://www.hollisterco.com/shop/us/p/cotton-crew-baby-tee-63270321?categoryId=641189253&faceout=model&seq=05&pagefm=navigation-grid&prodvm=navigation-grid",
+          "field": "price"
+        }
+      ],
+      "extractedAt": "2026-10-31T01:44:48.331Z",
+      "lowConfidence": [
+        "tempRangeF"
+      ]
     }
   }
 ]

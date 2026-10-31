@@ -26,6 +26,7 @@ import {
   unitsCookieString,
   type Units,
 } from "@/lib/profile/units";
+import { LETTER_SIZES, SHOE_SIZE_OPTIONS } from "@/lib/resale/size";
 
 type Status = "idle" | "saving" | "saved" | "error";
 
@@ -48,6 +49,22 @@ const OCCASION_LABELS: Record<Occasion, string> = {
 
 const kindOf = (m: Measurement) => (m === "weightKg" ? "weight" : "length");
 
+// Picked from fixed lists; all three are required.
+const SIZES = ["topSize", "bottomSize", "shoeSize"] as const;
+type SizeField = (typeof SIZES)[number];
+
+const SIZE_LABELS: Record<SizeField, string> = {
+  topSize: "Tops & dresses",
+  bottomSize: "Bottoms",
+  shoeSize: "Shoes",
+};
+
+const SIZE_OPTIONS: Record<SizeField, { value: string; label: string }[]> = {
+  topSize: LETTER_SIZES.map((s) => ({ value: s, label: s })),
+  bottomSize: LETTER_SIZES.map((s) => ({ value: s, label: s })),
+  shoeSize: SHOE_SIZE_OPTIONS,
+};
+
 // text is what the box shows; metric is the cm / kg value behind it (null =
 // empty, NaN = not a number). Untouched fields keep their stored value
 // exactly, whatever the units.
@@ -65,9 +82,13 @@ function fieldsFor(profile: Profile, units: Units): Record<Measurement, Field> {
   ) as Record<Measurement, Field>;
 }
 
-const INPUT =
-  "w-24 rounded-lg border border-black/15 bg-transparent px-2 py-1 tabular-nums outline-none focus:border-foreground dark:border-white/20";
-const ERROR = "text-xs text-red-600 dark:text-red-400";
+const INPUT = "field h-9 w-24 px-2";
+const ERROR = "text-sm font-medium";
+
+// Each section is a spec sheet: what it is on the left, the fields on the right.
+const SECTION = "grid gap-x-4 gap-y-8 border-t border-ink pt-6 md:grid-cols-12";
+const SECTION_HEAD = "flex flex-col gap-1.5 md:col-span-4";
+const SECTION_BODY = "flex flex-col gap-8 md:col-span-7 md:col-start-6";
 
 export function ProfileForm({
   initial,
@@ -85,7 +106,13 @@ export function ProfileForm({
   const [mix, setMix] = useState(() =>
     Object.fromEntries(Occasion.options.map((o) => [o, String(initial.lifestyleMix[o])])) as Record<Occasion, string>,
   );
-  const [errors, setErrors] = useState<Partial<Record<Measurement | Occasion | "shape", string>>>({});
+  const [sizes, setSizes] = useState<Record<SizeField, string>>(() => ({
+    topSize: initial.topSize ?? "",
+    bottomSize: initial.bottomSize ?? "",
+    shoeSize: initial.shoeSize ?? "",
+  }));
+  const [resaleOptIn, setResaleOptIn] = useState(initial.resaleOptIn);
+  const [errors, setErrors] = useState<Partial<Record<Measurement | Occasion | SizeField | "shape", string>>>({});
   const [status, setStatus] = useState<Status>("idle");
 
   function edited() {
@@ -129,6 +156,9 @@ export function ProfileForm({
       }
     }
     if (!shape) found.shape = "Pick one.";
+    for (const s of SIZES) {
+      if (!sizes[s]) found[s] = "Pick a size.";
+    }
     for (const o of Occasion.options) {
       const n = Number(mix[o]);
       if (mix[o].trim() === "" || !Number.isInteger(n) || n < 0 || n > MAX_OUTFITS_WANTED) {
@@ -147,6 +177,8 @@ export function ProfileForm({
       ...Object.fromEntries(MEASUREMENTS.map((m) => [m, fields[m].metric])),
       bodyShape: shape,
       lifestyleMix: Object.fromEntries(Occasion.options.map((o) => [o, Number(mix[o])])),
+      ...sizes,
+      resaleOptIn,
     });
     if (Object.keys(found).length > 0 || !input.success) {
       setStatus("idle");
@@ -169,102 +201,134 @@ export function ProfileForm({
   const height = fields.heightCm.metric;
 
   return (
-    <form onSubmit={save} noValidate className="flex flex-col gap-10">
-      <section aria-labelledby="body-heading" className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 id="body-heading" className="text-lg font-semibold">
+    <form onSubmit={save} noValidate className="flex flex-col gap-16">
+      <section aria-labelledby="body-heading" className={SECTION}>
+        <div className={SECTION_HEAD}>
+          <h2 id="body-heading" className="text-lg font-medium">
             Your body
           </h2>
-          <div role="group" aria-label="Units" className="flex rounded-full border border-black/15 p-0.5 text-sm dark:border-white/20">
+          <p className="text-sm text-ink-2">Height, weight and sizes are a must. The rest helps.</p>
+          <div role="group" aria-label="Units" className="mt-3 flex self-start border border-ink text-sm">
             {(["imperial", "metric"] as const).map((u) => (
               <button
                 key={u}
                 type="button"
                 aria-pressed={units === u}
                 onClick={() => switchUnits(u)}
-                className="rounded-full px-3 py-0.5 aria-pressed:bg-foreground aria-pressed:text-background"
+                className="h-8 cursor-pointer px-3 transition-colors duration-150 aria-pressed:bg-ink aria-pressed:text-paper"
               >
                 {u === "imperial" ? "in · lb" : "cm · kg"}
               </button>
             ))}
           </div>
         </div>
-        <p className="text-sm text-foreground/60">Height and weight are a must. The rest helps.</p>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-          {MEASUREMENTS.map((m) => (
-            <div key={m} className="flex flex-col gap-1">
-              <label htmlFor={m} className="text-sm text-foreground/70">
-                {LABELS[m]}
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id={m}
-                  type="number"
-                  inputMode="decimal"
-                  step="any"
-                  value={fields[m].text}
-                  onChange={(e) => setMeasurement(m, e.target.value)}
-                  aria-invalid={errors[m] ? true : undefined}
-                  aria-describedby={errors[m] ? `${m}-error` : undefined}
-                  className={INPUT}
-                />
-                <span className="text-sm text-foreground/60">{unitLabel(kindOf(m), units)}</span>
+        <div className={SECTION_BODY}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+            {MEASUREMENTS.map((m) => (
+              <div key={m} className="flex flex-col gap-1.5">
+                <label htmlFor={m} className="text-sm text-ink-2">
+                  {LABELS[m]}
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id={m}
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    value={fields[m].text}
+                    onChange={(e) => setMeasurement(m, e.target.value)}
+                    aria-invalid={errors[m] ? true : undefined}
+                    aria-describedby={errors[m] ? `${m}-error` : undefined}
+                    className={INPUT}
+                  />
+                  <span className="text-sm text-ink-2">{unitLabel(kindOf(m), units)}</span>
+                </div>
+                {m === "heightCm" && units === "imperial" && height !== null && !Number.isNaN(height) && (
+                  <span className="text-sm text-ink-2 tabular-nums">{feetAndInches(height / CM_PER_IN)}</span>
+                )}
+                {errors[m] && (
+                  <p id={`${m}-error`} className={ERROR}>
+                    {errors[m]}
+                  </p>
+                )}
               </div>
-              {m === "heightCm" && units === "imperial" && height !== null && !Number.isNaN(height) && (
-                <span className="text-xs text-foreground/50">{feetAndInches(height / CM_PER_IN)}</span>
-              )}
-              {errors[m] && (
-                <p id={`${m}-error`} className={ERROR}>
-                  {errors[m]}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <fieldset className="flex flex-col gap-2" aria-describedby={errors.shape ? "shape-error" : undefined}>
-          <legend className="mb-2 text-sm text-foreground/70">Body shape</legend>
-          <div className="flex flex-wrap gap-2">
-            {BODY_SHAPES.map((s) => (
-              <label
-                key={s}
-                className="cursor-pointer rounded-full border border-black/15 px-3 py-1 text-sm has-checked:border-foreground has-checked:bg-foreground has-checked:text-background has-focus-visible:outline-2 dark:border-white/20"
-              >
-                <input
-                  type="radio"
-                  name="bodyShape"
-                  value={s}
-                  checked={shape === s}
-                  onChange={() => {
-                    setShape(s);
-                    edited();
-                  }}
-                  className="sr-only"
-                />
-                {BODY_SHAPE_LABELS[s]}
-              </label>
             ))}
           </div>
-          {errors.shape && (
-            <p id="shape-error" className={ERROR}>
-              {errors.shape}
-            </p>
-          )}
-        </fieldset>
+
+          <fieldset className="flex flex-col gap-2" aria-describedby={errors.shape ? "shape-error" : undefined}>
+            <legend className="mb-2 text-sm text-ink-2">Body shape</legend>
+            <div className="flex flex-wrap gap-2">
+              {BODY_SHAPES.map((s) => (
+                <label key={s} className="chip">
+                  <input
+                    type="radio"
+                    name="bodyShape"
+                    value={s}
+                    checked={shape === s}
+                    onChange={() => {
+                      setShape(s);
+                      edited();
+                    }}
+                    className="sr-only"
+                  />
+                  {BODY_SHAPE_LABELS[s]}
+                </label>
+              ))}
+            </div>
+            {errors.shape && (
+              <p id="shape-error" className={ERROR}>
+                {errors.shape}
+              </p>
+            )}
+          </fieldset>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+            {SIZES.map((s) => (
+              <div key={s} className="flex flex-col gap-1.5">
+                <label htmlFor={s} className="text-sm text-ink-2">
+                  {SIZE_LABELS[s]}
+                </label>
+                <select
+                  id={s}
+                  value={sizes[s]}
+                  onChange={(e) => {
+                    setSizes((prev) => ({ ...prev, [s]: e.target.value }));
+                    edited();
+                  }}
+                  aria-invalid={errors[s] ? true : undefined}
+                  aria-describedby={errors[s] ? `${s}-error` : undefined}
+                  className="field h-9 px-2"
+                >
+                  <option value="">Pick one</option>
+                  {SIZE_OPTIONS[s].map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                {errors[s] && (
+                  <p id={`${s}-error`} className={ERROR}>
+                    {errors[s]}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section aria-labelledby="mix-heading" className="flex flex-col gap-4">
-        <div>
-          <h2 id="mix-heading" className="text-lg font-semibold">
+      <section aria-labelledby="mix-heading" className={SECTION}>
+        <div className={SECTION_HEAD}>
+          <h2 id="mix-heading" className="text-lg font-medium">
             Outfits you want each season
           </h2>
-          <p className="text-sm text-foreground/60">How many different looks for each.</p>
+          <p className="text-sm text-ink-2">How many different looks for each.</p>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col border-t border-line md:col-span-7 md:col-start-6">
           {Occasion.options.map((o) => (
-            <div key={o} className="flex flex-wrap items-center gap-3">
-              <label htmlFor={`mix-${o}`} className="w-16 text-sm">
+            <div key={o} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-2.5">
+              <label htmlFor={`mix-${o}`} className="w-28 text-base">
                 {OCCASION_LABELS[o]}
               </label>
               <input
@@ -293,25 +357,50 @@ export function ProfileForm({
         </div>
       </section>
 
-      <div className="flex items-center gap-3">
+      {/* The demo account is never anyone's buyer, so it doesn't see this. */}
+      {!readOnly && (
+        <section aria-labelledby="resale-heading" className={SECTION}>
+          <div className={SECTION_HEAD}>
+            <h2 id="resale-heading" className="text-lg font-medium">
+              Resale
+            </h2>
+            <p className="text-sm text-ink-2">Your name, email and measurements stay private.</p>
+          </div>
+          <div className={SECTION_BODY}>
+            <label className="flex items-start gap-3 text-base">
+              <input
+                type="checkbox"
+                checked={resaleOptIn}
+                onChange={(e) => {
+                  setResaleOptIn(e.target.checked);
+                  edited();
+                }}
+                className="mt-1 size-4 accent-ink"
+              />
+              <span className="flex flex-col gap-1">
+                I&apos;d take secondhand clothes
+                <span className="text-sm text-ink-2">People passing on clothes can be matched with you.</span>
+              </span>
+            </label>
+          </div>
+        </section>
+      )}
+
+      <div className="flex items-center gap-4 md:pl-[calc((100%-11*16px)/12*5+5*16px)]">
         {readOnly ? (
           <ReadOnlyNote />
         ) : (
-          <button
-            type="submit"
-            disabled={status === "saving"}
-            className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background disabled:opacity-40"
-          >
+          <button type="submit" disabled={status === "saving"} className="btn-primary px-10">
             {status === "saving" ? "Saving…" : "Save"}
           </button>
         )}
         {status === "saved" && (
-          <p role="status" className="text-sm text-foreground/60">
+          <p role="status" className="text-sm text-ink-2">
             Saved
           </p>
         )}
         {status === "error" && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm font-medium">
             Couldn&apos;t save. Try again.
           </p>
         )}

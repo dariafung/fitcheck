@@ -11,8 +11,14 @@ import {
 } from "../ai/schemas/common";
 import { AiOutputError } from "../ai/errors";
 import type { JudgeRepeatInput, JudgeRepeatOutput } from "../ai/schemas/judge-repeat";
-import type { ScorePurchaseInput, ScorePurchaseOutput } from "../ai/schemas/score-purchase";
+import {
+  MAX_FELT_PHOTOS,
+  type ScorePurchaseInput,
+  type ScorePurchaseOutput,
+  type StyleLine,
+} from "../ai/schemas/score-purchase";
 import { imageUrls } from "../closet/images";
+import { loadStyleCardForScoring } from "../closet/style-profile";
 import type { Db } from "../db/server";
 import {
   FIT_QUESTIONS,
@@ -57,6 +63,7 @@ import {
   POINTS_PER_REVIVED,
   roundPart,
 } from "./score";
+import { itemPhotos, scoringPhoto } from "./score-photos";
 import { categoryOf, toClosetItem, type ClosetItem } from "./types";
 
 export type ScoreFn = (input: ScorePurchaseInput) => Promise<ScorePurchaseOutput>;
@@ -111,6 +118,8 @@ export function isIncomplete(err: unknown): boolean {
 export interface Candidate {
   title: string;
   tags: ItemTags;
+  // From the page, never stored; without it the model goes by the tags.
+  photo?: Buffer | null;
 }
 
 interface Profile {
@@ -165,21 +174,33 @@ async function loadFeelings(
 
 async function askFit(
   score: ScoreFn,
-  candidate: ClosetItem,
+  db: Db,
+  userId: string,
+  candidate: ClosetItem & { photo: Buffer | null },
   closet: readonly ClosetItem[],
   feelings: Map<string, FeelingStructured>,
   profile: ProfileSummary,
+  styleProfile: StyleLine[] | null,
 ): Promise<{ answers: FitAnswer[]; summary: string }> {
   const rows = pickFeltItems(closet, feelings, candidate);
   const trouble = troubleAreas(rows.map((r) => r.feeling));
   const asked = FIT_QUESTIONS.filter((q) => hasBasis(q.basis, rows, trouble));
   if (asked.length === 0) return { answers: fitAnswers([], null), summary: NO_FIT_SUMMARY };
+  // The candidate's photo and the closest felt items' photos.
+  const [candidatePhoto, photos] = await Promise.all([
+    candidate.photo && scoringPhoto(candidate.photo),
+    itemPhotos(db, userId, rows.slice(0, MAX_FELT_PHOTOS).map((r) => r.item.id)),
+  ]);
   const output = await score({
-    candidate: toItemSummary(candidate),
+    candidate: { ...toItemSummary(candidate), ...(candidatePhoto && { photo: candidatePhoto }) },
     profile,
-    feltItems: rows.map(toFeltItem),
+    feltItems: rows.map((row) => {
+      const photo = photos.get(row.item.id);
+      return { ...toFeltItem(row), ...(photo && { photo }) };
+    }),
     troubleAreas: trouble,
     questions: asked.map(({ id, text }) => ({ id, text })),
+    ...(styleProfile && { styleProfile }),
   });
   return { answers: fitAnswers(asked, output), summary: output.summary };
 }
@@ -244,17 +265,23 @@ export async function runBuyCheck(
     return { unsupported: "accessory", message: ACCESSORY_NOTICE };
   }
 
-  const [profile, { items: closet }] = await Promise.all([
+  const [profile, { items: closet, skippedItemIds }] = await Promise.all([
     loadProfile(db, userId),
     loadClosetItems(db, userId),
   ]);
   if (!profile) return null;
-  const feelings = await loadFeelings(db, userId, new Set(closet.map((i) => i.id)));
+  const closetIds = closet.map((i) => i.id);
+  // The style card helps the fit questions, stale or not; without one the
+  // model gets the same request as before cards existed.
+  const [feelings, styleProfile] = await Promise.all([
+    loadFeelings(db, userId, new Set(closetIds)),
+    loadStyleCardForScoring(db, userId, new Set([...closetIds, ...skippedItemIds])),
+  ]);
 
   // The model never sees the gap numbers, so all the calls can run at once.
   const [comparison, fit, repeat] = await Promise.all([
     compareWithCandidate(db, userId, closet, ai.judge, candidate),
-    askFit(ai.score, candidate, closet, feelings, profile.summary),
+    askFit(ai.score, db, userId, { ...candidate, photo: input.photo ?? null }, closet, feelings, profile.summary, styleProfile),
     askRepeat(ai.repeat, candidate, closet),
   ]);
   const { before, after } = comparison;

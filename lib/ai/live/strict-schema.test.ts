@@ -6,6 +6,7 @@ import { RepeatWire } from "./judge-repeat";
 import { FeelingWire } from "./parse-feeling";
 import { ScoreWire } from "./score-purchase";
 import { strictJsonSchema } from "./strict-schema";
+import { WearWire } from "./summarize-wear";
 
 // Meta's strict subset (dev.meta.ai/docs/structured-output): closed, fully
 // required objects; no allOf / oneOf; anyOf only below the root.
@@ -43,6 +44,7 @@ describe("strictJsonSchema", () => {
     ["item", ExtractWire],
     ["fit_answers", ScoreWire],
     ["repeat", RepeatWire],
+    ["wear_insights", WearWire],
   ])("%s fits the strict subset", (_, schema) => {
     expect(strictProblems(strictJsonSchema(schema))).toEqual([]);
   });

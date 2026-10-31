@@ -71,6 +71,21 @@ describe("POST /api/items", () => {
     });
   });
 
+  it("keeps a typed size as typed, and none when left blank", async () => {
+    const sized = await (await POST(jsonRequest("/api/items", request({ size: "  US 8 " })))).json();
+    const blank = await (await POST(jsonRequest("/api/items", request({ size: "" })))).json();
+    const { data } = await createServerClient()
+      .from("items")
+      .select("id, size")
+      .in("id", [sized.item.id, blank.item.id])
+      .throwOnError();
+    expect(Object.fromEntries(data.map((r) => [r.id, r.size]))).toEqual({
+      [sized.item.id]: "US 8",
+      [blank.item.id]: null,
+    });
+    expect((await POST(jsonRequest("/api/items", request({ size: "x".repeat(21) })))).status).toBe(400);
+  });
+
   it("refuses image paths outside the user's folder", async () => {
     const res = await POST(
       jsonRequest("/api/items", request({ imagePaths: [`${randomUUID()}/${randomUUID()}.webp`] })),

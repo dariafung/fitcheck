@@ -19,7 +19,7 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px).
 | # | Do | Expect |
 | --- | --- | --- |
 | 1.1 | Open the site while signed out | You land on `/login` with "Log in", "Sign up" and "Try the demo account" |
-| 1.2 | "Sign up" with your email and a password of 6+ characters | You land on an empty closet: "Your closet is empty."; "Log out" top right |
+| 1.2 | "Sign up" with your email and a password of 6+ characters | You land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
 | 1.3 | Log out, log in again with the same email and password | Back in your (empty) closet |
 | 1.4 | Log in with a wrong password | A short error on the page |
 | 1.5 | Open `/closet` in a private window | Sent to `/login` |
@@ -55,7 +55,7 @@ Take screenshots of real product pages from different stores (one screen: produc
 | 4.1 | Profile: fill height, weight, body shape and outfits wanted per occasion; Save; reload | Values kept |
 | 4.2 | Switch units in · lb ↔ cm · kg | Numbers convert; switching back gives the same numbers |
 | 4.3 | Weather: search a city, pick it | Home shows that city's low–high in °F |
-| 4.4 | Home | "Should I buy this?" card; "Good for today" shows clothes whose range fits today's weather |
+| 4.4 | Home | "Good for today" shows clothes whose range fits today's weather; the top bar has a black "Should I buy this?" button ("Buy?" on a phone) on every page |
 
 ### 5. Should I buy this?
 
@@ -63,7 +63,7 @@ Do this after 2.4 and 4.1, so there is a closet and a profile to check against.
 
 | # | Do | Expect |
 | --- | --- | --- |
-| 5.1 | Home → "Should I buy this?", upload a product screenshot, "Check it" | "Checking…", then a score like "47.5 / 100" |
+| 5.1 | Top bar → "Should I buy this?" ("Buy?" on a phone), upload a product screenshot, "Check it" | "Checking…", then a score like "47.5 / 100" |
 | 5.2 | Look at the five parts | Suits you /40, Outfits /20, Revives /15, Fills a gap /15, Not a repeat /10; they add up to the total |
 | 5.3 | Read every reason | Short, plain, about this item and your closet; no made-up items |
 | 5.4 | Check an item close to one you own (same type and color) | "Not a repeat" is low and names that item |
@@ -75,7 +75,7 @@ Do this after 2.4 and 4.1, so there is a closet and a profile to check against.
 
 | # | Do | Expect |
 | --- | --- | --- |
-| 6.1 | Log out → "Try the demo account" | Home with the demo persona's closet; "Sign up" and "Log out" top right |
+| 6.1 | Log out → "Try the demo account" | Home with the demo persona's closet; "Sign up" and "Log out" top right (on a phone, no "Sign up" in the top bar and "Log out" at the bottom of Profile) |
 | 6.2 | Open an item and Profile | No Edit, Save, Delete or voice button; instead "Demo account is read-only. Sign up to add your own." |
 | 6.3 | Run "Should I buy this?" | Works and shows a score |
 

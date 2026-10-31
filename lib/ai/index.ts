@@ -1,11 +1,14 @@
 // The only entry point for model calls. Import from Route Handlers only.
 import { defineAiFunction } from "./define";
+import { liveBuildProfile } from "./live/build-profile";
 import { liveExtractItem } from "./live/extract-item";
 import { liveJudgePairing } from "./live/judge-pairing";
 import { liveJudgeRepeat } from "./live/judge-repeat";
-import { notImplemented } from "./live/not-implemented";
 import { liveParseFeeling } from "./live/parse-feeling";
+import { liveRenderOutfit } from "./live/render-outfit";
 import { liveScorePurchase } from "./live/score-purchase";
+import { liveSegmentGarment } from "./live/segment-garment";
+import { liveSummarizeWear } from "./live/summarize-wear";
 import { liveTranscribe } from "./live/transcribe";
 import { mockBuildProfile } from "./mock/build-profile";
 import { mockExtractItem } from "./mock/extract-item";
@@ -15,6 +18,7 @@ import { mockParseFeeling } from "./mock/parse-feeling";
 import { mockRenderOutfit } from "./mock/render-outfit";
 import { mockScorePurchase } from "./mock/score-purchase";
 import { mockSegmentGarment } from "./mock/segment-garment";
+import { mockSummarizeWear } from "./mock/summarize-wear";
 import { mockTranscribe } from "./mock/transcribe";
 import * as buildProfileSchema from "./schemas/build-profile";
 import * as extractItemSchema from "./schemas/extract-item";
@@ -24,6 +28,7 @@ import * as parseFeelingSchema from "./schemas/parse-feeling";
 import * as renderOutfitSchema from "./schemas/render-outfit";
 import * as scorePurchaseSchema from "./schemas/score-purchase";
 import * as segmentGarmentSchema from "./schemas/segment-garment";
+import * as summarizeWearSchema from "./schemas/summarize-wear";
 import * as transcribeSchema from "./schemas/transcribe";
 
 // A missing answer or out-of-range score is asked again up to 3 times.
@@ -91,7 +96,9 @@ export const renderOutfit = defineAiFunction({
   input: renderOutfitSchema.RenderOutfitInput,
   output: renderOutfitSchema.RenderOutfitOutput,
   mock: mockRenderOutfit,
-  live: notImplemented("renderOutfit"),
+  live: liveRenderOutfit,
+  // A picture never fails validation; asking again would only pay twice.
+  liveAttempts: 1,
 });
 
 export const buildProfile = defineAiFunction({
@@ -100,7 +107,7 @@ export const buildProfile = defineAiFunction({
   input: buildProfileSchema.BuildProfileInput,
   output: buildProfileSchema.BuildProfileOutput,
   mock: mockBuildProfile,
-  live: notImplemented("buildProfile"),
+  live: liveBuildProfile,
 });
 
 export const segmentGarment = defineAiFunction({
@@ -109,7 +116,16 @@ export const segmentGarment = defineAiFunction({
   input: segmentGarmentSchema.SegmentGarmentInput,
   output: segmentGarmentSchema.SegmentGarmentOutput,
   mock: mockSegmentGarment,
-  live: notImplemented("segmentGarment"),
+  live: liveSegmentGarment,
+});
+
+export const summarizeWear = defineAiFunction({
+  name: "summarizeWear",
+  promptVersion: summarizeWearSchema.PROMPT_VERSION,
+  input: summarizeWearSchema.SummarizeWearInput,
+  output: summarizeWearSchema.SummarizeWearOutput,
+  mock: mockSummarizeWear,
+  live: liveSummarizeWear,
 });
 
 export { AiError } from "./errors";
@@ -125,4 +141,5 @@ export type { ParseFeelingInput, ParseFeelingOutput } from "./schemas/parse-feel
 export type { RenderOutfitInput, RenderOutfitOutput } from "./schemas/render-outfit";
 export type { ScorePurchaseInput, ScorePurchaseOutput } from "./schemas/score-purchase";
 export type { SegmentGarmentInput, SegmentGarmentOutput } from "./schemas/segment-garment";
+export type { SummarizeWearInput, SummarizeWearOutput } from "./schemas/summarize-wear";
 export type { TranscribeInput, TranscribeOutput } from "./schemas/transcribe";

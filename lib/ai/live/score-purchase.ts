@@ -1,5 +1,13 @@
+import type { ResponseInputContent } from "openai/resources/responses/responses";
 import { z } from "zod";
-import { FIT_SCORE_MAX, type FeltItem, type ScorePurchaseInput, type ScorePurchaseOutput } from "../schemas/score-purchase";
+import type { MediaRef } from "../schemas/common";
+import {
+  FIT_SCORE_MAX,
+  type FeltItem,
+  type ScorePurchaseInput,
+  type ScorePurchaseOutput,
+  type StyleLine,
+} from "../schemas/score-purchase";
 import { describeItem } from "./describe";
 import { respondStructured } from "./respond";
 
@@ -79,7 +87,53 @@ export function scorePrompt(input: Input): string {
     "",
     "Questions:",
     ...input.questions.map((q, i) => `Q${i + 1}: ${q.text}`),
+    ...(input.styleProfile ? ["", ...styleSection(input.styleProfile)] : []),
   ].join("\n");
+}
+
+// The style card goes last and only when there is one, with its rules, so
+// the request without a card stays as it was.
+function styleSection(lines: readonly StyleLine[]): string[] {
+  return [
+    "Style summary of their whole closet (a digest of the same feelings, not new evidence):",
+    "- It only shows the patterns across the felt items above. When it and a felt item disagree, the felt item wins.",
+    "- When no feeling bears on the candidate for a question, the summary doesn't move that score from 4.",
+    "- Do not quote it in reasons.",
+    ...lines.map((l) => `${l.kind === "suits" ? "+" : "-"} ${l.topic}: ${l.text}`),
+  ];
+}
+
+// Photos go after the text, each with the number it belongs to, and their
+// rules with them, so a request without photos stays as it was.
+export function photoContent(input: Input): ResponseInputContent[] {
+  const photos = [
+    { label: "Candidate", photo: input.candidate.photo },
+    ...input.feltItems.map((item, i) => ({ label: `F${i + 1}`, photo: item.photo })),
+  ].flatMap(({ label, photo }) => {
+    const url = photo && photoUrl(photo);
+    return url ? [{ label, url }] : [];
+  });
+  if (photos.length === 0) return [];
+  return [
+    {
+      type: "input_text",
+      text: [
+        "Photos of some of these items follow, each after its label.",
+        "- Where a photo shows the color shade, cut or length better than the tags, go by the photo; the tags fill in the rest.",
+        "- A photo is not a feeling. When no feeling bears on the candidate for a question, it still gets 4.",
+      ].join("\n"),
+    },
+    ...photos.flatMap(({ label, url }): ResponseInputContent[] => [
+      { type: "input_text", text: `${label}:` },
+      { type: "input_image", image_url: url, detail: "auto" },
+    ]),
+  ];
+}
+
+// Stored images are read and inlined by lib/check before this.
+function photoUrl(ref: MediaRef): string | null {
+  if (ref.kind === "inline") return `data:${ref.mime};base64,${ref.base64}`;
+  return ref.kind === "url" ? ref.url : null;
 }
 
 // Answers come back in question order. Numbers out of range are dropped and
@@ -106,7 +160,7 @@ export async function liveScorePurchase(input: Input): Promise<z.input<typeof Sc
   const { data } = await respondStructured({
     fn: "scorePurchase",
     instructions: SCORE_PURCHASE_INSTRUCTIONS,
-    content: [{ type: "input_text", text: scorePrompt(input) }],
+    content: [{ type: "input_text", text: scorePrompt(input) }, ...photoContent(input)],
     schemaName: "fit_answers",
     schema: ScoreWire,
     maxOutputTokens: 4000,

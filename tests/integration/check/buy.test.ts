@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/checks/route";
 import * as ai from "@/lib/ai";
 import { MOCK_INCOMPLETE_TITLE } from "@/lib/ai/mock/score-purchase";
@@ -7,9 +7,12 @@ import type { ItemTags } from "@/lib/ai/schemas/common";
 import type { BuyCheck, BuyCheckResult } from "@/lib/check/buy-check";
 import { FIT_QUESTIONS } from "@/lib/check/fit-questions";
 import { CANDIDATE_ITEM_ID } from "@/lib/check/pairings";
-import { INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
+import { ACCESSORY_NOTICE, INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REASON } from "@/lib/check/reasons";
 import { roundPart } from "@/lib/check/score";
+import { PLACEHOLDER_VERSION } from "@/lib/closet/style-profile";
 import { createServerClient } from "@/lib/db/server";
+import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
+import sharp from "sharp";
 
 // Spies on the model calls while keeping the mock answers.
 vi.mock("@/lib/ai", async (importOriginal) => {
@@ -143,7 +146,7 @@ describe("POST /api/checks", () => {
     expect(r.parts.revives.items.map((i) => i.id).sort()).toEqual([shirtId, trousersId].sort());
     expect(r.parts.revives.points).toBe(8);
     // Work: 3 of 3 short, adds 1.
-    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 5, reason: "Work: 3 short, this adds 1." });
+    expect(r.parts.fillsGap).toMatchObject({ tier: "from_zero", points: 5, reason: "You want 3 work outfits and have 0. This adds 1." });
     expect(r.parts.notRepeat).toMatchObject({ points: 10, item: null });
     expect(r.gap).toBeNull();
     expect(r.sampleOutfits).toHaveLength(1);
@@ -186,7 +189,7 @@ describe("POST /api/checks", () => {
     expect(r.gap).toEqual({
       kind: "nothing_owned",
       slots: [[{ category: "shoes", owned: false }]],
-      reason: "Nothing in your closet to wear this with yet. Add shoes.",
+      reason: "Your tops could go with this, but you have no shoes yet.",
     });
     expect(r.sampleOutfits).toEqual([]);
   });
@@ -214,7 +217,7 @@ describe("POST /api/checks", () => {
 
   it("doesn't score accessories", async () => {
     const json = await check({ title: "Gold hoops", tags: tags({ category: "accessory" }) });
-    expect(json).toEqual({ unsupported: "accessory", message: expect.stringContaining("Accessories") });
+    expect(json).toEqual({ unsupported: "accessory", message: ACCESSORY_NOTICE });
     expect(ai.judgePairing).not.toHaveBeenCalled();
     expect(ai.scorePurchase).not.toHaveBeenCalled();
     expect(ai.judgeRepeat).not.toHaveBeenCalled();
@@ -257,5 +260,98 @@ describe("POST /api/checks", () => {
         .eq("id", userId)
         .throwOnError();
     }
+  });
+
+  describe("with a style card", () => {
+    const goneId = randomUUID();
+    const statement = (topic: string, text: string, ids: string[]) => ({ topic, text, evidenceItemIds: ids });
+    // Built for an older closet: stale, and one line is about an item that's gone.
+    const CARD = {
+      headline: { text: "Easy basics.", evidenceItemIds: [shirtId, trousersId] },
+      suits: [
+        statement("color", "Light colors.", [shirtId]),
+        statement("feel", "Soft cotton.", [shirtId]),
+        statement("style", "Bold prints.", [goneId]),
+        statement("occasion", "Mostly work.", [shirtId, trousersId]),
+      ],
+      avoid: [statement("fit", "Tight hips.", [shirtId])],
+      input_hash: "an older closet",
+      prompt_version: "build-profile@3",
+    };
+    const saveCard = (card: Record<string, unknown>) =>
+      db.from("style_profiles").upsert({ user_id: userId, ...card }, { onConflict: "user_id" }).throwOnError();
+    const scoreInput = async () => {
+      vi.mocked(ai.scorePurchase).mockClear();
+      await result(LOAFERS);
+      return vi.mocked(ai.scorePurchase).mock.calls[0][0];
+    };
+
+    afterEach(async () => {
+      await db.from("style_profiles").delete().eq("user_id", userId).throwOnError();
+    });
+
+    it("sends the card's lines, stale too, without occasions or lines about items that are gone", async () => {
+      const without = await scoreInput();
+      await saveCard(CARD);
+      const input = await scoreInput();
+      expect(input.styleProfile).toEqual([
+        { topic: "color", kind: "suits", text: "Light colors." },
+        { topic: "fit", kind: "avoid", text: "Tight hips." },
+        { topic: "feel", kind: "suits", text: "Soft cotton." },
+      ]);
+      expect({ ...input, styleProfile: undefined }).toEqual(without);
+    });
+
+    it("sends the same input as without a card for the placeholder or a card too thin to show", async () => {
+      const without = await scoreInput();
+      expect(without).not.toHaveProperty("styleProfile");
+      await saveCard({ ...CARD, prompt_version: PLACEHOLDER_VERSION });
+      expect(await scoreInput()).toEqual(without);
+      // Only the headline, color and occasion rows are left.
+      await saveCard({ ...CARD, suits: CARD.suits.filter((x) => x.topic === "color" || x.topic === "occasion"), avoid: [] });
+      expect(await scoreInput()).toEqual(without);
+    });
+  });
+
+  describe("with photos", () => {
+    const shirtPhoto = `${userId}/${randomUUID()}.webp`;
+    const shot = () =>
+      sharp({ create: { width: 900, height: 1200, channels: 3, background: "#ffffff" } }).webp().toBuffer();
+
+    beforeAll(async () => {
+      const { error } = await db.storage.from(ITEM_IMAGES_BUCKET).upload(shirtPhoto, await shot(), { contentType: "image/webp" });
+      if (error) throw error;
+      await db.from("items").update({ image_paths: [shirtPhoto] }).eq("id", shirtId).throwOnError();
+    });
+
+    afterAll(async () => {
+      await db.from("items").update({ image_paths: [] }).eq("id", shirtId).throwOnError();
+      await db.storage.from(ITEM_IMAGES_BUCKET).remove([shirtPhoto]);
+    });
+
+    const scoreInput = async (body: unknown) => {
+      vi.mocked(ai.scorePurchase).mockClear();
+      await result(body);
+      return vi.mocked(ai.scorePurchase).mock.calls[0][0];
+    };
+
+    it("sends the item's photo and the felt items' stored photos, shrunk", async () => {
+      const input = await scoreInput({ ...LOAFERS, photo: `data:image/webp;base64,${(await shot()).toString("base64")}` });
+      const photo = input.candidate.photo;
+      if (photo?.kind !== "inline") throw new Error("expected an inline photo");
+      expect(await sharp(Buffer.from(photo.base64, "base64")).metadata()).toMatchObject({ format: "webp", height: 512 });
+      const felt = new Map(input.feltItems.map((f) => [f.id, f.photo]));
+      expect(felt.get(shirtId)).toMatchObject({ kind: "inline", mime: "image/webp" });
+      // The trousers have no photo and go as text.
+      expect(felt.has(trousersId)).toBe(true);
+      expect(felt.get(trousersId)).toBeUndefined();
+    });
+
+    it("scores by the tags when the item's photo can't be read", async () => {
+      for (const photo of ["not a data url", `data:image/png;base64,${Buffer.from("hello").toString("base64")}`]) {
+        const input = await scoreInput({ ...LOAFERS, photo });
+        expect(input.candidate).not.toHaveProperty("photo");
+      }
+    });
   });
 });

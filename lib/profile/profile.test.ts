@@ -11,6 +11,10 @@ const VALID = {
   inseamCm: null,
   bodyShape: "pear",
   lifestyleMix: { work: 0, school: 3, social: 2, sport: 3, home: 3 },
+  topSize: "M",
+  bottomSize: "M",
+  shoeSize: "W7.5",
+  resaleOptIn: false,
 };
 
 const parses = (over: Record<string, unknown>) => ProfileInput.safeParse({ ...VALID, ...over }).success;
@@ -25,6 +29,15 @@ describe("ProfileInput", () => {
     expect(parses({ weightKg: undefined })).toBe(false);
     expect(parses({ bodyShape: null })).toBe(false);
     expect(parses({ bodyShape: "triangle" })).toBe(false);
+  });
+
+  it("requires the three sizes from their lists, and the resale choice", () => {
+    expect(parses({ topSize: null })).toBe(false);
+    expect(parses({ bottomSize: "XXXL" })).toBe(false);
+    expect(parses({ shoeSize: undefined })).toBe(false);
+    expect(parses({ shoeSize: "7.5" })).toBe(false);
+    expect(parses({ shoeSize: "M15" })).toBe(true);
+    expect(parses({ resaleOptIn: "yes" })).toBe(false);
   });
 
   it("keeps measurements within sane bounds", () => {

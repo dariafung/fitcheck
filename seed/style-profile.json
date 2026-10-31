@@ -1,0 +1,78 @@
+{
+  "promptVersion": "build-profile@3",
+  "inputHash": "60de115c1b512aa8521cddd7ad9130df2a49f3946a642022e3b790af8de4060c",
+  "headline": {
+    "text": "Your style blends sporty pinks and cozy casuals with clean fitted basics",
+    "evidenceItemIds": [
+      "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+      "e749b166-b703-413a-80f2-36b6e2864ed6",
+      "11fc83de-be0d-42f0-b9f7-d7051467f79d"
+    ]
+  },
+  "suits": [
+    {
+      "text": "Soft pink tones brighten your look",
+      "topic": "color",
+      "evidenceItemIds": [
+        "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+        "b91ce162-a22b-4d6f-a443-65547e082181",
+        "e749b166-b703-413a-80f2-36b6e2864ed6"
+      ]
+    },
+    {
+      "text": "Slim fitted tops and relaxed wide legs suit your wardrobe",
+      "topic": "fit",
+      "evidenceItemIds": [
+        "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+        "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+        "b4411873-c7b0-44eb-bb1d-542889641915"
+      ]
+    },
+    {
+      "text": "Soft sweat-wicking and fleece fabrics keep you comfortable",
+      "topic": "feel",
+      "evidenceItemIds": [
+        "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+        "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+        "825788d8-8548-43da-9a26-40f5af91c0f3",
+        "b91ce162-a22b-4d6f-a443-65547e082181"
+      ]
+    },
+    {
+      "text": "Casual sneakers loafers and cozy hoodies match your style",
+      "topic": "style",
+      "evidenceItemIds": [
+        "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+        "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+        "e749b166-b703-413a-80f2-36b6e2864ed6"
+      ]
+    },
+    {
+      "text": "Your wardrobe covers school and social with sport home basics",
+      "topic": "occasion",
+      "evidenceItemIds": [
+        "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+        "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+        "825788d8-8548-43da-9a26-40f5af91c0f3",
+        "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+      ]
+    }
+  ],
+  "avoid": [
+    {
+      "text": "Skip beige tones dulling your look",
+      "topic": "color",
+      "evidenceItemIds": [
+        "8e169881-6d10-4f5e-93b1-c00a1e1efe69"
+      ]
+    },
+    {
+      "text": "Avoid deep V necklines and tight shoulders for your comfort",
+      "topic": "fit",
+      "evidenceItemIds": [
+        "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+        "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
+      ]
+    }
+  ]
+}

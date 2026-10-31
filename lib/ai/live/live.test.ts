@@ -154,6 +154,7 @@ describe("extractItem", () => {
     brand: "Acme",
     price: 49.9,
     currency: "usd",
+    size: " Size: S ",
     tags: {
       category: "top",
       subcategory: null,
@@ -204,6 +205,7 @@ describe("extractItem", () => {
       brand: "Acme",
       priceCents: 4990,
       currency: "USD",
+      size: "S",
       productBox: { x: 0.1, y: 0.2, width: 0.9, height: 0.5 },
       sources: [{ field: "materials", url: "https://acme.example/shirt" }],
     });
@@ -237,6 +239,12 @@ describe("extractItem", () => {
     expect(out.productBox).toBeUndefined();
     expect(out.sources).toEqual([]);
     expect(create.mock.calls[0][0].tools).toBeUndefined();
+  });
+
+  it("gives no size when the model reads none", async () => {
+    create.mockResolvedValue(reply({ ...WIRE, size: null }));
+    const out = await extractItem({ knownFields: {}, images: [], screenshot: SCREENSHOT, allowWebSearch: false }, LIVE);
+    expect(out.size).toBeUndefined();
   });
 
   it("does not read images from storage yet", async () => {

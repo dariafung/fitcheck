@@ -102,7 +102,7 @@ export function VoiceButton({ itemId, onText }: { itemId: string; onText: (text:
     state === "recording" ? "Release when done" : state === "working" ? "Turning it into text…" : "Hold to talk";
 
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex flex-col items-start gap-2">
       <button
         type="button"
         disabled={state === "working"}
@@ -124,21 +124,22 @@ export function VoiceButton({ itemId, onText }: { itemId: string; onText: (text:
         onKeyUp={(e) => {
           if (e.key === " " || e.key === "Enter") release();
         }}
-        className="flex touch-none items-center gap-2 rounded-full border border-black/15 px-4 py-1.5 text-sm font-medium select-none [-webkit-touch-callout:none] hover:bg-black/[.04] disabled:opacity-60 dark:border-white/20 dark:hover:bg-white/[.06]"
+        className="btn-secondary touch-none select-none [-webkit-touch-callout:none] data-[state=recording]:bg-ink data-[state=recording]:text-paper"
+        data-state={state}
       >
         <span
           aria-hidden
-          className={`size-2 rounded-full ${state === "recording" ? "animate-pulse bg-red-600" : "bg-foreground/40"}`}
+          className={`size-2 rounded-full ${state === "recording" ? "bg-paper motion-safe:animate-pulse" : "bg-ink"}`}
         />
         {label}
       </button>
       {state === "recording" && (
-        <p role="status" className="text-sm tabular-nums text-foreground/60">
+        <p role="status" className="text-sm tabular-nums text-ink-2">
           {clock(elapsed)} / {clock(MAX_VOICE_SECONDS * 1000)}
         </p>
       )}
       {message && (
-        <p role="alert" className="text-sm text-foreground/70">
+        <p role="alert" className="text-sm font-medium">
           {message}
         </p>
       )}
