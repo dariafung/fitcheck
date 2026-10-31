@@ -1,12 +1,12 @@
-// Loads the fictional demo persona, items, feelings, style card and 30 days
-// of outfits (made up from the items, ending yesterday) into the database.
-// Idempotent: rows have fixed ids and are upserted. Item photos listed in
-// items.json image_paths are uploaded from seed/images/.
+// Loads the fictional demo persona, items, feelings, style card and 10 days
+// of outfits (ending yesterday) into the database. The persona's old items,
+// card, outfits, insights and photos are cleared first, so the persona ends
+// up exactly as seeded. Item photos listed in items.json image_paths are
+// uploaded from seed/images/.
 //
 // Local by default (.env.local) and refuses any other URL. SEED_REMOTE=1
 // seeds the hosted project instead: SUPABASE_URL and SUPABASE_SECRET_KEY come
-// from the environment, the project ref must be typed back to confirm, and
-// the old demo data is cleared first.
+// from the environment, and the project ref must be typed back to confirm.
 //
 // Also creates the read-only demo account's auth user (same id as the
 // persona) with DEMO_ACCOUNT_PASSWORD: from .env.local locally, from the
@@ -16,7 +16,7 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
-import { addDays, SEED_DAYS, seedOutfitLog, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
+import { addDays, SEED_DAYS, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -63,18 +63,17 @@ const imagePaths = items.flatMap((item) => item.image_paths ?? []);
 const db = createClient(url, key, { auth: { persistSession: false } });
 const bucket = db.storage.from(ITEM_IMAGES_BUCKET);
 
-if (remote) {
-  // Items take their feelings and pairings with them.
-  for (const table of ["items", "style_profiles", "outfit_logs", "wear_insights"] as const) {
-    const cleared = await db.from(table).delete().eq("user_id", persona.id);
-    if (cleared.error) throw cleared.error;
-  }
-  const { data: old, error } = await bucket.list(persona.id, { limit: 1000 });
-  if (error) throw error;
-  if (old.length > 0) {
-    const removed = await bucket.remove(old.map((f) => `${persona.id}/${f.name}`));
-    if (removed.error) throw removed.error;
-  }
+// The seed is the whole persona: pieces from an older seed, or added by
+// hand or by tests, go first. Items take their feelings and pairings with them.
+for (const table of ["items", "style_profiles", "outfit_logs", "wear_insights"] as const) {
+  const cleared = await db.from(table).delete().eq("user_id", persona.id);
+  if (cleared.error) throw cleared.error;
+}
+const { data: old, error } = await bucket.list(persona.id, { limit: 1000 });
+if (error) throw error;
+if (old.length > 0) {
+  const removed = await bucket.remove(old.map((f) => `${persona.id}/${f.name}`));
+  if (removed.error) throw removed.error;
 }
 
 // A calendar turned off while testing comes back on.
@@ -115,10 +114,10 @@ const styled = await db.from("style_profiles").upsert(
 );
 if (styled.error) throw styled.error;
 
-// Dates move with the day the seed runs, so the old log goes first. Its
-// insights go too: they were about the old log.
+// Dates move with the day the seed runs; the old log and its insights went
+// with the rest of the persona above.
 const plan = existsSync(new URL("../seed/wear-plan.json", import.meta.url))
-  ? (readJson("wear-plan.json") as Record<string, "rare" | "often" | "never">)
+  ? (readJson("wear-plan.json") as Record<string, "rare" | "often" | "never"> | DayPlan)
   : null;
 const { rows: outfits } = seedOutfitLog({
   personaId: persona.id,
@@ -128,10 +127,6 @@ const { rows: outfits } = seedOutfitLog({
   plan,
   lastDay,
 });
-for (const table of ["outfit_logs", "wear_insights"] as const) {
-  const cleared = await db.from(table).delete().eq("user_id", persona.id);
-  if (cleared.error) throw cleared.error;
-}
 const logged = await db.from("outfit_logs").insert(outfits);
 if (logged.error) throw logged.error;
 

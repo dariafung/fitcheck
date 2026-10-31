@@ -12,9 +12,9 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
 });
 
-const SHIRT = "White cotton button-down";
-const SNEAKERS = "White leather sneakers";
-const JEANS = "Dark straight-leg jeans";
+const SHIRT = "Supima Long Sleeve T-Shirt";
+const SNEAKERS = "Japan Pro";
+const JEANS = "ZW Collection High-Rise Straight Fit Jeans";
 // The browser and this process share a clock and a time zone.
 const TODAY = localDay();
 

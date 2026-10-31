@@ -1,84 +1,505 @@
 [
   {
-    "id": "5b0d3c1e-6f2a-4c8e-9a1d-2e7f4b6c8a01",
-    "item_id": "852c8e3d-abf7-4955-ab65-9d83194a02ae",
-    "raw_text": "Love this shirt, so comfy and the color makes me look awake. A bit tight across the shoulders though.",
+    "id": "c08a0b43-c008-4a23-899e-5408891129d4",
+    "item_id": "2262ce87-2107-4b70-8e85-33f8ecb2b8bb",
+    "raw_text": "Love the color and the belt shapes my waist, but it's boxy in the shoulders.",
     "source": "typed",
     "structured": {
-      "flattering": "yes",
+      "mood": [],
       "liked": "yes",
       "aspects": [
         {
-          "aspect": "feel",
-          "sentiment": "positive",
-          "said": "so comfy",
-          "means": "so comfy"
-        },
-        {
+          "said": "Love the color",
+          "means": "Love the color",
           "aspect": "color",
-          "sentiment": "positive",
-          "said": "color makes me look awake",
-          "means": "looks awake in white"
+          "sentiment": "positive"
         },
         {
+          "area": "waist",
+          "said": "belt shapes my waist",
+          "means": "belt shapes my waist",
           "aspect": "fit",
-          "sentiment": "negative",
+          "sentiment": "positive"
+        },
+        {
           "area": "shoulders",
-          "said": "tight across the shoulders",
-          "means": "shoulders need more room"
+          "said": "boxy in the shoulders",
+          "means": "boxy in the shoulders",
+          "aspect": "fit",
+          "sentiment": "negative"
         }
       ],
+      "summary": "Toffee jacket loved for color and waist shaping but boxy at shoulders.",
       "occasions": [],
-      "mood": [],
-      "summary": "Comfy white shirt looks awake but tight across shoulders."
+      "flattering": "mixed"
     },
-    "parsed_at": "2026-10-26T00:00:00Z"
+    "parsed_at": "2026-10-31T01:36:07.732Z"
   },
   {
-    "id": "5b0d3c1e-6f2a-4c8e-9a1d-2e7f4b6c8a02",
-    "item_id": "c81b2b56-1f62-4284-83b6-7307a6355ac5",
-    "raw_text": "Never wear these. The waist digs in when I sit and they make my legs look short.",
+    "id": "d1b5817b-edad-437f-b640-4b66d23b266f",
+    "item_id": "c2f21ca3-2cdc-43df-8b63-af8d5d29cd4b",
+    "raw_text": "Goes with everything, but it's a little see-through.",
     "source": "typed",
     "structured": {
-      "flattering": "no",
+      "mood": [],
+      "liked": "unknown",
+      "aspects": [
+        {
+          "said": "Goes with everything",
+          "means": "Goes with everything",
+          "aspect": "other",
+          "sentiment": "positive"
+        },
+        {
+          "said": "a little see-through",
+          "means": "a little see-through",
+          "aspect": "feel",
+          "sentiment": "negative"
+        }
+      ],
+      "summary": "Versatile top that is a little see-through.",
+      "occasions": [],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:26.882Z"
+  },
+  {
+    "id": "5e401418-f073-4fab-8813-0b74cb492bbd",
+    "item_id": "907d76cc-98b7-4e29-8755-fc734a761987",
+    "raw_text": "Love the boat neckline, but the knit pills after a few washes.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "mixed",
+      "aspects": [
+        {
+          "area": "neckline",
+          "said": "love the boat neckline",
+          "means": "love the boat neckline",
+          "aspect": "fit",
+          "sentiment": "positive"
+        },
+        {
+          "said": "knit pills after a few washes",
+          "means": "knit pills after a few washes",
+          "aspect": "feel",
+          "sentiment": "negative"
+        }
+      ],
+      "summary": "Loved boat neckline but knit pills after washing.",
+      "occasions": [],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:37.445Z"
+  },
+  {
+    "id": "458ca3fc-bbf1-44bb-8d36-b946a70b6ba6",
+    "item_id": "0d20089b-caf5-426f-8f27-5cd4b6dfaeca",
+    "raw_text": "Fits just right, but the V is a bit too deep for class.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "unknown",
+      "aspects": [
+        {
+          "area": "overall",
+          "said": "fits just right",
+          "means": "fits just right",
+          "aspect": "fit",
+          "sentiment": "positive"
+        },
+        {
+          "area": "neckline",
+          "said": "V is a bit too deep",
+          "means": "prefers shallower V necklines",
+          "aspect": "fit",
+          "sentiment": "negative"
+        }
+      ],
+      "summary": "Fits well overall but neckline too deep for class.",
+      "occasions": [],
+      "flattering": "yes"
+    },
+    "parsed_at": "2026-10-31T01:36:34.966Z"
+  },
+  {
+    "id": "f3c867a7-0ca4-4de9-af6b-e817a84cbc64",
+    "item_id": "5e8bd85a-3e3a-40fc-9028-bb7d2695596c",
+    "raw_text": "Wicks sweat really well, I wear these for every run.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "wicks sweat really well",
+          "means": "wicks sweat really well",
+          "aspect": "feel",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Sweat-wicking running shorts worn for every run.",
+      "occasions": [
+        "sport"
+      ],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:32.177Z"
+  },
+  {
+    "id": "c3893b92-64eb-461c-a479-6adfbef4cdc1",
+    "item_id": "11fc83de-be0d-42f0-b9f7-d7051467f79d",
+    "raw_text": "Wicks sweat and the fitted cut looks clean on me.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "unknown",
+      "aspects": [
+        {
+          "said": "wicks sweat",
+          "means": "wicks sweat",
+          "aspect": "feel",
+          "sentiment": "positive"
+        },
+        {
+          "said": "fitted cut looks clean",
+          "means": "fitted cuts look clean",
+          "aspect": "fit",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Sweat-wicking tee with clean-looking fitted cut.",
+      "occasions": [],
+      "flattering": "yes"
+    },
+    "parsed_at": "2026-10-31T01:36:37.524Z"
+  },
+  {
+    "id": "eca258e2-6fb0-4649-a00f-b94aff72f08e",
+    "item_id": "5674a27b-87a6-4929-8099-28b5a3b2b9e3",
+    "raw_text": "Wicks sweat, and the pink makes me look awake.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "unknown",
+      "aspects": [
+        {
+          "said": "Wicks sweat",
+          "means": "Wicks sweat",
+          "aspect": "feel",
+          "sentiment": "positive"
+        },
+        {
+          "said": "pink makes me look awake",
+          "means": "pink is flattering",
+          "aspect": "color",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Sweat-wicking pink shirt that looks brightening.",
+      "occasions": [],
+      "flattering": "yes"
+    },
+    "parsed_at": "2026-10-31T01:36:36.618Z"
+  },
+  {
+    "id": "c1836d0b-8a1e-423e-b8c6-c699f5775e90",
+    "item_id": "b91ce162-a22b-4d6f-a443-65547e082181",
+    "raw_text": "Wicks sweat, and I love the pink with the matching tee.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "Wicks sweat",
+          "means": "likes sweat-wicking fabrics",
+          "aspect": "feel",
+          "sentiment": "positive"
+        },
+        {
+          "said": "love the pink with matching tee",
+          "means": "likes pink clothing",
+          "aspect": "color",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Sweat-wicking pink shorts worn with matching tee.",
+      "occasions": [],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:41.906Z"
+  },
+  {
+    "id": "404a6142-f6c3-404f-ae90-e03f5622172f",
+    "item_id": "825788d8-8548-43da-9a26-40f5af91c0f3",
+    "raw_text": "The comfiest thing I own, I live in these at home.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "comfiest thing I own",
+          "means": "comfiest thing I own",
+          "aspect": "feel",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Most comfortable sweatpants, worn constantly at home.",
+      "occasions": [
+        "home"
+      ],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:37.542Z"
+  },
+  {
+    "id": "49c9c9d0-ad3d-4759-bc12-7ce8032a5da1",
+    "item_id": "e749b166-b703-413a-80f2-36b6e2864ed6",
+    "raw_text": "Love the soft pink, the oversized fit looks relaxed and cute.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "soft pink",
+          "means": "soft pink",
+          "aspect": "color",
+          "sentiment": "positive"
+        },
+        {
+          "said": "oversized fit looks relaxed and cute",
+          "means": "oversized fit suits relaxed look",
+          "aspect": "fit",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Soft pink oversized hoodie looks relaxed and cute.",
+      "occasions": [],
+      "flattering": "yes"
+    },
+    "parsed_at": "2026-10-31T01:36:39.967Z"
+  },
+  {
+    "id": "b30b9b71-b6fc-4830-bbee-9855f6a3d1f8",
+    "item_id": "f4678e3e-ef86-4510-87ba-7fa834cc08d6",
+    "raw_text": "Goes with all my loungewear, and gray hides stains.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "unknown",
+      "aspects": [
+        {
+          "said": "Goes with all my loungewear",
+          "means": "Goes with all my loungewear",
+          "aspect": "style",
+          "sentiment": "positive"
+        },
+        {
+          "said": "gray hides stains",
+          "means": "gray hides stains",
+          "aspect": "other",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Versatile gray hoodie pairs with loungewear and hides stains.",
+      "occasions": [],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:38.720Z"
+  },
+  {
+    "id": "9bc09191-e249-4b25-9803-7fa9baae7690",
+    "item_id": "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+    "raw_text": "Goes with everything, my everyday sneaker.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "Goes with everything",
+          "means": "Goes with everything",
+          "aspect": "style",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Everyday sneaker that goes with everything.",
+      "occasions": [],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:36:42.131Z"
+  },
+  {
+    "id": "18d2534e-d7ef-4a95-8e11-7210fa5a4d1f",
+    "item_id": "8e169881-6d10-4f5e-93b1-c00a1e1efe69",
+    "raw_text": "The beige washes me out, I never end up wearing it.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
       "liked": "no",
       "aspects": [
         {
-          "aspect": "fit",
-          "sentiment": "negative",
-          "area": "waist",
-          "said": "waist digs in when I sit",
-          "means": "needs roomier waist for sitting"
-        },
-        {
-          "aspect": "length",
-          "sentiment": "negative",
-          "said": "make my legs look short",
-          "means": "needs longer-looking leg line"
+          "said": "beige washes me out",
+          "means": "beige washes out complexion",
+          "aspect": "color",
+          "sentiment": "negative"
         }
       ],
+      "summary": "Beige shirt washes out complexion and remains unworn.",
       "occasions": [],
-      "mood": [],
-      "summary": "Unworn jeans dig at the waist and shorten the leg line."
+      "flattering": "no"
     },
-    "parsed_at": "2026-10-26T00:00:00Z"
+    "parsed_at": "2026-10-31T01:45:18.259Z"
   },
   {
-    "id": "5b0d3c1e-6f2a-4c8e-9a1d-2e7f4b6c8a03",
-    "item_id": "23c59091-9b18-4c24-92c3-1072a5581d8e",
-    "raw_text": "Wore them to brunch and a long walk, no complaints.",
+    "id": "30137012-5361-4afd-952b-0fc34f331c69",
+    "item_id": "d54193d3-7afa-4da9-9af7-efc08b13427a",
+    "raw_text": "Love the dark wash and the straight leg, my go-to for class.",
     "source": "typed",
     "structured": {
-      "flattering": "unknown",
-      "liked": "unknown",
-      "aspects": [],
-      "occasions": [
-        "social",
-        "sport"
-      ],
       "mood": [],
-      "summary": "White leather sneakers worn to brunch and long walk without complaints."
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "dark wash",
+          "means": "dark wash",
+          "aspect": "color",
+          "sentiment": "positive"
+        },
+        {
+          "area": "legs",
+          "said": "straight leg",
+          "means": "straight leg",
+          "aspect": "fit",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Dark-wash straight-leg jeans, a go-to for class.",
+      "occasions": [
+        "school"
+      ],
+      "flattering": "unknown"
     },
-    "parsed_at": "2026-10-26T00:00:00Z"
+    "parsed_at": "2026-10-31T01:45:23.037Z"
+  },
+  {
+    "id": "9651293e-69ed-4056-8847-717dc82a2c23",
+    "item_id": "ab426b49-f3b7-42bd-9527-b71176656fbb",
+    "raw_text": "Size is too small and they're way too short on me.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "unknown",
+      "aspects": [
+        {
+          "area": "overall",
+          "said": "too small",
+          "means": "needs larger size",
+          "aspect": "fit",
+          "sentiment": "negative"
+        },
+        {
+          "said": "way too short",
+          "means": "needs longer length",
+          "aspect": "length",
+          "sentiment": "negative"
+        }
+      ],
+      "summary": "Shorts are too small and too short.",
+      "occasions": [],
+      "flattering": "unknown"
+    },
+    "parsed_at": "2026-10-31T01:45:21.949Z"
+  },
+  {
+    "id": "9012c5f0-e2a1-47c8-9294-7d272b0e1771",
+    "item_id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+    "raw_text": "Too small and too short, it rides up every time I lift my arms.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "no",
+      "aspects": [
+        {
+          "area": "overall",
+          "said": "too small",
+          "means": "too small",
+          "aspect": "fit",
+          "sentiment": "negative"
+        },
+        {
+          "said": "too short",
+          "means": "too short",
+          "aspect": "length",
+          "sentiment": "negative"
+        },
+        {
+          "area": "overall",
+          "said": "rides up every time I lift my arms",
+          "means": "rides up every time I lift my arms",
+          "aspect": "fit",
+          "sentiment": "negative"
+        }
+      ],
+      "summary": "Baby tee runs too small and too short, riding up with arm movement.",
+      "occasions": [],
+      "flattering": "no"
+    },
+    "parsed_at": "2026-10-31T01:45:34.967Z"
+  },
+  {
+    "id": "6e01f195-cd5f-4491-b70f-e5668696fc3e",
+    "item_id": "b4411873-c7b0-44eb-bb1d-542889641915",
+    "raw_text": "Love how they flow, the wide leg balances my hips.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "area": "overall",
+          "said": "love how they flow",
+          "means": "flowing wide legs suit well",
+          "aspect": "fit",
+          "sentiment": "positive"
+        },
+        {
+          "area": "hips",
+          "said": "wide leg balances my hips",
+          "means": "wide legs balance hips",
+          "aspect": "fit",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Flowing wide-leg pants balance hips.",
+      "occasions": [],
+      "flattering": "yes"
+    },
+    "parsed_at": "2026-10-31T01:45:27.185Z"
+  },
+  {
+    "id": "cfd46aeb-5091-4893-b108-c2b56f487d4e",
+    "item_id": "84709d1e-9f8a-4f71-ac84-43ecd8c7f603",
+    "raw_text": "Look polished, my go-to when I dress up a bit.",
+    "source": "typed",
+    "structured": {
+      "mood": [],
+      "liked": "yes",
+      "aspects": [
+        {
+          "said": "look polished",
+          "means": "look polished",
+          "aspect": "style",
+          "sentiment": "positive"
+        }
+      ],
+      "summary": "Polished loafers are a go-to for dressing up.",
+      "occasions": [],
+      "flattering": "yes"
+    },
+    "parsed_at": "2026-10-31T01:45:25.332Z"
   }
 ]

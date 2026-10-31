@@ -1,4 +1,4 @@
-// The demo persona's outfit calendar: 30 days of outfits made up from
+// The demo persona's outfit calendar: 10 days of outfits made up from
 // whatever closet seed/items.json holds, so it keeps working when the closet
 // changes. Same closet, same log: every choice comes from a fixed-seed PRNG.
 //
@@ -7,9 +7,11 @@
 // they want 3 different outfits for, always gets the same one.
 // seed/wear-plan.json can pick those pieces by hand:
 //   { "<item id>": "rare" | "often" | "never" }
+// or write the whole log by hand, day by day (0 days ago is the last day):
+//   { "days": [{ "daysAgo": 9, "outfits": [{ "items": ["<item id>"], "occasion": "school" }] }] }
 import { createHash } from "node:crypto";
 
-export const SEED_DAYS = 30;
+export const SEED_DAYS = 10;
 // Days left blank, as people forget.
 const SKIP_CHANCE = 0.12;
 // Most days have one outfit; this share also get a second, for sport.
@@ -18,7 +20,7 @@ const OFTEN_WEIGHT = 10;
 const WEIGHT_BY_LIKED = { yes: 1.5, mixed: 1, unknown: 1, no: 0.5 };
 // Below this high (°F) a day gets outerwear when there is some.
 const OUTERWEAR_BELOW_F = 55;
-const RARE_DAY = 20;
+const RARE_DAY = 6;
 
 /** @typedef {"rare" | "often" | "never"} Role */
 /**
@@ -27,6 +29,7 @@ const RARE_DAY = 20;
  * @typedef {{ item_id: string, structured: { liked: string, flattering: string,
  *   aspects?: { sentiment: string }[] } }} SeedFeeling
  * @typedef {{ id: string, user_id: string, worn_on: string, item_ids: string[], occasion: string | null }} OutfitRow
+ * @typedef {{ days: { daysAgo: number, outfits: { items: string[], occasion?: string | null }[] }[] }} DayPlan
  */
 
 /** @param {string} seed */
@@ -90,14 +93,46 @@ export function wearRoles(items, felt, plan) {
 }
 
 /**
+ * The log exactly as a day-by-day plan writes it. Pieces that aren't in the
+ * closet are dropped, and so is an outfit left empty or repeated that day.
+ * Passed-on pieces may appear: they were worn before they were let go.
+ * @param {string} personaId @param {SeedItem[]} items @param {DayPlan} plan @param {string} lastDay
+ * @returns {OutfitRow[]}
+ */
+function plannedLog(personaId, items, plan, lastDay) {
+  const ids = new Set(items.map((i) => i.id));
+  /** @type {OutfitRow[]} */
+  const rows = [];
+  for (const day of [...plan.days].sort((a, b) => b.daysAgo - a.daysAgo)) {
+    if (day.daysAgo < 0 || day.daysAgo >= SEED_DAYS) continue;
+    const date = addDays(lastDay, -day.daysAgo);
+    const seen = new Set();
+    for (const outfit of day.outfits) {
+      const pieces = [...new Set(outfit.items.filter((i) => ids.has(i)))].sort();
+      if (pieces.length === 0 || seen.has(pieces.join())) continue;
+      seen.add(pieces.join());
+      rows.push({
+        id: uuidFrom(`${personaId}:${date}:${seen.size - 1}`),
+        user_id: personaId,
+        worn_on: date,
+        item_ids: pieces,
+        occasion: outfit.occasion ?? null,
+      });
+    }
+  }
+  return rows;
+}
+
+/**
  * @param {{ personaId: string, items: SeedItem[], feelings: SeedFeeling[],
- *   lifestyleMix: Record<string, number>, plan?: Record<string, Role> | null, lastDay: string }} input
+ *   lifestyleMix: Record<string, number>, plan?: Record<string, Role> | DayPlan | null, lastDay: string }} input
  * @returns {{ rows: OutfitRow[], roles: Map<string, Role> }}
  */
 export function seedOutfitLog({ personaId, items, feelings, lifestyleMix, plan = null, lastDay }) {
+  if (plan && "days" in plan) return { rows: plannedLog(personaId, items, /** @type {DayPlan} */ (plan), lastDay), roles: new Map() };
   const active = items.filter((i) => (i.status ?? "active") === "active");
   const felt = new Map(feelings.map((f) => [f.item_id, f.structured]));
-  const roles = wearRoles(active, felt, plan);
+  const roles = wearRoles(active, felt, /** @type {Record<string, Role> | null} */ (plan));
   const rand = random(`${personaId}:${active.map((i) => i.id).sort().join(",")}`);
   const of = (/** @type {string} */ category) => active.filter((i) => i.category === category && roles.get(i.id) !== "never");
 
@@ -135,7 +170,7 @@ export function seedOutfitLog({ personaId, items, feelings, lifestyleMix, plan =
     const date = addDays(lastDay, -n);
     const index = SEED_DAYS - 1 - n;
     // Fall: highs from the mid 60s down to the high 40s.
-    const high = Math.round(66 - index * 0.6 + (rand() - 0.5) * 8);
+    const high = Math.round(66 - index * (18 / SEED_DAYS) + (rand() - 0.5) * 8);
     const temp = { low: high - 14, high };
     const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
     const weekend = weekday === 0 || weekday === 6;

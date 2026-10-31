@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
@@ -145,10 +146,10 @@ test("edit details: a wider temperature range moves an item into Good for today 
 });
 
 test("closet tabs: Wearing shows what you wear, Passing on survives a refresh", async ({ page }) => {
-  const passing = `E2E old jacket ${randomUUID().slice(0, 8)}`;
+  const passing = `E2E old dress ${randomUUID().slice(0, 8)}`;
   const { data, error } = await db
     .from("items")
-    .insert({ user_id: DEMO_USER_ID, entry_method: "manual", title: passing, category: "outerwear", status: "passing_on" })
+    .insert({ user_id: DEMO_USER_ID, entry_method: "manual", title: passing, category: "one_piece", status: "passing_on" })
     .select("id")
     .single();
   if (error) throw error;
@@ -178,10 +179,10 @@ test("closet tabs: Wearing shows what you wear, Passing on survives a refresh", 
 });
 
 test("closet categories: filter by type, keep the tab, and show all again when empty", async ({ page }) => {
-  const passing = `E2E old jacket ${randomUUID().slice(0, 8)}`;
+  const passing = `E2E old dress ${randomUUID().slice(0, 8)}`;
   const { data, error } = await db
     .from("items")
-    .insert({ user_id: DEMO_USER_ID, entry_method: "manual", title: passing, category: "outerwear", status: "passing_on" })
+    .insert({ user_id: DEMO_USER_ID, entry_method: "manual", title: passing, category: "one_piece", status: "passing_on" })
     .select("id")
     .single();
   if (error) throw error;
@@ -191,8 +192,8 @@ test("closet categories: filter by type, keep the tab, and show all again when e
   const main = page.getByRole("main");
   const categories = main.getByRole("group", { name: "Category" });
   await expect(categories.getByRole("link", { name: /^All \d+$/ })).toHaveAttribute("aria-current", "true");
-  // Outerwear is only in Passing on, so Wearing does not offer it.
-  await expect(categories.getByRole("link", { name: /^Outerwear/ })).toHaveCount(0);
+  // The persona owns no one-piece, so with this one in Passing on, Wearing does not offer it.
+  await expect(categories.getByRole("link", { name: /^One-piece/ })).toHaveCount(0);
 
   await categories.getByRole("link", { name: /^Top \d+$/ }).click();
   await expect(page).toHaveURL(/\/closet\?cat=top$/);
@@ -203,16 +204,17 @@ test("closet categories: filter by type, keep the tab, and show all again when e
   await page.reload();
   await expect(main.getByRole("link", { name: item.title })).toBeVisible();
 
-  // The tab keeps the category: no tops are on their way out.
+  // The tab keeps the category: no shoes are on their way out.
+  await categories.getByRole("link", { name: /^Shoes \d+$/ }).click();
   await main.getByRole("link", { name: /^Passing on 0$/ }).click();
-  await expect(page).toHaveURL(/\/closet\?tab=passing-on&cat=top$/);
+  await expect(page).toHaveURL(/\/closet\?tab=passing-on&cat=shoes$/);
   await expect(page.getByText("Nothing in this category.")).toBeVisible();
   await expect(main.getByRole("link", { name: passing })).toHaveCount(0);
 
   await main.getByRole("link", { name: "Show all" }).click();
   await expect(page).toHaveURL(/\/closet\?tab=passing-on$/);
   await expect(main.getByRole("link", { name: passing })).toBeVisible();
-  await expect(categories.getByRole("link", { name: /^Outerwear 1$/ })).toBeVisible();
+  await expect(categories.getByRole("link", { name: /^One-piece 1$/ })).toBeVisible();
 });
 
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {
@@ -248,10 +250,15 @@ test("pass an item on from its page, then keep wearing it", async ({ page }) => 
 });
 
 // Only this file adds passing-on items, and its tests run one at a time.
-test("Passing on is empty when nothing is on its way out", async ({ page }) => {
+// (An empty Passing on is checked with a new account in auth/auth.spec.ts.)
+test("Passing on shows only the persona's pieces on their way out", async ({ page }) => {
+  const seeded = (JSON.parse(readFileSync("seed/items.json", "utf8")) as { title: string; status: string }[])
+    .filter((i) => i.status === "passing_on")
+    .map((i) => i.title);
   await page.goto("/closet?tab=passing-on");
-  await expect(page.getByText("Nothing to pass on.")).toBeVisible();
-  await expect(page.getByRole("link", { name: item.title })).toHaveCount(0);
+  const main = page.getByRole("main");
+  for (const title of seeded) await expect(main.getByRole("link", { name: title })).toBeVisible();
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
 });
 
 test("delete an item: confirm first, then it's gone from home, the closet and storage", async ({ page }) => {

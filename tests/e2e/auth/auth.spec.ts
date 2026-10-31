@@ -13,7 +13,7 @@ const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
 });
 const PASSWORD = "e2e-password";
-const SEED_ITEM = { id: "852c8e3d-abf7-4955-ab65-9d83194a02ae", title: "White cotton button-down" };
+const SEED_ITEM = { id: "2262ce87-2107-4b70-8e85-33f8ecb2b8bb", title: "Faux Suede Belted Jacket" };
 const created: string[] = [];
 
 test.afterAll(async () => {
@@ -73,6 +73,8 @@ test("a new account can add its first item", async ({ page }) => {
 
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: "First tee" })).toBeVisible();
+  await page.goto("/closet?tab=passing-on");
+  await expect(page.getByText("Nothing to pass on.")).toBeVisible();
 });
 
 test("log in with the account you made, then log out", async ({ page }) => {
