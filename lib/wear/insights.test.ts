@@ -3,7 +3,7 @@ import type { ItemTags } from "@/lib/ai/schemas/common";
 import { addDays } from "./day";
 import { daysToGo, wearHash, wearInput } from "./insights";
 import type { WearLog, WearLogItem } from "./log";
-import { MIN_LOGGED_DAYS, wearStats, wearWindow, type LoggedOutfit } from "./stats";
+import { MIN_LOGGED_DAYS, NEW_ITEM_DAYS, wearStats, wearWindow, type LoggedOutfit } from "./stats";
 
 const END = "2026-10-28";
 const ID = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -58,6 +58,17 @@ describe("wearInput", () => {
     expect(input.items[0].feeling).toEqual({ flattering: "yes", liked: "yes", aspects: [] });
     expect(input.items[1]).toMatchObject({ wornCount: 0, lastWornDaysAgo: null, addedDaysAgo: 5 });
     expect(JSON.stringify(input)).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+  });
+
+  it("counts a piece as new only under a week before the last day, like the stats", () => {
+    const input = wearInput(
+      log(MIN_LOGGED_DAYS, [
+        item(1, { addedOn: addDays(END, -(NEW_ITEM_DAYS - 1)) }),
+        item(2, { addedOn: addDays(END, -NEW_ITEM_DAYS) }),
+        item(3, { addedOn: addDays(END, -10) }),
+      ]),
+    )!;
+    expect(input.items.map((i) => i.addedDaysAgo)).toEqual([NEW_ITEM_DAYS - 1, null, null]);
   });
 
   it("hashes the same log the same way, and a new outfit differently", () => {

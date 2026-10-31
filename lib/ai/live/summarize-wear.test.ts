@@ -43,6 +43,14 @@ describe("wearPrompt", () => {
     expect(prompt).toContain("I2: Green dress");
     expect(prompt).toContain("not worn (added 4 days before the end)");
   });
+
+  it("lists pieces owned all along and never worn, and the most worn, so the model doesn't count", () => {
+    expect(wearPrompt(INPUT)).toContain("Not worn: none\nMost worn: I1 (11 outfits each)");
+    const old = SummarizeWearInput.parse({ ...INPUT, items: [INPUT.items[0], { ...INPUT.items[1], addedDaysAgo: null }] });
+    expect(wearPrompt(old)).toContain("Not worn: I2\n");
+    const none = SummarizeWearInput.parse({ ...INPUT, items: [{ ...INPUT.items[0], wornCount: 0, lastWornDaysAgo: null }] });
+    expect(wearPrompt(none)).toContain("Not worn: I1\nMost worn: none");
+  });
 });
 
 describe("toWearOutput", () => {
