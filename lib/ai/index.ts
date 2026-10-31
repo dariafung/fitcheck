@@ -4,8 +4,8 @@ import { liveBuildProfile } from "./live/build-profile";
 import { liveExtractItem } from "./live/extract-item";
 import { liveJudgePairing } from "./live/judge-pairing";
 import { liveJudgeRepeat } from "./live/judge-repeat";
-import { notImplemented } from "./live/not-implemented";
 import { liveParseFeeling } from "./live/parse-feeling";
+import { liveRenderOutfit } from "./live/render-outfit";
 import { liveScorePurchase } from "./live/score-purchase";
 import { liveSegmentGarment } from "./live/segment-garment";
 import { liveSummarizeWear } from "./live/summarize-wear";
@@ -96,7 +96,9 @@ export const renderOutfit = defineAiFunction({
   input: renderOutfitSchema.RenderOutfitInput,
   output: renderOutfitSchema.RenderOutfitOutput,
   mock: mockRenderOutfit,
-  live: notImplemented("renderOutfit"),
+  live: liveRenderOutfit,
+  // A picture never fails validation; asking again would only pay twice.
+  liveAttempts: 1,
 });
 
 export const buildProfile = defineAiFunction({
