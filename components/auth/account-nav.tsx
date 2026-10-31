@@ -12,7 +12,7 @@ export async function AccountNav() {
   const user = await sessionUser();
   if (!user) {
     return (
-      <Link href="/login" className="text-sm transition-colors duration-150 hover:text-ink-2">
+      <Link href="/login" className="text-sm text-ink-2 transition-colors duration-150 hover:text-ink">
         Log in
       </Link>
     );
