@@ -6,6 +6,7 @@ import type { EntryErrorCode, ItemDraft } from "@/lib/entry/draft";
 import { savedBrands } from "@/lib/entry/saved-brands";
 import { productPhoto, readScreenshot } from "@/lib/entry/screenshot";
 import { cleanTitle } from "@/lib/entry/title";
+import { withDaily } from "@/lib/limits/daily";
 
 // A screenshot we can't use is an expected outcome: answer 200 so the
 // browser console stays clean, and let the page explain.
@@ -26,12 +27,14 @@ export async function POST(request: Request) {
 
   let extracted;
   try {
-    extracted = await extractItem({
-      knownFields: {},
-      images: [],
-      screenshot: { kind: "inline", mime: shot.mime, base64: shot.data.toString("base64") },
-      allowWebSearch: true,
-    });
+    extracted = await withDaily("read", () =>
+      extractItem({
+        knownFields: {},
+        images: [],
+        screenshot: { kind: "inline", mime: shot.mime, base64: shot.data.toString("base64") },
+        allowWebSearch: true,
+      }),
+    );
   } catch (err) {
     return aiErrorResponse(err);
   }

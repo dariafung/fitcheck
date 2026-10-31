@@ -6,6 +6,7 @@ import { LifestyleMix, type Occasion } from "@/lib/ai/schemas/common";
 import { readPhoto } from "@/lib/check/board-pieces";
 import { runBuyCheck, type BuyCheckResult } from "@/lib/check/buy-check";
 import type { Db } from "@/lib/db/server";
+import { tryTakeDaily } from "@/lib/limits/daily";
 import { type BuyerState, type SellerItem } from "./fingerprint";
 import { staleBuyerIds } from "./matches";
 import { buyerReasons } from "./reason-filter";
@@ -69,7 +70,9 @@ export interface CheckTarget {
 // Checks up to MAX_NEW_CHECKS of the buyers in the pool whose cached check
 // is missing or out of date, all at once, in checkOrder. A buyer whose check
 // fails (over budget, model never finished, …) is left unchecked; the others
-// are saved either way.
+// are saved either way. A run counts once against the seller's daily
+// "buyers" limit; over it, nothing new is checked and the cached matches
+// stand. A run where every check failed gives its count back.
 export function checkBuyers(db: Db, target: CheckTarget, buyers: readonly BuyerToCheck[], ai: BuyCheckAi) {
   const pending = running.get(target.itemId);
   if (pending) return pending;
@@ -89,6 +92,9 @@ async function runChecks(db: Db, { sellerId, itemId, item }: CheckTarget, buyers
     item.tags.occasions,
   ).slice(0, MAX_NEW_CHECKS);
   if (toCheck.length === 0) return;
+  const ticket = await tryTakeDaily("buyers");
+  if (!ticket) return;
+  let failed = 0;
   const photo = item.photoPath ? await readPhoto(db, item.photoPath) : null;
   await Promise.all(
     toCheck.map(async (state) => {
@@ -115,7 +121,9 @@ async function runChecks(db: Db, { sellerId, itemId, item }: CheckTarget, buyers
           .throwOnError();
       } catch {
         // Left unchecked; the next opening tries again.
+        failed += 1;
       }
     }),
   );
+  if (failed === toCheck.length) await ticket.giveBack();
 }

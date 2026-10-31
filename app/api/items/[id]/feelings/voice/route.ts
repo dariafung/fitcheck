@@ -6,6 +6,7 @@ import { isVoicePath } from "@/lib/closet/voice/path";
 import { readVoiceAudio, removeVoiceAudio } from "@/lib/closet/voice/storage";
 import { voiceWavProblem } from "@/lib/closet/voice/wav";
 import { createServerClient } from "@/lib/db/server";
+import { withDaily } from "@/lib/limits/daily";
 
 // A live transcription can take a while; see the timeouts in lib/ai/live/transcribe.ts.
 export const maxDuration = 300;
@@ -37,10 +38,12 @@ export async function POST(req: Request, ctx: RouteContext<"/api/items/[id]/feel
     if (voiceWavProblem(audio)) {
       return Response.json({ error: "Record again." }, { status: 400 });
     }
-    const { text } = await transcribe({
-      audio: { kind: "inline", mime: "audio/wav", base64: Buffer.from(audio).toString("base64") },
-      language: "en",
-    });
+    const { text } = await withDaily("voice", () =>
+      transcribe({
+        audio: { kind: "inline", mime: "audio/wav", base64: Buffer.from(audio).toString("base64") },
+        language: "en",
+      }),
+    );
     return Response.json({ text });
   } catch (err) {
     return aiErrorResponse(err);

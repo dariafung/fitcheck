@@ -2,6 +2,7 @@ import { aiErrorResponse, judgePairing } from "@/lib/ai";
 import { computeClosetOutfits } from "@/lib/check/pairings";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { withDaily } from "@/lib/limits/daily";
 
 // Every complete outfit in the current user's closet. Pairs not yet judged
 // are sent to judgePairing and cached, so repeat calls cost nothing. The
@@ -18,7 +19,11 @@ export async function POST() {
   if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
   try {
-    return Response.json(await computeClosetOutfits(db, userId, judgePairing));
+    // All from the cache: the model wasn't asked, so it doesn't count.
+    const outfits = await withDaily("pairings", () => computeClosetOutfits(db, userId, judgePairing), {
+      result: (r) => r.stats.judgeCalls === 0,
+    });
+    return Response.json(outfits);
   } catch (err) {
     return aiErrorResponse(err);
   }

@@ -5,9 +5,11 @@ import { FeelingBody } from "@/lib/closet/feeling-body";
 import { saveFeeling, storeParsedFeeling } from "@/lib/closet/feelings";
 import { findItemSummary } from "@/lib/closet/items";
 import { createServerClient } from "@/lib/db/server";
+import { tryTakeDaily } from "@/lib/limits/daily";
 
 // Saves the raw text right away; the structured fields are extracted after
-// the response is sent. If that fails they stay empty until the next save.
+// the response is sent. If that fails, or the day's count of reads is used
+// up, they stay empty until the next save.
 export async function POST(req: Request, ctx: RouteContext<"/api/items/[id]/feelings">) {
   const writer = await requireWriter();
   if ("denied" in writer) return writer.denied;
@@ -24,12 +26,15 @@ export async function POST(req: Request, ctx: RouteContext<"/api/items/[id]/feel
 
   const { text, source } = body.data;
   const feeling = await saveFeeling(db, { itemId: item.id, userId, text, source });
+  const ticket = await tryTakeDaily("feeling");
 
   after(async () => {
+    if (!ticket) return;
     try {
       const structured = await parseFeeling({ text, item });
       await storeParsedFeeling(db, { feelingId: feeling.id, text, structured });
     } catch (err) {
+      await ticket.giveBack().catch(() => {});
       console.error(`parseFeeling failed for feeling ${feeling.id}:`, err);
     }
   });
