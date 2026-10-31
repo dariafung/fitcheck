@@ -108,7 +108,7 @@ export function BuyCheck() {
       const res = await fetch("/api/checks", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title: edited.title, tags: edited.tags }),
+        body: JSON.stringify({ title: edited.title, tags: edited.tags, photo: draft.imageUrls[0] }),
       });
       const json = (await res.json().catch(() => ({}))) as Partial<BuyCheckResponse> & { error?: string };
       if (res.ok && "result" in json && json.result) {

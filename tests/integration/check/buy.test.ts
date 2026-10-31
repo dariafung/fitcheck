@@ -11,6 +11,8 @@ import { ACCESSORY_NOTICE, INCOMPLETE_ERROR, INCOMPLETE_NOTICE, NO_LIFESTYLE_REA
 import { roundPart } from "@/lib/check/score";
 import { PLACEHOLDER_VERSION } from "@/lib/closet/style-profile";
 import { createServerClient } from "@/lib/db/server";
+import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
+import sharp from "sharp";
 
 // Spies on the model calls while keeping the mock answers.
 vi.mock("@/lib/ai", async (importOriginal) => {
@@ -308,6 +310,48 @@ describe("POST /api/checks", () => {
       // Only the headline, color and occasion rows are left.
       await saveCard({ ...CARD, suits: CARD.suits.filter((x) => x.topic === "color" || x.topic === "occasion"), avoid: [] });
       expect(await scoreInput()).toEqual(without);
+    });
+  });
+
+  describe("with photos", () => {
+    const shirtPhoto = `${userId}/${randomUUID()}.webp`;
+    const shot = () =>
+      sharp({ create: { width: 900, height: 1200, channels: 3, background: "#ffffff" } }).webp().toBuffer();
+
+    beforeAll(async () => {
+      const { error } = await db.storage.from(ITEM_IMAGES_BUCKET).upload(shirtPhoto, await shot(), { contentType: "image/webp" });
+      if (error) throw error;
+      await db.from("items").update({ image_paths: [shirtPhoto] }).eq("id", shirtId).throwOnError();
+    });
+
+    afterAll(async () => {
+      await db.from("items").update({ image_paths: [] }).eq("id", shirtId).throwOnError();
+      await db.storage.from(ITEM_IMAGES_BUCKET).remove([shirtPhoto]);
+    });
+
+    const scoreInput = async (body: unknown) => {
+      vi.mocked(ai.scorePurchase).mockClear();
+      await result(body);
+      return vi.mocked(ai.scorePurchase).mock.calls[0][0];
+    };
+
+    it("sends the item's photo and the felt items' stored photos, shrunk", async () => {
+      const input = await scoreInput({ ...LOAFERS, photo: `data:image/webp;base64,${(await shot()).toString("base64")}` });
+      const photo = input.candidate.photo;
+      if (photo?.kind !== "inline") throw new Error("expected an inline photo");
+      expect(await sharp(Buffer.from(photo.base64, "base64")).metadata()).toMatchObject({ format: "webp", height: 512 });
+      const felt = new Map(input.feltItems.map((f) => [f.id, f.photo]));
+      expect(felt.get(shirtId)).toMatchObject({ kind: "inline", mime: "image/webp" });
+      // The trousers have no photo and go as text.
+      expect(felt.has(trousersId)).toBe(true);
+      expect(felt.get(trousersId)).toBeUndefined();
+    });
+
+    it("scores by the tags when the item's photo can't be read", async () => {
+      for (const photo of ["not a data url", `data:image/png;base64,${Buffer.from("hello").toString("base64")}`]) {
+        const input = await scoreInput({ ...LOAFERS, photo });
+        expect(input.candidate).not.toHaveProperty("photo");
+      }
     });
   });
 });
