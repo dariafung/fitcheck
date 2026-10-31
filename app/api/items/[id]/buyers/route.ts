@@ -6,8 +6,8 @@ import { findBuyers } from "@/lib/resale/buyers";
 // Up to five buy checks run at once, each up to ~25 s.
 export const maxDuration = 300;
 
-// Who'd want one of the user's passing-on items: anonymous buyers and their
-// scores, or why there are none. A POST because finding them runs buy checks
+// Who'd want one of the user's passing-on items: how many buyers would likely
+// want it, or why there are none. A POST because finding them runs buy checks
 // for buyers not checked yet. The demo account may call it too.
 export async function POST(_req: Request, ctx: RouteContext<"/api/items/[id]/buyers">) {
   const { id } = await ctx.params;

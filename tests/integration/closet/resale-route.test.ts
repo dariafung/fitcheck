@@ -302,7 +302,7 @@ describe("POST /api/items/[id]/buyers", () => {
     expect(row.buyer_reasons.join(" ")).not.toMatch(/hides/i);
   });
 
-  it("lists cached matches at 60 or more, best first, with nothing about who they are", async () => {
+  it("counts cached matches at 60 or more, with nothing about who they are or their scores", async () => {
     const [a, b, c] = await Promise.all([buyer(), buyer(), buyer()]);
     await cached(a, 72);
     await cached(b, 91);
@@ -310,9 +310,7 @@ describe("POST /api/items/[id]/buyers", () => {
 
     const body = await open();
     expect(checksRun()).toBe(0);
-    expect(body.state).toBe("matches");
-    expect(body.matches.map((m: { score: number }) => m.score)).toEqual([91, 72]);
-    for (const m of body.matches) expect(Object.keys(m).sort()).toEqual(["color", "key", "score"]);
+    expect(body).toEqual({ state: "matches", count: 2, someUnchecked: false, sample: false });
     const text = JSON.stringify(body);
     for (const id of [a, b, c]) expect(text).not.toContain(id);
     expect(text).not.toMatch(/Resale test buyer|Buyer (bottom|shoes)|Loves the color|pear/);
@@ -325,7 +323,7 @@ describe("POST /api/items/[id]/buyers", () => {
     await closet.db.from("users").update({ top_size: "XXL" }).eq("id", resized).throwOnError();
 
     const body = await open();
-    expect(body.matches.map((m: { score: number }) => m.score)).toEqual([70]);
+    expect(body).toMatchObject({ state: "matches", count: 1 });
   });
 
   it("says no one is a strong match when every score is under 60", async () => {
