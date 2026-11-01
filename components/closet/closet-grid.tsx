@@ -63,9 +63,9 @@ async function notWornIds(userId: string): Promise<NotWorn> {
 
 // An empty slot on the shelf: a tile outlined in a dashed line, the words
 // beside it.
-function EmptySlot({ children }: { children: ReactNode }) {
+function EmptySlot({ empty, children }: { empty?: boolean; children: ReactNode }) {
   return (
-    <div className="flex items-end gap-6 md:gap-10">
+    <div data-empty-closet={empty || undefined} className="flex items-end gap-6 md:gap-10">
       <div
         aria-hidden
         className="aspect-[4/5] w-28 shrink-0 bg-tile outline-1 -outline-offset-[10px] outline-ink/30 outline-dashed md:w-56"
@@ -85,9 +85,10 @@ function Empty({ title, text, children }: { title: string; text: string; childre
   );
 }
 
+// Marked so the closet page can hide its own "Add clothes" while this one shows.
 export function EmptyCloset() {
   return (
-    <EmptySlot>
+    <EmptySlot empty>
       <p className="text-lg font-medium">Your closet is empty.</p>
       <p className="text-sm text-ink-2">Add a few things you own to get started.</p>
       <Link href="/closet/add" className="btn-primary mt-4">
