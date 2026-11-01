@@ -1,7 +1,9 @@
-import type { Category } from "@/lib/ai/schemas/common";
+import { Occasion, type Category } from "@/lib/ai/schemas/common";
+import { OCCASION_LABELS } from "./labels";
 
-// The closet's two tabs and its category filter, kept in the URL as ?tab= and
-// ?cat= so a refresh stays put and the two work together.
+// The closet's two tabs, its category filter and its quick filters, kept in
+// the URL as ?tab=, ?cat= and ?tag= so a refresh stays put and they all work
+// together.
 export type ClosetTab = "wearing" | "passing-on";
 
 export const CLOSET_TABS: { id: ClosetTab; label: string }[] = [
@@ -12,9 +14,15 @@ export const CLOSET_TABS: { id: ClosetTab; label: string }[] = [
 // Head to toe. Accessories can't be added, so they get no filter.
 export const CLOSET_CATEGORIES: Category[] = ["top", "bottom", "one_piece", "outerwear", "shoes"];
 
+// Quick filters, beside the categories: pieces not worn lately (from the
+// outfit calendar) and occasions.
+export type ClosetTag = "not-worn" | Occasion;
+
 export interface ClosetView {
   tab: ClosetTab;
   cat: Category | null;
+  // Wearing only: what's on its way out is not worn by design.
+  tag: ClosetTag | null;
 }
 
 // Anything but a known tab falls back to Wearing.
@@ -29,8 +37,15 @@ export function closetCategory(param: string | string[] | undefined): Category |
   return CLOSET_CATEGORIES.find((cat) => categorySlug(cat) === param) ?? null;
 }
 
+export function closetTag(param: string | string[] | undefined): ClosetTag | null {
+  if (param === "not-worn") return param;
+  const occasion = Occasion.safeParse(param);
+  return occasion.success ? occasion.data : null;
+}
+
 export function closetView(params: Record<string, string | string[] | undefined>): ClosetView {
-  return { tab: closetTab(params.tab), cat: closetCategory(params.cat) };
+  const tab = closetTab(params.tab);
+  return { tab, cat: closetCategory(params.cat), tag: tab === "wearing" ? closetTag(params.tag) : null };
 }
 
 export function categorySlug(cat: Category): string {
@@ -39,10 +54,11 @@ export function categorySlug(cat: Category): string {
 
 // Defaults (Wearing, no filter) stay out of the URL, so the plain /closet is
 // the starting view.
-export function closetHref({ tab, cat }: ClosetView): string {
+export function closetHref({ tab, cat, tag }: ClosetView): string {
   const params = new URLSearchParams();
   if (tab !== "wearing") params.set("tab", tab);
   if (cat) params.set("cat", categorySlug(cat));
+  if (tag && tab === "wearing") params.set("tag", tag);
   const query = params.toString();
   return query ? `/closet?${query}` : "/closet";
 }
@@ -67,4 +83,48 @@ export function categoryFilters<T extends { category: string }>(
   return CLOSET_CATEGORIES.map((cat) => ({ cat, count: inCategory(items, cat).length })).filter(
     ({ cat, count }) => count > 0 || cat === active,
   );
+}
+
+// Ids of pieces not worn lately; null when the outfit calendar is off or has
+// nothing logged, and then there is no such filter.
+export type NotWorn = ReadonlySet<string> | null;
+
+export function inTag<T extends { id: string; occasions: readonly string[] }>(
+  items: T[],
+  tag: ClosetTag | null,
+  notWorn: NotWorn,
+): T[] {
+  if (!tag) return items;
+  if (tag === "not-worn") return notWorn ? items.filter((item) => notWorn.has(item.id)) : items;
+  return items.filter((item) => item.occasions.includes(tag));
+}
+
+export function tagLabel(tag: ClosetTag): string {
+  return tag === "not-worn" ? "Not worn lately" : OCCASION_LABELS[tag];
+}
+
+// Baymard: offer only the few that matter. At most this many occasions.
+export const QUICK_OCCASIONS = 2;
+
+// The quick filters for a tab, with how many pieces each gives with the
+// picked category: "Not worn lately" when the calendar knows, then the
+// occasions most of the tab is tagged for (not one that every piece has, which
+// would filter nothing). Empty ones are left out, except the one already picked.
+export function quickTags<T extends { id: string; category: string; occasions: readonly string[] }>(
+  tabItems: T[],
+  view: Pick<ClosetView, "cat" | "tag">,
+  notWorn: NotWorn,
+): { tag: ClosetTag; count: number }[] {
+  const occasions = Occasion.options
+    .map((occasion) => ({ occasion, count: inTag(tabItems, occasion, notWorn).length }))
+    .filter(({ count }) => count > 0 && count < tabItems.length)
+    // Stable sort: ties keep the schema's order (work, school, social, sport, home).
+    .sort((a, b) => b.count - a.count)
+    .slice(0, QUICK_OCCASIONS)
+    .map(({ occasion }) => occasion);
+  const tags: ClosetTag[] = [...(notWorn ? ["not-worn" as const] : []), ...occasions];
+  if (view.tag && !tags.includes(view.tag) && (view.tag !== "not-worn" || notWorn)) tags.push(view.tag);
+  return tags
+    .map((tag) => ({ tag, count: inCategory(inTag(tabItems, tag, notWorn), view.cat).length }))
+    .filter(({ tag, count }) => count > 0 || tag === view.tag);
 }

@@ -1,7 +1,7 @@
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { effectiveTags } from "@/lib/db/items";
 import { DEFAULT_TEMP_UNIT, toUnit, type TempUnit } from "@/lib/profile/temp-unit";
-import { CATEGORY_LABELS, FIELD_LABELS, capitalize, formalityLabel } from "./labels";
+import { CATEGORY_LABELS, FIELD_LABELS, capitalize, formalityLabel, sentenceCase } from "./labels";
 
 const UserTags = ItemTags.partial();
 
@@ -72,7 +72,7 @@ export function tagGroups(tags: ItemTags, unit: TempUnit = DEFAULT_TEMP_UNIT): T
     },
     { label: FIELD_LABELS.fit, values: tags.fit ? [tags.fit] : [] },
     { label: FIELD_LABELS.colorFamily, values: tags.colorFamily ? [tags.colorFamily] : [] },
-    { label: FIELD_LABELS.colors, values: tags.colors.map((c) => c.name) },
+    { label: FIELD_LABELS.colors, values: tags.colors.map((c) => sentenceCase(c.name)) },
     { label: FIELD_LABELS.pattern, values: tags.pattern ? [tags.pattern] : [] },
     { label: FIELD_LABELS.materials, values: tags.materials },
     { label: FIELD_LABELS.formality, values: [formalityLabel(tags.formality)] },

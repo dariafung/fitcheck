@@ -97,6 +97,35 @@ test("open an item from the grid, write how it feels, and keep it", async ({ pag
   await expect(page.getByRole("textbox", { name: "How it feels" })).toHaveCount(0);
 });
 
+test("an item page shows the closet pieces it goes with, from cached pairings only", async ({ page }) => {
+  await page.goto(`/closet/${item.id}`);
+  // Nothing judged for a new piece yet, and opening the page judges nothing.
+  await expect(page.getByText("Not paired with your closet yet.")).toBeVisible();
+  const { data: judged } = await db.from("pairings").select("id").or(`item_a_id.eq.${item.id},item_b_id.eq.${item.id}`);
+  expect(judged).toEqual([]);
+
+  const { data: jeans } = await db
+    .from("items")
+    .select("id, title")
+    .eq("user_id", DEMO_USER_ID)
+    .eq("status", "active")
+    .eq("category", "bottom")
+    .limit(1)
+    .single()
+    .throwOnError();
+  const [a, b] = item.id < jeans.id ? [item.id, jeans.id] : [jeans.id, item.id];
+  await db
+    .from("pairings")
+    .insert({ user_id: DEMO_USER_ID, item_a_id: a, item_b_id: b, pairs: true, source: "ai", prompt_version: "e2e" })
+    .throwOnError();
+
+  await page.reload();
+  const goes = page.getByRole("region", { name: "Goes with 1 piece in your closet" });
+  await expect(goes).toBeVisible();
+  await goes.getByRole("link", { name: jeans.title }).click();
+  await expect(page).toHaveURL(`/closet/${jeans.id}`);
+});
+
 test("edit a saved feeling", async ({ page }) => {
   const { error } = await db.from("item_feelings").insert({
     item_id: item.id,
@@ -224,6 +253,32 @@ test("closet categories: filter by type, keep the tab, and show all again when e
   await expect(page).toHaveURL(/\/closet\?tab=passing-on$/);
   await expect(main.getByRole("link", { name: passing })).toBeVisible();
   await expect(categories.getByRole("link", { name: /^One-piece 1$/ })).toBeVisible();
+});
+
+test("closet quick filters: not worn lately and an occasion, each switched off by a second tap", async ({ page }) => {
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const quick = main.getByRole("group", { name: "Quick filters" });
+  // Added today, so it isn't called unworn yet.
+  await quick.getByRole("link", { name: /^Not worn lately \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tag=not-worn$/);
+  await expect(quick.getByRole("link", { name: /^Not worn lately/ })).toHaveAttribute("aria-current", "true");
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+  // The category counts follow the quick filter.
+  const count = (name: RegExp) => quick.getByRole("link", { name }).textContent().then((t) => t?.match(/\d+/)?.[0]);
+  await expect(main.getByRole("group", { name: "Category" }).getByRole("link", { name: /^All \d+$/ })).toHaveText(
+    `All ${await count(/^Not worn lately/)}`,
+  );
+  await quick.getByRole("link", { name: /^Not worn lately/ }).click();
+  await expect(page).toHaveURL(/\/closet$/);
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+
+  // The persona dresses for school most.
+  await quick.getByRole("link", { name: /^School \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tag=school$/);
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+  await page.reload();
+  await expect(quick.getByRole("link", { name: /^School/ })).toHaveAttribute("aria-current", "true");
 });
 
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {
