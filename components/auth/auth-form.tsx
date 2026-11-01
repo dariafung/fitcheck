@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { logIn, signUp, tryDemo, type AuthFormState } from "@/lib/auth/actions";
-import { AUTH_ERRORS, MIN_PASSWORD_LENGTH } from "@/lib/auth/messages";
+import { AUTH_ERROR_FIELD, AUTH_ERRORS, MIN_PASSWORD_LENGTH } from "@/lib/auth/messages";
 
 const INPUT = "field h-11";
 const LABEL = "text-sm text-ink-2";
@@ -18,6 +18,12 @@ const MODES = {
 export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
   const { action, submit, busy, password, button } = MODES[mode];
   const [state, formAction, pending] = useActionState<AuthFormState, FormData>(action, {});
+  // An error about one box shows under it, in place of its hint.
+  const field = state.error && AUTH_ERROR_FIELD[state.error];
+  const message = state.error && AUTH_ERRORS[state.error];
+  const emailBad = field === "email" || state.error === "bad_login";
+  const passwordBad = field === "password";
+  const hint = mode === "signup" && !passwordBad;
 
   return (
     <form action={formAction} noValidate className="flex flex-col gap-5">
@@ -32,8 +38,15 @@ export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
           autoComplete="email"
           required
           defaultValue={state.email}
+          aria-invalid={emailBad || undefined}
+          aria-describedby={emailBad ? `${field}-error` : undefined}
           className={INPUT}
         />
+        {field === "email" && (
+          <p id="email-error" role="alert" className={ERROR}>
+            {message}
+          </p>
+        )}
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="password" className={LABEL}>
@@ -46,15 +59,24 @@ export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
           autoComplete={password}
           required
           minLength={mode === "signup" ? MIN_PASSWORD_LENGTH : undefined}
+          aria-invalid={passwordBad || undefined}
+          aria-describedby={passwordBad ? "password-error" : hint ? "password-hint" : undefined}
           className={INPUT}
         />
-        {mode === "signup" && (
-          <p className="text-sm text-ink-2">At least {MIN_PASSWORD_LENGTH} characters.</p>
+        {passwordBad && (
+          <p id="password-error" role="alert" className={ERROR}>
+            {message}
+          </p>
+        )}
+        {hint && (
+          <p id="password-hint" className="text-sm text-ink-2">
+            At least {MIN_PASSWORD_LENGTH} characters.
+          </p>
         )}
       </div>
-      {state.error && (
+      {state.error && !field && (
         <p role="alert" className={ERROR}>
-          {AUTH_ERRORS[state.error]}
+          {message}
         </p>
       )}
       <button

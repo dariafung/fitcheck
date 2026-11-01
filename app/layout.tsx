@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import { Suspense } from "react";
 import { AccountNav } from "@/components/auth/account-nav";
+import { SignedInOnly } from "@/components/auth/signed-in-only";
 import { CalendarNavLink } from "@/components/calendar/calendar-nav-link";
 import { NAV_LINK } from "@/components/nav/nav-class";
 import { NavLink } from "@/components/nav/nav-link";
@@ -27,6 +28,19 @@ export const metadata: Metadata = {
   description: "Check if a piece works with your closet before you buy it.",
 };
 
+// Signed out (sign-in on), the top bar is only the logo and Log in. While the
+// session is read, the links show as they will for almost everyone.
+const CLOSET = (
+  <NavLink href="/closet" className={NAV_LINK}>
+    Closet
+  </NavLink>
+);
+const PROFILE = (
+  <NavLink href="/profile" className={NAV_LINK}>
+    Profile
+  </NavLink>
+);
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${schibsted.variable} ${newsreader.variable} h-full antialiased`}>
@@ -38,16 +52,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <NavLink href="/" className="mr-1 text-sm font-medium tracking-[0.25em] uppercase md:mr-3">
               fitcheck
             </NavLink>
-            <NavLink href="/closet" className={NAV_LINK}>
-              Closet
-            </NavLink>
+            <Suspense fallback={CLOSET}>
+              <SignedInOnly>{CLOSET}</SignedInOnly>
+            </Suspense>
             <Suspense>
               <CalendarNavLink className={NAV_LINK} />
             </Suspense>
             <div className="ml-auto flex items-center gap-4 text-sm md:gap-5">
-              <NavLink href="/profile" className={NAV_LINK}>
-                Profile
-              </NavLink>
+              <Suspense fallback={PROFILE}>
+                <SignedInOnly>{PROFILE}</SignedInOnly>
+              </Suspense>
               <Suspense>
                 <AccountNav />
               </Suspense>

@@ -53,8 +53,29 @@ test("signed out, pages send you to log in", async ({ page }) => {
   const buttons = page.getByRole("main").getByRole("button");
   await expect(buttons.first()).toHaveText("Try the demo account");
   await expect(buttons.last()).toHaveText("Log in");
-  // No top-bar link is the login page, so none is marked current.
-  await expect(page.getByRole("navigation").locator("[aria-current]")).toHaveCount(0);
+  // No top-bar link is the login page, so none is marked current, and only
+  // the logo and Log in are there.
+  const nav = page.getByRole("navigation");
+  await expect(nav.locator("[aria-current]")).toHaveCount(0);
+  await expect(nav.getByRole("link")).toHaveText(["fitcheck", "Log in"], { ignoreCase: true });
+});
+
+test("login and sign-up errors sit under the box they're about", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("main").getByRole("button", { name: "Log in" }).click();
+  await expect(page.getByLabel("Email")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByLabel("Email")).toHaveAccessibleDescription("Enter your email.");
+
+  await page.goto("/signup");
+  const password = page.getByLabel("Password");
+  await expect(password).toHaveAccessibleDescription("At least 6 characters.");
+  await page.getByLabel("Email").fill("short@example.com");
+  await password.fill("123");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(password).toHaveAttribute("aria-invalid", "true");
+  await expect(password).toHaveAccessibleDescription("Use at least 6 characters.");
+  // The error takes the hint's place; they never show together.
+  await expect(page.getByText("At least 6 characters.", { exact: true })).toHaveCount(0);
 });
 
 test("sign up and land on an empty closet", async ({ page }) => {
@@ -92,6 +113,9 @@ test("log in with the account you made, then log out", async ({ page }) => {
   await page.getByLabel("Password").fill("not-the-password");
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page.getByText("Wrong email or password.")).toBeVisible();
+  for (const box of ["Email", "Password"]) {
+    await expect(page.getByLabel(box)).toHaveAttribute("aria-invalid", "true");
+  }
 
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Log in" }).click();
@@ -119,6 +143,11 @@ test("Try the demo account opens the persona's closet", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "Sign up" })).toHaveCount(0);
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
+  // Signed in, the login pages lead home.
+  for (const path of ["/login", "/signup"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL("/");
+  }
 });
 
 test("the demo account can look but not change anything", async ({ page }) => {

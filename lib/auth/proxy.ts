@@ -6,13 +6,23 @@ import { authEnv, authRequired } from "./config";
 // themselves (the cron route checks its own secret).
 const PUBLIC_PAGES = ["/login", "/signup"];
 
+function isPublicPage(pathname: string): boolean {
+  return PUBLIC_PAGES.some((page) => pathname === page || pathname.startsWith(`${page}/`));
+}
+
 export function needsSignIn(pathname: string): boolean {
   if (pathname === "/api" || pathname.startsWith("/api/")) return false;
-  return !PUBLIC_PAGES.some((page) => pathname === page || pathname.startsWith(`${page}/`));
+  return !isPublicPage(pathname);
+}
+
+// Someone already signed in has nothing to do on /login or /signup.
+export function sendsSignedInHome(pathname: string): boolean {
+  return isPublicPage(pathname);
 }
 
 // With sign-in on: refresh the Supabase session cookies on every request,
-// and send signed-out visitors from app pages to /login. Off, it does nothing.
+// send signed-out visitors from app pages to /login, and signed-in ones from
+// the login pages to home. Off, it does nothing.
 export async function refreshSession(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({ request });
   if (!authRequired()) return response;
@@ -32,9 +42,14 @@ export async function refreshSession(request: NextRequest): Promise<NextResponse
 
   // getClaims refreshes an expired token through setAll above.
   const { data } = await supabase.auth.getClaims();
-  if (data?.claims || !needsSignIn(request.nextUrl.pathname)) return response;
+  const { pathname } = request.nextUrl;
+  const signedIn = Boolean(data?.claims);
+  let to: string | null = null;
+  if (signedIn && sendsSignedInHome(pathname)) to = "/";
+  if (!signedIn && needsSignIn(pathname)) to = "/login";
+  if (!to) return response;
 
-  const redirect = NextResponse.redirect(new URL("/login", request.url));
+  const redirect = NextResponse.redirect(new URL(to, request.url));
   // Keep cookies the refresh cleared or set.
   for (const cookie of response.cookies.getAll()) redirect.cookies.set(cookie);
   return redirect;
