@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { ReadOnlyNote } from "@/components/auth/read-only-note";
 import { ItemWearRow } from "@/components/calendar/item-wear-row";
 import { isReadOnly } from "@/lib/auth/session";
 import { getClosetItem } from "@/lib/closet/items";
+import { goesWith, type GoesWith } from "@/lib/closet/pairs";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { brandLabel } from "@/lib/entry/brands";
 import { currentUserId } from "@/lib/db/current-user";
@@ -22,10 +24,12 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   await connection();
   const { id } = await params;
   const userId = await currentUserId();
-  const [item, readOnly, unit] = await Promise.all([
-    getClosetItem(createServerClient(), userId, id),
+  const db = createServerClient();
+  const [item, readOnly, unit, pairs] = await Promise.all([
+    getClosetItem(db, userId, id),
     isReadOnly(),
     tempUnitFor(userId),
+    goesWith(db, userId, id),
   ]);
   if (!item) notFound();
 
@@ -128,6 +132,9 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
             )}
           </div>
 
+          {/* Pieces on their way out are left out of outfits, so they pair with nothing. */}
+          {status === "active" && <GoesWithPieces pairs={pairs} />}
+
           {findsBuyers && <BuyerMatches itemId={item.id} size={item.size} />}
 
           {readOnly ? (
@@ -144,6 +151,42 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
         </div>
       </div>
     </ItemEditor>
+  );
+}
+
+// Zara's "Complete your look", from pairings already judged and cached; the
+// rest of the closet hasn't been checked against this piece yet.
+function GoesWithPieces({ pairs }: { pairs: GoesWith }) {
+  if (pairs.count === 0) return <p className="text-sm text-ink-2">Not paired with your closet yet.</p>;
+  const more = pairs.count - pairs.pieces.length;
+  return (
+    <section aria-labelledby="goes-with-heading" className="flex flex-col gap-3">
+      <h2 id="goes-with-heading" className="text-lg font-medium">
+        Goes with {pairs.count} {pairs.count === 1 ? "piece" : "pieces"} in your closet
+      </h2>
+      <ul className="flex items-center gap-1">
+        {pairs.pieces.map((piece) => (
+          <li key={piece.id} className="w-16">
+            <Link href={`/closet/${piece.id}`} aria-label={piece.title} className="block">
+              <ItemImage
+                src={piece.imageUrl}
+                alt=""
+                category={piece.category}
+                swatch={piece.swatch}
+                sizes="64px"
+                aspect="aspect-square"
+              />
+            </Link>
+          </li>
+        ))}
+        {more > 0 && (
+          <li className="pl-2 text-sm text-ink-2 tabular-nums">
+            <span aria-hidden="true">+{more}</span>
+            <span className="sr-only">and {more} more</span>
+          </li>
+        )}
+      </ul>
+    </section>
   );
 }
 
