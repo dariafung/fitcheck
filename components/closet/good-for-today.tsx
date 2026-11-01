@@ -62,7 +62,7 @@ export async function GoodForToday() {
             href={ATTRIBUTION.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 transition-colors duration-150 hover:text-ink"
+            className="-my-[14px] inline-flex min-h-11 items-center underline underline-offset-2 transition-colors duration-150 hover:text-ink"
           >
             {ATTRIBUTION.text}
           </a>
@@ -80,6 +80,8 @@ export function GoodForTodaySkeleton() {
   );
 }
 
+// Links in this section's text keep their look but are 44 px tall to tap; the
+// negative margin gives the extra height back, so nothing moves.
 function Section({ note, children }: { note?: string; children: ReactNode }) {
   return (
     <section aria-labelledby="good-for-today" className="flex flex-col gap-6">
@@ -94,7 +96,7 @@ function Section({ note, children }: { note?: string; children: ReactNode }) {
               <Link
                 href="/profile#weather"
                 aria-label="Change weather location"
-                className="underline underline-offset-4 transition-colors duration-150 hover:text-ink"
+                className="-my-[13px] inline-flex min-h-11 items-center underline underline-offset-4 transition-colors duration-150 hover:text-ink"
               >
                 Change
               </Link>
@@ -102,7 +104,7 @@ function Section({ note, children }: { note?: string; children: ReactNode }) {
           )}
         <Link
           href="/closet"
-          className="ml-auto shrink-0 text-sm underline underline-offset-4 transition-colors duration-150 hover:text-ink-2"
+          className="-my-[13px] ml-auto inline-flex min-h-11 shrink-0 items-center text-sm underline underline-offset-4 transition-colors duration-150 hover:text-ink-2"
         >
           See all clothes
         </Link>

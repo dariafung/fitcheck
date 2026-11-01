@@ -47,10 +47,12 @@ export function ClosetFilters<T extends { id: string; status: string; category: 
             href={closetHref({ ...view, tab: tab.id })}
             scroll={false}
             aria-current={tab.id === view.tab ? "page" : undefined}
-            className={`${FILTER} -my-3 py-3 ${on(tab.id === view.tab)}`}
+            className={`${FILTER} -my-[13px] inline-flex min-h-11 items-center ${on(tab.id === view.tab)}`}
           >
-            {tab.label}{" "}
-            <span className="text-ink-2 tabular-nums">{inCategory(inTabTagged(tab.id), view.cat).length}</span>
+            <span>
+              {tab.label}{" "}
+              <span className="text-ink-2 tabular-nums">{inCategory(inTabTagged(tab.id), view.cat).length}</span>
+            </span>
           </Link>
         ))}
       </div>
