@@ -216,9 +216,9 @@ test("when the AI doesn't finish, try again sends the same item and photo", asyn
   await card.getByLabel("Type").selectOption("shoes");
   await card.getByRole("button", { name: "Check it" }).click();
 
-  await expect(page.getByRole("status")).toContainText(INCOMPLETE_NOTICE);
+  await expect(card.getByRole("status")).toContainText(INCOMPLETE_NOTICE);
   await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
-  await page.getByRole("button", { name: "Try again" }).click();
+  await card.getByRole("button", { name: "Try again" }).click();
   await expect.poll(() => sent.length).toBe(2);
   expect(JSON.parse(sent[0]).photo).toMatch(/^data:image\//);
   expect(sent[1]).toBe(sent[0]);
@@ -249,7 +249,44 @@ test("when the AI fails, the card stays and Check it works again", async ({ page
   await page.goto("/check");
   const card = await upload(page);
   await card.getByRole("button", { name: "Check it" }).click();
-  await expect(page.getByRole("status")).toContainText("Couldn't check it. Try again?");
+  // Next to the button that was just pressed, not at the top of the page.
+  await expect(card.getByRole("status")).toContainText("Couldn't check it. Try again?");
   await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
   await expect(card.getByRole("button", { name: "Check it" })).toBeEnabled();
+});
+
+test("a screenshot that can't be read says so above the drop target", async ({ page }) => {
+  const failed = aiErrorResponse(new AiUpstreamError("extractItem", 500));
+  const body = await failed.text();
+  await page.route("**/api/checks/extract", (route) =>
+    route.fulfill({ status: failed.status, contentType: "application/json", body }),
+  );
+  await page.goto("/check");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const notice = page.getByRole("status");
+  await expect(notice).toBeVisible();
+  const [noticeBox, dropBox] = await Promise.all([notice.boundingBox(), page.locator(".dropzone").boundingBox()]);
+  expect(noticeBox!.y).toBeLessThan(dropBox!.y);
+});
+
+test("with nothing in the closet to compare, there's no score, only a way to add clothes", async ({ page }) => {
+  // The persona's closet isn't empty; answer as the route would for one that is.
+  await page.route("**/api/checks", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { result: { ...json.result, closetSize: 0 } } });
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByText("Nothing to compare it with yet.", { exact: true })).toBeVisible();
+  await expect(result.getByTestId("score")).toHaveCount(0);
+  await expect(result.getByTestId("verdict")).toHaveCount(0);
+  await expect(result.getByRole("link", { name: "Add clothes" })).toHaveAttribute("href", "/closet/add");
+  await expect(result.getByRole("button", { name: "Check another" })).toBeVisible();
 });

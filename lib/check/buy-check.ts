@@ -102,6 +102,9 @@ export interface BuyCheckResult {
   // `slots` holds what's missing for each way to build an outfit around it.
   gap: { kind: GapKind; slots: MissingSlot[][]; reason: string } | null;
   sampleOutfits: SampleOutfit[];
+  // Owned items the check compared against; 0 means there was nothing to
+  // compare, and the page shows no score.
+  closetSize: number;
   stats: PairingStats;
 }
 
@@ -345,6 +348,7 @@ export async function runBuyCheck(
       parts,
       gap: slots && gapNotice(slots, categoryOf(candidate)),
       sampleOutfits: sampleOutfits(withCandidate, titles, images),
+      closetSize: closet.length,
       stats: comparison.stats,
     },
   };

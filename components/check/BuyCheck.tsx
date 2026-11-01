@@ -139,8 +139,20 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
     setStep({ kind: "idle" });
   }
 
+  // A problem with the screenshot shows above the drop target; one with the
+  // check, next to the Check it button: either way where the eye already is.
   return (
     <div className="flex flex-col gap-8">
+      <div role="status" aria-live="polite" className="empty:hidden">
+        {step.kind !== "draft" && problem && (
+          <p className="notice">
+            {problem}
+          </p>
+        )}
+        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
+        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
+      </div>
+
       {(step.kind === "idle" || step.kind === "loading" || step.kind === "cutting") && (
         <div
           onDragOver={(e) => {
@@ -182,28 +194,6 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
         </div>
       )}
 
-      <div role="status" aria-live="polite" className="empty:hidden">
-        {problem && (
-          <p className="notice">
-            {problem}
-          </p>
-        )}
-        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
-        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
-        {step.kind === "draft" && step.checking && (
-          <p className="text-sm text-ink-2">Checking it against your closet…</p>
-        )}
-      </div>
-
-      {step.kind === "draft" && retry && (
-        <button
-          type="button"
-          onClick={() => check(step.draft, retry, step.original)}
-          className="btn-primary self-start"
-        >
-          Try again
-        </button>
-      )}
       {step.kind === "draft" && (
         <button
           type="button"
@@ -230,6 +220,26 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
           busyLabel="Checking…"
           hint="Fix anything that's off, then check."
           tempUnit={use(tempUnit)}
+          actions={
+            <>
+              <p role="status" aria-live="polite" className="text-sm empty:hidden">
+                {step.checking ? (
+                  <span className="text-ink-2">Checking it against your closet…</span>
+                ) : (
+                  problem && <span className="font-medium">{problem}</span>
+                )}
+              </p>
+              {retry && !step.checking && (
+                <button
+                  type="button"
+                  onClick={() => check(step.draft, retry, step.original)}
+                  className="btn-text self-start md:self-center"
+                >
+                  Try again
+                </button>
+              )}
+            </>
+          }
         />
       )}
       {step.kind === "result" && (
