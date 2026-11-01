@@ -8,13 +8,15 @@ const INPUT = "field h-11";
 const LABEL = "text-sm text-ink-2";
 const ERROR = "text-sm font-medium";
 
+// On the login page the demo account is the main button, so Log in steps
+// back to the secondary style.
 const MODES = {
-  login: { action: logIn, submit: "Log in", busy: "Logging in…", password: "current-password" },
-  signup: { action: signUp, submit: "Create account", busy: "Creating…", password: "new-password" },
+  login: { action: logIn, submit: "Log in", busy: "Logging in…", password: "current-password", button: "btn-secondary" },
+  signup: { action: signUp, submit: "Create account", busy: "Creating…", password: "new-password", button: "btn-primary" },
 } as const;
 
 export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
-  const { action, submit, busy, password } = MODES[mode];
+  const { action, submit, busy, password, button } = MODES[mode];
   const [state, formAction, pending] = useActionState<AuthFormState, FormData>(action, {});
 
   return (
@@ -58,7 +60,7 @@ export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
       <button
         type="submit"
         disabled={pending}
-        className="btn-primary mt-2 w-full"
+        className={`${button} mt-2 w-full`}
       >
         {pending ? busy : submit}
       </button>
@@ -66,18 +68,19 @@ export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
   );
 }
 
-export function DemoButton() {
+// The main button on the login page; a secondary one under sign-up.
+export function DemoButton({ primary = false }: { primary?: boolean }) {
   const [state, formAction, pending] = useActionState<AuthFormState>(tryDemo, {});
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <button
         type="submit"
         disabled={pending}
-        className="btn-secondary w-full"
+        className={`${primary ? "btn-primary" : "btn-secondary"} w-full`}
       >
         {pending ? "Opening…" : "Try the demo account"}
       </button>
-      <p className="text-sm text-ink-2">A sample closet to look around. Read-only.</p>
+      <p className="text-sm text-ink-2">A sample closet with 18 pieces. Read-only.</p>
       {state.error && (
         <p role="alert" className={ERROR}>
           {AUTH_ERRORS[state.error]}

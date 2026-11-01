@@ -48,7 +48,11 @@ async function tryDemo(page: Page) {
 test("signed out, pages send you to log in", async ({ page }) => {
   await page.goto("/closet");
   await expect(page).toHaveURL(/\/login/);
-  await expect(page.getByRole("heading", { level: 1, name: "Log in" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Welcome to fitcheck" })).toBeVisible();
+  // The demo account comes first; logging in sits under it.
+  const buttons = page.getByRole("main").getByRole("button");
+  await expect(buttons.first()).toHaveText("Try the demo account");
+  await expect(buttons.last()).toHaveText("Log in");
   // No top-bar link is the login page, so none is marked current.
   await expect(page.getByRole("navigation").locator("[aria-current]")).toHaveCount(0);
 });
