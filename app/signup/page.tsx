@@ -14,7 +14,7 @@ export default function SignupPage() {
       <AuthForm mode="signup" />
       <p className="text-sm text-ink-2">
         Have an account?{" "}
-        <Link href="/login" className="font-medium text-ink underline underline-offset-4">
+        <Link href="/login" className="py-3.5 font-medium text-ink underline underline-offset-4">
           Log in
         </Link>
       </p>

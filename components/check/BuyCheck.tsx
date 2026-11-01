@@ -214,12 +214,6 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
           Use another screenshot
         </button>
       )}
-      {step.kind === "draft" && step.original && (
-        <CleanedNote
-          disabled={step.checking}
-          onUseOriginal={() => step.original && setStep({ kind: "draft", draft: step.original, checking: false })}
-        />
-      )}
       {step.kind === "draft" && (
         <ItemCard
           key={round}
@@ -230,6 +224,14 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
           busyLabel="Checking…"
           hint="Fix anything that's off, then check."
           tempUnit={use(tempUnit)}
+          photoNote={
+            step.original && (
+              <CleanedNote
+                disabled={step.checking}
+                onUseOriginal={() => step.original && setStep({ kind: "draft", draft: step.original, checking: false })}
+              />
+            )
+          }
         />
       )}
       {step.kind === "result" && (

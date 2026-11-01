@@ -54,6 +54,14 @@
   --text-score: 96px;
   --text-score--line-height: 0.9;
   --text-score--letter-spacing: -0.04em;
+  /* The purchase check on a phone: the 40px question and the 96px score
+     step down to 32 and 64 (text-2xl-phone, text-score-phone). */
+  --text-2xl-phone: 32px;
+  --text-2xl-phone--line-height: 1.05;
+  --text-2xl-phone--letter-spacing: -0.015em;
+  --text-score-phone: 64px;
+  --text-score-phone--line-height: 0.9;
+  --text-score-phone--letter-spacing: -0.04em;
 
   --radius-*: initial;
   --radius-input: 2px;
@@ -93,6 +101,13 @@ input,
 select,
 textarea {
   color: inherit;
+}
+
+/* Read-only boxes (the demo account's profile): still legible, but quieter. */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  color: var(--ink-2);
 }
 
 input::placeholder,
@@ -204,7 +219,7 @@ textarea::placeholder {
   /* 16px or iOS Safari zooms the page when the field takes focus. */
   font-size: 16px;
   transition: border-color 150ms var(--ease-quiet);
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--ink-2);
   }
   &:focus {
@@ -213,6 +228,9 @@ textarea::placeholder {
   &[aria-invalid="true"] {
     border-color: var(--ink);
     border-width: 2px;
+  }
+  &:disabled {
+    cursor: default;
   }
 }
 
@@ -229,8 +247,12 @@ textarea::placeholder {
     background-color 150ms var(--ease-quiet),
     border-color 150ms var(--ease-quiet),
     color 150ms var(--ease-quiet);
-  &:hover {
+  &:hover:not(:has(:disabled)) {
     border-color: var(--ink);
+  }
+  &:has(:disabled) {
+    color: var(--ink-2);
+    cursor: default;
   }
   &[aria-pressed="true"],
   &:has(:checked) {

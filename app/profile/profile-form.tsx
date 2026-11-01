@@ -29,7 +29,7 @@ import {
   unitsCookieString,
   type Units,
 } from "@/lib/profile/units";
-import type { TempUnit } from "@/lib/profile/temp-unit";
+import { DEFAULT_TEMP_UNIT, type TempUnit } from "@/lib/profile/temp-unit";
 import { LETTER_SIZES, SHOE_SIZE_OPTIONS } from "@/lib/resale/size";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -97,10 +97,11 @@ const SECTION_BODY = "flex flex-col gap-8 md:col-span-7 md:col-start-6";
 // Preferences: one labelled row each, the control on the right.
 const PREF_ROW = "grid grid-cols-[7rem_1fr] items-start gap-x-4 gap-y-2 border-b border-line py-3 sm:grid-cols-[9rem_1fr]";
 const PREF_LABEL = "flex min-h-11 items-center text-base";
-// Two-way switch (in · lb / cm · kg, °F / °C): 44 tall to tap.
+// Two-way switch (in · lb / cm · kg, °F / °C): 44 tall to tap, a line
+// between the halves.
 const SEGMENTS = "flex w-fit self-start border border-ink text-sm";
 const SEGMENT =
-  "h-11 min-w-14 cursor-pointer px-4 transition-colors duration-150 disabled:cursor-default aria-pressed:bg-ink aria-pressed:text-paper";
+  "h-11 min-w-14 cursor-pointer border-l border-ink px-4 transition-colors duration-150 first:border-l-0 disabled:cursor-default aria-pressed:bg-ink aria-pressed:text-paper";
 
 export function ProfileForm({
   initial,
@@ -123,7 +124,8 @@ export function ProfileForm({
     bottomSize: initial.bottomSize ?? "",
     shoeSize: initial.shoeSize ?? "",
   }));
-  const [tempUnit, setTempUnit] = useState<TempUnit | null>(initial.tempUnit);
+  // Until one is saved, the unit the rest of the site already shows.
+  const [tempUnit, setTempUnit] = useState<TempUnit | null>(initial.tempUnit ?? DEFAULT_TEMP_UNIT);
   const [resaleOptIn, setResaleOptIn] = useState(initial.resaleOptIn);
   const [errors, setErrors] = useState<
     Partial<Record<Measurement | Occasion | SizeField | "shape" | "tempUnit", string>>
@@ -219,72 +221,75 @@ export function ProfileForm({
 
   return (
     <form onSubmit={save} noValidate className="flex flex-col gap-16">
-      <section aria-labelledby="body-heading" className={SECTION}>
-        <div className={SECTION_HEAD}>
-          <h2 id="body-heading" className="text-lg font-medium">
-            Your body
-          </h2>
-          <p className="text-sm text-ink-2">Height, weight and sizes are a must. The rest helps.</p>
-        </div>
-
-        <div className={SECTION_BODY}>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
-            {MEASUREMENTS.map((m) => (
-              <div key={m} className="flex flex-col gap-1.5">
-                <label htmlFor={m} className="text-sm text-ink-2">
-                  {LABELS[m]}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    id={m}
-                    type="number"
-                    inputMode="decimal"
-                    step="any"
-                    value={fields[m].text}
-                    onChange={(e) => setMeasurement(m, e.target.value)}
-                    aria-invalid={errors[m] ? true : undefined}
-                    aria-describedby={errors[m] ? `${m}-error` : undefined}
-                    className={INPUT}
-                  />
-                  <span className="text-sm text-ink-2">{unitLabel(kindOf(m), units)}</span>
-                </div>
-                {m === "heightCm" && units === "imperial" && height !== null && !Number.isNaN(height) && (
-                  <span className="text-sm text-ink-2 tabular-nums">{feetAndInches(height / CM_PER_IN)}</span>
-                )}
-                {errors[m] && (
-                  <p id={`${m}-error`} className={ERROR}>
-                    {errors[m]}
-                  </p>
-                )}
-              </div>
-            ))}
+      {/* The demo account can look but not change anything: every box and
+          switch in here is disabled at once. */}
+      <fieldset disabled={readOnly} className="flex min-w-0 flex-col gap-16">
+        <section aria-labelledby="body-heading" className={SECTION}>
+          <div className={SECTION_HEAD}>
+            <h2 id="body-heading" className="text-lg font-medium">
+              Your body
+            </h2>
+            <p className="text-sm text-ink-2">Height, weight and sizes are a must. The rest helps.</p>
           </div>
 
-          <fieldset className="flex flex-col gap-2" aria-describedby={errors.shape ? "shape-error" : undefined}>
-            <legend className="mb-2 text-sm text-ink-2">Body shape</legend>
-            <div className="flex flex-wrap gap-2">
-              {BODY_SHAPES.map((s) => (
-                <label key={s} className="chip">
-                  <input
-                    type="radio"
-                    name="bodyShape"
-                    value={s}
-                    checked={shape === s}
-                    onChange={() => {
-                      setShape(s);
-                      edited();
-                    }}
-                    className="sr-only"
-                  />
-                  {BODY_SHAPE_LABELS[s]}
-                </label>
+          <div className={SECTION_BODY}>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+              {MEASUREMENTS.map((m) => (
+                <div key={m} className="flex flex-col gap-1.5">
+                  <label htmlFor={m} className="text-sm text-ink-2">
+                    {LABELS[m]}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id={m}
+                      type="number"
+                      inputMode="decimal"
+                      step="any"
+                      value={fields[m].text}
+                      onChange={(e) => setMeasurement(m, e.target.value)}
+                      aria-invalid={errors[m] ? true : undefined}
+                      aria-describedby={errors[m] ? `${m}-error` : undefined}
+                      className={INPUT}
+                    />
+                    <span className="text-sm text-ink-2">{unitLabel(kindOf(m), units)}</span>
+                  </div>
+                  {m === "heightCm" && units === "imperial" && height !== null && !Number.isNaN(height) && (
+                    <span className="text-sm text-ink-2 tabular-nums">{feetAndInches(height / CM_PER_IN)}</span>
+                  )}
+                  {errors[m] && (
+                    <p id={`${m}-error`} className={ERROR}>
+                      {errors[m]}
+                    </p>
+                  )}
+                </div>
               ))}
             </div>
-            {errors.shape && (
-              <p id="shape-error" className={ERROR}>
-                {errors.shape}
-              </p>
-            )}
+
+            <fieldset className="flex flex-col gap-2" aria-describedby={errors.shape ? "shape-error" : undefined}>
+              <legend className="mb-2 text-sm text-ink-2">Body shape</legend>
+              <div className="flex flex-wrap gap-2">
+                {BODY_SHAPES.map((s) => (
+                  <label key={s} className="chip">
+                    <input
+                      type="radio"
+                      name="bodyShape"
+                      value={s}
+                      checked={shape === s}
+                      onChange={() => {
+                        setShape(s);
+                        edited();
+                      }}
+                      className="sr-only"
+                    />
+                    {BODY_SHAPE_LABELS[s]}
+                  </label>
+                ))}
+              </div>
+              {errors.shape && (
+                <p id="shape-error" className={ERROR}>
+                  {errors.shape}
+                </p>
+              )}
           </fieldset>
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
@@ -399,7 +404,6 @@ export function ProfileForm({
                     key={u}
                     type="button"
                     aria-pressed={tempUnit === u}
-                    disabled={readOnly}
                     onClick={() => {
                       setTempUnit(u);
                       edited();
@@ -442,10 +446,14 @@ export function ProfileForm({
           )}
         </div>
       </section>
+      </fieldset>
 
       <div className="-mt-8 flex items-center gap-4 md:pl-[calc((100%-11*16px)/12*5+5*16px)]">
         {readOnly ? (
-          <ReadOnlyNote />
+          // As wide as the Outfit calendar's note below.
+          <div className="flex-1">
+            <ReadOnlyNote />
+          </div>
         ) : (
           <button type="submit" disabled={status === "saving"} className="btn-primary px-10">
             {status === "saving" ? "Saving…" : "Save"}

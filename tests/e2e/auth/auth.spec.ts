@@ -48,9 +48,34 @@ async function tryDemo(page: Page) {
 test("signed out, pages send you to log in", async ({ page }) => {
   await page.goto("/closet");
   await expect(page).toHaveURL(/\/login/);
-  await expect(page.getByRole("heading", { level: 1, name: "Log in" })).toBeVisible();
-  // No top-bar link is the login page, so none is marked current.
-  await expect(page.getByRole("navigation").locator("[aria-current]")).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1, name: "Welcome to fitcheck" })).toBeVisible();
+  // The demo account comes first; logging in sits under it.
+  const buttons = page.getByRole("main").getByRole("button");
+  await expect(buttons.first()).toHaveText("Try the demo account");
+  await expect(buttons.last()).toHaveText("Log in");
+  // No top-bar link is the login page, so none is marked current, and only
+  // the logo and Log in are there.
+  const nav = page.getByRole("navigation");
+  await expect(nav.locator("[aria-current]")).toHaveCount(0);
+  await expect(nav.getByRole("link")).toHaveText(["fitcheck", "Log in"], { ignoreCase: true });
+});
+
+test("login and sign-up errors sit under the box they're about", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("main").getByRole("button", { name: "Log in" }).click();
+  await expect(page.getByLabel("Email")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByLabel("Email")).toHaveAccessibleDescription("Enter your email.");
+
+  await page.goto("/signup");
+  const password = page.getByLabel("Password");
+  await expect(password).toHaveAccessibleDescription("At least 6 characters.");
+  await page.getByLabel("Email").fill("short@example.com");
+  await password.fill("123");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(password).toHaveAttribute("aria-invalid", "true");
+  await expect(password).toHaveAccessibleDescription("Use at least 6 characters.");
+  // The error takes the hint's place; they never show together.
+  await expect(page.getByText("At least 6 characters.", { exact: true })).toHaveCount(0);
 });
 
 test("sign up and land on an empty closet", async ({ page }) => {
@@ -88,6 +113,9 @@ test("log in with the account you made, then log out", async ({ page }) => {
   await page.getByLabel("Password").fill("not-the-password");
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page.getByText("Wrong email or password.")).toBeVisible();
+  for (const box of ["Email", "Password"]) {
+    await expect(page.getByLabel(box)).toHaveAttribute("aria-invalid", "true");
+  }
 
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Log in" }).click();
@@ -115,6 +143,17 @@ test("Try the demo account opens the persona's closet", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "Sign up" })).toHaveCount(0);
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
+  // Signed in, the login pages lead home.
+  for (const path of ["/login", "/signup"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL("/");
+  }
+  // A page that doesn't exist says so, in the site's own type.
+  const missing = await page.goto("/no-such-page");
+  expect(missing?.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+  await page.getByRole("link", { name: "Back to closet" }).click();
+  await expect(page).toHaveURL("/closet");
 });
 
 test("the demo account can look but not change anything", async ({ page }) => {
@@ -135,8 +174,12 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await page.goto("/profile");
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);
-  // Sizes show; the demo account is never anyone's buyer, so no Resale.
+  // Sizes show but can't be changed; the demo account is never anyone's
+  // buyer, so no Resale.
   await expect(page.getByLabel("Tops & dresses")).toBeVisible();
+  await expect(page.getByLabel("Tops & dresses")).toBeDisabled();
+  await expect(page.getByLabel("Height", { exact: true })).toBeDisabled();
+  await expect(page.getByRole("group", { name: "Units" }).getByRole("button").first()).toBeDisabled();
   await expect(page.getByRole("heading", { name: "Resale" })).toHaveCount(0);
 
   // The server says no even when the page is skipped. The body is invalid on
