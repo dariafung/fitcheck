@@ -22,7 +22,7 @@ export default function LoginPage() {
       <AuthForm mode="login" />
       <p className="text-sm text-ink-2">
         New here?{" "}
-        <Link href="/signup" className="font-medium text-ink underline underline-offset-4">
+        <Link href="/signup" className="py-3.5 font-medium text-ink underline underline-offset-4">
           Sign up
         </Link>
       </p>

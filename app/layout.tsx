@@ -41,6 +41,22 @@ const PROFILE = (
   </NavLink>
 );
 
+// Holds Calendar's place while it's decided whether to show it (it's off for
+// anyone who turned the calendar off), so the links after it don't jump.
+const CALENDAR_SLOT = (
+  <span aria-hidden className={`${NAV_LINK} invisible`}>
+    Calendar
+  </span>
+);
+
+// Likewise Log out on a desktop, the usual case on the hosted site; Profile
+// stays put when it streams in.
+const ACCOUNT_SLOT = (
+  <span aria-hidden className={`${NAV_LINK} invisible max-md:hidden`}>
+    Log out
+  </span>
+);
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${schibsted.variable} ${newsreader.variable} h-full antialiased`}>
@@ -49,20 +65,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* Logo and sections on the left; the account on the right. The
               purchase check starts from the banner on home. */}
           <nav className="shell flex h-14 items-center gap-4 md:gap-5">
-            <NavLink href="/" className="mr-1 text-sm font-medium tracking-[0.25em] uppercase md:mr-3">
+            <NavLink href="/" className={`${NAV_LINK} mr-1 font-medium tracking-[0.25em] uppercase md:mr-3`}>
               fitcheck
             </NavLink>
             <Suspense fallback={CLOSET}>
               <SignedInOnly>{CLOSET}</SignedInOnly>
             </Suspense>
-            <Suspense>
+            <Suspense fallback={CALENDAR_SLOT}>
               <CalendarNavLink className={NAV_LINK} />
             </Suspense>
             <div className="ml-auto flex items-center gap-4 text-sm md:gap-5">
               <Suspense fallback={PROFILE}>
                 <SignedInOnly>{PROFILE}</SignedInOnly>
               </Suspense>
-              <Suspense>
+              <Suspense fallback={ACCOUNT_SLOT}>
                 <AccountNav />
               </Suspense>
             </div>

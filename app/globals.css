@@ -54,6 +54,14 @@
   --text-score: 96px;
   --text-score--line-height: 0.9;
   --text-score--letter-spacing: -0.04em;
+  /* The purchase check on a phone: the 40px question and the 96px score
+     step down to 32 and 64 (text-2xl-phone, text-score-phone). */
+  --text-2xl-phone: 32px;
+  --text-2xl-phone--line-height: 1.05;
+  --text-2xl-phone--letter-spacing: -0.015em;
+  --text-score-phone: 64px;
+  --text-score-phone--line-height: 0.9;
+  --text-score-phone--letter-spacing: -0.04em;
 
   --radius-*: initial;
   --radius-input: 2px;

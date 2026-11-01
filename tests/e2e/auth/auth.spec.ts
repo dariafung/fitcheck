@@ -148,6 +148,12 @@ test("Try the demo account opens the persona's closet", async ({ page }) => {
     await page.goto(path);
     await expect(page).toHaveURL("/");
   }
+  // A page that doesn't exist says so, in the site's own type.
+  const missing = await page.goto("/no-such-page");
+  expect(missing?.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+  await page.getByRole("link", { name: "Back to closet" }).click();
+  await expect(page).toHaveURL("/closet");
 });
 
 test("the demo account can look but not change anything", async ({ page }) => {
