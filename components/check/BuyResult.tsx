@@ -33,6 +33,31 @@ function Thumb({ src, alt }: { src: string | null; alt: string }) {
   );
 }
 
+// The closest owned piece shows beside this one only when it's a real
+// repeat: Not a repeat at 6 of 10 or lower.
+const CLOSEST_SHOWN_AT = 6;
+
+// The new piece and the owned piece it's most like, side by side.
+function Closest({ photo, title, item }: { photo: string | null; title: string; item: { id: string; title: string; imageUrl: string | null } }) {
+  return (
+    <div data-testid="closest" className="flex flex-col gap-4">
+      <h3 className="text-base font-medium">Closest in your closet</h3>
+      <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          <Thumb src={photo} alt={title} />
+          <p className="text-sm text-ink-2">This one</p>
+        </div>
+        <Link href={`/closet/${item.id}`} className="group flex flex-col gap-2">
+          <Thumb src={item.imageUrl} alt={item.title} />
+          <span className="line-clamp-2 w-24 text-sm underline decoration-line underline-offset-4 group-hover:decoration-ink md:w-28">
+            {item.title}
+          </span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 interface Cutouts {
   candidate: string | null;
   items: Record<string, OwnedPiece>;
@@ -199,6 +224,10 @@ export function BuyResult({
             );
           })}
         </ul>
+
+        {parts.notRepeat.item && parts.notRepeat.points <= CLOSEST_SHOWN_AT && (
+          <Closest photo={photo} title={title} item={parts.notRepeat.item} />
+        )}
 
         {result.sampleOutfits.length > 0 && (
           <div className="flex flex-col gap-4">

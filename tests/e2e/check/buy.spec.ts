@@ -81,6 +81,20 @@ test("check an item: screenshot, confirm, score, check another", async ({ page }
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
 });
 
+test("a close repeat shows the owned piece beside the new one, linked to its page", async ({ page }) => {
+  await page.goto("/check");
+  // The mock reads a black top; the persona owns black tops.
+  const card = await upload(page);
+  await card.getByRole("button", { name: "Check it" }).click();
+  const closest = page.getByRole("region", { name: "Result" }).getByTestId("closest");
+  await expect(closest.getByRole("heading", { name: "Closest in your closet" })).toBeVisible();
+  await expect(closest.getByText("This one", { exact: true })).toBeVisible();
+  await expect(closest.getByRole("img", { name: "Mock item" })).toBeVisible();
+  const owned = closest.getByRole("link");
+  await expect(owned).toHaveAttribute("href", /^\/closet\/[0-9a-f-]{36}$/);
+  await expect(owned.getByRole("img")).toBeVisible();
+});
+
 test("sample outfits show as boards of real photos; an on-model photo is cut out first", async ({ page }) => {
   const cutouts: string[] = [];
   page.on("request", (r) => {
