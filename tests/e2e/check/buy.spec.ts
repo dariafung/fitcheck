@@ -120,6 +120,12 @@ test("sample outfits show as boards of real photos; an on-model photo is cut out
   await expect(board.getByText("New", { exact: true })).toBeVisible();
   await expect(board.getByRole("img", { name: "Black loafers" })).toBeVisible();
   await expect(result.getByRole("list", { name: "Outfit" })).toHaveCount(await result.getByTestId("outfit-board").count());
+  // Owned pieces link to their pages and are named under the board; the new piece isn't a link.
+  const owned = board.getByRole("link");
+  await expect(owned.first()).toHaveAttribute("href", /^\/closet\/[0-9a-f-]{36}$/);
+  await expect(board.getByRole("link", { name: "Black loafers" })).toHaveCount(0);
+  const names = await owned.evaluateAll((links) => links.map((a) => a.querySelector("img")?.getAttribute("alt")));
+  await expect(result.getByText(`With your ${names.join(" · ")}`, { exact: true }).first()).toBeVisible();
 });
 
 test("when the boards can't load, the plain rows of photos stay", async ({ page }) => {

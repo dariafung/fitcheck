@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AI_BUDGET_NOTICE, aiNotice } from "@/lib/ai/notices";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { STYLE_FAILED, STYLE_IT, STYLING } from "@/lib/check/reasons";
-import { OutfitBoard, type BoardPiece } from "./OutfitBoard";
+import { OutfitBoard, ownedLine, type BoardPiece } from "./OutfitBoard";
 
 export interface StyleCandidate {
   photo: string;
@@ -59,7 +59,9 @@ export function useStyleIt(candidate: StyleCandidate | null) {
 
 export type StyleIt = ReturnType<typeof useStyleIt>;
 
-// One sample outfit: the board of real photos, or the AI picture of it.
+// One sample outfit: the board of real photos, or the AI picture of it,
+// with the owned pieces named underneath. The picture has no place for each
+// piece, so only the line names them there.
 export function StyledOutfit({
   outfitId,
   pieces,
@@ -77,6 +79,7 @@ export function StyledOutfit({
   // Every piece, the candidate plus each owned item, needs a photo to copy.
   const canStyle =
     styleIt.enabled && pieces.length === itemIds.length + 1 && pieces.every((p) => p.src) && !styleIt.stopped;
+  const owned = ownedLine(pieces);
   return (
     <div className="flex w-56 shrink-0 snap-start flex-col items-start gap-2 md:w-auto">
       {image && styleIt.showing[outfitId] ? (
@@ -96,6 +99,7 @@ export function StyledOutfit({
           <OutfitBoard pieces={pieces} />
         </div>
       )}
+      {owned && <p className="text-sm text-ink-2">{owned}</p>}
       {busy ? (
         <p className="text-sm text-ink-2">{STYLING}</p>
       ) : image ? (
