@@ -44,14 +44,17 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
     <ItemEditor itemId={item.id} details={details} tempUnit={unit}>
       <div className="grid gap-x-4 gap-y-10 md:grid-cols-12">
         <div className="flex flex-col gap-4 md:col-span-6 lg:col-span-6">
-          <ItemImage
-            src={cover ?? null}
-            alt={item.title}
-            category={item.category}
-            swatch={item.swatch}
-            sizes="(min-width: 768px) 50vw, 100vw"
-            priority
-          />
+          {/* Edge to edge on a phone, as on the brands' product pages. */}
+          <div className="-mx-4 md:mx-0">
+            <ItemImage
+              src={cover ?? null}
+              alt={item.title}
+              category={item.category}
+              swatch={item.swatch}
+              sizes="(min-width: 768px) 50vw, 100vw"
+              priority
+            />
+          </div>
           {more.length > 0 && (
             <ul className="grid grid-cols-4 gap-4">
               {more.map((src, i) => (
@@ -206,7 +209,7 @@ function ReadOnlyFeeling({ text }: { text: string | null }) {
 export function ItemDetailSkeleton() {
   return (
     <div className="grid gap-x-4 gap-y-10 md:grid-cols-12" aria-busy="true" aria-label="Loading item">
-      <div className="aspect-[4/5] bg-tile motion-safe:animate-pulse md:col-span-6" />
+      <div className="-mx-4 aspect-[4/5] bg-tile motion-safe:animate-pulse md:col-span-6 md:mx-0" />
       <div className="flex flex-col gap-3 md:col-span-6 md:col-start-7 lg:col-span-4 lg:col-start-8">
         <div className="h-8 w-2/3 bg-tile motion-safe:animate-pulse" />
         <div className="h-4 w-1/3 bg-tile motion-safe:animate-pulse" />
