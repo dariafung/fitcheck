@@ -88,6 +88,19 @@ describe("tagGroups", () => {
     });
   });
 
+  it("writes every color name in sentence case, however the store wrote it", () => {
+    const tags = itemTags({
+      category: "top",
+      ai_tags: { ...AI_TAGS, colors: [{ name: "LIGHT HEATHER GREY" }, { name: "black" }, { name: "Pink Pearl" }] },
+      user_tags: {},
+    });
+    expect(tagGroups(tags).find((g) => g.label === "Colors")?.values).toEqual([
+      "Light heather grey",
+      "Black",
+      "Pink pearl",
+    ]);
+  });
+
   it("shows the range in °C for a profile set to °C", () => {
     const tags = itemTags({ category: "top", ai_tags: { ...AI_TAGS, tempRangeF: { min: 55, max: 85 } }, user_tags: {} });
     const range = tagGroups(tags, "C").find((g) => g.label === "Comfortable in");
