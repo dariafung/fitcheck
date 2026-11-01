@@ -7,6 +7,7 @@ import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
+import { verdict } from "@/lib/check/verdict";
 import { Icon } from "@/components/ui/icon";
 import { StyledOutfit, useStyleIt } from "./StyleIt";
 
@@ -88,7 +89,7 @@ export function BuyResult({
       aria-label="Result"
       className="grid grid-cols-[2fr_3fr] gap-x-4 gap-y-10 md:grid-cols-12 md:gap-y-0"
     >
-      <div className="relative isolate aspect-[4/5] self-start overflow-hidden bg-tile md:col-span-5 md:row-span-2">
+      <div className="relative isolate aspect-[4/5] self-start overflow-hidden bg-tile md:sticky md:top-10 md:col-span-5 md:row-span-2">
         {photo ? (
           <Image
             src={photo}
@@ -113,6 +114,10 @@ export function BuyResult({
             {result.score}
           </span>
           <span className="text-sm text-ink-2"> / 100</span>
+        </p>
+        {/* In ink: only the number is red. */}
+        <p data-testid="verdict" className="text-title font-medium uppercase md:text-2xl">
+          {verdict(result.score, result.gap)}
         </p>
       </header>
 

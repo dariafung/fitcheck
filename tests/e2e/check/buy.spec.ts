@@ -7,6 +7,7 @@ import { MOCK_INCOMPLETE_TITLE } from "../../../lib/ai/mock/score-purchase";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { CANDIDATE_ITEM_ID } from "../../../lib/check/pairings";
 import { ACCESSORY_NOTICE, INCOMPLETE_NOTICE, STYLE_FAILED, STYLE_IT, STYLING } from "../../../lib/check/reasons";
+import { VERDICTS } from "../../../lib/check/verdict";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
 import { expect, test } from "../fixtures";
 
@@ -55,6 +56,8 @@ test("check an item: screenshot, confirm, score, check another", async ({ page }
   const result = page.getByRole("region", { name: "Result" });
   await expect(result.getByRole("heading", { name: "Black loafers" })).toBeVisible();
   await expect(result.getByTestId("score")).toHaveText(/^\d{1,3}(\.\d)?$/);
+  // One verdict in words under the number.
+  await expect(result.getByTestId("verdict")).toHaveText(new RegExp(`^(${Object.values(VERDICTS).join("|")})$`));
   for (const part of ["Suits you", "Outfits", "Revives", "Fills a gap", "Not a repeat"]) {
     await expect(result.getByText(part, { exact: true })).toBeVisible();
   }
