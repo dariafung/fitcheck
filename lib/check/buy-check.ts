@@ -95,13 +95,16 @@ export interface BuyCheckResult {
     outfits: Part & { count: number };
     revives: Part & { items: { id: string; title: string }[] };
     fillsGap: Part & { tier: OccasionGapTier; occasions: OccasionChange[] };
-    // The owned item it's most like, per the model.
-    notRepeat: Part & { item: { id: string; title: string } | null };
+    // The owned item it's most like, per the model, with its first photo.
+    notRepeat: Part & { item: { id: string; title: string; imageUrl: string | null } | null };
   };
   // Set only when the candidate forms no outfit at all.
   // `slots` holds what's missing for each way to build an outfit around it.
   gap: { kind: GapKind; slots: MissingSlot[][]; reason: string } | null;
   sampleOutfits: SampleOutfit[];
+  // Owned items the check compared against; 0 means there was nothing to
+  // compare, and the page shows no score.
+  closetSize: number;
   stats: PairingStats;
 }
 
@@ -220,12 +223,9 @@ async function askRepeat(
   };
 }
 
-async function sampleOutfits(
-  db: Db,
-  itemIdLists: string[][],
-  titles: ReadonlyMap<string, string>,
-): Promise<SampleOutfit[]> {
-  const ids = [...new Set(itemIdLists.flat())].filter((id) => id !== CANDIDATE_ITEM_ID);
+// The first photo of each owned item the page shows, ready to load.
+async function firstImages(db: Db, itemIds: string[]): Promise<Map<string, string>> {
+  const ids = [...new Set(itemIds)].filter((id) => id !== CANDIDATE_ITEM_ID);
   const images = new Map<string, string>();
   if (ids.length > 0) {
     const { data } = await db.from("items").select("id, image_paths").in("id", ids).throwOnError();
@@ -236,6 +236,14 @@ async function sampleOutfits(
       }),
     );
   }
+  return images;
+}
+
+function sampleOutfits(
+  itemIdLists: string[][],
+  titles: ReadonlyMap<string, string>,
+  images: ReadonlyMap<string, string>,
+): SampleOutfit[] {
   return itemIdLists.map((itemIds) => ({
     id: itemIds.join("+"),
     pieces: itemIds.map((id) => ({
@@ -293,6 +301,11 @@ export async function runBuyCheck(
     title: titles.get(id) ?? "",
   }));
   const gapByOccasion = occasionGap(profile.mix, before.summary.byOccasion, after.summary.byOccasion);
+  const withCandidate = after.outfits
+    .filter((o) => o.itemIds.includes(CANDIDATE_ITEM_ID))
+    .slice(0, SAMPLE_OUTFITS)
+    .map((o) => o.itemIds);
+  const images = await firstImages(db, [...withCandidate.flat(), ...(repeat.item ? [repeat.item.id] : [])]);
 
   const parts: BuyCheckResult["parts"] = {
     suitsYou: {
@@ -319,14 +332,14 @@ export async function runBuyCheck(
       max: MAX_POINTS.fillsGap,
       reason: fillsGapReason(gapByOccasion.tier, gapByOccasion.occasions, profile.mix !== null),
     },
-    notRepeat: { ...repeat, max: MAX_POINTS.notRepeat },
+    notRepeat: {
+      ...repeat,
+      max: MAX_POINTS.notRepeat,
+      item: repeat.item && { ...repeat.item, imageUrl: images.get(repeat.item.id) ?? null },
+    },
   };
 
   const slots = outfitCount === 0 ? missingSlots(candidate, closet, comparison.mightPair) : null;
-  const withCandidate = after.outfits
-    .filter((o) => o.itemIds.includes(CANDIDATE_ITEM_ID))
-    .slice(0, SAMPLE_OUTFITS)
-    .map((o) => o.itemIds);
 
   return {
     result: {
@@ -334,7 +347,8 @@ export async function runBuyCheck(
       summary: fit.summary,
       parts,
       gap: slots && gapNotice(slots, categoryOf(candidate)),
-      sampleOutfits: await sampleOutfits(db, withCandidate, titles),
+      sampleOutfits: sampleOutfits(withCandidate, titles, images),
+      closetSize: closet.length,
       stats: comparison.stats,
     },
   };

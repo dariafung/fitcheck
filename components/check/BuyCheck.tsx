@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { use, useEffect, useRef, useState } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
 import { CleanedNote } from "@/components/entry/CleanedNote";
@@ -12,13 +13,15 @@ import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
 import type { TempUnit } from "@/lib/profile/temp-unit";
 import { BuyResult } from "./BuyResult";
+import { KeepIt, type Bought } from "./KeepIt";
 
-const CHECK_FAILED = "Couldn't check it. Try again?";
+const CHECK_FAILED = "Couldn't check it. Try again.";
 
 type Step =
   | { kind: "idle" }
-  | { kind: "loading" }
-  | { kind: "cutting" }
+  // The screenshot, shown faded while it's read.
+  | { kind: "loading"; preview: string }
+  | { kind: "cutting"; draft: ItemDraft }
   // `original` is the draft before the model cut its photo out.
   | { kind: "draft"; draft: ItemDraft; original?: ItemDraft; checking: boolean }
   | {
@@ -29,12 +32,16 @@ type Step =
       tags: ItemTags;
       onModel: boolean;
       result: BuyCheckResult;
+      // What "I bought it" saves; null without a photo to save it with.
+      bought: Bought | null;
     };
 
 // Upload a screenshot → confirm the card → see the score. One item at a
-// time; nothing is kept once you check another.
-// tempUnit streams in after the page; only the card reads it, long after.
-export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
+// time; nothing is kept once you check another, unless "I bought it" adds it
+// to the closet.
+// tempUnit and readOnly stream in after the page; only the card and the
+// result read them, long after.
+export function BuyCheck({ tempUnit, readOnly }: { tempUnit: Promise<TempUnit>; readOnly: Promise<boolean> }) {
   const [step, setStep] = useState<Step>({ kind: "idle" });
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
@@ -48,7 +55,7 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
   // outfit boards show no person. Nothing is stored. If it fails the card
   // keeps the original, without a word.
   async function cutOut(draft: ItemDraft) {
-    setStep({ kind: "cutting" });
+    setStep({ kind: "cutting", draft });
     try {
       const res = await fetch("/api/checks/cutout", {
         method: "POST",
@@ -69,7 +76,8 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
 
   async function upload(file: File) {
     setProblem(undefined);
-    setStep({ kind: "loading" });
+    const preview = URL.createObjectURL(file);
+    setStep({ kind: "loading", preview });
     try {
       const body = new FormData();
       body.append("screenshot", await shrinkScreenshot(file), file.name);
@@ -87,6 +95,7 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
       setProblem(OFFLINE);
       setStep({ kind: "idle" });
     } finally {
+      URL.revokeObjectURL(preview);
       if (inputRef.current) inputRef.current.value = "";
     }
   }
@@ -122,6 +131,7 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
           tags: edited.tags,
           onModel: draft.onModel,
           result: json.result,
+          bought: draft.imageUrls[0] ? { draft, edited, photo: draft.imageUrls[0] } : null,
         });
         return;
       }
@@ -139,9 +149,21 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
     setStep({ kind: "idle" });
   }
 
+  // A problem with the screenshot shows above the drop target; one with the
+  // check, next to the Check it button: either way where the eye already is.
   return (
     <div className="flex flex-col gap-8">
-      {(step.kind === "idle" || step.kind === "loading" || step.kind === "cutting") && (
+      <div role="status" aria-live="polite" className="empty:hidden">
+        {step.kind !== "draft" && problem && (
+          <p className="notice">
+            {problem}
+          </p>
+        )}
+        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
+        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
+      </div>
+
+      {step.kind === "idle" && (
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -173,7 +195,7 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
             htmlFor="screenshot"
             className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
           >
-            {step.kind === "loading" || step.kind === "cutting" ? "Reading…" : "Choose a screenshot"}
+            Choose a screenshot
           </label>
           <p className="max-w-[40ch] text-sm text-ink-2">
             A screenshot of the product page.
@@ -182,28 +204,8 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
         </div>
       )}
 
-      <div role="status" aria-live="polite" className="empty:hidden">
-        {problem && (
-          <p className="notice">
-            {problem}
-          </p>
-        )}
-        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
-        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
-        {step.kind === "draft" && step.checking && (
-          <p className="text-sm text-ink-2">Checking it against your closet…</p>
-        )}
-      </div>
-
-      {step.kind === "draft" && retry && (
-        <button
-          type="button"
-          onClick={() => check(step.draft, retry, step.original)}
-          className="btn-primary self-start"
-        >
-          Try again
-        </button>
-      )}
+      {step.kind === "loading" && <ReadingCard preview={step.preview} />}
+      {step.kind === "cutting" && step.draft.imageUrls[0] && <ReadingCard preview={step.draft.imageUrls[0]} />}
       {step.kind === "draft" && (
         <button
           type="button"
@@ -232,6 +234,26 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
               />
             )
           }
+          actions={
+            <>
+              <p role="status" aria-live="polite" className="text-sm empty:hidden">
+                {step.checking ? (
+                  <span className="text-ink-2">Checking it against your closet…</span>
+                ) : (
+                  problem && <span className="font-medium">{problem}</span>
+                )}
+              </p>
+              {retry && !step.checking && (
+                <button
+                  type="button"
+                  onClick={() => check(step.draft, retry, step.original)}
+                  className="btn-text self-start md:self-center"
+                >
+                  Try again
+                </button>
+              )}
+            </>
+          }
         />
       )}
       {step.kind === "result" && (
@@ -243,8 +265,27 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
           onModel={step.onModel}
           result={step.result}
           onCheckAnother={checkAnother}
+          more={step.bought && <KeepIt key={round} bought={step.bought} readOnly={use(readOnly)} />}
         />
       )}
+    </div>
+  );
+}
+
+// Stands in for the card while the screenshot is read: the picture faded on
+// the left, the fields still to come on the right, laid out like the card.
+function ReadingCard({ preview }: { preview: string }) {
+  return (
+    <div aria-hidden className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12">
+      <div className="relative aspect-[4/5] w-3/5 overflow-hidden bg-tile md:col-span-5 md:w-full">
+        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 768px) 40vw, 60vw" className="object-contain p-[9%] opacity-50" />
+      </div>
+      <div className="flex flex-col gap-4 md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-7 motion-safe:animate-pulse">
+        <div className="h-7 w-1/2 bg-tile" />
+        <div className="h-10 bg-tile" />
+        <div className="h-10 bg-tile" />
+        <div className="h-10 w-2/3 bg-tile" />
+      </div>
     </div>
   );
 }
