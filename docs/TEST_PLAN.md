@@ -29,9 +29,11 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). 
 
 | # | Do | Expect |
 | --- | --- | --- |
-| 2.1 | Look at the top bar on desktop | Left to right: "FITCHECK", "Closet", "Calendar", a black "Should I buy this?" button; "Profile" and "Log out" on the right |
-| 2.2 | Same at 390 px | The button reads "Buy?"; no "Log out" in the bar (it's at the bottom of Profile); nothing wraps or overflows |
-| 2.3 | Click each link on a few pages | FITCHECK → home, Closet → `/closet`, Calendar → `/calendar`, the button → `/check`, Profile → `/profile`; the bar is the same on every page |
+| 2.1 | Look at the top bar on desktop | "FITCHECK", "Closet", "Calendar" on the left; "Profile" and "Log out" on the right; no purchase-check button |
+| 2.2 | Same at 390 px | No "Log out" in the bar (it's at the bottom of Profile); nothing wraps or overflows |
+| 2.3 | Click each link on a few pages | FITCHECK → home, Closet → `/closet`, Calendar → `/calendar`, Profile → `/profile`; the bar is the same on every page |
+| 2.4 | Open home, the closet, an item, "Add clothes", Calendar, Profile and the purchase check | The link for the page you're on is black, the rest gray (FITCHECK is black on home); an item and "Add clothes" count as Closet; on the purchase check all are gray; "Log out" is always gray |
+| 2.5 | Look at the top of home on desktop and at 390 px | Home's title "Thinking of buying something?" with a black "Should I buy this?" button under it, both on the left; at 390 px both are centered and the button is full width; it comes before "Your style" and "Good for today" |
 
 ### 3. Add clothes by screenshot
 
@@ -94,7 +96,7 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 
 | # | Do | Expect |
 | --- | --- | --- |
-| 7.1 | Top bar → "Should I buy this?" ("Buy?" on a phone), upload a product screenshot | "Reading…", then a "Look right?" card like in 3.1 (clean name, brand suggestions, a cut-out for an on-model photo) |
+| 7.1 | Home → "Should I buy this?" (the banner at the top), upload a product screenshot | "Reading…", then a "Look right?" card like in 3.1 (clean name, brand suggestions, a cut-out for an on-model photo) |
 | 7.2 | "Check it" | "Checking…", then the photo, a score like "47.5 / 100" and a one-line summary |
 | 7.3 | Look at the five parts | Suits you /40, Outfits /20, Revives /15, Fills a gap /15, Not a repeat /10; they add up to the total |
 | 7.4 | Read every reason, open "Why" under Suits you | Short, plain, about this item and your closet; no made-up items |
