@@ -28,7 +28,7 @@ Things to try first:
 - **Voice feelings**: hold to talk, up to 3 minutes, English.
 - **Closet**: a grid of everything you own, on phone and desktop.
 - **Pairing**: rules plus Spark decide which pieces go together; code builds full outfits from that.
-- **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10). The item you check is never saved.
+- **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10). The item you check is saved only if you tap "I bought it — add to closet".
 - **Outfit boards**: sample outfits shown as a flat lay of your own item photos. On-model photos are cleaned up to the garment alone by Muse Image.
 - **Style card**: one card on home that sums up what works for you and what to skip.
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.

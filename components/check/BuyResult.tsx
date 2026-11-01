@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
@@ -97,6 +97,7 @@ export function BuyResult({
   onModel,
   result,
   onCheckAnother,
+  more,
 }: {
   title: string;
   photo: string | null;
@@ -105,6 +106,8 @@ export function BuyResult({
   onModel: boolean;
   result: BuyCheckResult;
   onCheckAnother: () => void;
+  // Shown after Check another, e.g. "I bought it".
+  more?: ReactNode;
 }) {
   const { parts } = result;
   // Nothing in the closet to compare with: no number, no verdict, just
@@ -286,9 +289,12 @@ export function BuyResult({
           </>
         )}
 
-        <button type="button" onClick={onCheckAnother} className={`${empty ? "btn-secondary" : "btn-primary"} self-start`}>
-          Check another
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" onClick={onCheckAnother} className={empty ? "btn-secondary" : "btn-primary"}>
+            Check another
+          </button>
+          {more}
+        </div>
       </div>
     </section>
   );

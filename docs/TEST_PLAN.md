@@ -109,7 +109,9 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.11 | While it's styling, look at the other boards | Their "Style it with AI" can't be clicked until this one is done |
 | 7.12 | "Show real photos", then "Show AI look" | Switches between the board and the AI picture without asking again |
 | 7.13 | "Check another" or reload, then check the same item | The AI picture is gone; "Style it with AI" is back |
-| 7.14 | Go to the closet afterwards | The checked item was **not** added |
+| 7.14 | Check an item and leave without "I bought it", then go to the closet | The checked item was **not** added |
+| 7.15 | "I bought it — add to closet" on a result | "Adding…", then "<name> is in your closet." and "See it"; the item page shows the name, tags and photo from the check |
+| 7.16 | The same result on the read-only demo account | No "I bought it" button; the read-only note in its place |
 
 ### 8. Outfit calendar
 
