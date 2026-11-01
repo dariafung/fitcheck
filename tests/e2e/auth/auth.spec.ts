@@ -168,8 +168,12 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await page.goto("/profile");
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);
-  // Sizes show; the demo account is never anyone's buyer, so no Resale.
+  // Sizes show but can't be changed; the demo account is never anyone's
+  // buyer, so no Resale.
   await expect(page.getByLabel("Tops & dresses")).toBeVisible();
+  await expect(page.getByLabel("Tops & dresses")).toBeDisabled();
+  await expect(page.getByLabel("Height", { exact: true })).toBeDisabled();
+  await expect(page.getByRole("group", { name: "Units" }).getByRole("button").first()).toBeDisabled();
   await expect(page.getByRole("heading", { name: "Resale" })).toHaveCount(0);
 
   // The server says no even when the page is skipped. The body is invalid on

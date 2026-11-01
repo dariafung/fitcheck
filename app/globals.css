@@ -95,6 +95,13 @@ textarea {
   color: inherit;
 }
 
+/* Read-only boxes (the demo account's profile): still legible, but quieter. */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  color: var(--ink-2);
+}
+
 input::placeholder,
 textarea::placeholder {
   color: var(--ink-2);
@@ -204,7 +211,7 @@ textarea::placeholder {
   /* 16px or iOS Safari zooms the page when the field takes focus. */
   font-size: 16px;
   transition: border-color 150ms var(--ease-quiet);
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--ink-2);
   }
   &:focus {
@@ -213,6 +220,9 @@ textarea::placeholder {
   &[aria-invalid="true"] {
     border-color: var(--ink);
     border-width: 2px;
+  }
+  &:disabled {
+    cursor: default;
   }
 }
 
@@ -229,8 +239,12 @@ textarea::placeholder {
     background-color 150ms var(--ease-quiet),
     border-color 150ms var(--ease-quiet),
     color 150ms var(--ease-quiet);
-  &:hover {
+  &:hover:not(:has(:disabled)) {
     border-color: var(--ink);
+  }
+  &:has(:disabled) {
+    color: var(--ink-2);
+    cursor: default;
   }
   &[aria-pressed="true"],
   &:has(:checked) {

@@ -73,7 +73,10 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(page.getByText("Add your weight.")).toBeVisible();
   await expect(page.getByText("Pick one.")).toBeVisible();
   await expect(page.getByText("Pick a size.")).toHaveCount(3);
-  await expect(page.getByText("Pick °F or °C.")).toBeVisible();
+  // The temperature unit starts on the one the site already shows.
+  const temperature = page.getByRole("group", { name: "Temperature" });
+  await expect(temperature.getByRole("button", { name: "°F" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText("Pick °F or °C.")).toHaveCount(0);
 
   await height.fill("65");
   await expect(page.getByText("5 ft 5 in")).toBeVisible();
@@ -149,7 +152,7 @@ test("outfit counts over 30 are not saved", async ({ page }) => {
 });
 
 test("after picking °C, home, the item page and its editor all use °C and save °F", async ({ page }) => {
-  // A filled-in profile from before units were asked: only the unit is missing.
+  // A filled-in profile from before units were asked: the unit isn't saved yet.
   await db
     .from("users")
     .update({ height_cm: 165, weight_kg: 58, body_shape: "pear", top_size: "S", bottom_size: "S", shoe_size: "W7.5" })
@@ -172,9 +175,6 @@ test("after picking °C, home, the item page and its editor all use °C and save
 
   try {
     await page.goto("/profile");
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.getByText("Pick °F or °C.")).toBeVisible();
-    await expect(page.getByRole("status")).toHaveCount(0);
     await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°C" }).click();
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByRole("status")).toHaveText("Saved");
