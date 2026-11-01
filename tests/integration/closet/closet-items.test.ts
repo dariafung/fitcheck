@@ -63,6 +63,39 @@ describe("listClosetItems", () => {
     });
   });
 
+  it("notes the latest feeling's summary once it has been read, else nothing", async () => {
+    const { data: other } = await closet.db
+      .from("items")
+      .insert({ user_id: closet.userId, entry_method: "manual", title: "Unread tee", category: "top" })
+      .select("id")
+      .single()
+      .throwOnError();
+    await closet.db
+      .from("item_feelings")
+      .insert([
+        {
+          item_id: closet.itemId,
+          user_id: closet.userId,
+          raw_text: "Boxy in the shoulders but I love the color.",
+          source: "typed",
+          structured: {
+            flattering: "unknown",
+            liked: "yes",
+            aspects: [],
+            occasions: [],
+            mood: [],
+            summary: "Loved color, boxy in the shoulders.",
+          },
+        },
+        { item_id: other.id, user_id: closet.userId, raw_text: "Not read yet.", source: "typed" },
+      ])
+      .throwOnError();
+
+    const cards = await listClosetItems(closet.db, closet.userId);
+    expect(cards.find((c) => c.id === closet.itemId)?.note).toBe("Loved color, boxy in the shoulders.");
+    expect(cards.find((c) => c.id === other.id)?.note).toBeNull();
+  });
+
   it("is empty for a user with nothing yet", async () => {
     expect(await listClosetItems(closet.db, randomUUID())).toEqual([]);
   });

@@ -19,6 +19,8 @@ export interface ClosetCard {
   imageUrl: string | null;
   // Color-family swatch for the placeholder when there is no photo.
   swatch: string;
+  // The one-line summary of its latest feeling, once the AI has read it.
+  note: string | null;
 }
 
 export interface ClosetItem {
@@ -47,14 +49,27 @@ export function isItemId(id: string): boolean {
 }
 
 export async function listClosetItems(db: Db, userId: string): Promise<ClosetCard[]> {
-  const { data } = await db
-    .from("items")
-    .select("id, title, category, status, image_paths, ai_tags, user_tags")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .order("title")
-    .throwOnError();
+  const [{ data }, { data: feelings }] = await Promise.all([
+    db
+      .from("items")
+      .select("id, title, category, status, image_paths, ai_tags, user_tags")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .order("title")
+      .throwOnError(),
+    db
+      .from("item_feelings")
+      .select("item_id, structured")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .throwOnError(),
+  ]);
 
+  // The latest feeling per item; no note while it hasn't been read yet.
+  const notes = new Map<string, string | null>();
+  for (const row of feelings) {
+    if (!notes.has(row.item_id)) notes.set(row.item_id, feelingNote(row.structured));
+  }
   const firstImages = await imageUrls(
     db,
     data.flatMap((row) => row.image_paths.slice(0, 1)),
@@ -69,8 +84,14 @@ export async function listClosetItems(db: Db, userId: string): Promise<ClosetCar
       tempRangeF: itemTempRange(row),
       imageUrl: row.image_paths.length > 0 ? (firstImages[next++] ?? null) : null,
       swatch: swatchHex(row),
+      note: notes.get(row.id) ?? null,
     };
   });
+}
+
+function feelingNote(structured: unknown): string | null {
+  const summary = (structured as { summary?: unknown } | null)?.summary;
+  return typeof summary === "string" && summary.trim() !== "" ? summary.trim() : null;
 }
 
 // What the closet knows about one item, or null when it is not this user's.
