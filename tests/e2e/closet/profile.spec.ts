@@ -87,7 +87,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await page.getByLabel("School", { exact: true }).fill("4");
   await page.getByLabel("Social", { exact: true }).fill("2");
   await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°F" }).click();
-  await page.getByRole("checkbox", { name: /I'd take secondhand clothes/ }).check();
+  await page.getByRole("checkbox", { name: "Match me with secondhand pieces" }).check();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status")).toHaveText("Saved");
   await expect(page.getByText("Add your height.")).toHaveCount(0);
@@ -114,7 +114,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(page.getByLabel("School", { exact: true })).toHaveValue("4");
   await expect(page.getByRole("radio", { name: "Pear" })).toBeChecked();
   await expect(page.getByLabel("Shoes")).toHaveValue("W7.5");
-  await expect(page.getByRole("checkbox", { name: /I'd take secondhand clothes/ })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Match me with secondhand pieces" })).toBeChecked();
 });
 
 test("units switch to cm / kg and stay that way after a refresh", async ({ page }) => {
@@ -185,14 +185,14 @@ test("after picking °C, home, the item page and its editor all use °C and save
     await expect(page.getByRole("region", { name: "Good for today" })).toContainText(today);
 
     await page.goto(`/closet/${item.id}`);
-    await expect(page.getByText("11 to 21°C")).toBeVisible();
+    await expect(page.getByText("11–21°C")).toBeVisible();
     await page.getByRole("button", { name: "Edit details" }).click();
     const card = page.getByRole("form", { name: "Item details" });
     await expect(card.getByRole("spinbutton", { name: "Lowest °C" })).toHaveValue("11");
     await card.getByRole("spinbutton", { name: "Highest °C" }).fill("25");
     await card.getByRole("button", { name: "Save changes" }).click();
     await expect(card).toHaveCount(0);
-    await expect(page.getByText("11 to 25°C")).toBeVisible();
+    await expect(page.getByText("11–25°C")).toBeVisible();
 
     // The untouched low keeps its exact °F; the typed high is converted.
     const { data } = await db.from("items").select("user_tags").eq("id", item.id).single().throwOnError();

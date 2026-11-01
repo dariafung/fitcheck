@@ -6,7 +6,7 @@ import { ReadOnlyNote } from "@/components/auth/read-only-note";
 import { ItemImage } from "@/components/closet/item-image";
 import type { ClosetCard } from "@/lib/closet/items";
 import { OCCASION_LABELS } from "@/lib/closet/labels";
-import { longDay, MAX_OUTFITS_PER_DAY } from "@/lib/wear/day";
+import { BACKFILL_DAYS, longDay, MAX_OUTFITS_PER_DAY } from "@/lib/wear/day";
 import { outfitProblem } from "@/lib/wear/messages";
 import type { LoggedOutfit } from "@/lib/wear/stats";
 import { OutfitEditor } from "./outfit-editor";
@@ -85,7 +85,9 @@ export function DayPanel({
         </button>
       )}
 
-      {!readOnly && !editable && outfits.length > 0 && <p className="text-xs text-ink-2">Too far back to change.</p>}
+      {!readOnly && !editable && outfits.length > 0 && (
+        <p className="text-sm text-ink-2">Only the last {BACKFILL_DAYS} days can be changed.</p>
+      )}
       {readOnly && <ReadOnlyNote />}
     </section>
   );
@@ -159,7 +161,7 @@ function OutfitRow({
               onClick={remove}
               aria-label="Yes, delete it"
               disabled={status === "deleting"}
-              className="btn-primary h-9 px-4"
+              className="btn-secondary"
             >
               {status === "deleting" ? "Deleting…" : "Delete"}
             </button>

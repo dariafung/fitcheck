@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ReadOnlyNote } from "@/components/auth/read-only-note";
+import { SAVE_FAILED } from "@/components/entry/messages";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select } from "@/components/ui/select";
 import { writeCookie } from "@/lib/cookie";
 import { MAX_OUTFITS_WANTED, Occasion } from "@/lib/ai/schemas/common";
 import {
@@ -83,13 +86,21 @@ function fieldsFor(profile: Profile, units: Units): Record<Measurement, Field> {
   ) as Record<Measurement, Field>;
 }
 
-const INPUT = "field h-9 w-24 px-2";
+const INPUT = "field w-24";
 const ERROR = "text-sm font-medium";
 
 // Each section is a spec sheet: what it is on the left, the fields on the right.
 const SECTION = "grid gap-x-4 gap-y-8 border-t border-ink pt-6 md:grid-cols-12";
 const SECTION_HEAD = "flex flex-col gap-1.5 md:col-span-4";
 const SECTION_BODY = "flex flex-col gap-8 md:col-span-7 md:col-start-6";
+
+// Preferences: one labelled row each, the control on the right.
+const PREF_ROW = "grid grid-cols-[7rem_1fr] items-start gap-x-4 gap-y-2 border-b border-line py-3 sm:grid-cols-[9rem_1fr]";
+const PREF_LABEL = "flex min-h-11 items-center text-base";
+// Two-way switch (in · lb / cm · kg, °F / °C): 44 tall to tap.
+const SEGMENTS = "flex w-fit self-start border border-ink text-sm";
+const SEGMENT =
+  "h-11 min-w-14 cursor-pointer px-4 transition-colors duration-150 disabled:cursor-default aria-pressed:bg-ink aria-pressed:text-paper";
 
 export function ProfileForm({
   initial,
@@ -214,47 +225,6 @@ export function ProfileForm({
             Your body
           </h2>
           <p className="text-sm text-ink-2">Height, weight and sizes are a must. The rest helps.</p>
-          <div role="group" aria-label="Units" className="mt-3 flex self-start border border-ink text-sm">
-            {(["imperial", "metric"] as const).map((u) => (
-              <button
-                key={u}
-                type="button"
-                aria-pressed={units === u}
-                onClick={() => switchUnits(u)}
-                className="h-8 cursor-pointer px-3 transition-colors duration-150 aria-pressed:bg-ink aria-pressed:text-paper"
-              >
-                {u === "imperial" ? "in · lb" : "cm · kg"}
-              </button>
-            ))}
-          </div>
-          {/* Saved with the profile: everywhere switches after Save. */}
-          <div
-            role="group"
-            aria-label="Temperature"
-            aria-describedby={errors.tempUnit ? "tempUnit-error" : undefined}
-            className="mt-1 flex self-start border border-ink text-sm"
-          >
-            {(["F", "C"] as const).map((u) => (
-              <button
-                key={u}
-                type="button"
-                aria-pressed={tempUnit === u}
-                disabled={readOnly}
-                onClick={() => {
-                  setTempUnit(u);
-                  edited();
-                }}
-                className="h-8 cursor-pointer px-3 transition-colors duration-150 disabled:cursor-default aria-pressed:bg-ink aria-pressed:text-paper"
-              >
-                °{u}
-              </button>
-            ))}
-          </div>
-          {errors.tempUnit && (
-            <p id="tempUnit-error" className={ERROR}>
-              {errors.tempUnit}
-            </p>
-          )}
         </div>
 
         <div className={SECTION_BODY}>
@@ -323,7 +293,7 @@ export function ProfileForm({
                 <label htmlFor={s} className="text-sm text-ink-2">
                   {SIZE_LABELS[s]}
                 </label>
-                <select
+                <Select
                   id={s}
                   value={sizes[s]}
                   onChange={(e) => {
@@ -332,7 +302,7 @@ export function ProfileForm({
                   }}
                   aria-invalid={errors[s] ? true : undefined}
                   aria-describedby={errors[s] ? `${s}-error` : undefined}
-                  className="field h-9 px-2"
+                  className="field"
                 >
                   <option value="">Pick one</option>
                   {SIZE_OPTIONS[s].map((o) => (
@@ -340,7 +310,7 @@ export function ProfileForm({
                       {o.label}
                     </option>
                   ))}
-                </select>
+                </Select>
                 {errors[s] && (
                   <p id={`${s}-error`} className={ERROR}>
                     {errors[s]}
@@ -361,7 +331,7 @@ export function ProfileForm({
         </div>
         <div className="flex flex-col border-t border-line md:col-span-7 md:col-start-6">
           {Occasion.options.map((o) => (
-            <div key={o} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-2.5">
+            <div key={o} className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-2">
               <label htmlFor={`mix-${o}`} className="w-28 text-base">
                 {OCCASION_LABELS[o]}
               </label>
@@ -391,36 +361,89 @@ export function ProfileForm({
         </div>
       </section>
 
-      {/* The demo account is never anyone's buyer, so it doesn't see this. */}
-      {!readOnly && (
-        <section aria-labelledby="resale-heading" className={SECTION}>
-          <div className={SECTION_HEAD}>
-            <h2 id="resale-heading" className="text-lg font-medium">
-              Resale
-            </h2>
-            <p className="text-sm text-ink-2">Your name, email and measurements stay private.</p>
+      <section aria-labelledby="prefs-heading" className={SECTION}>
+        <div className={SECTION_HEAD}>
+          <h2 id="prefs-heading" className="text-lg font-medium">
+            Preferences
+          </h2>
+        </div>
+        <div className="flex flex-col border-t border-line md:col-span-7 md:col-start-6">
+          {/* Only how numbers are shown: switches at once, kept in this browser. */}
+          <div className={PREF_ROW}>
+            <span id="units-label" className={PREF_LABEL}>
+              Units
+            </span>
+            <div role="group" aria-labelledby="units-label" className={SEGMENTS}>
+              {(["imperial", "metric"] as const).map((u) => (
+                <button key={u} type="button" aria-pressed={units === u} onClick={() => switchUnits(u)} className={SEGMENT}>
+                  {u === "imperial" ? "in · lb" : "cm · kg"}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className={SECTION_BODY}>
-            <label className="flex items-start gap-3 text-base">
-              <input
-                type="checkbox"
-                checked={resaleOptIn}
-                onChange={(e) => {
-                  setResaleOptIn(e.target.checked);
-                  edited();
-                }}
-                className="mt-1 size-4 accent-ink"
-              />
-              <span className="flex flex-col gap-1">
-                I&apos;d take secondhand clothes
-                <span className="text-sm text-ink-2">People passing on clothes can be matched with you.</span>
-              </span>
-            </label>
-          </div>
-        </section>
-      )}
 
-      <div className="flex items-center gap-4 md:pl-[calc((100%-11*16px)/12*5+5*16px)]">
+          {/* Saved with the profile: everywhere switches after Save. */}
+          <div className={PREF_ROW}>
+            <span id="temp-label" className={PREF_LABEL}>
+              Temperature
+            </span>
+            <div className="flex flex-col gap-2">
+              <div
+                role="group"
+                aria-labelledby="temp-label"
+                aria-describedby={errors.tempUnit ? "tempUnit-error" : undefined}
+                className={SEGMENTS}
+              >
+                {(["F", "C"] as const).map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    aria-pressed={tempUnit === u}
+                    disabled={readOnly}
+                    onClick={() => {
+                      setTempUnit(u);
+                      edited();
+                    }}
+                    className={SEGMENT}
+                  >
+                    °{u}
+                  </button>
+                ))}
+              </div>
+              {errors.tempUnit && (
+                <p id="tempUnit-error" className={ERROR}>
+                  {errors.tempUnit}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* The demo account is never anyone's buyer, so it doesn't see this. */}
+          {!readOnly && (
+            <div className={PREF_ROW}>
+              <span className={PREF_LABEL}>Resale</span>
+              <div className="flex flex-col">
+                <label className="flex min-h-11 cursor-pointer items-center gap-3 text-base">
+                  <Checkbox
+                    checked={resaleOptIn}
+                    onChange={(e) => {
+                      setResaleOptIn(e.target.checked);
+                      edited();
+                    }}
+                  />
+                  Match me with secondhand pieces
+                </label>
+                <p className="flex flex-col gap-1 pl-8 text-sm text-ink-2">
+                  <span>People passing on pieces in your size see a match.</span>
+                  <span>We share only your sizes, never your name or email.</span>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <div className="-mt-8 flex items-center gap-4 md:pl-[calc((100%-11*16px)/12*5+5*16px)]">
         {readOnly ? (
           <ReadOnlyNote />
         ) : (
@@ -435,7 +458,7 @@ export function ProfileForm({
         )}
         {status === "error" && (
           <p role="alert" className="text-sm font-medium">
-            Couldn&apos;t save. Try again.
+            {SAVE_FAILED}
           </p>
         )}
       </div>

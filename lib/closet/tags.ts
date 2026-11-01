@@ -80,7 +80,7 @@ export function tagGroups(tags: ItemTags, unit: TempUnit = DEFAULT_TEMP_UNIT): T
       label: FIELD_LABELS.tempRangeF,
       values: [
         tags.tempRangeF
-          ? `${toUnit(tags.tempRangeF.min, unit)} to ${toUnit(tags.tempRangeF.max, unit)}°${unit}`
+          ? `${toUnit(tags.tempRangeF.min, unit)}–${toUnit(tags.tempRangeF.max, unit)}°${unit}`
           : "any weather",
       ],
     },

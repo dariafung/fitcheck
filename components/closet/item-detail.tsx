@@ -5,6 +5,7 @@ import { ItemWearRow } from "@/components/calendar/item-wear-row";
 import { isReadOnly } from "@/lib/auth/session";
 import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
+import { brandLabel } from "@/lib/entry/brands";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { tempUnitFor } from "@/lib/profile/temp-setting";
@@ -29,7 +30,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
   if (!item) notFound();
 
   const [cover, ...more] = item.imageUrls;
-  const byline = [item.brand, categoryLabel(item.category)].filter(Boolean).join(" · ");
+  const byline = [item.brand && brandLabel(item.brand), categoryLabel(item.category)].filter(Boolean).join(" · ");
   const status = item.status === "passing_on" ? "passing_on" : "active";
   const details = { title: item.title, brand: item.brand, size: item.size, tags: item.tags, imageUrls: item.imageUrls };
   // Accessories aren't matched with buyers.

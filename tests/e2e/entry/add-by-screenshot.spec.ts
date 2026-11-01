@@ -60,8 +60,8 @@ test("upload a screenshot, fix the details, save it", async ({ page }) => {
   const card = page.getByRole("form", { name: "Item details" });
   await expect(card.getByRole("heading", { name: "Look right?" })).toBeVisible();
   await expect(card.getByLabel("Name")).toHaveValue("Mock item");
-  // The mock reads LULULEMON; the card shows the brand list's spelling.
-  await expect(card.getByLabel("Brand")).toHaveValue("lululemon");
+  // The mock reads LULULEMON; the card shows the brand in the page's one case.
+  await expect(card.getByLabel("Brand")).toHaveValue("Lululemon");
   await expect(card.getByRole("img", { name: "Mock item" })).toBeVisible();
   await expect(card.getByText("Photo is the whole screenshot")).toBeHidden();
 
@@ -175,12 +175,12 @@ test("an on-model photo is cut out by AI before the card shows, and can be undon
   const { original } = await (await cutout).json();
 
   const card = page.getByRole("form", { name: "Item details" });
-  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  await expect(page.getByText("Background removed.")).toBeVisible();
   await card.getByLabel("Name").fill("Cut-out tee");
 
   // Back to the store's photo (framed on white) and then save: the name typed above stays.
   await page.getByRole("button", { name: "Use original photo" }).click();
-  await expect(page.getByText("Photo cleaned up by AI.")).toBeHidden();
+  await expect(page.getByText("Background removed.")).toBeHidden();
   await expect(card.getByLabel("Name")).toHaveValue("Cut-out tee");
   const saved = page.waitForResponse((res) => res.url().endsWith("/api/items") && res.request().method() === "POST");
   await card.getByRole("button", { name: "Save to closet" }).click();
@@ -206,7 +206,7 @@ test("a cut-out photo is what gets saved", async ({ page }) => {
     buffer: await fakeScreenshot(),
   });
   const card = page.getByRole("form", { name: "Item details" });
-  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  await expect(page.getByText("Background removed.")).toBeVisible();
   await card.getByLabel("Name").fill("Cut-out skirt");
   const saved = page.waitForResponse((res) => res.url().endsWith("/api/items") && res.request().method() === "POST");
   await card.getByRole("button", { name: "Save to closet" }).click();

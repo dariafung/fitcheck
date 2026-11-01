@@ -168,7 +168,7 @@ export const ACCESSORY_NOTICE = "We only check clothes and shoes.";
 export const INCOMPLETE_ERROR = "incomplete";
 export const INCOMPLETE_NOTICE = "The AI didn't finish this time.";
 
-// "Style it with AI" under each outfit board.
-export const STYLE_IT = "Style it with AI";
-export const STYLING = "AI is styling this outfit…";
+// "See it styled" under each outfit board: the AI picture of the outfit.
+export const STYLE_IT = "See it styled";
+export const STYLING = "Styling this outfit…";
 export const STYLE_FAILED = "Couldn't style this one. Try again?";

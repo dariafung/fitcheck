@@ -7,6 +7,7 @@ import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
+import { Icon } from "@/components/ui/icon";
 import { StyledOutfit, useStyleIt } from "./StyleIt";
 
 const PARTS: [keyof BuyCheckResult["parts"], string][] = [
@@ -21,11 +22,11 @@ const PARTS: [keyof BuyCheckResult["parts"], string][] = [
 // name instead.
 function Thumb({ src, alt }: { src: string | null; alt: string }) {
   return (
-    <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-paper md:w-28">
+    <div className="relative isolate aspect-square w-24 shrink-0 overflow-hidden bg-tile md:w-28">
       {src ? (
-        <Image src={src} alt={alt} fill unoptimized sizes="112px" className="object-contain p-[10%]" />
+        <Image src={src} alt={alt} fill unoptimized sizes="112px" className="object-contain p-[10%] mix-blend-multiply" />
       ) : (
-        <p className="flex h-full items-end p-2 text-xs leading-tight text-ink-2">{alt}</p>
+        <p className="flex h-full items-end p-2 text-sm leading-tight text-ink-2">{alt}</p>
       )}
     </div>
   );
@@ -87,7 +88,7 @@ export function BuyResult({
       aria-label="Result"
       className="grid grid-cols-[2fr_3fr] gap-x-4 gap-y-10 md:grid-cols-12 md:gap-y-0"
     >
-      <div className="relative aspect-[4/5] self-start overflow-hidden bg-paper md:col-span-5 md:row-span-2">
+      <div className="relative isolate aspect-[4/5] self-start overflow-hidden bg-tile md:col-span-5 md:row-span-2">
         {photo ? (
           <Image
             src={photo}
@@ -95,7 +96,7 @@ export function BuyResult({
             fill
             unoptimized
             sizes="(min-width: 768px) 40vw, 40vw"
-            className="object-contain p-[9%]"
+            className="object-contain p-[9%] mix-blend-multiply"
           />
         ) : (
           <p className="absolute inset-0 flex items-end p-4 text-sm text-ink-2">{title}</p>
@@ -156,11 +157,13 @@ export function BuyResult({
                   )}
                 </p>
                 {key === "suitsYou" && parts.suitsYou.answers.some((a) => a.score !== null) && (
-                  <details className="group mt-1 text-sm">
-                    <summary className="inline-flex cursor-pointer list-none items-baseline gap-1.5 text-ink after:w-2 after:content-['+'] group-open:after:content-['−'] [&::-webkit-details-marker]:hidden">
+                  <details className="group text-sm">
+                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-ink [&::-webkit-details-marker]:hidden">
                       <span className="underline underline-offset-4">Why</span>
+                      <Icon name="plus" size={12} className="text-ink-2 group-open:hidden" />
+                      <Icon name="minus" size={12} className="hidden text-ink-2 group-open:block" />
                     </summary>
-                    <ul className="mt-3 flex flex-col gap-2.5 border-l border-line pl-4">
+                    <ul className="mt-1 flex flex-col gap-2.5 border-l border-line pl-4">
                       {parts.suitsYou.answers.map((a) =>
                         // Not asked, for lack of notes: greyed out, default score.
                         a.score === null ? (

@@ -44,7 +44,7 @@ export function DeleteItem({ itemId }: { itemId: string }) {
           onClick={remove}
           aria-label="Yes, delete it"
           disabled={status === "deleting"}
-          className="btn-primary h-9 px-4"
+          className="btn-secondary"
         >
           {status === "deleting" ? "Deleting…" : "Delete"}
         </button>

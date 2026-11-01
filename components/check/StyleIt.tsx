@@ -13,7 +13,7 @@ export interface StyleCandidate {
   tags: ItemTags;
 }
 
-// "Style it with AI" for the sample outfits on one result: one outfit at a
+// "See it styled" (an AI picture) for the sample outfits on one result: one outfit at a
 // time, each picture kept only while the page shows this result. Over
 // budget or over the daily limit, every button goes away and `stopped`
 // says why.
@@ -80,16 +80,16 @@ export function StyledOutfit({
   return (
     <div className="flex w-56 shrink-0 snap-start flex-col items-start gap-2 md:w-auto">
       {image && styleIt.showing[outfitId] ? (
-        <div data-testid="ai-board" className="relative aspect-[4/5] w-full border border-line bg-paper">
+        <div data-testid="ai-board" className="relative isolate aspect-[4/5] w-full bg-tile">
           <Image
             src={image}
             alt={`AI-generated look: ${pieces.map((p) => p.title).join(", ")}`}
             fill
             unoptimized
             sizes="(min-width: 768px) 30vw, 224px"
-            className="object-contain"
+            className="object-contain mix-blend-multiply"
           />
-          <span className="absolute top-0 left-0 bg-ink px-1.5 py-0.5 text-xs font-medium text-paper">AI-generated</span>
+          <span className="absolute right-2 bottom-2 text-sm text-ink-2">AI preview</span>
         </div>
       ) : (
         <div aria-busy={busy} className={`w-full ${busy ? "opacity-50 motion-safe:animate-pulse" : ""}`}>
@@ -100,7 +100,7 @@ export function StyledOutfit({
         <p className="text-sm text-ink-2">{STYLING}</p>
       ) : image ? (
         <button type="button" className="btn-text" onClick={() => styleIt.toggle(outfitId)}>
-          {styleIt.showing[outfitId] ? "Show real photos" : "Show AI look"}
+          {styleIt.showing[outfitId] ? "Show photos" : "Show styled look"}
         </button>
       ) : (
         canStyle && (

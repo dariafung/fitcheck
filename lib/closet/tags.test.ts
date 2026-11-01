@@ -66,7 +66,7 @@ describe("tagGroups", () => {
       { label: "Materials", values: ["Cotton"] },
       { label: "How dressy", values: ["Smart casual"] },
       { label: "Comfortable in", values: ["Any weather"] },
-      { label: "Good for", values: ["Work"] },
+      { label: "Occasions", values: ["Work"] },
     ]);
   });
 
@@ -83,15 +83,15 @@ describe("tagGroups", () => {
       Type: ["Top · Button-down"],
       "Main color": ["Cream"],
       "How dressy": ["Lounge"],
-      "Comfortable in": ["55 to 85°F"],
-      "Good for": ["Home", "Social"],
+      "Comfortable in": ["55–85°F"],
+      "Occasions": ["Home", "Social"],
     });
   });
 
   it("shows the range in °C for a profile set to °C", () => {
     const tags = itemTags({ category: "top", ai_tags: { ...AI_TAGS, tempRangeF: { min: 55, max: 85 } }, user_tags: {} });
     const range = tagGroups(tags, "C").find((g) => g.label === "Comfortable in");
-    expect(range?.values).toEqual(["13 to 29°C"]);
+    expect(range?.values).toEqual(["13–29°C"]);
   });
 });
 

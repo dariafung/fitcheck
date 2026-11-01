@@ -12,7 +12,7 @@ export const FIELD_LABELS = {
   materials: "Materials",
   formality: "How dressy",
   tempRangeF: "Comfortable in",
-  occasions: "Good for",
+  occasions: "Occasions",
 } as const;
 
 // In the order the entry card lists them.

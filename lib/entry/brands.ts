@@ -236,6 +236,33 @@ export function brandKeys(brand: string | undefined): string[] {
   return [...new Set([key, ...(entry ? [entry.name, ...(entry.aliases ?? [])].map(brandKey) : [])])];
 }
 
+// Logo spellings the page keeps as they are when it evens out case: initials
+// and names written as one capitalized word.
+const SHOWN_AS_IS: Record<string, string> = {
+  cos: "COS",
+  ugg: "UGG",
+  asos: "ASOS",
+  asics: "ASICS",
+  allsaints: "AllSaints",
+};
+
+// One case for every brand on the page, like the item names: a built-in brand
+// stored in logo capitals or all lower case ("HOLLISTER", "aerie") shows in
+// title case ("Hollister", "Aerie"), keeping initials (COS, H&M, J.Crew).
+// Mixed-case logo spellings show as the list writes them.
+export function brandLabel(brand: string): string {
+  const text = brand.trim();
+  const entry = BUILT_IN.get(brandKey(text));
+  // Unknown brands, and aliases the user chose ("Hollister Co."), stay as stored.
+  if (!entry || brandKey(entry.name) !== brandKey(text)) return text;
+  const fixed = SHOWN_AS_IS[brandKey(entry.name)];
+  if (fixed) return fixed;
+  const name = entry.name;
+  if (name !== name.toUpperCase() && name !== name.toLowerCase()) return name;
+  // A capital after a start, space, hyphen, "&" or "."; the rest lower case.
+  return name.toLowerCase().replace(/(^|[\s\-&.])(\p{L})/gu, (_, before: string, letter: string) => before + letter.toUpperCase());
+}
+
 export const MAX_BRAND_SUGGESTIONS = 8;
 
 const BUILT_IN_SORTED = [...BRANDS]

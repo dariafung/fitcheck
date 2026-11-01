@@ -3,6 +3,7 @@ import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import { Suspense } from "react";
 import { AccountNav } from "@/components/auth/account-nav";
 import { CalendarNavLink } from "@/components/calendar/calendar-nav-link";
+import { NAV_LINK } from "@/components/nav/nav-class";
 import { NavLink } from "@/components/nav/nav-link";
 import "./globals.css";
 
@@ -25,10 +26,6 @@ export const metadata: Metadata = {
   title: "fitcheck",
   description: "Check if a piece works with your closet before you buy it.",
 };
-
-// 44px tall to tap, though the header still reads as one thin line. NavLink
-// adds the color: black for the page you're on, gray for the rest.
-const NAV_LINK = "inline-flex h-11 items-center text-sm";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

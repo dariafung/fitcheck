@@ -11,7 +11,7 @@ const TOPIC_LABELS: Record<ProfileTopic, string> = {
   feel: "Fabrics",
   length: "Length",
   style: "Style",
-  occasion: "Where you wear it",
+  occasion: "Occasions",
 };
 
 // Fixed zone so the server and the browser print the same day.
@@ -20,7 +20,7 @@ const UPDATED = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric
 export function StyleCardView({ card, note }: { card: VisibleCard; note?: string }) {
   return (
     <StyleSection note={note ?? `Updated ${UPDATED.format(new Date(card.generatedAt))}`}>
-      <p>{card.headline}</p>
+      <p className="font-serif text-lg">{card.headline}</p>
       {/* Label beside the text across the page; above it in home's narrow left column. */}
       <dl className="flex flex-col gap-3 text-sm">
         {card.rows.map((row) => (
@@ -28,7 +28,7 @@ export function StyleCardView({ card, note }: { card: VisibleCard; note?: string
             <dt className="shrink-0 text-ink-2 sm:w-36 lg:w-auto">{TOPIC_LABELS[row.topic]}</dt>
             <dd className="flex flex-col gap-0.5">
               {row.suits && <span>{row.suits}</span>}
-              {row.avoid && <span className="text-foreground/70">Skip: {row.avoid}</span>}
+              {row.avoid && <span className="text-ink-2">Skip: {row.avoid}</span>}
             </dd>
           </div>
         ))}
@@ -53,7 +53,7 @@ export function StyleCardSkeleton({ note }: { note?: string }) {
 export function StyleCardEmpty() {
   return (
     <StyleSection>
-      <p className="text-sm text-ink-2">Say how 3 pieces feel and we&apos;ll sum up your style.</p>
+      <p className="text-sm text-ink-2">Add a note to 3 pieces and we&apos;ll sum up your style.</p>
     </StyleSection>
   );
 }

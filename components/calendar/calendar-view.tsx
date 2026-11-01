@@ -82,6 +82,7 @@ function CalendarOff() {
       <Link href="/profile#calendar" className="font-medium underline underline-offset-4">
         Turn it on in Profile
       </Link>
+      .
     </p>
   );
 }

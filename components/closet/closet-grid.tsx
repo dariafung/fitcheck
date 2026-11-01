@@ -98,15 +98,18 @@ export function ItemList({
   items,
   grid = SHELF,
   addSlot = false,
+  phoneLimit,
 }: {
   items: ClosetCard[];
   grid?: string;
   addSlot?: boolean;
+  // Tiles shown on a phone; the rest appear from 768 px.
+  phoneLimit?: number;
 }) {
   return (
     <ul className={grid}>
       {items.map((item, i) => (
-        <li key={item.id}>
+        <li key={item.id} className={phoneLimit !== undefined && i >= phoneLimit ? "hidden md:block" : undefined}>
           <Link href={`/closet/${item.id}`} className="group block">
             <ItemImage
               src={item.imageUrl}

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createContext, use, useRef, useState, type ReactNode } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
-import { ACCESSORY_NOT_ADDED } from "@/components/entry/messages";
+import { ACCESSORY_NOT_ADDED, SAVE_FAILED } from "@/components/entry/messages";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { DEMO_READ_ONLY } from "@/lib/auth/messages";
 import type { ClosetItem } from "@/lib/closet/items";
@@ -148,7 +148,7 @@ async function saveProblem(res: Response | null): Promise<string> {
     if (error === "size_required") return "Passing-on items need a size.";
     if (error === "accessory") return ACCESSORY_NOT_ADDED;
   }
-  return "Couldn't save. Try again.";
+  return SAVE_FAILED;
 }
 
 // Opens the editor; "Saved" next to it after a save.

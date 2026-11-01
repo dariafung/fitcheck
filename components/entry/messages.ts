@@ -21,7 +21,7 @@ export function extractErrorMessage(code: string | undefined): string {
 }
 
 export const OFFLINE = "Looks like you're offline. Try again?";
-export const SAVE_FAILED = "Couldn't save. Try again?";
+export const SAVE_FAILED = "Couldn't save. Try again.";
 
 // While an on-model photo is redrawn as the garment alone on white.
-export const CUTTING_OUT = "AI is cutting out the photo…";
+export const CUTTING_OUT = "Removing background…";

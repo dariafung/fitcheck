@@ -131,7 +131,7 @@ test("edit details: a wider temperature range moves an item into Good for today 
   await good.getByRole("link", { name: "See all clothes" }).click();
   await expect(page).toHaveURL(/\/closet$/);
   await page.getByRole("link", { name: item.title }).click();
-  await expect(page.getByText(`${TOO_WARM.min} to ${TOO_WARM.max}°F`)).toBeVisible();
+  await expect(page.getByText(`${TOO_WARM.min}–${TOO_WARM.max}°F`)).toBeVisible();
   await page.getByRole("button", { name: "Edit details" }).click();
   const card = page.getByRole("form", { name: "Item details" });
   await expect(card.getByRole("heading", { name: "Edit details" })).toBeVisible();
@@ -143,7 +143,7 @@ test("edit details: a wider temperature range moves an item into Good for today 
   await card.getByRole("button", { name: "Save changes" }).click();
   await expect(card).toHaveCount(0);
   await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
-  await expect(page.getByText(`${FIXED_WEATHER.lowF - 5} to ${FIXED_WEATHER.highF + 5}°F`)).toBeVisible();
+  await expect(page.getByText(`${FIXED_WEATHER.lowF - 5}–${FIXED_WEATHER.highF + 5}°F`)).toBeVisible();
   await expect(page.getByText("Business", { exact: true })).toBeVisible();
 
   await page.getByRole("navigation").getByRole("link", { name: "fitcheck" }).click();

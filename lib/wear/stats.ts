@@ -10,9 +10,9 @@ export const WINDOW_DAYS = 30;
 export const MIN_LOGGED_DAYS = 7;
 // Pieces added this recently aren't called unworn yet.
 export const NEW_ITEM_DAYS = 7;
-// "You complain, you wear it" needs at least this many outfits.
+// "Critiqued, often worn" needs at least this many outfits.
 export const OFTEN_MIN = 4;
-// "You love it, you skip it": at most this many.
+// "Loved, rarely worn": at most this many.
 export const RARELY_MAX = 1;
 export const MOST_WORN_SHOWN = 3;
 

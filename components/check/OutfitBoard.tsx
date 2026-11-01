@@ -12,15 +12,16 @@ export interface BoardPiece {
   isCandidate: boolean;
 }
 
-// One outfit laid out like a flat-lay collage: real photos on white, each
-// piece on its own. Photos that couldn't be cut out show as they are.
+// One outfit laid out like a flat-lay collage on the shelf tile, no frame:
+// real photos, each piece on its own. Photos that couldn't be cut out show as
+// they are, their white multiplied into the tile.
 export function OutfitBoard({ pieces }: { pieces: BoardPiece[] }) {
   const boxes = boardLayout(pieces.map((p) => p.category));
   return (
     <ul
       aria-label="Outfit"
       data-testid="outfit-board"
-      className="relative aspect-[4/5] w-full border border-line bg-paper"
+      className="relative isolate aspect-[4/5] w-full bg-tile"
     >
       {pieces.map((piece, i) => {
         const box = boxes[i];
@@ -31,12 +32,12 @@ export function OutfitBoard({ pieces }: { pieces: BoardPiece[] }) {
             style={{ left: `${box.left}%`, top: `${box.top}%`, width: `${box.width}%`, height: `${box.height}%` }}
           >
             {piece.src ? (
-              <Image src={piece.src} alt={piece.title} fill unoptimized sizes="160px" className="object-contain" />
+              <Image src={piece.src} alt={piece.title} fill unoptimized sizes="160px" className="object-contain mix-blend-multiply" />
             ) : (
-              <p className="flex h-full items-end bg-tile p-2 text-xs leading-tight text-ink-2">{piece.title}</p>
+              <p className="flex h-full items-end bg-paper p-2 text-sm leading-tight text-ink-2">{piece.title}</p>
             )}
             {piece.isCandidate && (
-              <span className="absolute top-0 left-0 bg-ink px-1.5 py-0.5 text-xs font-medium text-paper">New</span>
+              <span className="absolute top-0 left-0 border border-ink bg-paper px-1.5 text-sm">New</span>
             )}
           </li>
         );

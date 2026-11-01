@@ -91,7 +91,7 @@ test("sample outfits show as boards of real photos; an on-model photo is cut out
   });
   await page.goto("/check");
   const card = await upload(page);
-  await expect(page.getByText("Photo cleaned up by AI.")).toBeVisible();
+  await expect(page.getByText("Background removed.")).toBeVisible();
   expect(cutouts).toEqual(["POST"]);
   await card.getByLabel("Name").fill("Black loafers");
   await card.getByLabel("Type").selectOption("shoes");
@@ -152,14 +152,14 @@ test("style it with AI: loading, the AI-generated board, and back to the real ph
 
   const ai = result.getByTestId("ai-board");
   await expect(ai).toBeVisible();
-  await expect(ai.getByText("AI-generated", { exact: true })).toBeVisible();
+  await expect(ai.getByText("AI preview", { exact: true })).toBeVisible();
   await expect(ai.getByRole("img", { name: /^AI-generated look: .*Black loafers/ })).toBeVisible();
   await expect(result.getByText(STYLING)).toBeHidden();
 
-  await result.getByRole("button", { name: "Show real photos" }).click();
+  await result.getByRole("button", { name: "Show photos" }).click();
   await expect(ai).toBeHidden();
   await expect(result.getByTestId("outfit-board").first().getByRole("img", { name: "Black loafers" })).toBeVisible();
-  await result.getByRole("button", { name: "Show AI look" }).click();
+  await result.getByRole("button", { name: "Show styled look" }).click();
   await expect(result.getByTestId("ai-board")).toBeVisible();
   // The picture is kept on the page, not drawn again.
   expect(styled).toBe(1);

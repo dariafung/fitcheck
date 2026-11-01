@@ -1,4 +1,4 @@
-// "Who'd want it" for one of the user's passing-on items.
+// "Who might want it" for one of the user's passing-on items.
 import { currentMode } from "@/lib/ai/mode";
 import { Category } from "@/lib/ai/schemas/common";
 import type { Db } from "@/lib/db/server";

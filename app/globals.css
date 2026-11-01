@@ -171,8 +171,12 @@ textarea::placeholder {
   }
 }
 
-/* Third level: text with an underline. */
+/* Third level: text with an underline. 44px tall to tap; the text still
+   reads as one short line. */
 @utility btn-text {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   font-size: 13px;
   color: var(--ink-2);
   text-decoration-line: underline;
@@ -237,6 +241,29 @@ textarea::placeholder {
   &:has(:focus-visible) {
     outline: 2px solid var(--ink);
     outline-offset: 2px;
+  }
+}
+
+/* On / off box (components/ui/checkbox.tsx draws the check over it):
+   square, 1px ink edge, filled with ink when on. */
+@utility checkbox {
+  appearance: none;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+  transition: background-color 150ms var(--ease-quiet);
+  &:checked {
+    background: var(--ink);
+  }
+  &:hover:not(:checked):not(:disabled) {
+    background: var(--tile);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 }
 
