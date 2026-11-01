@@ -16,7 +16,7 @@ Or **Sign up** with any email and a password (no confirmation email) and start f
 
 Things to try first:
 
-1. **Should I buy this?** (top bar): upload a screenshot of a product page. You get a score out of 100, split into five parts, each with a short reason.
+1. **Should I buy this?** (top of home): upload a screenshot of a product page. You get a score out of 100, split into five parts, each with a short reason.
 2. **Style it with AI**: under a sample outfit in the result, have Muse Image draw the outfit as one board.
 3. **Calendar** (top bar): see what was worn, which items sit idle, and a few AI insights.
 4. **Profile**: switch to °C and see every temperature on the site change.

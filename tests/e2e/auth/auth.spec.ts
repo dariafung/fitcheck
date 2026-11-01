@@ -49,6 +49,8 @@ test("signed out, pages send you to log in", async ({ page }) => {
   await page.goto("/closet");
   await expect(page).toHaveURL(/\/login/);
   await expect(page.getByRole("heading", { level: 1, name: "Log in" })).toBeVisible();
+  // No top-bar link is the login page, so none is marked current.
+  await expect(page.getByRole("navigation").locator("[aria-current]")).toHaveCount(0);
 });
 
 test("sign up and land on an empty closet", async ({ page }) => {
@@ -96,7 +98,7 @@ test("on a phone, Log out moves from the top bar to Profile", async ({ page }) =
   await page.setViewportSize({ width: 390, height: 844 });
   await signUp(page);
   const nav = page.getByRole("navigation");
-  await expect(nav.getByRole("link", { name: "Buy?", exact: true })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Profile", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "Log out" })).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 

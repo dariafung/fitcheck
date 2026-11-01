@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { connection } from "next/server";
+import { NavLink } from "@/components/nav/nav-link";
 import { authRequired } from "@/lib/auth/config";
 import { sessionUser } from "@/lib/auth/session";
 import { DEMO_USER_ID } from "@/lib/db/demo-user";
@@ -18,8 +18,8 @@ export async function CalendarNavLink({ className }: { className: string }) {
   }
   if (!(await wearLogEnabledFor(userId))) return null;
   return (
-    <Link href="/calendar" className={className}>
+    <NavLink href="/calendar" className={className}>
       Calendar
-    </Link>
+    </NavLink>
   );
 }
