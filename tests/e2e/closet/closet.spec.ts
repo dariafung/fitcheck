@@ -255,6 +255,32 @@ test("closet categories: filter by type, keep the tab, and show all again when e
   await expect(categories.getByRole("link", { name: /^One-piece 1$/ })).toBeVisible();
 });
 
+test("closet quick filters: not worn lately and an occasion, each switched off by a second tap", async ({ page }) => {
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const quick = main.getByRole("group", { name: "Quick filters" });
+  // Added today, so it isn't called unworn yet.
+  await quick.getByRole("link", { name: /^Not worn lately \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tag=not-worn$/);
+  await expect(quick.getByRole("link", { name: /^Not worn lately/ })).toHaveAttribute("aria-current", "true");
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+  // The category counts follow the quick filter.
+  const count = (name: RegExp) => quick.getByRole("link", { name }).textContent().then((t) => t?.match(/\d+/)?.[0]);
+  await expect(main.getByRole("group", { name: "Category" }).getByRole("link", { name: /^All \d+$/ })).toHaveText(
+    `All ${await count(/^Not worn lately/)}`,
+  );
+  await quick.getByRole("link", { name: /^Not worn lately/ }).click();
+  await expect(page).toHaveURL(/\/closet$/);
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+
+  // The persona dresses for school most.
+  await quick.getByRole("link", { name: /^School \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tag=school$/);
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+  await page.reload();
+  await expect(quick.getByRole("link", { name: /^School/ })).toHaveAttribute("aria-current", "true");
+});
+
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
   // It has no size yet, so it asks for one first.

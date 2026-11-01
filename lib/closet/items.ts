@@ -21,6 +21,8 @@ export interface ClosetCard {
   swatch: string;
   // The one-line summary of its latest feeling, once the AI has read it.
   note: string | null;
+  // With user corrections, for the closet's occasion filters.
+  occasions: string[];
 }
 
 export interface ClosetItem {
@@ -85,6 +87,7 @@ export async function listClosetItems(db: Db, userId: string): Promise<ClosetCar
       imageUrl: row.image_paths.length > 0 ? (firstImages[next++] ?? null) : null,
       swatch: swatchHex(row),
       note: notes.get(row.id) ?? null,
+      occasions: itemTags(row).occasions,
     };
   });
 }
