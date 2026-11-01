@@ -41,17 +41,17 @@ const FIT_TOPIC: Record<string, string> = {
 export const DEFAULT_FIT_SCORE = `${NO_DATA_POINTS}/${POINTS_PER_QUESTION}`;
 
 // Shown in Why for a question that wasn't asked.
-export const NO_NOTES_ANSWER = "Default score: no notes to compare yet.";
+export const NO_NOTES_ANSWER = "Middle score: no notes to compare yet.";
 
 export function suitsYouReason(answers: { id: string; score: number | null }[]): string {
   const unasked = answers.filter((a) => a.score === null);
   if (unasked.length === answers.length) {
-    return `No notes on your clothes to compare yet, so every question gets the default ${DEFAULT_FIT_SCORE}.`;
+    return `No notes on your clothes yet, so each question gets a middle score of ${DEFAULT_FIT_SCORE}.`;
   }
   if (unasked.length === 0) return "Scored on what you said about your clothes.";
   const topics = list(unasked.map((a) => FIT_TOPIC[a.id] ?? a.id));
   const those = unasked.length === 1 ? "it gets" : "those get";
-  return `No notes to compare on ${topics} yet, so ${those} the default ${DEFAULT_FIT_SCORE}.`;
+  return `No notes on ${topics} yet, so ${those} a middle score of ${DEFAULT_FIT_SCORE}.`;
 }
 
 export function outfitsReason(count: number): string {
@@ -171,4 +171,4 @@ export const INCOMPLETE_NOTICE = "The AI didn't finish this time.";
 // "See it styled" under each outfit board: the AI picture of the outfit.
 export const STYLE_IT = "See it styled";
 export const STYLING = "Styling this outfit…";
-export const STYLE_FAILED = "Couldn't style this one. Try again?";
+export const STYLE_FAILED = "Couldn't style this one. Try again.";

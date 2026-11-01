@@ -250,7 +250,7 @@ test("when the AI fails, the card stays and Check it works again", async ({ page
   const card = await upload(page);
   await card.getByRole("button", { name: "Check it" }).click();
   // Next to the button that was just pressed, not at the top of the page.
-  await expect(card.getByRole("status")).toContainText("Couldn't check it. Try again?");
+  await expect(card.getByRole("status")).toContainText("Couldn't check it. Try again.");
   await expect(page.getByRole("region", { name: "Result" })).toBeHidden();
   await expect(card.getByRole("button", { name: "Check it" })).toBeEnabled();
 });
