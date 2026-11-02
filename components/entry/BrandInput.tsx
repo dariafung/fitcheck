@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { brandLabel, suggestBrands } from "@/lib/entry/brands";
+import { suggestBrands } from "@/lib/entry/brands";
 
 // The brand box: free text, with matching brands listed while typing (the
 // user's own first, then the built-in list). ↑ / ↓ move, Enter or a click
@@ -25,8 +25,7 @@ export function BrandInput({
   const asked = useRef(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
-  // In the page's one case for brands (brandLabel); that is what fills in.
-  const options = open ? suggestBrands(value, own).map(brandLabel) : [];
+  const options = open ? suggestBrands(value, own) : [];
   const shown = options.length > 0;
 
   function loadOwn() {

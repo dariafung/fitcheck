@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alignBrand, BRANDS, brandKey, brandKeys, brandLabel, MAX_BRAND_SUGGESTIONS, savedBrandNames, suggestBrands } from "./brands";
+import { alignBrand, BRANDS, brandKey, brandKeys, MAX_BRAND_SUGGESTIONS, savedBrandNames, suggestBrands } from "./brands";
 
 describe("brandKey", () => {
   it("ignores case, spaces, punctuation and accents, and reads & as and", () => {
@@ -140,40 +140,5 @@ describe("suggestBrands", () => {
 
   it("lists at most a handful", () => {
     expect(suggestBrands("s", []).length).toBe(MAX_BRAND_SUGGESTIONS);
-  });
-});
-
-describe("brandLabel", () => {
-  it("shows logo capitals and lower-case logos in title case", () => {
-    expect(brandLabel("HOLLISTER")).toBe("Hollister");
-    expect(brandLabel("ZARA")).toBe("Zara");
-    expect(brandLabel("aerie")).toBe("Aerie");
-    expect(brandLabel("ABERCROMBIE & FITCH")).toBe("Abercrombie & Fitch");
-    expect(brandLabel("THE NORTH FACE")).toBe("The North Face");
-    expect(brandLabel("new balance")).toBe("New Balance");
-  });
-
-  it("keeps initials and brands written as one word", () => {
-    expect(brandLabel("COS")).toBe("COS");
-    expect(brandLabel("H&M")).toBe("H&M");
-    expect(brandLabel("J.CREW")).toBe("J.Crew");
-    expect(brandLabel("PULL&BEAR")).toBe("Pull&Bear");
-    expect(brandLabel("asos")).toBe("ASOS");
-    expect(brandLabel("ALLSAINTS")).toBe("AllSaints");
-    expect(brandLabel("ARC'TERYX")).toBe("Arc'teryx");
-    expect(brandLabel("DR. MARTENS")).toBe("Dr. Martens");
-  });
-
-  it("shows mixed-case logos, aliases and unknown brands as written", () => {
-    expect(brandLabel("Levi's")).toBe("Levi's");
-    expect(brandLabel("Citizens of Humanity")).toBe("Citizens of Humanity");
-    expect(brandLabel("Hollister Co.")).toBe("Hollister Co.");
-    expect(brandLabel("Tiny Studio")).toBe("Tiny Studio");
-    expect(brandLabel("tiny studio")).toBe("tiny studio");
-  });
-
-  it("evens out the user's own case of a built-in brand", () => {
-    expect(brandLabel("zara")).toBe("Zara");
-    expect(brandLabel(" Hollister ")).toBe("Hollister");
   });
 });

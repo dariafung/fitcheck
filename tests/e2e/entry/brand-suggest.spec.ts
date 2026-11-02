@@ -38,16 +38,16 @@ test("the brand box suggests brands: keys, a click, or anything typed", async ({
   const card = page.getByRole("form", { name: "Item details" });
   const brand = card.getByRole("combobox", { name: "Brand" });
   const list = card.getByRole("listbox");
-  await expect(brand).toHaveValue("Lululemon");
+  await expect(brand).toHaveValue("lululemon");
   await expect(list).toBeHidden();
 
   // Keys: ↓ picks the first match, Enter fills it in without saving.
   await brand.fill("aber");
-  await expect(list.getByRole("option")).toHaveText(["Abercrombie & Fitch"]);
+  await expect(list.getByRole("option")).toHaveText(["ABERCROMBIE & FITCH"]);
   await brand.press("ArrowDown");
-  await expect(list.getByRole("option", { name: "Abercrombie & Fitch" })).toHaveAttribute("aria-selected", "true");
+  await expect(list.getByRole("option", { name: "ABERCROMBIE & FITCH" })).toHaveAttribute("aria-selected", "true");
   await brand.press("Enter");
-  await expect(brand).toHaveValue("Abercrombie & Fitch");
+  await expect(brand).toHaveValue("ABERCROMBIE & FITCH");
   await expect(list).toBeHidden();
   await expect(card.getByRole("heading", { name: "Look right?" })).toBeVisible();
 
@@ -115,7 +115,7 @@ test("editing an item suggests the user's own brands first", async ({ page }) =>
   await brand.fill("t");
   const options = card.getByRole("listbox").getByRole("option");
   await expect(options.first()).toHaveText(own);
-  await expect(options.filter({ hasText: "Tommy Hilfiger" })).toBeVisible();
-  await options.filter({ hasText: "Tommy Hilfiger" }).click();
-  await expect(brand).toHaveValue("Tommy Hilfiger");
+  await expect(options.filter({ hasText: "TOMMY HILFIGER" })).toBeVisible();
+  await options.filter({ hasText: "TOMMY HILFIGER" }).click();
+  await expect(brand).toHaveValue("TOMMY HILFIGER");
 });

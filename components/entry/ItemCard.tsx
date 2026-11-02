@@ -5,7 +5,6 @@ import { useId, useState, type ReactNode } from "react";
 import type { Category, ItemTags, Occasion } from "@/lib/ai/schemas/common";
 import { CATEGORY_LABELS, FIELD_LABELS, FORMALITY_LABELS, capitalize } from "@/lib/closet/labels";
 import { COLOR_FAMILIES, COLOR_FAMILY_HEX, type ColorFamily } from "@/lib/color-families";
-import { brandLabel } from "@/lib/entry/brands";
 import type { ItemDraft } from "@/lib/entry/draft";
 import { DEFAULT_TEMP_UNIT, tempBounds, toUnit, type TempUnit } from "@/lib/profile/temp-unit";
 import { ITEM_SIZE_PLACEHOLDER, MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
@@ -90,7 +89,7 @@ export function ItemCard({
   tempUnit?: TempUnit;
 }) {
   const [title, setTitle] = useState(draft.title);
-  const [brand, setBrand] = useState(draft.brand ? brandLabel(draft.brand) : "");
+  const [brand, setBrand] = useState(draft.brand ?? "");
   const [size, setSize] = useState(initialSize ?? "");
   const [tags, setTags] = useState<ItemTags>(draft.tags);
   const [colors, setColors] = useState(draft.tags.colors.map((c) => c.name).join(", "));
