@@ -19,13 +19,14 @@ const PARTS: [keyof BuyCheckResult["parts"], string][] = [
   ["notRepeat", "Not a repeat"],
 ];
 
-// A square shelf tile for the outfit row. Pieces without a photo show their
-// name instead.
-function Thumb({ src, alt }: { src: string | null; alt: string }) {
+// A square shelf tile for the outfit row, 112 px on a desktop; "large" is
+// 160 px there, for the side-by-side compare. 96 px on a phone either way.
+// Pieces without a photo show their name instead.
+function Thumb({ src, alt, large = false }: { src: string | null; alt: string; large?: boolean }) {
   return (
-    <div className="relative isolate aspect-square w-24 shrink-0 overflow-hidden bg-tile md:w-28">
+    <div className={`relative isolate aspect-square w-24 shrink-0 overflow-hidden bg-tile ${large ? "md:w-40" : "md:w-28"}`}>
       {src ? (
-        <Image src={src} alt={alt} fill unoptimized sizes="112px" className="object-contain p-[10%] mix-blend-multiply" />
+        <Image src={src} alt={alt} fill unoptimized sizes={large ? "160px" : "112px"} className="object-contain p-[10%] mix-blend-multiply" />
       ) : (
         <p className="flex h-full items-end p-2 text-sm leading-tight text-ink-2">{alt}</p>
       )}
@@ -44,12 +45,12 @@ function Closest({ photo, title, item }: { photo: string | null; title: string; 
       <h3 className="text-base font-medium">Closest in your closet</h3>
       <div className="flex gap-2">
         <div className="flex flex-col gap-2">
-          <Thumb src={photo} alt={title} />
+          <Thumb src={photo} alt={title} large />
           <p className="text-sm text-ink-2">This one</p>
         </div>
         <Link href={`/closet/${item.id}`} className="group flex flex-col gap-2">
-          <Thumb src={item.imageUrl} alt={item.title} />
-          <span className="line-clamp-2 w-24 text-sm underline decoration-line underline-offset-4 group-hover:decoration-ink md:w-28">
+          <Thumb src={item.imageUrl} alt={item.title} large />
+          <span className="line-clamp-2 w-24 text-sm underline decoration-line underline-offset-4 group-hover:decoration-ink md:w-40">
             {item.title}
           </span>
         </Link>
