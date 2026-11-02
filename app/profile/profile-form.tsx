@@ -222,7 +222,8 @@ export function ProfileForm({
   return (
     <form onSubmit={save} noValidate className="flex flex-col gap-16">
       {/* The demo account can look but not change anything: every box and
-          switch in here is disabled at once. */}
+          switch in here is disabled at once. Units in Preferences stay
+          usable, since they only change how numbers show in this browser. */}
       <fieldset disabled={readOnly} className="flex min-w-0 flex-col gap-16">
         <section aria-labelledby="body-heading" className={SECTION}>
           <div className={SECTION_HEAD}>
@@ -365,6 +366,7 @@ export function ProfileForm({
           ))}
         </div>
       </section>
+      </fieldset>
 
       <section aria-labelledby="prefs-heading" className={SECTION}>
         <div className={SECTION_HEAD}>
@@ -387,8 +389,9 @@ export function ProfileForm({
             </div>
           </div>
 
-          {/* Saved with the profile: everywhere switches after Save. */}
-          <div className={PREF_ROW}>
+          {/* Saved with the profile: everywhere switches after Save. Locked
+              for the demo account, like the rest of the form. */}
+          <fieldset disabled={readOnly} className={`${PREF_ROW} min-w-0`}>
             <span id="temp-label" className={PREF_LABEL}>
               Temperature
             </span>
@@ -420,7 +423,7 @@ export function ProfileForm({
                 </p>
               )}
             </div>
-          </div>
+          </fieldset>
 
           {/* The demo account is never anyone's buyer, so it doesn't see this. */}
           {!readOnly && (
@@ -446,7 +449,6 @@ export function ProfileForm({
           )}
         </div>
       </section>
-      </fieldset>
 
       <div className="-mt-8 flex items-center gap-4 md:pl-[calc((100%-11*16px)/12*5+5*16px)]">
         {readOnly ? (
