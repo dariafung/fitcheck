@@ -23,8 +23,12 @@ export function avatarRow(count: number): { shown: number; more: number } {
   return { shown, more: count - shown };
 }
 
-export function shownToBuyers(count: number): string {
-  return `We've shown this to ${count} ${count === 1 ? "buyer" : "buyers"} in your size.`;
+// The count is buyers whose buy check scored 60+, not everyone checked: no
+// buyer is shown the item, so the copy says who'd want it.
+export function buyerCount(count: number): string {
+  return count === 1
+    ? "1 person in your size would likely want this."
+    : `${count} people in your size would likely want this.`;
 }
 
 async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
@@ -74,7 +78,7 @@ function Result({ result }: { result: BuyersResult }) {
       return (
         <>
           <Avatars count={result.count} />
-          <p className="text-base">{shownToBuyers(result.count)}</p>
+          <p className="text-base">{buyerCount(result.count)}</p>
           {result.someUnchecked && <Note>{SOME_UNCHECKED}</Note>}
           {result.sample && <Note>{SAMPLE_BUYERS}</Note>}
         </>
@@ -83,8 +87,8 @@ function Result({ result }: { result: BuyersResult }) {
 }
 
 // "Matching buyers" on a passing-on item: how many buyers in the user's size
-// it was shown to (identical anonymous avatars, no names), or why there are
-// none. Asked for once the page is up, since checking new buyers takes a
+// would likely want it (identical anonymous avatars, no names), or why there
+// are none. Asked for once the page is up, since checking new buyers takes a
 // while.
 export function BuyerMatches({ itemId, size }: { itemId: string; size: string | null }) {
   const [result, setResult] = useState<BuyersResult | "error" | null>(null);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_AVATARS, avatarRow, shownToBuyers } from "./buyer-matches";
+import { MAX_AVATARS, avatarRow, buyerCount } from "./buyer-matches";
 
 describe("avatarRow", () => {
   it("draws one avatar per match up to the cap", () => {
@@ -12,9 +12,9 @@ describe("avatarRow", () => {
   });
 });
 
-describe("shownToBuyers", () => {
-  it("says buyer for one and buyers for more", () => {
-    expect(shownToBuyers(1)).toBe("We've shown this to 1 buyer in your size.");
-    expect(shownToBuyers(3)).toBe("We've shown this to 3 buyers in your size.");
+describe("buyerCount", () => {
+  it("says person for one and people for more", () => {
+    expect(buyerCount(1)).toBe("1 person in your size would likely want this.");
+    expect(buyerCount(3)).toBe("3 people in your size would likely want this.");
   });
 });
