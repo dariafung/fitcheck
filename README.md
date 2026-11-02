@@ -16,19 +16,19 @@ Or **Sign up** with any email and a password (no confirmation email) and start f
 
 Things to try first:
 
-1. **Should I buy this?** (top of home): upload a screenshot of a product page. You get a score out of 100, split into five parts, each with a short reason.
+1. **Should I buy this?** (top of home): upload a screenshot of a product page. You get a score out of 100 with a one-line verdict, split into five parts, each with a short reason, and the closest piece you already own beside it.
 2. **Style it with AI**: under a sample outfit in the result, have Muse Image draw the outfit as one board.
 3. **Calendar** (top bar): see what was worn, which items sit idle, and a few AI insights.
-4. **Profile**: switch to °C and see every temperature on the site change.
+4. **Profile** (your own account; the demo Profile is read-only): switch to °C and see every temperature on the site change.
 
 ## What it does
 
 - **Add clothes from a screenshot**: Spark reads the product page, crops out the product photo and fills in brand, type, colors, material and size.
 - **Feelings**: write or say how a piece feels on you ("love the color, tight at the shoulders"). Spark turns it into structured notes you never have to fill in.
 - **Voice feelings**: hold to talk, up to 3 minutes, English.
-- **Closet**: a grid of everything you own, on phone and desktop.
+- **Closet**: a grid of everything you own, on phone and desktop, with quick filters (not worn lately, top occasions) and a sort by newest or by how often you wore each piece.
 - **Pairing**: rules plus Spark decide which pieces go together; code builds full outfits from that.
-- **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10). The item you check is never saved.
+- **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10), with a verdict from Worth buying to Skip this one. The item you check is never saved.
 - **Outfit boards**: sample outfits shown as a flat lay of your own item photos. On-model photos are cleaned up to the garment alone by Muse Image.
 - **Style card**: one card on home that sums up what works for you and what to skip.
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.

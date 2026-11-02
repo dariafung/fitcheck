@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { NAV_LINK } from "@/components/nav/nav-class";
 import { logOut } from "@/lib/auth/actions";
 import { authRequired } from "@/lib/auth/config";
 import { sessionUser } from "@/lib/auth/session";
@@ -12,7 +13,7 @@ export async function AccountNav() {
   const user = await sessionUser();
   if (!user) {
     return (
-      <Link href="/login" className="text-sm text-ink-2 transition-colors duration-150 hover:text-ink">
+      <Link href="/login" className={`${NAV_LINK} text-ink-2 transition-colors duration-150 hover:text-ink`}>
         Log in
       </Link>
     );
@@ -38,7 +39,7 @@ export async function PhoneLogOut() {
 
 function LogOutButton() {
   return (
-    <button type="submit" className="cursor-pointer text-sm text-ink-2 transition-colors duration-150 hover:text-ink">
+    <button type="submit" className={`${NAV_LINK} cursor-pointer text-ink-2 transition-colors duration-150 hover:text-ink`}>
       Log out
     </button>
   );

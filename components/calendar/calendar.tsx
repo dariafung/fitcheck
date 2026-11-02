@@ -7,13 +7,17 @@ import { canLogOn, localDay, longDay } from "@/lib/wear/day";
 import { monthLabel, monthOf, monthWeeks, shiftMonth } from "@/lib/wear/month";
 import type { LoggedOutfit } from "@/lib/wear/stats";
 import { ItemImage } from "@/components/closet/item-image";
+import { Icon } from "@/components/ui/icon";
 import { DayPanel } from "./day-panel";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-// Color squares a phone cell has room for.
+// Color squares a phone cell has room for, two by two; any more are left out.
 const PHONE_SWATCHES = 4;
 // Photos a desktop cell has room for (from the first outfit).
 const DESKTOP_PHOTOS = 3;
+// 44 × 44 to tap with the chevron inside, pulled out to line up with the grid.
+const MONTH_ARROW =
+  "-mx-3.5 inline-flex size-11 items-center justify-center text-ink transition-colors duration-150 hover:bg-tile";
 
 // The day never changes while the page is open; only the server and the
 // browser disagree on it, so the server renders without one.
@@ -60,18 +64,18 @@ export function Calendar({
   return (
     <div className="grid gap-x-4 gap-y-10 lg:grid-cols-12">
       <section aria-labelledby="month-heading" className="flex flex-col gap-4 lg:col-span-8">
-        <div className="flex items-center justify-between border-b border-line pb-3">
-          <Link href={`/calendar?month=${shiftMonth(month, -1)}`} scroll={false} aria-label="Previous month" className="btn-text px-2 text-lg text-ink no-underline">
-            ←
+        <div className="flex items-center justify-between border-b border-line pb-1">
+          <Link href={`/calendar?month=${shiftMonth(month, -1)}`} scroll={false} aria-label="Previous month" className={MONTH_ARROW}>
+            <Icon name="chevron-left" />
           </Link>
           <h2 id="month-heading" className="text-lg font-medium">
             {monthLabel(month)}
           </h2>
           {atLatestMonth ? (
-            <span aria-hidden="true" className="w-6" />
+            <span aria-hidden="true" className="-mx-3.5 size-11" />
           ) : (
-            <Link href={`/calendar?month=${shiftMonth(month, 1)}`} scroll={false} aria-label="Next month" className="btn-text px-2 text-lg text-ink no-underline">
-              →
+            <Link href={`/calendar?month=${shiftMonth(month, 1)}`} scroll={false} aria-label="Next month" className={MONTH_ARROW}>
+              <Icon name="chevron-right" />
             </Link>
           )}
         </div>
@@ -156,19 +160,21 @@ function DayCell({
       aria-pressed={selected}
       aria-label={label}
       className={`flex min-h-14 w-full flex-col gap-1 p-1 text-left transition-colors duration-150 md:min-h-28 md:p-1.5 ${
-        selected ? "bg-ink text-paper" : "hover:bg-tile disabled:text-ink-2/50 disabled:hover:bg-transparent"
+        selected
+          ? "outline-2 -outline-offset-2 outline-ink"
+          : "hover:bg-tile disabled:text-ink-2/50 disabled:hover:bg-transparent"
       }`}
     >
-      <span className="flex items-start justify-between text-xs tabular-nums">
-        <span className={today ? "font-medium underline underline-offset-4" : undefined}>{Number(day.slice(8))}</span>
-        {outfits.length > 1 && <span className="md:hidden">{outfits.length}</span>}
+      <span className="text-sm tabular-nums">
+        <span className={[selected || today ? "font-medium" : "", today ? "underline underline-offset-4" : ""].join(" ").trim() || undefined}>
+          {Number(day.slice(8))}
+        </span>
       </span>
       {pieces.length > 0 && (
-        <span aria-hidden="true" className="flex flex-wrap gap-0.5 md:hidden">
+        <span aria-hidden="true" className="grid w-fit grid-cols-2 gap-0.5 md:hidden">
           {pieces.slice(0, PHONE_SWATCHES).map((p) => (
-            <span key={p.id} className="size-2 border border-ink/15" style={{ backgroundColor: p.swatch }} />
+            <span key={p.id} className="size-2.5 border border-ink/15" style={{ backgroundColor: p.swatch }} />
           ))}
-          {pieces.length > PHONE_SWATCHES && <span className="text-[9px] leading-2">+{pieces.length - PHONE_SWATCHES}</span>}
         </span>
       )}
       {firstPhotos.length > 0 && (
@@ -186,7 +192,7 @@ function DayCell({
               />
             ))}
           </span>
-          {outfits.length > 1 && <span className="text-xs">+{outfits.length - 1} outfit{outfits.length > 2 ? "s" : ""}</span>}
+          {outfits.length > 1 && <span className="text-sm">+{outfits.length - 1} outfit{outfits.length > 2 ? "s" : ""}</span>}
         </span>
       )}
     </button>

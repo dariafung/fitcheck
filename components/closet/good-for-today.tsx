@@ -17,6 +17,10 @@ import { LocationSync } from "./location-sync";
 // Three across next to the style card on a desktop, so each slot lines up
 // with the closet's four-across shelf.
 const TODAY_GRID = "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4";
+// A pick, not the whole closet again: two rows each way, the rest under
+// "See all clothes". Keeps the style card in reach on a phone.
+const TODAY_MAX = 6;
+const TODAY_MAX_PHONE = 4;
 
 // Home's pick from the closet: what suits today's local weather. The location
 // comes from the browser (picked city or device location, see LocationSync),
@@ -30,6 +34,16 @@ export async function GoodForToday() {
     tempUnitFor(userId),
   ]);
   const good = goodForToday(items, weather && { min: weather.lowF, max: weather.highF });
+  // With nothing to pick from, today's weather and the way to the closet
+  // only get in the way of adding the first piece.
+  if (items.length === 0) {
+    return (
+      <Section seeAll={false}>
+        <LocationSync />
+        <EmptyCloset />
+      </Section>
+    );
+  }
 
   return (
     <Section
@@ -45,10 +59,8 @@ export async function GoodForToday() {
           Couldn&apos;t get today&apos;s weather, so here&apos;s everything.
         </p>
       )}
-      {items.length === 0 ? (
-        <EmptyCloset />
-      ) : good.length > 0 ? (
-        <ItemList items={good} grid={TODAY_GRID} />
+      {good.length > 0 ? (
+        <ItemList items={good.slice(0, TODAY_MAX)} grid={TODAY_GRID} phoneLimit={TODAY_MAX_PHONE} />
       ) : (
         <p className="text-sm text-ink-2">Nothing here fits today&apos;s weather.</p>
       )}
@@ -58,7 +70,7 @@ export async function GoodForToday() {
             href={ATTRIBUTION.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 transition-colors duration-150 hover:text-ink"
+            className="-my-[14px] inline-flex min-h-11 items-center underline underline-offset-2 transition-colors duration-150 hover:text-ink"
           >
             {ATTRIBUTION.text}
           </a>
@@ -76,7 +88,9 @@ export function GoodForTodaySkeleton() {
   );
 }
 
-function Section({ note, children }: { note?: string; children: ReactNode }) {
+// Links in this section's text keep their look but are 44 px tall to tap; the
+// negative margin gives the extra height back, so nothing moves.
+function Section({ note, seeAll = true, children }: { note?: string; seeAll?: boolean; children: ReactNode }) {
   return (
     <section aria-labelledby="good-for-today" className="flex flex-col gap-6">
       {/* Fixed height: matches the style card's heading bar beside it. */}
@@ -90,18 +104,20 @@ function Section({ note, children }: { note?: string; children: ReactNode }) {
               <Link
                 href="/profile#weather"
                 aria-label="Change weather location"
-                className="underline underline-offset-4 transition-colors duration-150 hover:text-ink"
+                className="-my-[13px] inline-flex min-h-11 items-center underline underline-offset-4 transition-colors duration-150 hover:text-ink"
               >
                 Change
               </Link>
             </span>
           )}
-        <Link
-          href="/closet"
-          className="ml-auto shrink-0 text-sm underline underline-offset-4 transition-colors duration-150 hover:text-ink-2"
-        >
-          See all clothes
-        </Link>
+        {seeAll && (
+          <Link
+            href="/closet"
+            className="-my-[13px] ml-auto inline-flex min-h-11 shrink-0 items-center text-sm underline underline-offset-4 transition-colors duration-150 hover:text-ink-2"
+          >
+            See all clothes
+          </Link>
+        )}
       </div>
       {children}
     </section>

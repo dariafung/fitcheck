@@ -4,7 +4,8 @@ import { Silhouette } from "./silhouette";
 
 // A photo, or the item's color in the shape of its category when it has none
 // yet. Stored photos are already framed on white with the margin built in
-// (lib/entry/frame.ts), so the tile is white too and adds no padding.
+// (lib/entry/frame.ts); multiplied onto the cool grey tile, that white turns
+// into the tile, so white clothes keep an edge. No extra padding.
 // Signed storage URLs expire, so images skip the optimizer.
 export function ItemImage({
   src,
@@ -24,7 +25,7 @@ export function ItemImage({
   aspect?: string;
 }) {
   return (
-    <div className={`relative ${aspect} overflow-hidden bg-paper text-ink`}>
+    <div className={`relative ${aspect} isolate overflow-hidden bg-tile text-ink`}>
       {src ? (
         <Image
           src={src}
@@ -33,7 +34,7 @@ export function ItemImage({
           sizes={sizes}
           unoptimized
           priority={priority}
-          className="object-contain"
+          className="object-contain mix-blend-multiply"
         />
       ) : swatch ? (
         <Silhouette category={category} color={swatch} />

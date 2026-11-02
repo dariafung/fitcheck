@@ -8,7 +8,7 @@ import { clearLocationCookieString, locationCookieString } from "@/lib/weather/l
 
 type Status = "idle" | "searching" | "locating" | "saved" | "error";
 
-const BUTTON = "btn-secondary h-10";
+const BUTTON = "btn-secondary";
 
 // Where the weather is for. A picked city lives in the browser's
 // fc_location cookie and wins over device location until "Use my location".

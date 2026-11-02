@@ -87,11 +87,13 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
     }
   }
 
-  // Desktop: a screenshot on the clipboard can be pasted straight in.
+  // Desktop: a screenshot on the clipboard can be pasted straight in, but only
+  // while the drop area is up. With a card open, a paste would throw the
+  // card's edits away; "Add another" starts over instead.
   useEffect(() => {
     function onPaste(event: ClipboardEvent) {
       const file = [...(event.clipboardData?.files ?? [])].find((f) => f.type.startsWith("image/"));
-      if (!file || busy) return;
+      if (!file || busy || step.kind !== "idle") return;
       event.preventDefault();
       void upload(file);
     }
@@ -133,61 +135,31 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
     setStep({ kind: "draft", draft, original, saving: false });
   }
 
-  function addAnother() {
+  // Back to the drop area, ready for the next screenshot.
+  function startOver() {
+    setProblem(undefined);
     setStep({ kind: "idle" });
-    inputRef.current?.focus();
+    requestAnimationFrame(() => inputRef.current?.focus());
   }
+
+  const reading = step.kind === "loading" || step.kind === "cutting";
+  const draft = step.kind === "draft" ? step : null;
+  // Reading errors show above the drop area; saving errors next to Save.
+  const saveProblem = draft ? problem : undefined;
+  const readProblem = draft ? undefined : problem;
+  const notice = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (readProblem) notice.current?.scrollIntoView({ block: "nearest" });
+  }, [readProblem]);
 
   return (
     <div className="flex flex-col gap-8">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          const file = e.dataTransfer.files[0];
-          if (file && !busy) void upload(file);
-        }}
-        data-dragging={dragging || undefined}
-        data-idle={step.kind === "idle" || undefined}
-        className="dropzone flex min-h-64 flex-col items-center justify-center gap-4 px-8 py-12 text-center md:min-h-80"
-      >
-        <input
-          ref={inputRef}
-          id="screenshot"
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          disabled={busy}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) void upload(file);
-          }}
-          className="peer sr-only"
-        />
-        <label
-          htmlFor="screenshot"
-          className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
-        >
-          {step.kind === "loading" || step.kind === "cutting" ? "Reading…" : "Choose a screenshot"}
-        </label>
-        <p className="max-w-[40ch] text-sm text-ink-2">
-          One screen is enough. Just get the photo and name in it.
-          <span className="hidden sm:inline"> You can also drop or paste it.</span>
-        </p>
-      </div>
-
       <div role="status" aria-live="polite" className="empty:hidden">
-        {problem && (
-          <p className="notice">
-            {problem}
+        {readProblem && (
+          <p ref={notice} className="notice">
+            {readProblem}
           </p>
         )}
-        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
-        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
         {step.kind === "saved" && (
           <div className="notice flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-lg">
@@ -197,7 +169,7 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
               <Link href="/closet" className="btn-secondary">
                 See closet
               </Link>
-              <button type="button" onClick={addAnother} className="btn-primary">
+              <button type="button" onClick={startOver} className="btn-primary">
                 Add another
               </button>
             </div>
@@ -205,24 +177,85 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
         )}
       </div>
 
+      {/* Folds away once there's a card, as on the purchase check. */}
+      {(step.kind === "idle" || reading) && (
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            const file = e.dataTransfer.files[0];
+            if (file && !busy) void upload(file);
+          }}
+          data-dragging={dragging || undefined}
+          data-idle={step.kind === "idle" || undefined}
+          className="dropzone flex min-h-64 flex-col items-center justify-center gap-4 px-8 py-12 text-center md:min-h-80"
+        >
+          <input
+            ref={inputRef}
+            id="screenshot"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            disabled={busy}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void upload(file);
+            }}
+            className="peer sr-only"
+          />
+          {/* The button says what's happening; no second line repeats it. */}
+          <label
+            htmlFor="screenshot"
+            className="btn-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink peer-disabled:cursor-default peer-disabled:opacity-40"
+          >
+            {step.kind === "loading" ? "Reading…" : step.kind === "cutting" ? CUTTING_OUT : "Choose a screenshot"}
+          </label>
+          <p className="max-w-[40ch] text-sm text-ink-2">
+            One screen is enough. Just get the photo and name in it.
+            <span className="hidden sm:inline"> You can also drop or paste it.</span>
+          </p>
+          <span aria-live="polite" className="sr-only">
+            {step.kind === "loading" ? "Reading your screenshot…" : step.kind === "cutting" ? CUTTING_OUT : ""}
+          </span>
+        </div>
+      )}
+
       {step.kind === "loading" && <LoadingCard preview={step.preview} />}
       {step.kind === "cutting" && step.draft.imageUrls[0] && <LoadingCard preview={step.draft.imageUrls[0]} />}
-      {step.kind === "draft" && step.original && (
-        <CleanedNote
-          disabled={step.saving}
-          onUseOriginal={() => step.original && setStep({ kind: "draft", draft: step.original, saving: false })}
-        />
+      {draft && (
+        <button type="button" onClick={startOver} disabled={draft.saving} className="btn-text self-start">
+          Use another screenshot
+        </button>
       )}
-      {step.kind === "draft" && (
+      {draft && (
         <ItemCard
           key={round}
-          draft={step.draft}
+          draft={draft.draft}
           withSize
-          initialSize={step.draft.size}
-          saving={step.saving}
-          onSave={(edited) => save(step.draft, edited, step.original)}
+          initialSize={draft.draft.size}
+          saving={draft.saving}
+          onSave={(edited) => save(draft.draft, edited, draft.original)}
           categories={CLOTHING_LABELS}
           tempUnit={use(tempUnit)}
+          photoNote={
+            draft.original && (
+              <CleanedNote
+                disabled={draft.saving}
+                onUseOriginal={() => draft.original && setStep({ kind: "draft", draft: draft.original, saving: false })}
+              />
+            )
+          }
+          actions={
+            saveProblem && (
+              <p role="alert" className="text-sm font-medium">
+                {saveProblem}
+              </p>
+            )
+          }
         />
       )}
     </div>
@@ -232,10 +265,10 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
 function LoadingCard({ preview }: { preview: string }) {
   return (
     <div aria-hidden className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12">
-      <div className="relative aspect-[4/5] w-3/5 overflow-hidden bg-tile md:col-span-5 md:w-full">
-        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 768px) 40vw, 60vw" className="object-contain p-[9%] opacity-50" />
+      <div className="relative aspect-[4/5] overflow-hidden bg-tile md:col-span-5">
+        <Image src={preview} alt="" fill unoptimized sizes="(min-width: 768px) 40vw, 100vw" className="object-contain p-[9%] opacity-50" />
       </div>
-      <div className="flex flex-col gap-4 md:col-span-6 md:col-start-7 motion-safe:animate-pulse">
+      <div className="flex flex-col gap-4 md:col-span-6 md:col-start-7 lg:col-span-5 motion-safe:animate-pulse">
         <div className="h-7 w-1/2 bg-tile" />
         <div className="h-10 bg-tile" />
         <div className="h-10 bg-tile" />

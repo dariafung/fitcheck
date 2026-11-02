@@ -89,8 +89,13 @@ test("won't log the same pieces twice on one day", async ({ page }) => {
 
 test("shows the seeded month, the 30-day numbers and what the AI noticed", async ({ page }) => {
   await page.goto("/calendar");
-  // Pick a seeded day; its outfit shows with Edit and Delete.
+  // Pick a seeded day; its outfit shows with Edit and Delete. The seeded log
+  // ends yesterday, so on the 1st it is all in the month before.
   const logged = page.getByRole("button", { name: /, \d outfits?$/ }).first();
+  if (TODAY.endsWith("-01")) {
+    await page.getByRole("link", { name: "Previous month" }).click();
+    await expect(page).toHaveURL(/\?month=\d{4}-\d{2}$/);
+  }
   const name = (await logged.getAttribute("aria-label"))!;
   await logged.click();
   const panel = page.getByRole("region", { name: name.split(",").slice(0, 2).join(",") });
@@ -98,7 +103,7 @@ test("shows the seeded month, the 30-day numbers and what the AI noticed", async
 
   const stats = page.getByRole("region", { name: /30 days/ });
   await expect(stats.getByText("Most worn")).toBeVisible();
-  await expect(stats.getByText("You complain, you wear it")).toBeVisible();
+  await expect(stats.getByText("Critiqued, often worn")).toBeVisible();
   await expect(stats.getByRole("link", { name: new RegExp(JEANS) }).first()).toBeVisible();
 
   // Mock insights, written once the page is up (or already cached).
@@ -114,5 +119,5 @@ test("an item page says how often it was worn", async ({ page }) => {
   const { data } = await db.from("items").select("id").eq("user_id", DEMO_USER_ID).eq("title", JEANS).single();
   await page.goto(`/closet/${data!.id}`);
   await expect(page.getByRole("term").filter({ hasText: "Worn" })).toBeVisible();
-  await expect(page.getByRole("definition").filter({ hasText: /times in the (last )?30 days/ })).toBeVisible();
+  await expect(page.getByRole("definition").filter({ hasText: /times in 30 days · last worn / })).toBeVisible();
 });

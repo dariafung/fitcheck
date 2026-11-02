@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ItemImage } from "@/components/closet/item-image";
+import { Icon } from "@/components/ui/icon";
 import { Occasion } from "@/lib/ai/schemas/common";
 import type { ClosetCard } from "@/lib/closet/items";
 import { OCCASION_LABELS } from "@/lib/closet/labels";
@@ -61,7 +62,7 @@ export function OutfitEditor({
     <div className="flex flex-col gap-5">
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm">What did you wear?</legend>
-        <ul className="grid grid-cols-3 gap-x-1 gap-y-3 sm:grid-cols-4 lg:grid-cols-3">
+        <ul className="-mx-2 grid grid-cols-3 gap-x-1 gap-y-3 sm:grid-cols-4 md:mx-0 lg:grid-cols-3">
           {shown.map((item) => {
             const on = picked.has(item.id);
             return (
@@ -72,15 +73,19 @@ export function OutfitEditor({
                   aria-pressed={on}
                   className="group relative block w-full text-left"
                 >
-                  <span className={`block outline-offset-[-2px] ${on ? "outline-2 outline-ink" : ""}`}>
+                  <span className="relative block">
                     <ItemImage src={item.imageUrl} alt="" category={item.category} swatch={item.swatch} sizes="120px" />
+                    {/* Drawn over the photo: an outline on the tile itself sits under it. */}
+                    {on && (
+                      <>
+                        <span aria-hidden="true" className="pointer-events-none absolute inset-0 border-2 border-ink" />
+                        <span aria-hidden="true" className="absolute top-1 right-1 flex size-5 items-center justify-center bg-ink text-paper">
+                          <Icon name="check" size={12} />
+                        </span>
+                      </>
+                    )}
                   </span>
-                  {on && (
-                    <span aria-hidden="true" className="absolute top-1 right-1 flex size-5 items-center justify-center bg-ink text-xs text-paper">
-                      ✓
-                    </span>
-                  )}
-                  <span className="mt-1 line-clamp-1 text-xs group-hover:underline">{item.title}</span>
+                  <span className="mt-1 line-clamp-1 px-1 text-sm group-hover:underline md:px-0">{item.title}</span>
                 </button>
               </li>
             );
@@ -89,9 +94,7 @@ export function OutfitEditor({
       </fieldset>
 
       <div role="group" aria-label="Occasion" className="flex flex-col gap-2">
-        <span className="text-sm">
-          Where to? <span className="text-ink-2">Optional</span>
-        </span>
+        <span className="text-sm">Occasion (optional)</span>
         <div className="flex flex-wrap gap-2">
           {Occasion.options.map((o) => (
             <button

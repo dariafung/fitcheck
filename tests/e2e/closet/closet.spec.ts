@@ -131,7 +131,7 @@ test("edit details: a wider temperature range moves an item into Good for today 
   await good.getByRole("link", { name: "See all clothes" }).click();
   await expect(page).toHaveURL(/\/closet$/);
   await page.getByRole("link", { name: item.title }).click();
-  await expect(page.getByText(`${TOO_WARM.min} to ${TOO_WARM.max}°F`)).toBeVisible();
+  await expect(page.getByText(`${TOO_WARM.min}–${TOO_WARM.max}°F`)).toBeVisible();
   await page.getByRole("button", { name: "Edit details" }).click();
   const card = page.getByRole("form", { name: "Item details" });
   await expect(card.getByRole("heading", { name: "Edit details" })).toBeVisible();
@@ -143,7 +143,7 @@ test("edit details: a wider temperature range moves an item into Good for today 
   await card.getByRole("button", { name: "Save changes" }).click();
   await expect(card).toHaveCount(0);
   await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
-  await expect(page.getByText(`${FIXED_WEATHER.lowF - 5} to ${FIXED_WEATHER.highF + 5}°F`)).toBeVisible();
+  await expect(page.getByText(`${FIXED_WEATHER.lowF - 5}–${FIXED_WEATHER.highF + 5}°F`)).toBeVisible();
   await expect(page.getByText("Business", { exact: true })).toBeVisible();
 
   await page.getByRole("navigation").getByRole("link", { name: "fitcheck" }).click();
@@ -224,6 +224,63 @@ test("closet categories: filter by type, keep the tab, and show all again when e
   await expect(page).toHaveURL(/\/closet\?tab=passing-on$/);
   await expect(main.getByRole("link", { name: passing })).toBeVisible();
   await expect(categories.getByRole("link", { name: /^One-piece 1$/ })).toBeVisible();
+});
+
+test("closet quick filters: not worn lately and an occasion, each switched off by a second tap", async ({ page }) => {
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const quick = main.getByRole("group", { name: "Quick filters" });
+  // Added today, so it isn't called unworn yet.
+  await quick.getByRole("link", { name: /^Not worn lately \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tag=not-worn$/);
+  await expect(quick.getByRole("link", { name: /^Not worn lately/ })).toHaveAttribute("aria-current", "true");
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+  // The category counts follow the quick filter.
+  const count = (name: RegExp) => quick.getByRole("link", { name }).textContent().then((t) => t?.match(/\d+/)?.[0]);
+  await expect(main.getByRole("group", { name: "Category" }).getByRole("link", { name: /^All \d+$/ })).toHaveText(
+    `All ${await count(/^Not worn lately/)}`,
+  );
+  await quick.getByRole("link", { name: /^Not worn lately/ }).click();
+  await expect(page).toHaveURL(/\/closet$/);
+  await expect(main.getByRole("link", { name: item.title })).toBeVisible();
+
+  // The persona dresses for school most.
+  await quick.getByRole("link", { name: /^School \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tag=school$/);
+  await expect(main.getByRole("link", { name: item.title })).toHaveCount(0);
+  await page.reload();
+  await expect(quick.getByRole("link", { name: /^School/ })).toHaveAttribute("aria-current", "true");
+});
+
+test("closet sort: newest, most worn, least worn, kept with the filters", async ({ page }) => {
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const first = main.locator("ul").first().getByRole("listitem").first();
+  const sort = main.getByLabel("Sort");
+  // Newest first by default: the item this test just added.
+  await expect(sort).toHaveValue("newest");
+  await expect(first).toContainText(item.title);
+
+  // Never worn, so it drops below everything the calendar has seen worn.
+  await sort.selectOption("most-worn");
+  await expect(page).toHaveURL(/\/closet\?sort=most-worn$/);
+  await expect(first).not.toContainText(item.title);
+
+  // Fewest outfits first; among the never-worn pieces, newest first.
+  await sort.selectOption("least-worn");
+  await expect(page).toHaveURL(/\/closet\?sort=least-worn$/);
+  await expect(first).toContainText(item.title);
+
+  // A filter keeps the order, and a refresh keeps both.
+  await main.getByRole("group", { name: "Category" }).getByRole("link", { name: /^Tops? \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?cat=top&sort=least-worn$/);
+  await page.reload();
+  await expect(main.getByLabel("Sort")).toHaveValue("least-worn");
+
+  // Passing on has no sort.
+  await main.getByRole("link", { name: /^Passing on/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tab=passing-on&cat=top$/);
+  await expect(main.getByLabel("Sort")).toHaveCount(0);
 });
 
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {

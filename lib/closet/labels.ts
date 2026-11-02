@@ -12,7 +12,7 @@ export const FIELD_LABELS = {
   materials: "Materials",
   formality: "How dressy",
   tempRangeF: "Comfortable in",
-  occasions: "Good for",
+  occasions: "Occasions",
 } as const;
 
 // In the order the entry card lists them.
@@ -40,6 +40,12 @@ export function capitalize(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
+// Color names arrive as the store wrote them ("LIGHT HEATHER GREY", "black");
+// shown in sentence case so they read alike ("Light heather grey", "Black").
+export function sentenceCase(text: string): string {
+  return capitalize(text.toLowerCase());
+}
+
 // The lifestyle mix's occasions, as the outfit calendar names them.
 export const OCCASION_LABELS: Record<Occasion, string> = {
   work: "Work",
@@ -48,3 +54,11 @@ export const OCCASION_LABELS: Record<Occasion, string> = {
   sport: "Sport",
   home: "Home",
 };
+
+// The closet's sort menu (lib/closet/tabs.ts).
+export const SORT_HEADING = "Sort";
+export const SORT_LABELS = {
+  newest: "Newest",
+  mostWorn: "Most worn",
+  leastWorn: "Least worn",
+} as const;

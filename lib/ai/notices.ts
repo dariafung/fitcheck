@@ -2,7 +2,9 @@
 // No server-only imports here: the client bundles this file.
 import { DEMO_READ_ONLY, DEMO_READ_ONLY_ERROR } from "../auth/messages";
 
-export const AI_BUDGET_NOTICE = "The demo's AI is resting for today. You can still browse the closet.";
+// The site's daily model budget is spent, for everyone: signed-up accounts
+// and the demo alike.
+export const AI_BUDGET_NOTICE = "Adding and checking are paused for today. You can still browse the closet.";
 // One account, or the shared demo account, used up an action's daily count.
 export const DAILY_LIMIT_NOTICE = "That's your AI limit for today. Try again tomorrow.";
 export const DEMO_LIMIT_NOTICE = "The demo's AI is done for today. Sign up to keep going.";

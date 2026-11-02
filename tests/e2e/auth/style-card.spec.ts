@@ -94,7 +94,7 @@ test("the demo account sees the seeded style card and never rebuilds it", async 
 test("a new account is told what the style card needs", async ({ page }) => {
   await signUp(page);
   await page.goto("/");
-  await expect(page.getByRole("region", { name: "Your style" })).toContainText("Say how 3 pieces feel");
+  await expect(page.getByRole("region", { name: "Your style" })).toContainText("Add a note to 3 pieces");
 });
 
 test("the style card builds itself once there are three feelings", async ({ page }) => {

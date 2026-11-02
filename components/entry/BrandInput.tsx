@@ -104,7 +104,7 @@ export function BrandInput({
             onMouseDown={(e) => e.preventDefault()}
             onMouseEnter={() => setActive(i)}
             onClick={() => choose(name)}
-            className="cursor-pointer px-3 py-2.5 text-base aria-selected:bg-tile"
+            className="flex min-h-11 cursor-pointer items-center px-3 text-[16px] aria-selected:bg-tile"
           >
             {name}
           </li>

@@ -11,7 +11,9 @@ export const BUYER_STATES = {
 } as const;
 export const TRY_DEMO = "Try the demo account to see how matching works.";
 export const SOME_UNCHECKED = "Some buyers weren't checked yet. Try again later.";
-export const SAMPLE_BUYERS = "Sample buyers, not real people.";
+export const SAMPLE_BUYERS = "Sample buyers for the demo.";
+
+export const BUYERS_HEADING = "Matching buyers";
 
 // At most this many avatars; the rest show as "+N".
 export const MAX_AVATARS = 5;
@@ -21,6 +23,8 @@ export function avatarRow(count: number): { shown: number; more: number } {
   return { shown, more: count - shown };
 }
 
+// The count is buyers whose buy check scored 60+, not everyone checked: no
+// buyer is shown the item, so the copy says who'd want it.
 export function buyerCount(count: number): string {
   return count === 1
     ? "1 person in your size would likely want this."
@@ -82,9 +86,10 @@ function Result({ result }: { result: BuyersResult }) {
   }
 }
 
-// "Who'd want it" on a passing-on item: how many buyers would likely want it
-// (with identical anonymous avatars), or why there are none. Asked for once the page is up, since checking new
-// buyers takes a while.
+// "Matching buyers" on a passing-on item: how many buyers in the user's size
+// would likely want it (identical anonymous avatars, no names), or why there
+// are none. Asked for once the page is up, since checking new buyers takes a
+// while.
 export function BuyerMatches({ itemId, size }: { itemId: string; size: string | null }) {
   const [result, setResult] = useState<BuyersResult | "error" | null>(null);
 
@@ -102,7 +107,7 @@ export function BuyerMatches({ itemId, size }: { itemId: string; size: string | 
   return (
     <section aria-labelledby="buyers-heading" className="flex flex-col gap-3">
       <h2 id="buyers-heading" className="text-lg font-medium">
-        Who&apos;d want it
+        {BUYERS_HEADING}
       </h2>
       {result === null ? (
         <p className="text-sm text-ink-2" aria-busy="true">
