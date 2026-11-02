@@ -23,7 +23,7 @@ describe("reasons", () => {
     expect(revivesReason([])).toBe("Doesn't give an outfit to anything that had none.");
   });
 
-  it("names the questions that got the default score", () => {
+  it("names the questions that got the middle score", () => {
     expect(suitsYouReason([{ id: "cut_flatters", score: 6 }, { id: "color_liked", score: 0 }])).toBe(
       "Scored on what you said about your clothes.",
     );
@@ -33,12 +33,12 @@ describe("reasons", () => {
         { id: "color_liked", score: null },
         { id: "feel_liked", score: null },
       ]),
-    ).toBe("No notes to compare on color and feel yet, so those get the default 4/8.");
+    ).toBe("No notes on color and feel yet, so those get a middle score of 4/8.");
     expect(suitsYouReason([{ id: "cut_flatters", score: 6 }, { id: "spares_trouble_areas", score: null }])).toBe(
-      "No notes to compare on the spots you're unsure about yet, so it gets the default 4/8.",
+      "No notes on the spots you're unsure about yet, so it gets a middle score of 4/8.",
     );
     expect(suitsYouReason([{ id: "cut_flatters", score: null }])).toBe(
-      "No notes on your clothes to compare yet, so every question gets the default 4/8.",
+      "No notes on your clothes yet, so each question gets a middle score of 4/8.",
     );
   });
 

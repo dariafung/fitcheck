@@ -16,7 +16,7 @@ export const OUTFIT_ERRORS = {
 } as const;
 export type OutfitError = keyof typeof OUTFIT_ERRORS;
 
-export const OUTFIT_SAVE_FAILED = "Couldn't save that. Try again?";
+export const OUTFIT_SAVE_FAILED = "Couldn't save. Try again.";
 
 // What an error answer from the calendar routes should say on the page.
 export async function outfitProblem(res: Response | null): Promise<string> {

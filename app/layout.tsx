@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import { Suspense } from "react";
 import { AccountNav } from "@/components/auth/account-nav";
+import { SignedInOnly } from "@/components/auth/signed-in-only";
 import { CalendarNavLink } from "@/components/calendar/calendar-nav-link";
+import { NAV_LINK } from "@/components/nav/nav-class";
 import { NavLink } from "@/components/nav/nav-link";
 import "./globals.css";
 
@@ -26,9 +28,34 @@ export const metadata: Metadata = {
   description: "Check if a piece works with your closet before you buy it.",
 };
 
-// 44px tall to tap, though the header still reads as one thin line. NavLink
-// adds the color: black for the page you're on, gray for the rest.
-const NAV_LINK = "inline-flex h-11 items-center text-sm";
+// Signed out (sign-in on), the top bar is only the logo and Log in. While the
+// session is read, the links show as they will for almost everyone.
+const CLOSET = (
+  <NavLink href="/closet" className={NAV_LINK}>
+    Closet
+  </NavLink>
+);
+const PROFILE = (
+  <NavLink href="/profile" className={NAV_LINK}>
+    Profile
+  </NavLink>
+);
+
+// Holds Calendar's place while it's decided whether to show it (it's off for
+// anyone who turned the calendar off), so the links after it don't jump.
+const CALENDAR_SLOT = (
+  <span aria-hidden className={`${NAV_LINK} invisible`}>
+    Calendar
+  </span>
+);
+
+// Likewise Log out on a desktop, the usual case on the hosted site; Profile
+// stays put when it streams in.
+const ACCOUNT_SLOT = (
+  <span aria-hidden className={`${NAV_LINK} invisible max-md:hidden`}>
+    Log out
+  </span>
+);
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -38,20 +65,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* Logo and sections on the left; the account on the right. The
               purchase check starts from the banner on home. */}
           <nav className="shell flex h-14 items-center gap-4 md:gap-5">
-            <NavLink href="/" className="mr-1 text-sm font-medium tracking-[0.25em] uppercase md:mr-3">
+            <NavLink href="/" className={`${NAV_LINK} mr-1 font-medium tracking-[0.25em] uppercase md:mr-3`}>
               fitcheck
             </NavLink>
-            <NavLink href="/closet" className={NAV_LINK}>
-              Closet
-            </NavLink>
-            <Suspense>
+            <Suspense fallback={CLOSET}>
+              <SignedInOnly>{CLOSET}</SignedInOnly>
+            </Suspense>
+            <Suspense fallback={CALENDAR_SLOT}>
               <CalendarNavLink className={NAV_LINK} />
             </Suspense>
             <div className="ml-auto flex items-center gap-4 text-sm md:gap-5">
-              <NavLink href="/profile" className={NAV_LINK}>
-                Profile
-              </NavLink>
-              <Suspense>
+              <Suspense fallback={PROFILE}>
+                <SignedInOnly>{PROFILE}</SignedInOnly>
+              </Suspense>
+              <Suspense fallback={ACCOUNT_SLOT}>
                 <AccountNav />
               </Suspense>
             </div>

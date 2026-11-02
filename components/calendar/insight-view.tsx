@@ -20,9 +20,9 @@ export function InsightsView({ insights, items, note }: { insights: VisibleInsig
             <p className="font-serif text-lg">{insight.text}</p>
             <ul className="flex flex-wrap gap-1">
               {insight.itemIds.flatMap((id) => cards.get(id) ?? []).map((item) => (
-                <li key={item.id} className="w-10">
+                <li key={item.id} className="w-11">
                   <Link href={`/closet/${item.id}`} aria-label={item.title} className="block">
-                    <ItemImage src={item.imageUrl} alt="" category={item.category} swatch={item.swatch} sizes="40px" aspect="aspect-square" />
+                    <ItemImage src={item.imageUrl} alt="" category={item.category} swatch={item.swatch} sizes="44px" aspect="aspect-square" />
                   </Link>
                 </li>
               ))}

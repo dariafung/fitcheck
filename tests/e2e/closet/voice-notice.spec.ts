@@ -66,6 +66,6 @@ test("when the day's AI budget is spent, voice says so", async ({ page }) => {
 
 test("when the AI fails, voice asks to try again", async ({ page }) => {
   const feeling = await recordAndFail(page, new AiOutputError("transcribe", []));
-  await expect(feeling.getByRole("alert")).toHaveText("Couldn't turn that into text. Try again?");
+  await expect(feeling.getByRole("alert")).toHaveText("Couldn't turn that into text. Try again.");
   await expect(feeling.getByRole("button", { name: "Hold to talk" })).toBeEnabled();
 });

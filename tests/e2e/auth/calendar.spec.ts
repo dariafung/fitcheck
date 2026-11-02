@@ -63,17 +63,18 @@ test("a new account can turn the calendar off and on in Profile", async ({ page 
 
   await page.goto("/profile#calendar");
   const setting = page.getByRole("region", { name: "Outfit calendar" });
-  const toggle = setting.getByRole("button", { name: "Keep an outfit calendar" });
-  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  const toggle = setting.getByRole("checkbox", { name: "Keep an outfit calendar" });
+  await expect(toggle).toBeChecked();
+  await expect(setting.getByText("Turning it off hides it. Your log is kept.")).toBeVisible();
   await toggle.click();
-  await expect(setting.getByText("Off. Your log is kept.")).toBeVisible();
+  await expect(toggle).not.toBeChecked();
   await expect(nav.getByRole("link", { name: "Calendar", exact: true })).toHaveCount(0);
 
   await page.goto("/calendar");
   await expect(page.getByText("Your outfit calendar is off.")).toBeVisible();
   await page.getByRole("link", { name: "Turn it on in Profile" }).click();
-  await page.getByRole("button", { name: "Keep an outfit calendar" }).click();
-  await expect(page.getByText("On. Turn it off to hide it; your log stays.")).toBeVisible();
+  await page.getByRole("checkbox", { name: "Keep an outfit calendar" }).click();
+  await expect(page.getByRole("checkbox", { name: "Keep an outfit calendar" })).toBeChecked();
   await expect(nav.getByRole("link", { name: "Calendar", exact: true })).toBeVisible();
 
   // An empty closet has nothing to log yet.

@@ -8,6 +8,7 @@ import { COLOR_FAMILIES, COLOR_FAMILY_HEX, type ColorFamily } from "@/lib/color-
 import type { ItemDraft } from "@/lib/entry/draft";
 import { DEFAULT_TEMP_UNIT, tempBounds, toUnit, type TempUnit } from "@/lib/profile/temp-unit";
 import { ITEM_SIZE_PLACEHOLDER, MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
+import { Select } from "@/components/ui/select";
 import { BrandInput } from "./BrandInput";
 import { readTempRange } from "./temp-range";
 
@@ -62,6 +63,7 @@ export function ItemCard({
   heading = "Look right?",
   hint = "Fix anything that's off, then save.",
   actions,
+  photoNote,
   categories = CATEGORY_LABELS,
   withSize = false,
   initialSize = null,
@@ -76,6 +78,8 @@ export function ItemCard({
   hint?: string;
   // Shown next to the submit button, e.g. Cancel and an error when editing.
   actions?: ReactNode;
+  // Right under the photo, e.g. that its background was removed.
+  photoNote?: ReactNode;
   // The types offered; all of them unless a page narrows it.
   categories?: [Category, string][];
   // An optional, typed size: for items saved to the closet, not buy checks.
@@ -126,21 +130,24 @@ export function ItemCard({
       aria-label="Item details"
       className="grid grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-12"
     >
-      <div className="flex w-3/5 flex-col gap-3 md:sticky md:top-10 md:col-span-5 md:w-full md:self-start">
-        <div className="relative aspect-[4/5] overflow-hidden bg-paper">
+      {/* Full width on a phone and top-aligned on a desktop, like the item
+          page, so the photo doesn't jump when Edit details opens. */}
+      <div className="flex flex-col gap-3 md:col-span-5 md:self-start">
+        <div className="relative isolate aspect-[4/5] overflow-hidden bg-tile">
           {draft.imageUrls[shown] ? (
             <Image
               src={draft.imageUrls[shown]}
               alt={title}
               fill
               unoptimized
-              sizes="(min-width: 768px) 40vw, 60vw"
-              className="object-contain"
+              sizes="(min-width: 768px) 40vw, 100vw"
+              className="object-contain mix-blend-multiply"
             />
           ) : (
             <p className="flex h-full items-end p-4 text-sm text-ink-2">No photo</p>
           )}
         </div>
+        {photoNote}
         {draft.imageUrls.length > 1 && (
           <div className="flex gap-2">
             {draft.imageUrls.map((url, i) => (
@@ -150,9 +157,9 @@ export function ItemCard({
                 onClick={() => setShown(i)}
                 aria-label={`Photo ${i + 1}`}
                 aria-pressed={i === shown}
-                className="relative aspect-[4/5] w-14 overflow-hidden border border-transparent bg-paper transition-colors duration-150 aria-pressed:border-ink"
+                className="relative isolate aspect-[4/5] w-14 overflow-hidden border border-transparent bg-tile transition-colors duration-150 aria-pressed:border-ink"
               >
-                <Image src={url} alt="" fill unoptimized sizes="56px" className="object-contain" />
+                <Image src={url} alt="" fill unoptimized sizes="56px" className="object-contain mix-blend-multiply" />
               </button>
             ))}
           </div>
@@ -213,16 +220,16 @@ export function ItemCard({
         <div className="grid grid-cols-2 gap-4">
           <Field label={FIELD_LABELS.category} unsure={unsure.has("category")}>
             {(id) => (
-              <select id={id} className={FIELD} value={tags.category} onChange={(e) => update("category", e.target.value as Category)}>
+              <Select id={id} className={FIELD} value={tags.category} onChange={(e) => update("category", e.target.value as Category)}>
                 {categories.map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
           <Field label={FIELD_LABELS.fit} unsure={unsure.has("fit")}>
             {(id) => (
-              <select
+              <Select
                 id={id}
                 className={FIELD}
                 value={tags.fit ?? ""}
@@ -233,7 +240,7 @@ export function ItemCard({
                 {FITS.map((fit) => (
                   <option key={fit} value={fit}>{capitalize(fit)}</option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
         </div>
@@ -244,10 +251,10 @@ export function ItemCard({
               <div className="relative">
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 border border-ink/20"
+                  className="pointer-events-none absolute top-1/2 left-3 z-10 size-3.5 -translate-y-1/2 border border-ink/20"
                   style={{ background: tags.colorFamily ? COLOR_FAMILY_HEX[tags.colorFamily] : "transparent" }}
                 />
-                <select
+                <Select
                   id={id}
                   className={`${FIELD} pl-9`}
                   value={tags.colorFamily ?? ""}
@@ -257,7 +264,7 @@ export function ItemCard({
                   {COLOR_FAMILIES.map((family) => (
                     <option key={family} value={family}>{capitalize(family)}</option>
                   ))}
-                </select>
+                </Select>
               </div>
             )}
           </Field>
@@ -275,11 +282,11 @@ export function ItemCard({
 
         <Field label={FIELD_LABELS.formality} unsure={unsure.has("formality")}>
           {(id) => (
-            <select id={id} className={FIELD} value={tags.formality} onChange={(e) => update("formality", Number(e.target.value))}>
+            <Select id={id} className={FIELD} value={tags.formality} onChange={(e) => update("formality", Number(e.target.value))}>
               {FORMALITY_LABELS.map((label, i) => (
                 <option key={label} value={i + 1}>{label}</option>
               ))}
-            </select>
+            </Select>
           )}
         </Field>
 

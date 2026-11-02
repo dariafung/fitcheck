@@ -2,11 +2,24 @@ import Link from "next/link";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { listClosetItems, type ClosetCard } from "@/lib/closet/items";
-import { CLOSET_TABS, closetHref, inCategory, inTab, type ClosetView } from "@/lib/closet/tabs";
+import {
+  CLOSET_TABS,
+  closetHref,
+  inCategory,
+  inTab,
+  inTag,
+  sortItems,
+  sortOptions,
+  type ClosetView,
+  type NotWorn,
+  type WearCounts,
+} from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
 import { isReadOnly } from "@/lib/auth/session";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
+import { loadWearLog } from "@/lib/wear/log";
+import { wearLogEnabledFor } from "@/lib/wear/settings";
 import { ClosetFilters, FILTER } from "./closet-filters";
 import { ItemImage } from "./item-image";
 
@@ -18,24 +31,33 @@ export const SHELF =
 
 export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView> }) {
   await connection();
-  const [items, view, readOnly] = await Promise.all([
-    currentUserId().then((userId) => listClosetItems(createServerClient(), userId)),
+  const userId = await currentUserId();
+  const [items, { notWorn, wear }, asked, readOnly] = await Promise.all([
+    listClosetItems(createServerClient(), userId),
+    wearFor(userId),
     viewParam,
     isReadOnly(),
   ]);
 
   if (items.length === 0) return <EmptyCloset />;
 
+  // No "not worn" filter and no wear order without a calendar to tell.
+  const sorts = sortOptions(wear);
+  const view: ClosetView = {
+    ...asked,
+    tag: asked.tag === "not-worn" && !notWorn ? null : asked.tag,
+    sort: sorts.some((s) => s.id === asked.sort) ? asked.sort : undefined,
+  };
   const tabItems = inTab(items, view.tab);
-  const shown = inCategory(tabItems, view.cat);
+  const shown = sortItems(inCategory(inTag(tabItems, view.tag, notWorn), view.cat), view.sort, wear);
   return (
     <div className="flex flex-col gap-10">
-      <ClosetFilters items={items} view={view} />
+      <ClosetFilters items={items} view={view} notWorn={notWorn} sorts={sorts} />
       {shown.length > 0 ? (
         <ItemList items={shown} addSlot={view.tab === "wearing" && !readOnly} />
       ) : tabItems.length > 0 ? (
-        <Empty title="Nothing in this category." text="Pick another one, or see everything.">
-          <Link href={closetHref({ ...view, cat: null })} scroll={false} className="btn-secondary mt-4">
+        <Empty title={emptyTitle(view)} text="Pick another one, or see everything.">
+          <Link href={closetHref({ ...view, cat: null, tag: null })} scroll={false} className="btn-secondary mt-4">
             Show all
           </Link>
         </Empty>
@@ -48,11 +70,26 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
   );
 }
 
+// What emptied the grid: a category, a quick filter, or both.
+function emptyTitle(view: { cat: unknown; tag: unknown }): string {
+  if (view.tag && view.cat) return "Nothing matches these filters.";
+  if (view.tag) return "Nothing matches this filter.";
+  return "Nothing in this category.";
+}
+
+// The same 30 days the calendar counts: what it calls "Not worn", and each
+// piece's wear for the sort menu. Both null with the calendar off or empty.
+async function wearFor(userId: string): Promise<{ notWorn: NotWorn; wear: WearCounts }> {
+  if (!(await wearLogEnabledFor(userId))) return { notWorn: null, wear: null };
+  const { stats } = await loadWearLog(createServerClient(), userId);
+  return stats ? { notWorn: new Set(stats.notWorn), wear: stats.byItem } : { notWorn: null, wear: null };
+}
+
 // An empty slot on the shelf: a tile outlined in a dashed line, the words
 // beside it.
-function EmptySlot({ children }: { children: ReactNode }) {
+function EmptySlot({ empty, children }: { empty?: boolean; children: ReactNode }) {
   return (
-    <div className="flex items-end gap-6 md:gap-10">
+    <div data-empty-closet={empty || undefined} className="flex items-end gap-6 md:gap-10">
       <div
         aria-hidden
         className="aspect-[4/5] w-28 shrink-0 bg-tile outline-1 -outline-offset-[10px] outline-ink/30 outline-dashed md:w-56"
@@ -72,9 +109,10 @@ function Empty({ title, text, children }: { title: string; text: string; childre
   );
 }
 
+// Marked so the closet page can hide its own "Add clothes" while this one shows.
 export function EmptyCloset() {
   return (
-    <EmptySlot>
+    <EmptySlot empty>
       <p className="text-lg font-medium">Your closet is empty.</p>
       <p className="text-sm text-ink-2">Add a few things you own to get started.</p>
       <Link href="/closet/add" className="btn-primary mt-4">
@@ -98,15 +136,18 @@ export function ItemList({
   items,
   grid = SHELF,
   addSlot = false,
+  phoneLimit,
 }: {
   items: ClosetCard[];
   grid?: string;
   addSlot?: boolean;
+  // Tiles shown on a phone; the rest appear from 768 px.
+  phoneLimit?: number;
 }) {
   return (
     <ul className={grid}>
       {items.map((item, i) => (
-        <li key={item.id}>
+        <li key={item.id} className={phoneLimit !== undefined && i >= phoneLimit ? "hidden md:block" : undefined}>
           <Link href={`/closet/${item.id}`} className="group block">
             <ItemImage
               src={item.imageUrl}

@@ -41,8 +41,8 @@ export function WearStatsView({
       <div className="grid gap-x-4 gap-y-10 md:grid-cols-2">
         <StatList title="Most worn" items={list(stats.mostWorn)} stats={stats} />
         <StatList title="Not worn" items={list(stats.notWorn)} stats={stats} />
-        <StatList title="You love it, you skip it" items={list(stats.lovedSkipped)} stats={stats} />
-        <StatList title="You complain, you wear it" items={list(stats.complainedWorn)} stats={stats} />
+        <StatList title="Loved, rarely worn" items={list(stats.lovedSkipped)} stats={stats} />
+        <StatList title="Critiqued, often worn" items={list(stats.complainedWorn)} stats={stats} />
       </div>
       {stats.occasions.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -52,8 +52,8 @@ export function WearStatsView({
               <div key={o.occasion} className="grid grid-cols-[6rem_1fr] gap-3 border-b border-line py-3">
                 <dt>{OCCASION_LABELS[o.occasion]}</dt>
                 <dd className="text-ink-2">
-                  {o.outfitsLogged} outfit{o.outfitsLogged === 1 ? "" : "s"}, {o.distinctOutfits} different
-                  {o.wanted > 0 && ` · you want ${o.wanted} a season`}
+                  {o.outfitsLogged} worn · {o.distinctOutfits} different
+                  {o.wanted > 0 && ` · goal ${o.wanted} a season`}
                 </dd>
               </div>
             ))}
@@ -69,7 +69,7 @@ function StatList({ title, items, stats }: { title: string; items: ClosetCard[];
     <div className="flex flex-col gap-2">
       <h3 className="text-sm text-ink-2">{title}</h3>
       {items.length === 0 ? (
-        <p className="border-t border-line pt-3 text-sm text-ink-2">Nothing here.</p>
+        <p className="border-t border-line pt-3 text-sm text-ink-2">None yet.</p>
       ) : (
         <ul className="border-t border-line">
           {items.map((item) => (

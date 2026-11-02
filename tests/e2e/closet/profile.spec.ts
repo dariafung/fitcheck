@@ -73,7 +73,9 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(page.getByText("Add your weight.")).toBeVisible();
   await expect(page.getByText("Pick one.")).toBeVisible();
   await expect(page.getByText("Pick a size.")).toHaveCount(3);
-  await expect(page.getByText("Pick °F or °C.")).toBeVisible();
+  // The temperature unit starts on the one the site already shows.
+  const temperature = page.getByRole("group", { name: "Temperature" });
+  await expect(temperature.getByRole("button", { name: "°F" })).toHaveAttribute("aria-pressed", "true");
 
   await height.fill("65");
   await expect(page.getByText("5 ft 5 in")).toBeVisible();
@@ -87,7 +89,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await page.getByLabel("School", { exact: true }).fill("4");
   await page.getByLabel("Social", { exact: true }).fill("2");
   await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°F" }).click();
-  await page.getByRole("checkbox", { name: /I'd take secondhand clothes/ }).check();
+  await page.getByRole("checkbox", { name: "Match me with secondhand pieces" }).check();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status")).toHaveText("Saved");
   await expect(page.getByText("Add your height.")).toHaveCount(0);
@@ -114,7 +116,7 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   await expect(page.getByLabel("School", { exact: true })).toHaveValue("4");
   await expect(page.getByRole("radio", { name: "Pear" })).toBeChecked();
   await expect(page.getByLabel("Shoes")).toHaveValue("W7.5");
-  await expect(page.getByRole("checkbox", { name: /I'd take secondhand clothes/ })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Match me with secondhand pieces" })).toBeChecked();
 });
 
 test("units switch to cm / kg and stay that way after a refresh", async ({ page }) => {
@@ -149,7 +151,7 @@ test("outfit counts over 30 are not saved", async ({ page }) => {
 });
 
 test("after picking °C, home, the item page and its editor all use °C and save °F", async ({ page }) => {
-  // A filled-in profile from before units were asked: only the unit is missing.
+  // A filled-in profile from before units were asked: the unit isn't saved yet.
   await db
     .from("users")
     .update({ height_cm: 165, weight_kg: 58, body_shape: "pear", top_size: "S", bottom_size: "S", shoe_size: "W7.5" })
@@ -172,9 +174,6 @@ test("after picking °C, home, the item page and its editor all use °C and save
 
   try {
     await page.goto("/profile");
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.getByText("Pick °F or °C.")).toBeVisible();
-    await expect(page.getByRole("status")).toHaveCount(0);
     await page.getByRole("group", { name: "Temperature" }).getByRole("button", { name: "°C" }).click();
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByRole("status")).toHaveText("Saved");
@@ -185,14 +184,14 @@ test("after picking °C, home, the item page and its editor all use °C and save
     await expect(page.getByRole("region", { name: "Good for today" })).toContainText(today);
 
     await page.goto(`/closet/${item.id}`);
-    await expect(page.getByText("11 to 21°C")).toBeVisible();
+    await expect(page.getByText("11–21°C")).toBeVisible();
     await page.getByRole("button", { name: "Edit details" }).click();
     const card = page.getByRole("form", { name: "Item details" });
     await expect(card.getByRole("spinbutton", { name: "Lowest °C" })).toHaveValue("11");
     await card.getByRole("spinbutton", { name: "Highest °C" }).fill("25");
     await card.getByRole("button", { name: "Save changes" }).click();
     await expect(card).toHaveCount(0);
-    await expect(page.getByText("11 to 25°C")).toBeVisible();
+    await expect(page.getByText("11–25°C")).toBeVisible();
 
     // The untouched low keeps its exact °F; the typed high is converted.
     const { data } = await db.from("items").select("user_tags").eq("id", item.id).single().throwOnError();

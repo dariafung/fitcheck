@@ -19,6 +19,8 @@ export interface ClosetCard {
   imageUrl: string | null;
   // Color-family swatch for the placeholder when there is no photo.
   swatch: string;
+  // With user corrections, for the closet's occasion filters.
+  occasions: string[];
 }
 
 export interface ClosetItem {
@@ -69,6 +71,7 @@ export async function listClosetItems(db: Db, userId: string): Promise<ClosetCar
       tempRangeF: itemTempRange(row),
       imageUrl: row.image_paths.length > 0 ? (firstImages[next++] ?? null) : null,
       swatch: swatchHex(row),
+      occasions: itemTags(row).occasions,
     };
   });
 }
