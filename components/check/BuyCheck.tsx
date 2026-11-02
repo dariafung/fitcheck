@@ -13,7 +13,6 @@ import { INCOMPLETE_ERROR } from "@/lib/check/reasons";
 import type { ItemDraft } from "@/lib/entry/draft";
 import type { TempUnit } from "@/lib/profile/temp-unit";
 import { BuyResult } from "./BuyResult";
-import { KeepIt, type Bought } from "./KeepIt";
 
 const CHECK_FAILED = "Couldn't check it. Try again.";
 
@@ -32,16 +31,12 @@ type Step =
       tags: ItemTags;
       onModel: boolean;
       result: BuyCheckResult;
-      // What "I bought it" saves; null without a photo to save it with.
-      bought: Bought | null;
     };
 
 // Upload a screenshot → confirm the card → see the score. One item at a
-// time; nothing is kept once you check another, unless "I bought it" adds it
-// to the closet.
-// tempUnit and readOnly stream in after the page; only the card and the
-// result read them, long after.
-export function BuyCheck({ tempUnit, readOnly }: { tempUnit: Promise<TempUnit>; readOnly: Promise<boolean> }) {
+// time; nothing is kept once you check another.
+// tempUnit streams in after the page; only the card reads it, long after.
+export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
   const [step, setStep] = useState<Step>({ kind: "idle" });
   const [problem, setProblem] = useState<string>();
   const [dragging, setDragging] = useState(false);
@@ -131,7 +126,6 @@ export function BuyCheck({ tempUnit, readOnly }: { tempUnit: Promise<TempUnit>; 
           tags: edited.tags,
           onModel: draft.onModel,
           result: json.result,
-          bought: draft.imageUrls[0] ? { draft, edited, photo: draft.imageUrls[0] } : null,
         });
         return;
       }
@@ -265,7 +259,6 @@ export function BuyCheck({ tempUnit, readOnly }: { tempUnit: Promise<TempUnit>; 
           onModel={step.onModel}
           result={step.result}
           onCheckAnother={checkAnother}
-          more={step.bought && <KeepIt key={round} bought={step.bought} readOnly={use(readOnly)} />}
         />
       )}
     </div>
