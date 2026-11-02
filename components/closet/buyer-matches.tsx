@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AnonAvatar } from "@/components/resale/anon-avatar";
 import type { BuyersResult } from "@/lib/resale/buyers";
 
 export const BUYER_STATES = {
@@ -12,9 +13,18 @@ export const TRY_DEMO = "Try the demo account to see how matching works.";
 export const SOME_UNCHECKED = "Some buyers weren't checked yet. Try again later.";
 export const SAMPLE_BUYERS = "Sample buyers for the demo.";
 
-// The words beside the big count: "1 buyer in your size", "3 buyers in your size".
-export function buyersInSize(count: number): string {
-  return count === 1 ? "buyer in your size" : "buyers in your size";
+export const BUYERS_HEADING = "Matching buyers";
+
+// At most this many avatars; the rest show as "+N".
+export const MAX_AVATARS = 5;
+
+export function avatarRow(count: number): { shown: number; more: number } {
+  const shown = Math.min(count, MAX_AVATARS);
+  return { shown, more: count - shown };
+}
+
+export function shownToBuyers(count: number): string {
+  return `We've shown this to ${count} ${count === 1 ? "buyer" : "buyers"} in your size.`;
 }
 
 async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
@@ -25,6 +35,19 @@ async function lookUp(itemId: string): Promise<BuyersResult | "error"> {
 
 function Note({ children }: { children: string }) {
   return <p className="text-sm text-ink-2">{children}</p>;
+}
+
+// One identical avatar per match, up to MAX_AVATARS.
+function Avatars({ count }: { count: number }) {
+  const { shown, more } = avatarRow(count);
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: shown }, (_, i) => (
+        <AnonAvatar key={i} />
+      ))}
+      {more > 0 && <span className="text-sm text-ink-2 tabular-nums">+{more}</span>}
+    </div>
+  );
 }
 
 function Result({ result }: { result: BuyersResult }) {
@@ -50,10 +73,8 @@ function Result({ result }: { result: BuyersResult }) {
     case "matches":
       return (
         <>
-          <p className="flex items-baseline gap-2">
-            <span className="text-title font-medium tabular-nums">{result.count}</span>
-            <span className="text-base">{buyersInSize(result.count)}</span>
-          </p>
+          <Avatars count={result.count} />
+          <p className="text-base">{shownToBuyers(result.count)}</p>
           {result.someUnchecked && <Note>{SOME_UNCHECKED}</Note>}
           {result.sample && <Note>{SAMPLE_BUYERS}</Note>}
         </>
@@ -61,9 +82,9 @@ function Result({ result }: { result: BuyersResult }) {
   }
 }
 
-// "Who might want it" on a passing-on item: how many buyers in the user's size
-// would likely want it, as one big number (no faces, no names), or why there
-// are none. Asked for once the page is up, since checking new buyers takes a
+// "Matching buyers" on a passing-on item: how many buyers in the user's size
+// it was shown to (identical anonymous avatars, no names), or why there are
+// none. Asked for once the page is up, since checking new buyers takes a
 // while.
 export function BuyerMatches({ itemId, size }: { itemId: string; size: string | null }) {
   const [result, setResult] = useState<BuyersResult | "error" | null>(null);
@@ -82,7 +103,7 @@ export function BuyerMatches({ itemId, size }: { itemId: string; size: string | 
   return (
     <section aria-labelledby="buyers-heading" className="flex flex-col gap-3">
       <h2 id="buyers-heading" className="text-lg font-medium">
-        Who might want it
+        {BUYERS_HEADING}
       </h2>
       {result === null ? (
         <p className="text-sm text-ink-2" aria-busy="true">
