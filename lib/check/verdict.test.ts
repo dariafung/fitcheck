@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { capForGap, verdict, verdictFor, VERDICTS } from "./verdict";
+import { verdictFor, VERDICTS } from "./verdict";
 
 describe("verdict", () => {
   it("puts each score in its band, edges included", () => {
@@ -18,18 +18,5 @@ describe("verdict", () => {
       expect(word).toBe(word.toUpperCase());
       expect(word.split(" ").length).toBeLessThanOrEqual(4);
     }
-  });
-
-  it("reads THINK TWICE at best when the piece creates a gap", () => {
-    const gap = { kind: "no_match" as const };
-    expect(verdict(90, gap)).toBe(VERDICTS.thinkTwice);
-    expect(verdict(65, gap)).toBe(VERDICTS.thinkTwice);
-    expect(verdict(45, gap)).toBe(VERDICTS.thinkTwice);
-    expect(verdict(20, gap)).toBe(VERDICTS.skip);
-  });
-
-  it("leaves the band alone without a gap, or when there's just nothing to wear it with yet", () => {
-    expect(verdict(90, null)).toBe(VERDICTS.worthBuying);
-    expect(capForGap(VERDICTS.worthBuying, { kind: "nothing_owned" })).toBe(VERDICTS.worthBuying);
   });
 });

@@ -7,7 +7,7 @@ import type { Category, ItemTags } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
-import { verdict } from "@/lib/check/verdict";
+import { verdictFor } from "@/lib/check/verdict";
 import { Icon } from "@/components/ui/icon";
 import { StyledOutfit, useStyleIt } from "./StyleIt";
 
@@ -149,7 +149,7 @@ export function BuyResult({
             </p>
             {/* In ink: only the number is red. */}
             <p data-testid="verdict" className="text-title font-medium uppercase md:text-2xl">
-              {verdict(result.score, result.gap)}
+              {verdictFor(result.score)}
             </p>
           </>
         )}
