@@ -10,6 +10,8 @@ import {
   inTab,
   inTag,
   quickTags,
+  sortItems,
+  sortOptions,
   tagLabel,
 } from "./tabs";
 
@@ -45,6 +47,16 @@ describe("closetView / closetHref", () => {
     expect(closetView({ cat: "top", tag: "not-worn" })).toEqual({ tab: "wearing", cat: "top", tag: "not-worn" });
     // Quick filters are for Wearing only.
     expect(closetView({ tab: "passing-on", tag: "school" })).toEqual({ tab: "passing-on", cat: null, tag: null });
+  });
+
+  it("keeps a sort order for Wearing only, newest left out", () => {
+    expect(closetView({ sort: "most-worn" })).toEqual({ tab: "wearing", cat: null, tag: null, sort: "most-worn" });
+    expect(closetView({ sort: "newest" })).toEqual({ tab: "wearing", cat: null, tag: null });
+    expect(closetView({ sort: "price" })).toEqual({ tab: "wearing", cat: null, tag: null });
+    expect(closetView({ tab: "passing-on", sort: "least-worn" })).toEqual({ tab: "passing-on", cat: null, tag: null });
+    expect(closetHref({ tab: "wearing", cat: "top", tag: null, sort: "least-worn" })).toBe("/closet?cat=top&sort=least-worn");
+    expect(closetHref({ tab: "wearing", cat: null, tag: null, sort: "newest" })).toBe("/closet");
+    expect(closetHref({ tab: "passing-on", cat: null, tag: null, sort: "most-worn" })).toBe("/closet?tab=passing-on");
   });
 
   it("leaves the defaults out of the URL", () => {
@@ -171,5 +183,41 @@ describe("quick filters", () => {
       { tag: "sport", count: 2 },
       { tag: "work", count: 0 },
     ]);
+  });
+});
+
+describe("sortItems", () => {
+  // Newest first, as the closet lists them.
+  const items = [{ id: "a" }, { id: "b" }, { id: "c" }, { id: "d" }];
+  const wear = new Map([
+    ["a", { count: 1, lastWorn: "2026-10-20" }],
+    ["b", { count: 3, lastWorn: "2026-10-10" }],
+    ["c", { count: 0, lastWorn: null }],
+    ["d", { count: 3, lastWorn: "2026-10-25" }],
+  ]);
+  const ids = (list: { id: string }[]) => list.map((i) => i.id);
+
+  it("keeps the closet's newest-first order by default or without a log", () => {
+    expect(ids(sortItems(items, undefined, wear))).toEqual(["a", "b", "c", "d"]);
+    expect(ids(sortItems(items, "newest", wear))).toEqual(["a", "b", "c", "d"]);
+    expect(ids(sortItems(items, "most-worn", null))).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("puts the most worn first, the one worn more lately breaking a tie", () => {
+    expect(ids(sortItems(items, "most-worn", wear))).toEqual(["d", "b", "a", "c"]);
+  });
+
+  it("puts the least worn first, never worn at the top, worn longest ago breaking a tie", () => {
+    expect(ids(sortItems(items, "least-worn", wear))).toEqual(["c", "a", "b", "d"]);
+  });
+
+  it("keeps newest first among pieces that tie", () => {
+    const flat = new Map(items.map((i) => [i.id, { count: 0, lastWorn: null }]));
+    expect(ids(sortItems(items, "least-worn", flat))).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("offers the wear orders only with a log", () => {
+    expect(sortOptions(null).map((s) => s.id)).toEqual(["newest"]);
+    expect(sortOptions(wear).map((s) => s.id)).toEqual(["newest", "most-worn", "least-worn"]);
   });
 });

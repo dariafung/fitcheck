@@ -9,10 +9,12 @@ import {
   inTag,
   quickTags,
   tagLabel,
+  type ClosetSort,
   type ClosetView,
   type NotWorn,
 } from "@/lib/closet/tabs";
 import { categoryLabel } from "@/lib/closet/tags";
+import { SortMenu } from "./sort-menu";
 
 // Every number on these links is how many pieces you get when you click it:
 // the tab counts follow the picked category and quick filter, the category
@@ -28,10 +30,13 @@ export function ClosetFilters<T extends { id: string; status: string; category: 
   items,
   view,
   notWorn,
+  sorts = [],
 }: {
   items: T[];
   view: ClosetView;
   notWorn: NotWorn;
+  // The orders the sort menu offers; no menu with one or none.
+  sorts?: { id: ClosetSort; label: string }[];
 }) {
   // Quick filters are for Wearing only; switching to Passing on drops them.
   const inTabTagged = (tab: ClosetView["tab"]) => inTag(inTab(items, tab), tab === "wearing" ? view.tag : null, notWorn);
@@ -55,6 +60,8 @@ export function ClosetFilters<T extends { id: string; status: string; category: 
             </span>
           </Link>
         ))}
+        {/* Sorting is for Wearing, like the quick filters. */}
+        {view.tab === "wearing" && sorts.length > 1 && tabItems.length > 1 && <SortMenu view={view} options={sorts} />}
       </div>
       {/* Nothing to sort when the tab is empty. On a phone the row scrolls
           sideways, edge to edge, rather than wrapping. The quick filters

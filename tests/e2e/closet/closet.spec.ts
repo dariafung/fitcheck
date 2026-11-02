@@ -252,6 +252,37 @@ test("closet quick filters: not worn lately and an occasion, each switched off b
   await expect(quick.getByRole("link", { name: /^School/ })).toHaveAttribute("aria-current", "true");
 });
 
+test("closet sort: newest, most worn, least worn, kept with the filters", async ({ page }) => {
+  await page.goto("/closet");
+  const main = page.getByRole("main");
+  const first = main.locator("ul").first().getByRole("listitem").first();
+  const sort = main.getByLabel("Sort");
+  // Newest first by default: the item this test just added.
+  await expect(sort).toHaveValue("newest");
+  await expect(first).toContainText(item.title);
+
+  // Never worn, so it drops below everything the calendar has seen worn.
+  await sort.selectOption("most-worn");
+  await expect(page).toHaveURL(/\/closet\?sort=most-worn$/);
+  await expect(first).not.toContainText(item.title);
+
+  // Fewest outfits first; among the never-worn pieces, newest first.
+  await sort.selectOption("least-worn");
+  await expect(page).toHaveURL(/\/closet\?sort=least-worn$/);
+  await expect(first).toContainText(item.title);
+
+  // A filter keeps the order, and a refresh keeps both.
+  await main.getByRole("group", { name: "Category" }).getByRole("link", { name: /^Tops? \d+$/ }).click();
+  await expect(page).toHaveURL(/\/closet\?cat=top&sort=least-worn$/);
+  await page.reload();
+  await expect(main.getByLabel("Sort")).toHaveValue("least-worn");
+
+  // Passing on has no sort.
+  await main.getByRole("link", { name: /^Passing on/ }).click();
+  await expect(page).toHaveURL(/\/closet\?tab=passing-on&cat=top$/);
+  await expect(main.getByLabel("Sort")).toHaveCount(0);
+});
+
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
   // It has no size yet, so it asks for one first.

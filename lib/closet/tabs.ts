@@ -1,9 +1,9 @@
 import { Occasion, type Category } from "@/lib/ai/schemas/common";
-import { OCCASION_LABELS } from "./labels";
+import { OCCASION_LABELS, SORT_LABELS } from "./labels";
 
-// The closet's two tabs, its category filter and its quick filters, kept in
-// the URL as ?tab=, ?cat= and ?tag= so a refresh stays put and they all work
-// together.
+// The closet's two tabs, its category filter, its quick filters and its sort
+// order, kept in the URL as ?tab=, ?cat=, ?tag= and ?sort= so a refresh stays
+// put and they all work together.
 export type ClosetTab = "wearing" | "passing-on";
 
 export const CLOSET_TABS: { id: ClosetTab; label: string }[] = [
@@ -18,11 +18,24 @@ export const CLOSET_CATEGORIES: Category[] = ["top", "bottom", "one_piece", "out
 // outfit calendar) and occasions.
 export type ClosetTag = "not-worn" | Occasion;
 
+// Newest first is the closet's own order (the default). The wear orders read
+// the outfit calendar's last 30 days, so they are only offered when it has a
+// log. More orders go here, each with how to compare two pieces.
+export type ClosetSort = "newest" | "most-worn" | "least-worn";
+
+export const CLOSET_SORTS: { id: ClosetSort; label: string; needsWear: boolean }[] = [
+  { id: "newest", label: SORT_LABELS.newest, needsWear: false },
+  { id: "most-worn", label: SORT_LABELS.mostWorn, needsWear: true },
+  { id: "least-worn", label: SORT_LABELS.leastWorn, needsWear: true },
+];
+
 export interface ClosetView {
   tab: ClosetTab;
   cat: Category | null;
   // Wearing only: what's on its way out is not worn by design.
   tag: ClosetTag | null;
+  // Wearing only, like the quick filters. Left out means newest first.
+  sort?: ClosetSort;
 }
 
 // Anything but a known tab falls back to Wearing.
@@ -43,9 +56,19 @@ export function closetTag(param: string | string[] | undefined): ClosetTag | nul
   return occasion.success ? occasion.data : null;
 }
 
+export function closetSort(param: string | string[] | undefined): ClosetSort {
+  return CLOSET_SORTS.find((sort) => sort.id === param)?.id ?? "newest";
+}
+
 export function closetView(params: Record<string, string | string[] | undefined>): ClosetView {
   const tab = closetTab(params.tab);
-  return { tab, cat: closetCategory(params.cat), tag: tab === "wearing" ? closetTag(params.tag) : null };
+  const sort = tab === "wearing" ? closetSort(params.sort) : "newest";
+  return {
+    tab,
+    cat: closetCategory(params.cat),
+    tag: tab === "wearing" ? closetTag(params.tag) : null,
+    ...(sort !== "newest" && { sort }),
+  };
 }
 
 export function categorySlug(cat: Category): string {
@@ -54,11 +77,12 @@ export function categorySlug(cat: Category): string {
 
 // Defaults (Wearing, no filter) stay out of the URL, so the plain /closet is
 // the starting view.
-export function closetHref({ tab, cat, tag }: ClosetView): string {
+export function closetHref({ tab, cat, tag, sort }: ClosetView): string {
   const params = new URLSearchParams();
   if (tab !== "wearing") params.set("tab", tab);
   if (cat) params.set("cat", categorySlug(cat));
   if (tag && tab === "wearing") params.set("tag", tag);
+  if (sort && sort !== "newest" && tab === "wearing") params.set("sort", sort);
   const query = params.toString();
   return query ? `/closet?${query}` : "/closet";
 }
@@ -127,4 +151,28 @@ export function quickTags<T extends { id: string; category: string; occasions: r
   return tags
     .map((tag) => ({ tag, count: inCategory(inTag(tabItems, tag, notWorn), view.cat).length }))
     .filter(({ tag, count }) => count > 0 || tag === view.tag);
+}
+
+// How often and how lately each piece was worn in the calendar's 30 days;
+// null when the calendar is off or has nothing logged.
+export type WearCounts = ReadonlyMap<string, { count: number; lastWorn: string | null }> | null;
+
+// The sorts to offer: the wear ones only when there is a log to read.
+export function sortOptions(wear: WearCounts): { id: ClosetSort; label: string }[] {
+  return CLOSET_SORTS.filter((sort) => !sort.needsWear || wear).map(({ id, label }) => ({ id, label }));
+}
+
+// Items arrive newest first; ties keep that order (the sort is stable).
+// Most worn: most outfits first, then the one worn more lately. Least worn:
+// fewest outfits first (never worn in the 30 days at the top), then the one
+// worn longest ago.
+export function sortItems<T extends { id: string }>(items: T[], sort: ClosetSort | undefined, wear: WearCounts): T[] {
+  if (!sort || sort === "newest" || !wear) return items;
+  const count = (item: T) => wear.get(item.id)?.count ?? 0;
+  const last = (item: T) => wear.get(item.id)?.lastWorn ?? "";
+  return [...items].sort((a, b) =>
+    sort === "most-worn"
+      ? count(b) - count(a) || last(b).localeCompare(last(a))
+      : count(a) - count(b) || last(a).localeCompare(last(b)),
+  );
 }

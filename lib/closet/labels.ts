@@ -54,3 +54,11 @@ export const OCCASION_LABELS: Record<Occasion, string> = {
   sport: "Sport",
   home: "Home",
 };
+
+// The closet's sort menu (lib/closet/tabs.ts).
+export const SORT_HEADING = "Sort";
+export const SORT_LABELS = {
+  newest: "Newest",
+  mostWorn: "Most worn",
+  leastWorn: "Least worn",
+} as const;
