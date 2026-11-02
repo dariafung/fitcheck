@@ -137,8 +137,7 @@ export function ItemList({
               <p className="mt-2 line-clamp-2 text-sm leading-snug decoration-1 underline-offset-[3px] group-hover:underline">
                 {item.title}
               </p>
-              {/* How it feels, in the AI's one line; the type until there is one. */}
-              <p className="line-clamp-1 text-sm text-ink-2">{item.note ?? categoryLabel(item.category)}</p>
+              <p className="text-sm text-ink-2">{categoryLabel(item.category)}</p>
             </div>
           </Link>
         </li>
