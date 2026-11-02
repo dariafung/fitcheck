@@ -56,7 +56,7 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
       {shown.length > 0 ? (
         <ItemList items={shown} addSlot={view.tab === "wearing" && !readOnly} />
       ) : tabItems.length > 0 ? (
-        <Empty title="Nothing in this category." text="Pick another one, or see everything.">
+        <Empty title={emptyTitle(view)} text="Pick another one, or see everything.">
           <Link href={closetHref({ ...view, cat: null, tag: null })} scroll={false} className="btn-secondary mt-4">
             Show all
           </Link>
@@ -68,6 +68,13 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
       )}
     </div>
   );
+}
+
+// What emptied the grid: a category, a quick filter, or both.
+function emptyTitle(view: { cat: unknown; tag: unknown }): string {
+  if (view.tag && view.cat) return "Nothing matches these filters.";
+  if (view.tag) return "Nothing matches this filter.";
+  return "Nothing in this category.";
 }
 
 // The same 30 days the calendar counts: what it calls "Not worn", and each
