@@ -87,11 +87,13 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
     }
   }
 
-  // Desktop: a screenshot on the clipboard can be pasted straight in.
+  // Desktop: a screenshot on the clipboard can be pasted straight in, but only
+  // while the drop area is up. With a card open, a paste would throw the
+  // card's edits away; "Add another" starts over instead.
   useEffect(() => {
     function onPaste(event: ClipboardEvent) {
       const file = [...(event.clipboardData?.files ?? [])].find((f) => f.type.startsWith("image/"));
-      if (!file || busy) return;
+      if (!file || busy || step.kind !== "idle") return;
       event.preventDefault();
       void upload(file);
     }
