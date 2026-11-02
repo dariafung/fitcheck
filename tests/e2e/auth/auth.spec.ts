@@ -143,11 +143,12 @@ test("Try the demo account opens the persona's closet", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "Sign up" })).toHaveCount(0);
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
-  // Signed in, the login pages lead home.
-  for (const path of ["/login", "/signup"]) {
-    await page.goto(path);
-    await expect(page).toHaveURL("/");
-  }
+  // Signed in, /login leads home. /signup stays open to the demo account, so
+  // the read-only notes' "Sign up" links work.
+  await page.goto("/login");
+  await expect(page).toHaveURL("/");
+  await page.goto("/signup");
+  await expect(page).toHaveURL("/signup");
   // A page that doesn't exist says so, in the site's own type.
   const missing = await page.goto("/no-such-page");
   expect(missing?.status()).toBe(404);
