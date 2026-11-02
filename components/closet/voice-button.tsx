@@ -19,7 +19,7 @@ const MIC_MESSAGES: Record<MicError, string> = {
   failed: "Couldn't start the mic. Try again.",
 };
 const FAILED = "Couldn't hear that. Record again.";
-const AI_FAILED = "Couldn't turn that into text. Try again?";
+const AI_FAILED = "Couldn't turn that into text. Try again.";
 
 const noSubscribe = () => () => {};
 

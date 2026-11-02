@@ -141,7 +141,7 @@ export function BuyResult({
             <p className="flex items-baseline gap-2">
               <span
                 data-testid="score"
-                className="text-[64px] leading-[0.9] font-medium tracking-[-0.04em] text-signal tabular-nums md:text-score"
+                className="text-score-phone font-medium text-signal tabular-nums md:text-score"
               >
                 {result.score}
               </span>
