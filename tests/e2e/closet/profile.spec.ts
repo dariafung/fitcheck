@@ -76,7 +76,6 @@ test("a new user fills in their profile in in / lb and it sticks", async ({ page
   // The temperature unit starts on the one the site already shows.
   const temperature = page.getByRole("group", { name: "Temperature" });
   await expect(temperature.getByRole("button", { name: "°F" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("Pick °F or °C.")).toHaveCount(0);
 
   await height.fill("65");
   await expect(page.getByText("5 ft 5 in")).toBeVisible();

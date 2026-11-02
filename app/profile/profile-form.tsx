@@ -125,10 +125,10 @@ export function ProfileForm({
     shoeSize: initial.shoeSize ?? "",
   }));
   // Until one is saved, the unit the rest of the site already shows.
-  const [tempUnit, setTempUnit] = useState<TempUnit | null>(initial.tempUnit ?? DEFAULT_TEMP_UNIT);
+  const [tempUnit, setTempUnit] = useState<TempUnit>(initial.tempUnit ?? DEFAULT_TEMP_UNIT);
   const [resaleOptIn, setResaleOptIn] = useState(initial.resaleOptIn);
   const [errors, setErrors] = useState<
-    Partial<Record<Measurement | Occasion | SizeField | "shape" | "tempUnit", string>>
+    Partial<Record<Measurement | Occasion | SizeField | "shape", string>>
   >({});
   const [status, setStatus] = useState<Status>("idle");
 
@@ -176,7 +176,6 @@ export function ProfileForm({
     for (const s of SIZES) {
       if (!sizes[s]) found[s] = "Pick a size.";
     }
-    if (!tempUnit) found.tempUnit = "Pick °F or °C.";
     for (const o of Occasion.options) {
       const n = Number(mix[o]);
       if (mix[o].trim() === "" || !Number.isInteger(n) || n < 0 || n > MAX_OUTFITS_WANTED) {
@@ -399,7 +398,6 @@ export function ProfileForm({
               <div
                 role="group"
                 aria-labelledby="temp-label"
-                aria-describedby={errors.tempUnit ? "tempUnit-error" : undefined}
                 className={SEGMENTS}
               >
                 {(["F", "C"] as const).map((u) => (
@@ -417,11 +415,6 @@ export function ProfileForm({
                   </button>
                 ))}
               </div>
-              {errors.tempUnit && (
-                <p id="tempUnit-error" className={ERROR}>
-                  {errors.tempUnit}
-                </p>
-              )}
             </div>
           </fieldset>
 
