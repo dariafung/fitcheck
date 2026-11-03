@@ -9,6 +9,7 @@ vi.mock("@/lib/db/current-user", () => ({ currentUserId: () => user.id }));
 const db = createServerClient();
 
 const INPUT = {
+  name: "Sky",
   heightCm: 170.04,
   weightKg: 61.2,
   bustCm: null,
@@ -49,6 +50,7 @@ describe("GET /api/profile", () => {
     const res = await GET();
     expect(res.status).toBe(200);
     expect((await res.json()).profile).toEqual({
+      name: "Profile test user",
       heightCm: null,
       weightKg: null,
       bustCm: null,
@@ -92,11 +94,12 @@ describe("PUT /api/profile", () => {
 
     const { data } = await db
       .from("users")
-      .select("height_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in")
+      .select("display_name, height_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in")
       .eq("id", user.id)
       .single()
       .throwOnError();
     expect(data).toEqual({
+      display_name: "Sky",
       height_cm: 170,
       body_shape: "hourglass",
       lifestyle_mix: INPUT.lifestyleMix,
@@ -121,6 +124,15 @@ describe("PUT /api/profile", () => {
       expect((await put(bad)).status).toBe(400);
     }
     expect((await (await GET()).json()).profile.topSize).toBeNull();
+  });
+
+  it("requires a name of 2 to 30 characters, trimmed", async () => {
+    for (const bad of [{ ...INPUT, name: undefined }, { ...INPUT, name: " a " }, { ...INPUT, name: "x".repeat(31) }]) {
+      expect((await put(bad)).status).toBe(400);
+    }
+    expect((await (await GET()).json()).profile.name).toBe("Profile test user");
+    const { profile } = await (await put({ ...INPUT, name: "  Sky Lee " })).json();
+    expect(profile.name).toBe("Sky Lee");
   });
 
   it("requires a temperature unit", async () => {

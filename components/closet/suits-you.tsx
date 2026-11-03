@@ -10,7 +10,8 @@ import { ItemImage } from "./item-image";
 const GRID = "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4";
 
 // Home's pick from what other people are passing on: pieces whose buy check,
-// run from this user's side, scored high. Look only: no seller, no contact.
+// run from this user's side, scored high. Look only: the seller's picked name,
+// no way to contact them.
 // Not shown at all when there's nothing to show.
 export async function SuitsYou() {
   await connection();
@@ -38,6 +39,7 @@ export async function SuitsYou() {
               />
               <div className="flex flex-col gap-1 px-2 md:px-0">
                 <p className="text-sm font-medium">{piece.title}</p>
+                <p className="text-sm text-ink-2">from {piece.sellerName}</p>
                 <p className="text-sm text-ink-2">
                   {[piece.size && sizeLabel(piece.size), listing].filter(Boolean).join(" · ")}
                 </p>

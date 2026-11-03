@@ -2,6 +2,7 @@ import { z } from "zod";
 import { LifestyleMix } from "../ai/schemas/common";
 import type { Db } from "../db/server";
 import { LetterSize, ShoeSize } from "../resale/size";
+import { Nickname } from "./nickname";
 import { TempUnit } from "./temp-unit";
 
 export const BODY_SHAPES = ["pear", "apple", "hourglass", "rectangle", "inverted_triangle"] as const;
@@ -34,11 +35,12 @@ export const REQUIRED_MEASUREMENTS: readonly Measurement[] = ["heightCm", "weigh
 
 const measure = (m: Measurement) => z.number().min(MEASUREMENT_LIMITS[m].min).max(MEASUREMENT_LIMITS[m].max);
 
-// What PUT /api/profile accepts: height, weight, body shape, the three sizes
-// and the temperature unit are required; the other measurements may be
-// null. resaleOptIn says
-// whether people passing on clothes may be matched with this user.
+// What PUT /api/profile accepts: the name others see, height, weight, body
+// shape, the three sizes and the temperature unit are required; the other
+// measurements may be null. resaleOptIn says whether people passing on
+// clothes may be matched with this user.
 export const ProfileInput = z.strictObject({
+  name: Nickname,
   heightCm: measure("heightCm"),
   weightKg: measure("weightKg"),
   bustCm: measure("bustCm").nullable(),
@@ -57,6 +59,8 @@ export type ProfileInput = z.infer<typeof ProfileInput>;
 
 // A stored profile can still be incomplete (a new user).
 export type Profile = Record<Measurement, number | null> & {
+  // users.display_name: what others see.
+  name: string;
   bodyShape: BodyShape | null;
   lifestyleMix: LifestyleMix;
   topSize: LetterSize | null;
@@ -69,9 +73,10 @@ export type Profile = Record<Measurement, number | null> & {
 export const EMPTY_MIX: LifestyleMix = { work: 0, school: 0, social: 0, sport: 0, home: 0 };
 
 const COLUMNS =
-  "height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in";
+  "display_name, height_cm, weight_kg, bust_cm, waist_cm, hip_cm, inseam_cm, body_shape, lifestyle_mix, top_size, bottom_size, shoe_size, temp_unit, resale_opt_in";
 
 interface Row {
+  display_name: string;
   height_cm: number | null;
   weight_kg: number | null;
   bust_cm: number | null;
@@ -95,6 +100,7 @@ function toProfile(row: Row): Profile {
   const shape = BodyShape.safeParse(row.body_shape);
   const mix = LifestyleMix.safeParse(row.lifestyle_mix);
   return {
+    name: row.display_name,
     heightCm: num(row.height_cm),
     weightKg: num(row.weight_kg),
     bustCm: num(row.bust_cm),
@@ -125,6 +131,7 @@ export async function saveProfile(db: Db, userId: string, input: ProfileInput): 
   const { data } = await db
     .from("users")
     .update({
+      display_name: input.name,
       height_cm: round1(input.heightCm),
       weight_kg: round1(input.weightKg),
       bust_cm: round1OrNull(input.bustCm),

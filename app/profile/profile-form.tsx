@@ -30,6 +30,7 @@ import {
   type Units,
 } from "@/lib/profile/units";
 import { DEFAULT_TEMP_UNIT, type TempUnit } from "@/lib/profile/temp-unit";
+import { MAX_NICKNAME_LENGTH, Nickname } from "@/lib/profile/nickname";
 import { LETTER_SIZES, SHOE_SIZE_OPTIONS } from "@/lib/resale/size";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -114,6 +115,7 @@ export function ProfileForm({
 }) {
   const router = useRouter();
   const [units, setUnits] = useState(initialUnits);
+  const [name, setName] = useState(initial.name);
   const [fields, setFields] = useState(() => fieldsFor(initial, initialUnits));
   const [shape, setShape] = useState<BodyShape | null>(initial.bodyShape);
   const [mix, setMix] = useState(() =>
@@ -128,7 +130,7 @@ export function ProfileForm({
   const [tempUnit, setTempUnit] = useState<TempUnit>(initial.tempUnit ?? DEFAULT_TEMP_UNIT);
   const [resaleOptIn, setResaleOptIn] = useState(initial.resaleOptIn);
   const [errors, setErrors] = useState<
-    Partial<Record<Measurement | Occasion | SizeField | "shape", string>>
+    Partial<Record<Measurement | Occasion | SizeField | "shape" | "name", string>>
   >({});
   const [status, setStatus] = useState<Status>("idle");
 
@@ -162,6 +164,7 @@ export function ProfileForm({
 
   function check(): typeof errors {
     const found: typeof errors = {};
+    if (!Nickname.safeParse(name).success) found.name = "2 to 30 characters.";
     for (const m of MEASUREMENTS) {
       const { metric } = fields[m];
       const { min, max } = MEASUREMENT_LIMITS[m];
@@ -191,6 +194,7 @@ export function ProfileForm({
     const found = check();
     setErrors(found);
     const input = ProfileInput.safeParse({
+      name,
       ...Object.fromEntries(MEASUREMENTS.map((m) => [m, fields[m].metric])),
       bodyShape: shape,
       lifestyleMix: Object.fromEntries(Occasion.options.map((o) => [o, Number(mix[o])])),
@@ -224,6 +228,41 @@ export function ProfileForm({
           switch in here is disabled at once. Units in Preferences stay
           usable, since they only change how numbers show in this browser. */}
       <fieldset disabled={readOnly} className="flex min-w-0 flex-col gap-16">
+        <section aria-labelledby="name-heading" className={SECTION}>
+          <div className={SECTION_HEAD}>
+            <h2 id="name-heading" className="text-lg font-medium">
+              Your name
+            </h2>
+            <p className="text-sm text-ink-2">What others see, like people who might buy what you pass on.</p>
+          </div>
+          <div className={SECTION_BODY}>
+            <div className="flex max-w-sm flex-col gap-1.5">
+              <label htmlFor="name" className="text-sm text-ink-2">
+                Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                autoComplete="nickname"
+                maxLength={MAX_NICKNAME_LENGTH}
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  edited();
+                }}
+                aria-invalid={errors.name ? true : undefined}
+                aria-describedby={errors.name ? "name-error" : undefined}
+                className={INPUT}
+              />
+              {errors.name && (
+                <p id="name-error" className={ERROR}>
+                  {errors.name}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
         <section aria-labelledby="body-heading" className={SECTION}>
           <div className={SECTION_HEAD}>
             <h2 id="body-heading" className="text-lg font-medium">

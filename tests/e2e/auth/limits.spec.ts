@@ -27,6 +27,7 @@ const chicagoDay = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/C
 test("an account that used up today's screenshot reads is told to come back tomorrow", async ({ page }) => {
   const email = `e2e-${randomUUID().slice(0, 8)}@example.com`;
   await page.goto("/signup");
+  await page.getByLabel("Name").fill("E2E tester");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("e2e-password");
   await page.getByRole("button", { name: "Create account" }).click();

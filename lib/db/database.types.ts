@@ -270,6 +270,9 @@ isOneToOne: true
 "orphan_item_images":
 { Args: { "p_before": string,"p_limit": number,"p_prefix"?: string }; Returns: string[]
                            },
+"rename_email_named_users":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "style_profile_claim":
 { Args: { "p_cooldown": string,"p_hash": string,"p_user": string }; Returns: string
                            }

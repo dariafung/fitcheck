@@ -1,13 +1,15 @@
 // "Suits you": what other people are passing on that the buy check, run from
 // this user's side, scored high for them. Read only from the cached checks
-// (resale_matches); opening home never runs a check. Nothing about the seller
-// is read here.
+// (resale_matches); opening home never runs a check. Of the seller, only the
+// name they picked (users.display_name) is read: never their email, closet
+// or anything else. (The seller never learns who the buyers are.)
 import type { AiMode } from "@/lib/ai/mode";
 import { Category } from "@/lib/ai/schemas/common";
 import { imageUrls } from "@/lib/closet/images";
 import { swatchHex } from "@/lib/closet/swatch";
 import type { Db } from "@/lib/db/server";
 import { toSellerItem } from "./buyers";
+import { nicknameOrDefault } from "@/lib/profile/nickname";
 import { buyerStates, fingerprint } from "./fingerprint";
 import { RESALE_SCORE_THRESHOLD } from "./matches";
 
@@ -25,6 +27,8 @@ export interface FeedPiece {
   swatch: string;
   // The buyer's own reasons from their check.
   reasons: string[];
+  // The name the seller picked; DEFAULT_NICKNAME when theirs isn't usable.
+  sellerName: string;
 }
 
 // The user's strong matches, best first: still passing on, not an accessory,
@@ -45,7 +49,9 @@ export async function suitsYou(db: Db, userId: string, mode: AiMode): Promise<Fe
   const [{ data: items }, states] = await Promise.all([
     db
       .from("items")
-      .select("id, title, category, status, size, asking_price_cents, condition, image_paths, ai_tags, user_tags")
+      .select(
+        "id, user_id, title, category, status, size, asking_price_cents, condition, image_paths, ai_tags, user_tags",
+      )
       .in(
         "id",
         matches.map((m) => m.item_id),
@@ -67,10 +73,18 @@ export async function suitsYou(db: Db, userId: string, mode: AiMode): Promise<Fe
     return [{ item, reasons: m.buyer_reasons }];
   });
   const shown = fresh.slice(0, MAX_FEED);
-  const urls = await imageUrls(
-    db,
-    shown.flatMap(({ item }) => item.image_paths.slice(0, 1)),
-  );
+  const [urls, { data: sellers }] = await Promise.all([
+    imageUrls(
+      db,
+      shown.flatMap(({ item }) => item.image_paths.slice(0, 1)),
+    ),
+    db
+      .from("users")
+      .select("id, display_name")
+      .in("id", [...new Set(shown.map(({ item }) => item.user_id))])
+      .throwOnError(),
+  ]);
+  const names = new Map(sellers.map((s) => [s.id, s.display_name]));
   let next = 0;
   return shown.map(({ item, reasons }) => ({
     id: item.id,
@@ -82,5 +96,6 @@ export async function suitsYou(db: Db, userId: string, mode: AiMode): Promise<Fe
     imageUrl: item.image_paths.length > 0 ? (urls[next++] ?? null) : null,
     swatch: swatchHex(item),
     reasons,
+    sellerName: nicknameOrDefault(names.get(item.user_id)),
   }));
 }

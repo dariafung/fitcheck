@@ -16,6 +16,6 @@ export async function currentUserId(): Promise<string> {
   if (!authRequired()) return DEMO_USER_ID;
   const user = await sessionUser();
   if (!user) redirect("/login");
-  if (!user.readOnly) await ensureKnownUser(createServerClient(), user.id, user.email);
+  if (!user.readOnly) await ensureKnownUser(createServerClient(), user.id, user.name);
   return user.id;
 }

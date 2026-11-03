@@ -420,6 +420,9 @@ describe("suitsYou", () => {
       condition: "like_new",
       reasons: ["Goes with your black jeans."],
     });
+    // The seller's picked name, and nothing else about them.
+    const { data: seller } = await closet.db.from("users").select("display_name").eq("id", closet.userId).single();
+    expect(pieces[0].sellerName).toBe(seller?.display_name);
     // Nothing about the seller.
     expect(JSON.stringify(pieces)).not.toContain(closet.userId);
     // The seller doesn't see their own piece.

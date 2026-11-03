@@ -15,6 +15,7 @@ import neighbors from "./neighbors.json";
 import persona from "./persona.json";
 import resaleMatches from "./resale-matches.json";
 import styleProfile from "./style-profile.json";
+import { Nickname } from "../lib/profile/nickname";
 
 describe("seed data", () => {
   it("has a valid persona", () => {
@@ -103,11 +104,18 @@ describe("seed style card", () => {
   });
 });
 
+describe("seed persona's name", () => {
+  it("is the nickname the demo shows to buyers", () => {
+    expect(persona.display_name).toBe("figment");
+  });
+});
+
 describe("seed neighbors", () => {
   // Only what matching needs: a name, sizes and the opt-in.
   const Neighbor = z.strictObject({
     id: z.uuid(),
-    display_name: z.string().min(1),
+    // A nickname, as people pick at sign-up.
+    display_name: Nickname,
     is_seed: z.literal(true),
     resale_opt_in: z.literal(true),
     top_size: LetterSize,

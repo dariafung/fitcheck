@@ -3,6 +3,7 @@ import { MAX_OUTFITS_WANTED } from "../ai/schemas/common";
 import { MEASUREMENT_LIMITS, ProfileInput } from "./profile";
 
 const VALID = {
+  name: "figment",
   heightCm: 165,
   weightKg: 58,
   bustCm: 86,
@@ -21,6 +22,13 @@ const VALID = {
 const parses = (over: Record<string, unknown>) => ProfileInput.safeParse({ ...VALID, ...over }).success;
 
 describe("ProfileInput", () => {
+  it("requires a name of 2 to 30 characters", () => {
+    expect(parses({ name: undefined })).toBe(false);
+    expect(parses({ name: "x" })).toBe(false);
+    expect(parses({ name: "x".repeat(31) })).toBe(false);
+    expect(ProfileInput.parse({ ...VALID, name: " Jo " }).name).toBe("Jo");
+  });
+
   it("accepts a full profile with optional measurements left empty", () => {
     expect(ProfileInput.parse(VALID)).toEqual(VALID);
   });

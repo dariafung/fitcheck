@@ -13,12 +13,14 @@ async function tryDemo(page: Page) {
   await expect(page).toHaveURL("/");
 }
 
-test("Suits you shows the neighbors' pieces with their listing and reasons, nothing about the seller", async ({ page }) => {
+test("Suits you shows the neighbors' pieces with their listing, reasons and seller's name only", async ({ page }) => {
   await tryDemo(page);
   const suits = page.getByRole("region", { name: "Suits you" });
   for (const piece of neighbors.items) {
     const card = suits.getByRole("listitem").filter({ hasText: piece.title });
+    const seller = neighbors.users.find((u) => u.id === piece.user_id)!;
     const match = resaleMatches.matches.find((m) => m.item_id === piece.id)!;
+    await expect(card.getByText(`from ${seller.display_name}`)).toBeVisible();
     await expect(card.getByText(`${sizeLabel(piece.size)} · ${listingText(piece.asking_price_cents, piece.condition)}`)).toBeVisible();
     await expect(card.getByText(match.buyer_reasons[0])).toBeVisible();
   }
