@@ -6,6 +6,7 @@ import { AiBudgetError } from "@/lib/ai/errors";
 import { toSellerItem } from "@/lib/resale/buyers";
 import { MAX_NEW_CHECKS } from "@/lib/resale/check-buyers";
 import { buyerStates, fingerprint } from "@/lib/resale/fingerprint";
+import { suitsYou } from "@/lib/resale/feed";
 import { buyerPool } from "@/lib/resale/pool";
 import { FALLBACK_SUMMARY } from "@/lib/resale/reason-filter";
 import { createTestCloset } from "./helpers";
@@ -353,5 +354,67 @@ describe("POST /api/items/[id]/buyers", () => {
     await closet.db.from("items").delete().eq("id", closet.itemId).throwOnError();
     const { data } = await closet.db.from("resale_matches").select("item_id").eq("buyer_id", id).throwOnError();
     expect(data).toEqual([]);
+  });
+});
+
+describe("suitsYou", () => {
+  async function listed(score: number, reasons: string[]) {
+    await closet.db
+      .from("items")
+      .update({ asking_price_cents: 1500, condition: "like_new" })
+      .eq("id", closet.itemId)
+      .throwOnError();
+    const id = await buyer();
+    await cached(id, score);
+    await closet.db
+      .from("resale_matches")
+      .update({ buyer_reasons: reasons })
+      .eq("item_id", closet.itemId)
+      .eq("buyer_id", id)
+      .throwOnError();
+    return id;
+  }
+
+  it("shows a buyer the pieces that scored 60 or more for them, with the listing and their reasons", async () => {
+    const id = await listed(72, ["Goes with your black jeans."]);
+    const pieces = await suitsYou(closet.db, id, "mock");
+    expect(pieces).toHaveLength(1);
+    expect(pieces[0]).toMatchObject({
+      id: closet.itemId,
+      size: "M",
+      askingPriceCents: 1500,
+      condition: "like_new",
+      reasons: ["Goes with your black jeans."],
+    });
+    // Nothing about the seller.
+    expect(JSON.stringify(pieces)).not.toContain(closet.userId);
+    // The seller doesn't see their own piece.
+    expect(await suitsYou(closet.db, closet.userId, "mock")).toEqual([]);
+  });
+
+  it("leaves out weak matches, stale checks, pieces kept again, and buyers who opted out", async () => {
+    const weak = await listed(59, []);
+    expect(await suitsYou(closet.db, weak, "mock")).toEqual([]);
+    await closet.db.from("resale_matches").delete().eq("item_id", closet.itemId).throwOnError();
+
+    const id = await listed(90, []);
+    expect(await suitsYou(closet.db, id, "mock")).toHaveLength(1);
+    // Checked in another AI mode: not this check.
+    expect(await suitsYou(closet.db, id, "live")).toEqual([]);
+
+    // The buyer's closet changed since the check.
+    const { data: theirs } = await closet.db.from("items").select("id").eq("user_id", id).limit(1).throwOnError();
+    await closet.db.from("items").update({ title: "Renamed" }).eq("id", theirs[0].id).throwOnError();
+    expect(await suitsYou(closet.db, id, "mock")).toEqual([]);
+    await closet.db.from("resale_matches").delete().eq("item_id", closet.itemId).throwOnError();
+    await cached(id, 90);
+    expect(await suitsYou(closet.db, id, "mock")).toHaveLength(1);
+
+    await closet.db.from("users").update({ resale_opt_in: false }).eq("id", id).throwOnError();
+    expect(await suitsYou(closet.db, id, "mock")).toEqual([]);
+    await closet.db.from("users").update({ resale_opt_in: true }).eq("id", id).throwOnError();
+
+    await closet.db.from("items").update({ status: "active" }).eq("id", closet.itemId).throwOnError();
+    expect(await suitsYou(closet.db, id, "mock")).toEqual([]);
   });
 });
