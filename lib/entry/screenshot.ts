@@ -82,14 +82,23 @@ export function padBox(box: PixelBox, width: number, height: number): PixelBox {
   return { left, top, width: right - left, height: bottom - top };
 }
 
-// The product photo cut out of the screenshot as WebP. Without a usable box
-// the whole screenshot stands in, and `cropped` says so.
+// The product photo cut out of the screenshot as WebP, padded by BOX_PAD.
+// `probe` is the model's box alone, for judging the photo's backdrop
+// (needsCutout, frameOriginal): the page and text the padding takes in would
+// break its sides. Without a usable box the whole screenshot stands in for
+// both, and `cropped` says so.
 export async function productPhoto(
   shot: Screenshot,
   box: Box | undefined,
-): Promise<{ webp: Buffer; cropped: boolean }> {
+): Promise<{ webp: Buffer; probe: Buffer; cropped: boolean }> {
   const region = pixelBox(box, shot.width, shot.height);
-  const image = sharp(shot.data).rotate();
-  if (region) image.extract(padBox(region, shot.width, shot.height));
-  return { webp: await toItemWebp(image), cropped: !!region };
+  if (!region) {
+    const webp = await toItemWebp(sharp(shot.data).rotate());
+    return { webp, probe: webp, cropped: false };
+  }
+  const [webp, probe] = await Promise.all([
+    toItemWebp(sharp(shot.data).rotate().extract(padBox(region, shot.width, shot.height))),
+    toItemWebp(sharp(shot.data).rotate().extract(region)),
+  ]);
+  return { webp, probe, cropped: true };
 }

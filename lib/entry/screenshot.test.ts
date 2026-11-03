@@ -68,6 +68,8 @@ describe("productPhoto", () => {
     // 800 × 1000 box, grown by 8% of each side all round.
     expect(BOX_PAD).toBe(0.08);
     expect(meta).toMatchObject({ format: "webp", width: 928, height: 1160 });
+    // The model's box alone, for judging the backdrop.
+    expect(await sharp(photo.probe).metadata()).toMatchObject({ width: 800, height: 1000 });
     const { dominant } = await sharp(photo.webp).stats();
     expect(dominant.r).toBeGreaterThan(150);
     expect(dominant.g).toBeLessThan(100);
@@ -77,6 +79,7 @@ describe("productPhoto", () => {
     const shot = { data: await png(1170, 2532), mime: "image/png", width: 1170, height: 2532 };
     const photo = await productPhoto(shot, { x: 2, y: 0, width: 1, height: 1 });
     expect(photo.cropped).toBe(false);
+    expect(photo.probe).toBe(photo.webp);
     expect(await sharp(photo.webp).metadata()).toMatchObject({ height: 1600 });
   });
 });

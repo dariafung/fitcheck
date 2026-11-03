@@ -51,8 +51,8 @@ export async function POST(request: Request) {
   // A flat-lay or ghost-mannequin photo is framed on white here, for free. An
   // on-model one, or one whose backdrop can't be turned white for free, is
   // kept as cropped for the model to cut out (/api/items/cutout).
-  const cutOut = extracted.onModel || (await needsCutout(photo.webp));
-  const webp = cutOut ? photo.webp : await frameOriginal(photo.webp);
+  const cutOut = extracted.onModel || (await needsCutout(photo.webp, photo.probe));
+  const webp = cutOut ? photo.webp : await frameOriginal(photo.webp, photo.probe);
   const db = createServerClient();
   const imagePaths = [await storeImage(db, writer.userId, webp)];
   const lowConfidence = photo.cropped

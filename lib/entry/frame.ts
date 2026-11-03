@@ -242,8 +242,11 @@ function liftableBackground(sides: number[][][]): [number, number, number] | nul
 // True when a flat-lay photo can't be put on white for free: a backdrop
 // (gradient, busy, dark) still fills whole sides of the area, where a
 // garment on white touches its bounding box only here and there.
-export async function needsCutout(photo: Buffer): Promise<boolean> {
-  const sides = await backdropSides(photo);
+// `probe` is the photo to judge the backdrop on when it differs from the one
+// framed: the model's own crop, before productPhoto padded it with the page
+// (whose text would break the backdrop's sides).
+export async function needsCutout(photo: Buffer, probe: Buffer = photo): Promise<boolean> {
+  const sides = await backdropSides(probe);
   if (!sides || liftableBackground(sides)) return false;
   const filled = sides.filter((side) => side.filter(shaded).length >= side.length * MIN_BACKDROP_SIDE);
   return filled.length >= MIN_FILLED_SIDES;
@@ -254,8 +257,9 @@ export async function needsCutout(photo: Buffer): Promise<boolean> {
 // in proportion, for free: nothing is cut away, so a white or pale garment
 // stays whole, only a few percent lighter. Anything else (a model, a busy or
 // dark background) keeps its background.
-export async function frameOriginal(photo: Buffer): Promise<Buffer> {
-  const sides = await backdropSides(photo);
+// The backdrop is judged on `probe`, as in needsCutout.
+export async function frameOriginal(photo: Buffer, probe: Buffer = photo): Promise<Buffer> {
+  const sides = await backdropSides(probe);
   const background = sides && liftableBackground(sides);
   if (!background) return frameOnWhite(photo);
   const lifted = await sharp(photo)
