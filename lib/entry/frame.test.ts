@@ -1,6 +1,7 @@
 import sharp, { type OverlayOptions } from "sharp";
 import { describe, expect, it } from "vitest";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, MARGIN, frameOnWhite, frameOriginal, needsCutout } from "./frame";
+import { productPhoto } from "./screenshot";
 
 const WHITE = { r: 255, g: 255, b: 255 };
 const NAVY = { r: 20, g: 30, b: 80 };
@@ -82,6 +83,47 @@ describe("frameOnWhite", () => {
     );
     expectCentered(pair);
     expect(Math.abs(pair.width - innerWidth)).toBeLessThanOrEqual(3);
+  });
+
+  it("centers the garment, not the product name or a thumbnail edge taken in with it", async () => {
+    // A jacket with a line of "text" under it and a sliver of the next photo
+    // at the side, as a padded crop of a store page takes them in.
+    const box = await garmentBox(
+      await frameOnWhite(
+        await photo({
+          width: 400,
+          height: 560,
+          boxes: [
+            { left: 120, top: 60, width: 200, height: 220 },
+            ...[0, 1, 2, 3, 4, 5].map((i) => ({ left: 60 + i * 22, top: 470, width: 16, height: 10 })),
+            { left: 0, top: 80, width: 12, height: 150 },
+          ],
+        }),
+      ),
+    );
+    expectCentered(box);
+    // Only the jacket is framed, so it reaches the side margins.
+    expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
+  });
+
+  it("keeps a thin pair of sandals and leaves out the next photo's edge", async () => {
+    // Two thin straps of sandal in the middle, and a 60 px strip of the
+    // neighbouring photo's grey at the side, which has more pixels than both.
+    const base = await sharp(
+      await photo({
+        boxes: [
+          { left: 150, top: 140, width: 14, height: 110 },
+          { left: 236, top: 150, width: 14, height: 110 },
+        ],
+      }),
+    )
+      .composite([{ input: { create: { width: 60, height: 400, channels: 3, background: { r: 180, g: 180, b: 180 } } }, left: 0, top: 0 }])
+      .png()
+      .toBuffer();
+    const box = await garmentBox(await frameOnWhite(base));
+    expectCentered(box);
+    // Both sandals (100 × 120 together), scaled up to the side margins.
+    expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
   });
 
   it("turns a transparent background white", async () => {
@@ -168,6 +210,36 @@ describe("frameOriginal", () => {
     // The whole photo is the "garment": a square touching the side margins.
     expectCentered(box);
     expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("judging the backdrop on the model's own crop", () => {
+  it("still lifts a full-width grey photo for free when the padding takes in the product name", async () => {
+    // A store page: a grey product photo the full width of the screen with a
+    // navy garment on it, and a line of dark "text" on white below.
+    const grey = { r: 232, g: 232, b: 232 };
+    const data = await sharp({ create: { width: 1000, height: 1500, channels: 3, background: WHITE } })
+      .composite([
+        { input: { create: { width: 1000, height: 1100, channels: 3, background: grey } }, left: 0, top: 0 },
+        { input: { create: { width: 400, height: 600, channels: 3, background: NAVY } }, left: 300, top: 250 },
+        ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({
+          input: { create: { width: 30, height: 18, channels: 3 as const, background: NAVY } },
+          left: 100 + i * 40,
+          top: 1130,
+        })),
+      ])
+      .png()
+      .toBuffer();
+    const shot = { data, mime: "image/png", width: 1000, height: 1500 };
+    const photo = await productPhoto(shot, { x: 0, y: 0, width: 1, height: 1100 / 1500 });
+    expect(await needsCutout(photo.webp, photo.probe)).toBe(false);
+
+    const framed = await frameOriginal(photo.webp, photo.probe);
+    const { data: px, info } = await sharp(framed).raw().toBuffer({ resolveWithObject: true });
+    // The grey went white, and the garment (not the text) is centered.
+    expect(Math.min(px[0], px[1], px[2])).toBeGreaterThanOrEqual(250);
+    expect(info).toMatchObject({ width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+    expectCentered(await garmentBox(framed));
   });
 });
 

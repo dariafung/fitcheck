@@ -4,7 +4,7 @@ import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 import { TempRangeF } from "@/lib/temperature";
 import { ItemTags, MediaRef } from "./common";
 
-export const PROMPT_VERSION = "extract-item@6";
+export const PROMPT_VERSION = "extract-item@7";
 
 export const ExtractItemInput = z.object({
   sourceUrl: z.url().optional(),

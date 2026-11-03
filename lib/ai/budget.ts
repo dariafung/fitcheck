@@ -11,7 +11,7 @@ export const PRICE_PER_AUDIO_HOUR = 0.18;
 // Muse Image, a flat price per returned image (same page).
 export const PRICE_PER_IMAGE = 0.01;
 
-export const DEFAULT_DAILY_BUDGET_USD = 7;
+export const DEFAULT_DAILY_BUDGET_USD = 15;
 
 // Worst-case cost of one live attempt: a generous input estimate plus the
 // function's max_output_tokens (reasoning included; even "low" effort used
