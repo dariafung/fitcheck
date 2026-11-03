@@ -6,8 +6,8 @@ import seedItems from "../../../seed/items.json";
 import { expect, test } from "../fixtures";
 
 // A passing-on item's page: its size and who'd want it. The demo persona is
-// only matched with the seeded sample buyers (pnpm seed), checked here with
-// the mock models. Tests that change an item add their own.
+// only matched with the seed neighbors (pnpm seed), whose checks are seeded
+// in the cache. Tests that change an item add their own.
 const env = readLocalSupabase();
 const db = createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
@@ -25,7 +25,7 @@ test.beforeEach(async () => {
       title,
       category: "outerwear",
       status: "passing_on",
-      // Bigger than any sample buyer.
+      // Bigger than any seed neighbor.
       size: "XXL",
       asking_price_cents: 3000,
       condition: "good",
@@ -55,17 +55,21 @@ test("a passing-on item shows its size and listing, and says when no buyer fits 
   await expect(page.getByText("No buyers for this one right now.")).toBeVisible();
 });
 
-test("the persona's baby tee has one strong sample buyer, shown as one avatar", async ({ page }) => {
-  const tee = seedItems.find((i) => i.title === "100% Cotton Crew Baby Tee")!;
-  await page.goto(`/closet/${tee.id}`);
-  const buyers = page.getByRole("region", { name: "Matching buyers" });
-  await expect(buyers.getByText("1 person would likely want this.")).toBeVisible();
-  await expect(buyers.getByText("Sample buyers for the demo.")).toBeVisible();
-  // One plain avatar per match, and no scores.
-  await expect(buyers.getByRole("img", { name: "Anonymous buyer" })).toHaveCount(1);
-  await expect(buyers).not.toContainText(/match\b/);
-  // No sample buyer's name ("Sample buyer Maya").
-  await expect(buyers).not.toContainText(/Sample buyer [A-Z]/);
+test("the persona's baby tee and shorts show the seeded buyer counts, as anonymous avatars", async ({ page }) => {
+  for (const { title, count } of [
+    { title: "100% Cotton Crew Baby Tee", count: 3 },
+    { title: "Fleece Shortie Shorts", count: 2 },
+  ]) {
+    const piece = seedItems.find((i) => i.title === title)!;
+    await page.goto(`/closet/${piece.id}`);
+    const buyers = page.getByRole("region", { name: "Matching buyers" });
+    await expect(buyers.getByText(`${count} people would likely want this.`)).toBeVisible();
+    // One plain avatar per match, and no scores.
+    await expect(buyers.getByRole("img", { name: "Anonymous buyer" })).toHaveCount(count);
+    await expect(buyers).not.toContainText(/match\b/);
+    // No buyer's name, ever.
+    await expect(buyers).not.toContainText(/Maya|Jordan|Priya|Lena/);
+  }
 });
 
 test("edit the size and listing; a size code can't read still saves, with a note", async ({ page }) => {

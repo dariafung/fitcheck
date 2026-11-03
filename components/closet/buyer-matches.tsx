@@ -11,7 +11,6 @@ export const BUYER_STATES = {
 } as const;
 export const TRY_DEMO = "Try the demo account to see how matching works.";
 export const SOME_UNCHECKED = "Some buyers weren't checked yet. Try again later.";
-export const SAMPLE_BUYERS = "Sample buyers for the demo.";
 
 export const BUYERS_HEADING = "Matching buyers";
 
@@ -60,7 +59,7 @@ function Result({ result }: { result: BuyersResult }) {
       return (
         <>
           <Note>{BUYER_STATES.no_buyers}</Note>
-          {!result.sample && <Note>{TRY_DEMO}</Note>}
+          {!result.seeded && <Note>{TRY_DEMO}</Note>}
         </>
       );
     case "no_size_match":
@@ -80,7 +79,6 @@ function Result({ result }: { result: BuyersResult }) {
           <Avatars count={result.count} />
           <p className="text-base">{buyerCount(result.count)}</p>
           {result.someUnchecked && <Note>{SOME_UNCHECKED}</Note>}
-          {result.sample && <Note>{SAMPLE_BUYERS}</Note>}
         </>
       );
   }
