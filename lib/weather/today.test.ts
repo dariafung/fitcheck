@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCATION_COOKIE } from "./location-cookie";
-import { CACHE_MS, clearWeatherCache, FIXED_WEATHER, todayWeather } from "./today";
+import { CACHE_MS, clearWeatherCache, FIXED_NO_LOCATION_HEADER, FIXED_WEATHER, NO_LOCATION, todayWeather } from "./today";
 
 const FORECAST = {
   daily: { time: ["2026-10-26"], temperature_2m_min: [40], temperature_2m_max: [55] },
@@ -47,8 +47,8 @@ describe("todayWeather", () => {
     expect(calls).toBe(2);
   });
 
-  it("is null without any location, and asks nobody", async () => {
-    expect(await todayWeather("u", new Headers(), { fetchImpl })).toBeNull();
+  it("says there is no location when none is known, and asks nobody", async () => {
+    expect(await todayWeather("u", new Headers(), { fetchImpl })).toBe(NO_LOCATION);
     expect(calls).toBe(0);
   });
 
@@ -63,6 +63,12 @@ describe("todayWeather", () => {
   it("never touches the network in fixed or off mode", async () => {
     vi.stubEnv("WEATHER_MODE", "fixed");
     expect(await todayWeather("u", new Headers(), { fetchImpl })).toEqual(FIXED_WEATHER);
+    // Tests can ask for the no-location path; a location cookie still wins.
+    expect(await todayWeather("u", new Headers({ [FIXED_NO_LOCATION_HEADER]: "1" }), { fetchImpl })).toBe(NO_LOCATION);
+    const picked = encodeURIComponent(JSON.stringify({ src: "picked", lat: 41.88, lon: -87.63, city: "Chicago" }));
+    expect(
+      await todayWeather("u", new Headers({ [FIXED_NO_LOCATION_HEADER]: "1", cookie: `${LOCATION_COOKIE}=${picked}` }), { fetchImpl }),
+    ).toEqual({ ...FIXED_WEATHER, city: "Chicago" });
     vi.stubEnv("WEATHER_MODE", "off");
     expect(await todayWeather("u", new Headers(), { fetchImpl })).toBeNull();
     expect(calls).toBe(0);
