@@ -17,7 +17,7 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
-import { addDays, SEED_DAYS, seedLastDay, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
+import { addDays, futureSeedWarning, SEED_DAYS, seedLastDay, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -52,6 +52,8 @@ const persona = readJson("persona.json") as { id: string; lifestyle_mix: Record<
 // The outfit log ends yesterday (Chicago), leaving today for the demo, or on
 // SEED_LAST_DAY when set. Items count as owned since before it starts.
 const lastDay = seedLastDay(process.env.SEED_LAST_DAY);
+const future = futureSeedWarning(lastDay);
+if (future) console.warn(future);
 const ownedSince = `${addDays(lastDay, -SEED_DAYS)}T12:00:00Z`;
 const items = (readJson("items.json") as (SeedItem & { image_paths?: string[] })[]).map(
   (item) => ({ ...item, user_id: persona.id, created_at: ownedSince }),
