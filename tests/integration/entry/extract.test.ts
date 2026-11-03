@@ -3,7 +3,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/items/extract/route";
 import { createServerClient } from "@/lib/db/server";
 import type { ItemDraft } from "@/lib/entry/draft";
-import { fakeScreenshot, PHOTO } from "@/lib/entry/fake-screenshot";
+import { fakeScreenshot, PHOTO, SHOT } from "@/lib/entry/fake-screenshot";
+import { padBox } from "@/lib/entry/screenshot";
 import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
 import { createTestUser, removeTestUser, uploadRequest } from "./helpers";
 
@@ -40,7 +41,9 @@ describe("POST /api/items/extract", () => {
     // it is kept as cropped for the model to cut out.
     expect(draft.cutOut).toBe(true);
     const stored = await download(draft.imagePaths[0]);
-    expect(await sharp(stored).metadata()).toMatchObject({ format: "webp", width: PHOTO.width, height: PHOTO.height });
+    // Kept as the padded crop, so a sleeve the box cut off reaches the model.
+    const padded = padBox(PHOTO, SHOT.width, SHOT.height);
+    expect(await sharp(stored).metadata()).toMatchObject({ format: "webp", width: padded.width, height: padded.height });
     const { dominant } = await sharp(stored).stats();
     expect(dominant.r).toBeGreaterThan(150);
   });

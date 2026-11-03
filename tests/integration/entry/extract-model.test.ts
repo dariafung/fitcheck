@@ -5,9 +5,10 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/items/extract/route";
 import type { ExtractItemOutput } from "@/lib/ai";
 import { createServerClient } from "@/lib/db/server";
-import { fakeScreenshot, PHOTO } from "@/lib/entry/fake-screenshot";
+import { fakeScreenshot, PHOTO, SHOT } from "@/lib/entry/fake-screenshot";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/entry/frame";
 import { ITEM_IMAGES_BUCKET } from "@/lib/entry/images";
+import { padBox } from "@/lib/entry/screenshot";
 import { createTestUser, removeTestUser, uploadRequest } from "./helpers";
 
 const user = vi.hoisted(() => ({ id: "" }));
@@ -70,9 +71,11 @@ describe("POST /api/items/extract with real-shaped model answers", () => {
     const { body } = await extract("#efefed");
     expect(body.draft.cutOut).toBe(true);
     const { data } = await createServerClient().storage.from(ITEM_IMAGES_BUCKET).download(body.draft.imagePaths[0]);
+    // The padded crop, so a sleeve the box cut off reaches the model.
+    const padded = padBox(PHOTO, SHOT.width, SHOT.height);
     expect(await sharp(Buffer.from(await data!.arrayBuffer())).metadata()).toMatchObject({
-      width: PHOTO.width,
-      height: PHOTO.height,
+      width: padded.width,
+      height: padded.height,
     });
   });
 
