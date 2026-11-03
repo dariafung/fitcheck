@@ -52,6 +52,13 @@ function lineBounds(data: Buffer, width: number, area: Bounds): Bounds | null {
 
 // Pieces are found on a grid of cells about this many across the long side.
 const PIECE_GRID = 400;
+// Pixels this far apart (as a share of the long side) still join one piece,
+// so a thin strap or lace separated from the body by a pale gap stays on.
+const JOIN_SHARE = 0.01;
+// The middle of the crop a piece must reach to count as garment. A piece
+// that touches the crop's edge and stays out of here is the next photo or
+// the page around the product, taken in by the padded crop.
+const MIDDLE = { from: 0.3, to: 0.7 };
 // A piece counts as garment when it has at least this share of the biggest
 // piece's pixels: both shoes of a pair stay, the product name, a badge or
 // the edge of a thumbnail next to the photo don't.
@@ -69,7 +76,8 @@ function garmentArea(data: Buffer, width: number, height: number): Bounds | null
       if (isGarment(data, (y * width + x) * 3)) weight[Math.floor(y / cell) * cols + Math.floor(x / cell)]++;
     }
   }
-  // Neighbouring cells, and cells one apart (a thin gap), join one piece.
+  // Neighbouring cells, and cells a little apart (a thin gap), join one piece.
+  const reach = Math.max(2, Math.round((Math.max(width, height) * JOIN_SHARE) / cell));
   const label = new Int32Array(cols * rowsN).fill(-1);
   const pieces: { pixels: number; left: number; top: number; right: number; bottom: number }[] = [];
   const stack: number[] = [];
@@ -87,8 +95,8 @@ function garmentArea(data: Buffer, width: number, height: number): Bounds | null
       piece.right = Math.max(piece.right, cx);
       piece.top = Math.min(piece.top, cy);
       piece.bottom = Math.max(piece.bottom, cy);
-      for (let ny = Math.max(0, cy - 2); ny <= Math.min(rowsN - 1, cy + 2); ny++) {
-        for (let nx = Math.max(0, cx - 2); nx <= Math.min(cols - 1, cx + 2); nx++) {
+      for (let ny = Math.max(0, cy - reach); ny <= Math.min(rowsN - 1, cy + reach); ny++) {
+        for (let nx = Math.max(0, cx - reach); nx <= Math.min(cols - 1, cx + reach); nx++) {
           const next = ny * cols + nx;
           if (weight[next] > 0 && label[next] < 0) {
             label[next] = pieces.length;
@@ -100,8 +108,18 @@ function garmentArea(data: Buffer, width: number, height: number): Bounds | null
     pieces.push(piece);
   }
   if (pieces.length === 0) return null;
-  const biggest = Math.max(...pieces.map((p) => p.pixels));
-  const kept = pieces.filter((p) => p.pixels >= biggest * MIN_PIECE_SHARE);
+  const midLeft = cols * MIDDLE.from;
+  const midRight = cols * MIDDLE.to;
+  const midTop = rowsN * MIDDLE.from;
+  const midBottom = rowsN * MIDDLE.to;
+  const atEdgeOnly = (p: (typeof pieces)[number]) =>
+    (p.left === 0 || p.top === 0 || p.right === cols - 1 || p.bottom === rowsN - 1) &&
+    !(p.right >= midLeft && p.left <= midRight && p.bottom >= midTop && p.top <= midBottom);
+  // When every piece is at the edge, none is ruled out.
+  const inner = pieces.filter((p) => !atEdgeOnly(p));
+  const candidates = inner.length > 0 ? inner : pieces;
+  const biggest = Math.max(...candidates.map((p) => p.pixels));
+  const kept = candidates.filter((p) => p.pixels >= biggest * MIN_PIECE_SHARE);
   const left = Math.min(...kept.map((p) => p.left)) * cell;
   const top = Math.min(...kept.map((p) => p.top)) * cell;
   const right = Math.min(width, (Math.max(...kept.map((p) => p.right)) + 1) * cell);

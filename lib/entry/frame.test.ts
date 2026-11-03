@@ -106,6 +106,26 @@ describe("frameOnWhite", () => {
     expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
   });
 
+  it("keeps a thin pair of sandals and leaves out the next photo's edge", async () => {
+    // Two thin straps of sandal in the middle, and a 60 px strip of the
+    // neighbouring photo's grey at the side, which has more pixels than both.
+    const base = await sharp(
+      await photo({
+        boxes: [
+          { left: 150, top: 140, width: 14, height: 110 },
+          { left: 236, top: 150, width: 14, height: 110 },
+        ],
+      }),
+    )
+      .composite([{ input: { create: { width: 60, height: 400, channels: 3, background: { r: 180, g: 180, b: 180 } } }, left: 0, top: 0 }])
+      .png()
+      .toBuffer();
+    const box = await garmentBox(await frameOnWhite(base));
+    expectCentered(box);
+    // Both sandals (100 × 120 together), scaled up to the side margins.
+    expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
+  });
+
   it("turns a transparent background white", async () => {
     const out = await frameOnWhite(await photo({ background: { ...WHITE, alpha: 0 }, channels: 4 }));
     const { data, info } = await sharp(out).raw().toBuffer({ resolveWithObject: true });
