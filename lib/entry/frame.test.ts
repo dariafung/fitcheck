@@ -84,6 +84,27 @@ describe("frameOnWhite", () => {
     expect(Math.abs(pair.width - innerWidth)).toBeLessThanOrEqual(3);
   });
 
+  it("centers the garment, not the product name or a thumbnail edge taken in with it", async () => {
+    // A jacket with a line of "text" under it and a sliver of the next photo
+    // at the side, as a padded crop of a store page takes them in.
+    const box = await garmentBox(
+      await frameOnWhite(
+        await photo({
+          width: 400,
+          height: 560,
+          boxes: [
+            { left: 120, top: 60, width: 200, height: 220 },
+            ...[0, 1, 2, 3, 4, 5].map((i) => ({ left: 60 + i * 22, top: 470, width: 16, height: 10 })),
+            { left: 0, top: 80, width: 12, height: 150 },
+          ],
+        }),
+      ),
+    );
+    expectCentered(box);
+    // Only the jacket is framed, so it reaches the side margins.
+    expect(Math.abs(box.width - innerWidth)).toBeLessThanOrEqual(3);
+  });
+
   it("turns a transparent background white", async () => {
     const out = await frameOnWhite(await photo({ background: { ...WHITE, alpha: 0 }, channels: 4 }));
     const { data, info } = await sharp(out).raw().toBuffer({ resolveWithObject: true });

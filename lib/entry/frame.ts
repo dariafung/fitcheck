@@ -23,27 +23,95 @@ interface Bounds {
   height: number;
 }
 
-function contentBounds(data: Buffer, width: number, height: number): Bounds | null {
-  const rows = new Uint32Array(height);
-  const columns = new Uint32Array(width);
+function isGarment(data: Buffer, i: number): boolean {
   const limit = 255 - TRIM_THRESHOLD;
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 3;
-      if (data[i] < limit || data[i + 1] < limit || data[i + 2] < limit) {
+  return data[i] < limit || data[i + 1] < limit || data[i + 2] < limit;
+}
+
+// Rows and columns with enough garment pixels inside `area`, as bounds.
+function lineBounds(data: Buffer, width: number, area: Bounds): Bounds | null {
+  const rows = new Uint32Array(area.height);
+  const columns = new Uint32Array(area.width);
+  for (let y = 0; y < area.height; y++) {
+    for (let x = 0; x < area.width; x++) {
+      if (isGarment(data, ((area.top + y) * width + area.left + x) * 3)) {
         rows[y]++;
         columns[x]++;
       }
     }
   }
-  const minRow = Math.max(1, Math.round(width * MIN_LINE_SHARE));
-  const minColumn = Math.max(1, Math.round(height * MIN_LINE_SHARE));
+  const minRow = Math.max(1, Math.round(area.width * MIN_LINE_SHARE));
+  const minColumn = Math.max(1, Math.round(area.height * MIN_LINE_SHARE));
   const top = rows.findIndex((n) => n >= minRow);
   const left = columns.findIndex((n) => n >= minColumn);
   if (top < 0 || left < 0) return null;
   const bottom = rows.findLastIndex((n) => n >= minRow);
   const right = columns.findLastIndex((n) => n >= minColumn);
-  return { left, top, width: right - left + 1, height: bottom - top + 1 };
+  return { left: area.left + left, top: area.top + top, width: right - left + 1, height: bottom - top + 1 };
+}
+
+// Pieces are found on a grid of cells about this many across the long side.
+const PIECE_GRID = 400;
+// A piece counts as garment when it has at least this share of the biggest
+// piece's pixels: both shoes of a pair stay, the product name, a badge or
+// the edge of a thumbnail next to the photo don't.
+export const MIN_PIECE_SHARE = 0.25;
+
+// The area covered by the garment: the biggest piece of non-white pixels and
+// any piece nearly as big, leaving out small ones elsewhere in the crop.
+function garmentArea(data: Buffer, width: number, height: number): Bounds | null {
+  const cell = Math.max(1, Math.ceil(Math.max(width, height) / PIECE_GRID));
+  const cols = Math.ceil(width / cell);
+  const rowsN = Math.ceil(height / cell);
+  const weight = new Uint32Array(cols * rowsN);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (isGarment(data, (y * width + x) * 3)) weight[Math.floor(y / cell) * cols + Math.floor(x / cell)]++;
+    }
+  }
+  // Neighbouring cells, and cells one apart (a thin gap), join one piece.
+  const label = new Int32Array(cols * rowsN).fill(-1);
+  const pieces: { pixels: number; left: number; top: number; right: number; bottom: number }[] = [];
+  const stack: number[] = [];
+  for (let start = 0; start < weight.length; start++) {
+    if (weight[start] === 0 || label[start] >= 0) continue;
+    const piece = { pixels: 0, left: cols, top: rowsN, right: -1, bottom: -1 };
+    label[start] = pieces.length;
+    stack.push(start);
+    while (stack.length > 0) {
+      const at = stack.pop()!;
+      const cx = at % cols;
+      const cy = (at - cx) / cols;
+      piece.pixels += weight[at];
+      piece.left = Math.min(piece.left, cx);
+      piece.right = Math.max(piece.right, cx);
+      piece.top = Math.min(piece.top, cy);
+      piece.bottom = Math.max(piece.bottom, cy);
+      for (let ny = Math.max(0, cy - 2); ny <= Math.min(rowsN - 1, cy + 2); ny++) {
+        for (let nx = Math.max(0, cx - 2); nx <= Math.min(cols - 1, cx + 2); nx++) {
+          const next = ny * cols + nx;
+          if (weight[next] > 0 && label[next] < 0) {
+            label[next] = pieces.length;
+            stack.push(next);
+          }
+        }
+      }
+    }
+    pieces.push(piece);
+  }
+  if (pieces.length === 0) return null;
+  const biggest = Math.max(...pieces.map((p) => p.pixels));
+  const kept = pieces.filter((p) => p.pixels >= biggest * MIN_PIECE_SHARE);
+  const left = Math.min(...kept.map((p) => p.left)) * cell;
+  const top = Math.min(...kept.map((p) => p.top)) * cell;
+  const right = Math.min(width, (Math.max(...kept.map((p) => p.right)) + 1) * cell);
+  const bottom = Math.min(height, (Math.max(...kept.map((p) => p.bottom)) + 1) * cell);
+  return { left, top, width: right - left, height: bottom - top };
+}
+
+function contentBounds(data: Buffer, width: number, height: number): Bounds | null {
+  const area = garmentArea(data, width, height);
+  return area && lineBounds(data, width, area);
 }
 
 // The photo flattened onto white, trimmed to the garment and scaled (up or
