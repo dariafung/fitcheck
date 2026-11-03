@@ -140,7 +140,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 9.4 | A: "Matching buyers" before anyone else has opted in | "Looking for buyers…", then "No active buyers right now." and "Try the demo account to see how matching works." |
 | 9.5 | B: sign up, fill Profile with sizes that fit A's item, tick "I'd take secondhand clothes", Save; add a few clothes with feelings | Saved |
 | 9.6 | A: reopen the item | Either a line saying how many people would want it, with one identical anonymous avatar per person (at most 5, then "+N"), or "No one's a strong match yet." No names, emails or scores anywhere |
-| 9.7 | A: "Edit size" to a size B doesn't wear | "No buyers in this size right now." |
+| 9.7 | A: "Edit size" to a size B doesn't wear | "No buyers for this one right now." |
 | 9.8 | A: "Keep wearing it" | The item is back in "Wearing" and in outfits; "Matching buyers" is gone |
 
 ### 10. Demo account
@@ -152,7 +152,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.3 | Open an item and Profile | No Edit, Save, Delete, "Pass it on" or voice button; instead "Demo account is read-only. Sign up to add your own." No Resale section in Profile |
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
-| 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers" on each: "N person / people in your size would likely want this." (at least 1), and that many identical anonymous avatars (up to 5); no names or scores |
+| 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers" on each: "N person / people would likely want this." (at least 1), and that many identical anonymous avatars (up to 5); no names or scores |
 | 10.7 | Run "Should I buy this?" | Works and shows a score |
 | 10.8 | "Style it with AI" under a sample outfit | Works as in 7.10 |
 

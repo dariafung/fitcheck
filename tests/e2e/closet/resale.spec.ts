@@ -49,14 +49,14 @@ test("a passing-on item shows its size, and says when no buyer fits it", async (
   await page.goto(`/closet/${item.id}`);
   await expect(page.getByText("Size XXL")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Matching buyers" })).toBeVisible();
-  await expect(page.getByText("No buyers in this size right now.")).toBeVisible();
+  await expect(page.getByText("No buyers for this one right now.")).toBeVisible();
 });
 
 test("the persona's baby tee has one strong sample buyer, shown as one avatar", async ({ page }) => {
   const tee = seedItems.find((i) => i.title === "100% Cotton Crew Baby Tee")!;
   await page.goto(`/closet/${tee.id}`);
   const buyers = page.getByRole("region", { name: "Matching buyers" });
-  await expect(buyers.getByText("1 person in your size would likely want this.")).toBeVisible();
+  await expect(buyers.getByText("1 person would likely want this.")).toBeVisible();
   await expect(buyers.getByText("Sample buyers for the demo.")).toBeVisible();
   // One plain avatar per match, and no scores.
   await expect(buyers.getByRole("img", { name: "Anonymous buyer" })).toHaveCount(1);

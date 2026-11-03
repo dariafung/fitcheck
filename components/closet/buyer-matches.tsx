@@ -6,7 +6,7 @@ import type { BuyersResult } from "@/lib/resale/buyers";
 
 export const BUYER_STATES = {
   no_buyers: "No active buyers right now.",
-  no_size_match: "No buyers in this size right now.",
+  no_size_match: "No buyers for this one right now.",
   none_strong: "No one's a strong match yet.",
 } as const;
 export const TRY_DEMO = "Try the demo account to see how matching works.";
@@ -27,8 +27,8 @@ export function avatarRow(count: number): { shown: number; more: number } {
 // buyer is shown the item, so the copy says who'd want it.
 export function buyerCount(count: number): string {
   return count === 1
-    ? "1 person in your size would likely want this."
-    : `${count} people in your size would likely want this.`;
+    ? "1 person would likely want this."
+    : `${count} people would likely want this.`;
 }
 
 async function lookUp(itemId: string): Promise<BuyersResult | "error"> {

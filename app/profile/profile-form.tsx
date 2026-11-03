@@ -434,7 +434,7 @@ export function ProfileForm({
                   Match me with secondhand pieces
                 </label>
                 <p className="flex flex-col gap-1 pl-8 text-sm text-ink-2">
-                  <span>People passing on pieces in your size see a match.</span>
+                  <span>People passing on pieces see a match.</span>
                   <span>We share only your sizes, never your name or email.</span>
                 </p>
               </div>
