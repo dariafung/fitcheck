@@ -6,6 +6,8 @@ import { authRequired } from "./config";
 export interface SessionUser {
   id: string;
   email: string | null;
+  // The name given at sign-up (user metadata), for making the users row.
+  name: string | null;
   // The shared demo persona: can look, can't change anything.
   readOnly: boolean;
   // This login's session, for the demo account's per-login AI limits.
@@ -22,6 +24,7 @@ export const sessionUser = cache(async (): Promise<SessionUser | null> => {
   return {
     id: claims.sub,
     email: typeof claims.email === "string" ? claims.email : null,
+    name: metadataName(claims.user_metadata),
     readOnly: claims.sub === DEMO_USER_ID,
     sessionId: typeof claims.session_id === "string" ? claims.session_id : null,
   };
@@ -31,4 +34,9 @@ export const sessionUser = cache(async (): Promise<SessionUser | null> => {
 export async function isReadOnly(): Promise<boolean> {
   if (!authRequired()) return false;
   return (await sessionUser())?.readOnly ?? false;
+}
+
+function metadataName(metadata: unknown): string | null {
+  const name = (metadata as { name?: unknown } | null | undefined)?.name;
+  return typeof name === "string" ? name : null;
 }

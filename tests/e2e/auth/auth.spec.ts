@@ -28,6 +28,7 @@ test.afterAll(async () => {
 async function signUp(page: Page): Promise<string> {
   const email = `e2e-${randomUUID().slice(0, 8)}@example.com`;
   await page.goto("/signup");
+  await page.getByLabel("Name").fill("E2E tester");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
@@ -67,6 +68,13 @@ test("login and sign-up errors sit under the box they're about", async ({ page }
   await expect(page.getByLabel("Email")).toHaveAccessibleDescription("Enter your email.");
 
   await page.goto("/signup");
+  // A name is required first, and it says it isn't the email.
+  const name = page.getByLabel("Name");
+  await expect(name).toHaveAccessibleDescription("What others see. Not your email.");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(name).toHaveAttribute("aria-invalid", "true");
+  await expect(name).toHaveAccessibleDescription("Pick a name of 2 to 30 characters.");
+  await name.fill("Jo");
   const password = page.getByLabel("Password");
   await expect(password).toHaveAccessibleDescription("At least 6 characters.");
   await page.getByLabel("Email").fill("short@example.com");
@@ -81,6 +89,9 @@ test("login and sign-up errors sit under the box they're about", async ({ page }
 test("sign up and land on an empty closet", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Your closet is empty.")).toBeVisible();
+  // Named as typed, never after the email.
+  const { data } = await db.from("users").select("display_name").eq("id", created.at(-1)!).single();
+  expect(data?.display_name).toBe("E2E tester");
   await expect(page.getByText(SEED_ITEM.title)).toBeHidden();
 });
 

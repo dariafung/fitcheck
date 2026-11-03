@@ -25,7 +25,10 @@ export function filterBySize(buyers: PoolBuyer[], size: string | null, category:
 }
 
 // Real users are only matched with real users, and the demo persona only
-// with the seeded sample buyers. The seller is never their own buyer.
+// with the seed neighbors (other seed users). The seller is never their own
+// buyer. Seed neighbors have no closet: they count only through their seeded
+// cached checks (checkBuyers never checks a buyer without clothes), so they
+// skip the closet minimum.
 export async function buyerPool(
   db: Db,
   seller: { id: string; isSeed: boolean },
@@ -60,6 +63,6 @@ export async function buyerPool(
   const closetSize = new Map<string, number>();
   for (const { user_id } of items) closetSize.set(user_id, (closetSize.get(user_id) ?? 0) + 1);
 
-  const buyers = sized.filter((b) => (closetSize.get(b.id) ?? 0) >= MIN_BUYER_CLOSET);
+  const buyers = sized.filter((b) => seller.isSeed || (closetSize.get(b.id) ?? 0) >= MIN_BUYER_CLOSET);
   return filterBySize(buyers, item.size, item.category);
 }

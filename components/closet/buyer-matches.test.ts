@@ -14,7 +14,7 @@ describe("avatarRow", () => {
 
 describe("buyerCount", () => {
   it("says person for one and people for more", () => {
-    expect(buyerCount(1)).toBe("1 person in your size would likely want this.");
-    expect(buyerCount(3)).toBe("3 people in your size would likely want this.");
+    expect(buyerCount(1)).toBe("1 person would likely want this.");
+    expect(buyerCount(3)).toBe("3 people would likely want this.");
   });
 });

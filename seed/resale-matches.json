@@ -1,0 +1,168 @@
+{
+  "note": "Cached buy checks the seed writes, so nothing is checked when the demo opens: the sample buyers' checks for figment's passing-on pieces (the buyer count on those pieces), and figment's checks for the pieces the sample buyers pass on (figment's Suits you). Fingerprints are worked out when seeding.",
+  "matches": [
+    {
+      "item_id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "score": 81,
+      "highlights": [
+        "fillsGap",
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "A soft crew tee that fits the easy school looks you go for."
+      ]
+    },
+    {
+      "item_id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "score": 74,
+      "highlights": [
+        "fillsGap",
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "A plain tee you'd wear to class most weeks."
+      ]
+    },
+    {
+      "item_id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "score": 66,
+      "highlights": [
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "An easy everyday tee."
+      ]
+    },
+    {
+      "item_id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "score": 41,
+      "highlights": [],
+      "buyer_reasons": [
+        "Close to tees you already wear."
+      ]
+    },
+    {
+      "item_id": "ab426b49-f3b7-42bd-9527-b71176656fbb",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "score": 77,
+      "highlights": [
+        "fillsGap",
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "Comfy fleece shorts for the days at home you plan for."
+      ]
+    },
+    {
+      "item_id": "ab426b49-f3b7-42bd-9527-b71176656fbb",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "score": 63,
+      "highlights": [
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "Soft shorts for lounging."
+      ]
+    },
+    {
+      "item_id": "ab426b49-f3b7-42bd-9527-b71176656fbb",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "score": 48,
+      "highlights": [],
+      "buyer_reasons": [
+        "You rarely plan outfits for home."
+      ]
+    },
+    {
+      "item_id": "ab426b49-f3b7-42bd-9527-b71176656fbb",
+      "seller_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "buyer_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "score": 39,
+      "highlights": [],
+      "buyer_reasons": [
+        "Close to shorts you already wear."
+      ]
+    },
+    {
+      "item_id": "af2c734c-3125-4536-a8ac-ed56d3277652",
+      "seller_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "score": 86,
+      "highlights": [
+        "fillsGap",
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "A high waist and wide leg are what you say flatters you, and black goes with everything you own.",
+        "Makes 9 outfits with your closet, like your Supima Long Sleeve T-Shirt and Soft Ruched Loafers.",
+        "You want 2 social outfits and have 1. This adds 1."
+      ]
+    },
+    {
+      "item_id": "e3b74be4-6a77-4db8-a17b-40d87043b14c",
+      "seller_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "score": 68,
+      "highlights": [
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "A light layer over your V-neck tees; cream sits well with your gray and pink pieces.",
+        "Makes 6 outfits with your closet."
+      ]
+    },
+    {
+      "item_id": "b592daa9-a10d-4564-b9c3-ed6770fd002d",
+      "seller_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "score": 72,
+      "highlights": [
+        "fillsGap",
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "A dressier piece for going out, which your closet is short on.",
+        "You want 2 social outfits and have 1. This adds 1.",
+        "Makes 4 outfits with your closet."
+      ]
+    },
+    {
+      "item_id": "40f0e480-42f5-4ae2-8eee-df79ba6b1183",
+      "seller_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "score": 64,
+      "highlights": [
+        "outfits",
+        "revives"
+      ],
+      "buyer_reasons": [
+        "An easy flat that dresses up your jeans and wide-leg pants.",
+        "1 piece that had no outfit now has one: Softstreme High-Rise Pant."
+      ]
+    },
+    {
+      "item_id": "c1708d91-6dc8-4a63-bae4-09aaf9d90908",
+      "seller_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
+      "score": 70,
+      "highlights": [
+        "outfits"
+      ],
+      "buyer_reasons": [
+        "A cropped jacket keeps your waist in view, which you like.",
+        "Makes 7 outfits with your closet."
+      ]
+    }
+  ]
+}

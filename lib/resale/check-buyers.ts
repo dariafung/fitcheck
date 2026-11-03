@@ -68,7 +68,9 @@ export interface CheckTarget {
 }
 
 // Checks up to MAX_NEW_CHECKS of the buyers in the pool whose cached check
-// is missing or out of date, all at once, in checkOrder. A buyer whose check
+// is missing or out of date, all at once, in checkOrder. A buyer with no
+// clothes (the seed neighbors) is never checked: a check on an empty
+// closet means nothing, so only their seeded cached check counts. A buyer whose check
 // fails (over budget, model never finished, …) is left unchecked; the others
 // are saved either way. A run counts once against the seller's daily
 // "buyers" limit; over it, nothing new is checked and the cached matches
@@ -88,7 +90,7 @@ async function runChecks(db: Db, { sellerId, itemId, item }: CheckTarget, buyers
   const fingerprints = new Map(buyers.map((b) => [b.state.id, b.fingerprint]));
   const stale = await staleBuyerIds(db, itemId, fingerprints);
   const toCheck = checkOrder(
-    buyers.filter((b) => stale.has(b.state.id)).map((b) => b.state),
+    buyers.filter((b) => stale.has(b.state.id) && b.state.items.length > 0).map((b) => b.state),
     item.tags.occasions,
   ).slice(0, MAX_NEW_CHECKS);
   if (toCheck.length === 0) return;

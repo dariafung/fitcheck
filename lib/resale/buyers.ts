@@ -9,9 +9,9 @@ import { buyerStates, fingerprint, type SellerItem } from "./fingerprint";
 import { sellerMatches, type SellerMatches } from "./matches";
 import { buyerPool } from "./pool";
 
-// sample: the seller is the demo persona, matched with sample buyers only.
+// seeded: the seller is the demo persona, matched with the seed neighbors only.
 export type BuyersResult = ({ state: "no_buyers" } | { state: "no_size_match" } | SellerMatches) & {
-  sample: boolean;
+  seeded: boolean;
 };
 
 // The seller's item as each buyer's check gets it.
@@ -50,10 +50,10 @@ export async function findBuyers(
   if (item.status !== "passing_on" || !category.success || category.data === "accessory") {
     return "not_passing_on";
   }
-  const sample = seller.is_seed;
+  const seeded = seller.is_seed;
 
-  const pool = await buyerPool(db, { id: userId, isSeed: sample }, { category: category.data, size: item.size });
-  if (pool.state !== "ok") return { ...pool, sample };
+  const pool = await buyerPool(db, { id: userId, isSeed: seeded }, { category: category.data, size: item.size });
+  if (pool.state !== "ok") return { ...pool, seeded };
 
   const sellerItem = toSellerItem(item);
   const mode = currentMode();
@@ -62,5 +62,5 @@ export async function findBuyers(
   await checkBuyers(db, { sellerId: userId, itemId, item: sellerItem }, buyers, ai);
   const fingerprints = new Map(buyers.map((b) => [b.state.id, b.fingerprint]));
 
-  return { ...(await sellerMatches(db, itemId, fingerprints)), sample };
+  return { ...(await sellerMatches(db, itemId, fingerprints)), seeded };
 }

@@ -20,8 +20,8 @@ const session = vi.hoisted(() => ({ user: null as SessionUser | null }));
 vi.mock("@/lib/auth/session", () => ({ sessionUser: async () => session.user }));
 
 const NOON = new Date("2026-10-31T17:00:00Z"); // 12:00 in Chicago
-const user = (id: string): SessionUser => ({ id, email: `${id}@example.com`, readOnly: false, sessionId: `s-${id}` });
-const demo = (sessionId: string | null): SessionUser => ({ id: "demo", email: null, readOnly: true, sessionId });
+const user = (id: string): SessionUser => ({ id, email: `${id}@example.com`, name: null, readOnly: false, sessionId: `s-${id}` });
+const demo = (sessionId: string | null): SessionUser => ({ id: "demo", email: null, name: null, readOnly: true, sessionId });
 
 async function takeTimes(n: number, action: Parameters<typeof takeDaily>[0], now = NOON) {
   for (let i = 0; i < n; i++) await takeDaily(action, now);

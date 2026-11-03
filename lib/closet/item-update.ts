@@ -11,6 +11,8 @@ export interface EditableRow {
   category: string;
   status: string;
   size: string | null;
+  asking_price_cents: number | null;
+  condition: string | null;
   ai_tags: unknown;
   user_tags: unknown;
 }
@@ -21,6 +23,8 @@ export interface ItemRowUpdate {
   category?: string;
   status?: string;
   size?: string | null;
+  asking_price_cents?: number | null;
+  condition?: string | null;
   user_tags?: { [key: string]: Json };
 }
 
@@ -35,6 +39,19 @@ export function needsSize(row: EditableRow, patch: ItemPatch): boolean {
   return row.status !== "passing_on" || patch.size === null;
 }
 
+// Passing an item on also needs an asking price and a condition. True when
+// the patch would put an item there without both, or take either off one
+// that is there. Items passed on before listings existed can still be edited
+// without adding them, like sizes.
+export function needsListing(row: EditableRow, patch: ItemPatch): boolean {
+  const status = patch.status ?? row.status;
+  if (status !== "passing_on") return false;
+  const price = patch.askingPriceCents === undefined ? row.asking_price_cents : patch.askingPriceCents;
+  const condition = patch.condition === undefined ? row.condition : patch.condition;
+  if (price !== null && condition !== null) return false;
+  return row.status !== "passing_on" || patch.askingPriceCents === null || patch.condition === null;
+}
+
 // The columns a patch changes, or null when it changes nothing (so an
 // unchanged save doesn't bump updated_at and send pairings back to the model).
 // Tags are stored the way a new item stores them: only the fields that differ
@@ -44,6 +61,10 @@ export function itemUpdate(row: EditableRow, patch: ItemPatch): ItemRowUpdate | 
   const next: ItemRowUpdate = {};
   if (patch.status !== undefined && patch.status !== row.status) next.status = patch.status;
   if (patch.size !== undefined && patch.size !== row.size) next.size = patch.size;
+  if (patch.askingPriceCents !== undefined && patch.askingPriceCents !== row.asking_price_cents) {
+    next.asking_price_cents = patch.askingPriceCents;
+  }
+  if (patch.condition !== undefined && patch.condition !== row.condition) next.condition = patch.condition;
 
   const details = patch.details;
   if (details) {

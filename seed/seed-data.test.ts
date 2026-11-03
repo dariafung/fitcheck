@@ -5,13 +5,17 @@ import { z } from "zod";
 import { ProfileStatement } from "@/lib/ai/schemas/build-profile";
 import { Category, FeelingStructured, ItemTags, LifestyleMix } from "@/lib/ai/schemas/common";
 import { profileHash, profileInput, visibleCard } from "@/lib/closet/style-profile";
-import { MIN_BUYER_CLOSET, filterBySize } from "@/lib/resale/pool";
+import { RESALE_SCORE_THRESHOLD } from "@/lib/resale/matches";
+import { Condition } from "@/lib/resale/listing";
+import { filterBySize } from "@/lib/resale/pool";
 import { LetterSize, ShoeSize } from "@/lib/resale/size";
-import buyers from "./buyers.json";
 import feelings from "./feelings.json";
 import items from "./items.json";
+import neighbors from "./neighbors.json";
 import persona from "./persona.json";
+import resaleMatches from "./resale-matches.json";
 import styleProfile from "./style-profile.json";
+import { Nickname } from "../lib/profile/nickname";
 
 describe("seed data", () => {
   it("has a valid persona", () => {
@@ -100,56 +104,101 @@ describe("seed style card", () => {
   });
 });
 
-describe("seed sample buyers", () => {
-  const Buyer = z.object({
+describe("seed persona's name", () => {
+  it("is the nickname the demo shows to buyers", () => {
+    expect(persona.display_name).toBe("figment");
+  });
+});
+
+describe("seed neighbors", () => {
+  // Only what matching needs: a name, sizes and the opt-in.
+  const Neighbor = z.strictObject({
     id: z.uuid(),
-    display_name: z.string().startsWith("Sample buyer "),
+    // A nickname, as people pick at sign-up.
+    display_name: Nickname,
     is_seed: z.literal(true),
     resale_opt_in: z.literal(true),
-    lifestyle_mix: LifestyleMix,
     top_size: LetterSize,
     bottom_size: LetterSize,
     shoe_size: ShoeSize,
   });
 
-  it("are opted-in seed users with sizes, apart from the persona", () => {
-    for (const buyer of buyers.users) Buyer.parse(buyer);
-    expect(buyers.users.map((b) => b.id)).not.toContain(persona.id);
+  it("are opted-in seed users with a name and sizes only, apart from the persona", () => {
+    for (const neighbor of neighbors.users) Neighbor.parse(neighbor);
+    expect(neighbors.users.map((n) => n.id)).not.toContain(persona.id);
   });
 
-  it("each have a closet big enough to be checked, with valid tags and no photos", () => {
+  it("own only the pieces they pass on, each listed with a size, price and condition", () => {
     const Item = z.object({
       id: z.uuid(),
       user_id: z.uuid(),
-      status: z.literal("active"),
+      status: z.literal("passing_on"),
+      size: z.string().min(1),
+      asking_price_cents: z.number().int().min(0),
+      condition: Condition,
       category: Category,
       ai_tags: ItemTags,
-      image_paths: z.array(z.string()).length(0),
+      image_paths: z.array(z.string()),
     });
-    for (const item of buyers.items) {
+    const ids = new Set(neighbors.users.map((n) => n.id));
+    for (const item of neighbors.items) {
       const parsed = Item.parse(item);
       expect(parsed.ai_tags.category).toBe(parsed.category);
+      expect(parsed.category).not.toBe("accessory");
+      expect(ids.has(parsed.user_id)).toBe(true);
     }
-    for (const buyer of buyers.users) {
-      expect(buyers.items.filter((i) => i.user_id === buyer.id).length).toBeGreaterThanOrEqual(MIN_BUYER_CLOSET);
+    expect(neighbors.items.length).toBeGreaterThanOrEqual(4);
+    expect(neighbors.items.length).toBeLessThanOrEqual(6);
+  });
+});
+
+describe("seeded resale matches", () => {
+  const Match = z.strictObject({
+    item_id: z.uuid(),
+    seller_id: z.uuid(),
+    buyer_id: z.uuid(),
+    score: z.number().min(0).max(100),
+    highlights: z.array(z.enum(["suitsYou", "outfits", "revives", "fillsGap", "notRepeat"])),
+    buyer_reasons: z.array(z.string().min(1)).min(1),
+  });
+  const matches = resaleMatches.matches.map((m) => Match.parse(m));
+  const owner = new Map([...items.map((i) => [i.id, persona.id] as const), ...neighbors.items.map((i) => [i.id, i.user_id] as const)]);
+  const strong = (itemId: string) => matches.filter((m) => m.item_id === itemId && m.score >= RESALE_SCORE_THRESHOLD);
+
+  it("name each piece's real seller, never the buyer", () => {
+    for (const m of matches) {
+      expect(owner.get(m.item_id)).toBe(m.seller_id);
+      expect(m.buyer_id).not.toBe(m.seller_id);
     }
   });
 
-  it("have valid feelings on their own clothes", () => {
-    for (const feeling of buyers.feelings) {
-      FeelingStructured.strict().parse(feeling.structured);
-      expect(buyers.items.find((i) => i.id === feeling.item_id)?.user_id).toBe(feeling.user_id);
-    }
-  });
-
-  it("all but one fit the persona's passing-on pieces", () => {
-    const pool = buyers.users.map((b) => ({
-      id: b.id,
-      sizes: { top: LetterSize.parse(b.top_size), bottom: LetterSize.parse(b.bottom_size), shoe: ShoeSize.parse(b.shoe_size) },
+  it("cover every neighbor whose size fits each of the persona's passing-on pieces, so none is left to check", () => {
+    const pool = neighbors.users.map((n) => ({
+      id: n.id,
+      sizes: { top: LetterSize.parse(n.top_size), bottom: LetterSize.parse(n.bottom_size), shoe: ShoeSize.parse(n.shoe_size) },
     }));
     for (const item of items.filter((i) => i.status === "passing_on")) {
       const fit = filterBySize(pool, item.size, Category.parse(item.category));
-      expect(fit.state === "ok" && fit.buyerIds).toHaveLength(buyers.users.length - 1);
+      const fitting = fit.state === "ok" ? fit.buyerIds : [];
+      expect(fitting.length).toBeGreaterThan(0);
+      const checked = matches.filter((m) => m.item_id === item.id).map((m) => m.buyer_id);
+      expect(new Set(checked)).toEqual(new Set(fitting));
+    }
+  });
+
+  it("give the persona 3 buyers for the baby tee and 2 for the shorts", () => {
+    const byTitle = (title: string) => items.find((i) => i.title === title)!.id;
+    expect(strong(byTitle("100% Cotton Crew Baby Tee"))).toHaveLength(3);
+    expect(strong(byTitle("Fleece Shortie Shorts"))).toHaveLength(2);
+  });
+
+  it("put every neighbor's piece in the persona's Suits you, with a few reasons", () => {
+    for (const item of neighbors.items) {
+      const mine = matches.filter((m) => m.item_id === item.id);
+      expect(mine).toHaveLength(1);
+      expect(mine[0].buyer_id).toBe(persona.id);
+      expect(mine[0].score).toBeGreaterThanOrEqual(RESALE_SCORE_THRESHOLD);
+      expect(mine[0].buyer_reasons.length).toBeGreaterThanOrEqual(2);
     }
   });
 });

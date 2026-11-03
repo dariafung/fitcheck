@@ -21,6 +21,7 @@ test.afterAll(async () => {
 async function signUp(page: Page): Promise<string> {
   const email = `e2e-style-${randomUUID().slice(0, 8)}@example.com`;
   await page.goto("/signup");
+  await page.getByLabel("Name").fill("E2E tester");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("e2e-password");
   await page.getByRole("button", { name: "Create account" }).click();

@@ -1,0 +1,250 @@
+{
+  "users": [
+    {
+      "id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "display_name": "Maya",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "top_size": "S",
+      "bottom_size": "S",
+      "shoe_size": "W7"
+    },
+    {
+      "id": "18b0e708-0b25-46ee-9848-616928911dcc",
+      "display_name": "Jordan",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "top_size": "XS",
+      "bottom_size": "XS",
+      "shoe_size": "W6"
+    },
+    {
+      "id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "display_name": "Priya",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "top_size": "S",
+      "bottom_size": "S",
+      "shoe_size": "W8"
+    },
+    {
+      "id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "display_name": "Lena",
+      "is_seed": true,
+      "resale_opt_in": true,
+      "top_size": "S",
+      "bottom_size": "S",
+      "shoe_size": "W7.5"
+    }
+  ],
+  "items": [
+    {
+      "id": "af2c734c-3125-4536-a8ac-ed56d3277652",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "status": "passing_on",
+      "entry_method": "screenshot",
+      "title": "High-Waisted Wide-Leg Trousers",
+      "brand": null,
+      "size": "S",
+      "asking_price_cents": 2200,
+      "condition": "like_new",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "trousers",
+        "colors": [
+          {
+            "name": "Black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "polyester",
+          "viscose"
+        ],
+        "formality": 3,
+        "occasions": [
+          "school",
+          "social"
+        ],
+        "tempRangeF": {
+          "min": 45,
+          "max": 80
+        },
+        "pattern": "solid",
+        "fit": "relaxed"
+      },
+      "user_tags": {},
+      "on_model": false,
+      "image_paths": [],
+      "raw_source": {
+        "placeholder": "Replaced by the real product once its screenshot is framed"
+      }
+    },
+    {
+      "id": "e3b74be4-6a77-4db8-a17b-40d87043b14c",
+      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
+      "status": "passing_on",
+      "entry_method": "screenshot",
+      "title": "Ribbed Knit Cardigan",
+      "brand": null,
+      "size": "S",
+      "asking_price_cents": 1800,
+      "condition": "good",
+      "category": "top",
+      "ai_tags": {
+        "category": "top",
+        "subcategory": "cardigan",
+        "colors": [
+          {
+            "name": "Cream"
+          }
+        ],
+        "colorFamily": "white",
+        "materials": [
+          "cotton"
+        ],
+        "formality": 2,
+        "occasions": [
+          "school",
+          "social"
+        ],
+        "tempRangeF": {
+          "min": 45,
+          "max": 70
+        },
+        "pattern": "solid",
+        "fit": "regular"
+      },
+      "user_tags": {},
+      "on_model": false,
+      "image_paths": [],
+      "raw_source": {
+        "placeholder": "Replaced by the real product once its screenshot is framed"
+      }
+    },
+    {
+      "id": "b592daa9-a10d-4564-b9c3-ed6770fd002d",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "status": "passing_on",
+      "entry_method": "screenshot",
+      "title": "Satin Midi Skirt",
+      "brand": null,
+      "size": "M",
+      "asking_price_cents": 2000,
+      "condition": "like_new",
+      "category": "bottom",
+      "ai_tags": {
+        "category": "bottom",
+        "subcategory": "midi skirt",
+        "colors": [
+          {
+            "name": "Chocolate"
+          }
+        ],
+        "colorFamily": "brown",
+        "materials": [
+          "satin"
+        ],
+        "formality": 3,
+        "occasions": [
+          "social"
+        ],
+        "tempRangeF": {
+          "min": 55,
+          "max": 85
+        },
+        "pattern": "solid"
+      },
+      "user_tags": {},
+      "on_model": false,
+      "image_paths": [],
+      "raw_source": {
+        "placeholder": "Replaced by the real product once its screenshot is framed"
+      }
+    },
+    {
+      "id": "40f0e480-42f5-4ae2-8eee-df79ba6b1183",
+      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "status": "passing_on",
+      "entry_method": "screenshot",
+      "title": "Square-Toe Ballet Flats",
+      "brand": null,
+      "size": "W7.5",
+      "asking_price_cents": 2500,
+      "condition": "good",
+      "category": "shoes",
+      "ai_tags": {
+        "category": "shoes",
+        "subcategory": "flats",
+        "colors": [
+          {
+            "name": "Black"
+          }
+        ],
+        "colorFamily": "black",
+        "materials": [
+          "leather"
+        ],
+        "formality": 3,
+        "occasions": [
+          "school",
+          "social"
+        ],
+        "tempRangeF": {
+          "min": 45,
+          "max": 90
+        },
+        "pattern": "solid"
+      },
+      "user_tags": {},
+      "on_model": false,
+      "image_paths": [],
+      "raw_source": {
+        "placeholder": "Replaced by the real product once its screenshot is framed"
+      }
+    },
+    {
+      "id": "c1708d91-6dc8-4a63-bae4-09aaf9d90908",
+      "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
+      "status": "passing_on",
+      "entry_method": "screenshot",
+      "title": "Cropped Denim Jacket",
+      "brand": null,
+      "size": "S",
+      "asking_price_cents": 3000,
+      "condition": "good",
+      "category": "outerwear",
+      "ai_tags": {
+        "category": "outerwear",
+        "subcategory": "jacket",
+        "colors": [
+          {
+            "name": "Mid Blue"
+          }
+        ],
+        "colorFamily": "blue",
+        "materials": [
+          "denim"
+        ],
+        "formality": 2,
+        "occasions": [
+          "school",
+          "social"
+        ],
+        "tempRangeF": {
+          "min": 50,
+          "max": 72
+        },
+        "pattern": "solid",
+        "fit": "regular"
+      },
+      "user_tags": {},
+      "on_model": false,
+      "image_paths": [],
+      "raw_source": {
+        "placeholder": "Replaced by the real product once its screenshot is framed"
+      }
+    }
+  ]
+}

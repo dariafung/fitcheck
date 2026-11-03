@@ -1,17 +1,14 @@
 import type { Db } from "../db/server";
-
-// What we call a new account: the part of the email before the @.
-export function displayNameFor(email: string | null | undefined): string {
-  const name = email?.split("@")[0]?.trim();
-  return name || "me";
-}
+import { nicknameOrDefault } from "../profile/nickname";
 
 // The users row every closet, feeling and profile hangs off. Made right after
-// sign-up; an existing row (the persona included) is left exactly as it is.
-export async function ensureUserRow(db: Db, id: string, email: string | null | undefined) {
+// sign-up with the name from the form (DEFAULT_NICKNAME without one, never
+// anything from the email); an existing row (the persona included) is left
+// exactly as it is.
+export async function ensureUserRow(db: Db, id: string, name: string | null | undefined) {
   await db
     .from("users")
-    .upsert({ id, display_name: displayNameFor(email) }, { onConflict: "id", ignoreDuplicates: true })
+    .upsert({ id, display_name: nicknameOrDefault(name) }, { onConflict: "id", ignoreDuplicates: true })
     .throwOnError();
 }
 
@@ -19,8 +16,8 @@ export async function ensureUserRow(db: Db, id: string, email: string | null | u
 // currentUserId writes at most once per user per process.
 const known = new Set<string>();
 
-export async function ensureKnownUser(db: Db, id: string, email: string | null | undefined) {
+export async function ensureKnownUser(db: Db, id: string, name: string | null | undefined) {
   if (known.has(id)) return;
-  await ensureUserRow(db, id, email);
+  await ensureUserRow(db, id, name);
   known.add(id);
 }
