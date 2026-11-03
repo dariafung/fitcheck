@@ -23,27 +23,113 @@ interface Bounds {
   height: number;
 }
 
-function contentBounds(data: Buffer, width: number, height: number): Bounds | null {
-  const rows = new Uint32Array(height);
-  const columns = new Uint32Array(width);
+function isGarment(data: Buffer, i: number): boolean {
   const limit = 255 - TRIM_THRESHOLD;
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 3;
-      if (data[i] < limit || data[i + 1] < limit || data[i + 2] < limit) {
+  return data[i] < limit || data[i + 1] < limit || data[i + 2] < limit;
+}
+
+// Rows and columns with enough garment pixels inside `area`, as bounds.
+function lineBounds(data: Buffer, width: number, area: Bounds): Bounds | null {
+  const rows = new Uint32Array(area.height);
+  const columns = new Uint32Array(area.width);
+  for (let y = 0; y < area.height; y++) {
+    for (let x = 0; x < area.width; x++) {
+      if (isGarment(data, ((area.top + y) * width + area.left + x) * 3)) {
         rows[y]++;
         columns[x]++;
       }
     }
   }
-  const minRow = Math.max(1, Math.round(width * MIN_LINE_SHARE));
-  const minColumn = Math.max(1, Math.round(height * MIN_LINE_SHARE));
+  const minRow = Math.max(1, Math.round(area.width * MIN_LINE_SHARE));
+  const minColumn = Math.max(1, Math.round(area.height * MIN_LINE_SHARE));
   const top = rows.findIndex((n) => n >= minRow);
   const left = columns.findIndex((n) => n >= minColumn);
   if (top < 0 || left < 0) return null;
   const bottom = rows.findLastIndex((n) => n >= minRow);
   const right = columns.findLastIndex((n) => n >= minColumn);
-  return { left, top, width: right - left + 1, height: bottom - top + 1 };
+  return { left: area.left + left, top: area.top + top, width: right - left + 1, height: bottom - top + 1 };
+}
+
+// Pieces are found on a grid of cells about this many across the long side.
+const PIECE_GRID = 400;
+// Pixels this far apart (as a share of the long side) still join one piece,
+// so a thin strap or lace separated from the body by a pale gap stays on.
+const JOIN_SHARE = 0.01;
+// The middle of the crop a piece must reach to count as garment. A piece
+// that touches the crop's edge and stays out of here is the next photo or
+// the page around the product, taken in by the padded crop.
+const MIDDLE = { from: 0.3, to: 0.7 };
+// A piece counts as garment when it has at least this share of the biggest
+// piece's pixels: both shoes of a pair stay, the product name, a badge or
+// the edge of a thumbnail next to the photo don't.
+export const MIN_PIECE_SHARE = 0.25;
+
+// The area covered by the garment: the biggest piece of non-white pixels and
+// any piece nearly as big, leaving out small ones elsewhere in the crop.
+function garmentArea(data: Buffer, width: number, height: number): Bounds | null {
+  const cell = Math.max(1, Math.ceil(Math.max(width, height) / PIECE_GRID));
+  const cols = Math.ceil(width / cell);
+  const rowsN = Math.ceil(height / cell);
+  const weight = new Uint32Array(cols * rowsN);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (isGarment(data, (y * width + x) * 3)) weight[Math.floor(y / cell) * cols + Math.floor(x / cell)]++;
+    }
+  }
+  // Neighbouring cells, and cells a little apart (a thin gap), join one piece.
+  const reach = Math.max(2, Math.round((Math.max(width, height) * JOIN_SHARE) / cell));
+  const label = new Int32Array(cols * rowsN).fill(-1);
+  const pieces: { pixels: number; left: number; top: number; right: number; bottom: number }[] = [];
+  const stack: number[] = [];
+  for (let start = 0; start < weight.length; start++) {
+    if (weight[start] === 0 || label[start] >= 0) continue;
+    const piece = { pixels: 0, left: cols, top: rowsN, right: -1, bottom: -1 };
+    label[start] = pieces.length;
+    stack.push(start);
+    while (stack.length > 0) {
+      const at = stack.pop()!;
+      const cx = at % cols;
+      const cy = (at - cx) / cols;
+      piece.pixels += weight[at];
+      piece.left = Math.min(piece.left, cx);
+      piece.right = Math.max(piece.right, cx);
+      piece.top = Math.min(piece.top, cy);
+      piece.bottom = Math.max(piece.bottom, cy);
+      for (let ny = Math.max(0, cy - reach); ny <= Math.min(rowsN - 1, cy + reach); ny++) {
+        for (let nx = Math.max(0, cx - reach); nx <= Math.min(cols - 1, cx + reach); nx++) {
+          const next = ny * cols + nx;
+          if (weight[next] > 0 && label[next] < 0) {
+            label[next] = pieces.length;
+            stack.push(next);
+          }
+        }
+      }
+    }
+    pieces.push(piece);
+  }
+  if (pieces.length === 0) return null;
+  const midLeft = cols * MIDDLE.from;
+  const midRight = cols * MIDDLE.to;
+  const midTop = rowsN * MIDDLE.from;
+  const midBottom = rowsN * MIDDLE.to;
+  const atEdgeOnly = (p: (typeof pieces)[number]) =>
+    (p.left === 0 || p.top === 0 || p.right === cols - 1 || p.bottom === rowsN - 1) &&
+    !(p.right >= midLeft && p.left <= midRight && p.bottom >= midTop && p.top <= midBottom);
+  // When every piece is at the edge, none is ruled out.
+  const inner = pieces.filter((p) => !atEdgeOnly(p));
+  const candidates = inner.length > 0 ? inner : pieces;
+  const biggest = Math.max(...candidates.map((p) => p.pixels));
+  const kept = candidates.filter((p) => p.pixels >= biggest * MIN_PIECE_SHARE);
+  const left = Math.min(...kept.map((p) => p.left)) * cell;
+  const top = Math.min(...kept.map((p) => p.top)) * cell;
+  const right = Math.min(width, (Math.max(...kept.map((p) => p.right)) + 1) * cell);
+  const bottom = Math.min(height, (Math.max(...kept.map((p) => p.bottom)) + 1) * cell);
+  return { left, top, width: right - left, height: bottom - top };
+}
+
+function contentBounds(data: Buffer, width: number, height: number): Bounds | null {
+  const area = garmentArea(data, width, height);
+  return area && lineBounds(data, width, area);
 }
 
 // The photo flattened onto white, trimmed to the garment and scaled (up or
@@ -174,8 +260,11 @@ function liftableBackground(sides: number[][][]): [number, number, number] | nul
 // True when a flat-lay photo can't be put on white for free: a backdrop
 // (gradient, busy, dark) still fills whole sides of the area, where a
 // garment on white touches its bounding box only here and there.
-export async function needsCutout(photo: Buffer): Promise<boolean> {
-  const sides = await backdropSides(photo);
+// `probe` is the photo to judge the backdrop on when it differs from the one
+// framed: the model's own crop, before productPhoto padded it with the page
+// (whose text would break the backdrop's sides).
+export async function needsCutout(photo: Buffer, probe: Buffer = photo): Promise<boolean> {
+  const sides = await backdropSides(probe);
   if (!sides || liftableBackground(sides)) return false;
   const filled = sides.filter((side) => side.filter(shaded).length >= side.length * MIN_BACKDROP_SIDE);
   return filled.length >= MIN_FILLED_SIDES;
@@ -186,8 +275,9 @@ export async function needsCutout(photo: Buffer): Promise<boolean> {
 // in proportion, for free: nothing is cut away, so a white or pale garment
 // stays whole, only a few percent lighter. Anything else (a model, a busy or
 // dark background) keeps its background.
-export async function frameOriginal(photo: Buffer): Promise<Buffer> {
-  const sides = await backdropSides(photo);
+// The backdrop is judged on `probe`, as in needsCutout.
+export async function frameOriginal(photo: Buffer, probe: Buffer = photo): Promise<Buffer> {
+  const sides = await backdropSides(probe);
   const background = sides && liftableBackground(sides);
   if (!background) return frameOnWhite(photo);
   const lifted = await sharp(photo)

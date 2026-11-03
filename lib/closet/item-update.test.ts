@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ItemTags } from "@/lib/ai/schemas/common";
-import { itemUpdate, needsSize, type EditableRow } from "./item-update";
+import { itemUpdate, needsListing, needsSize, type EditableRow } from "./item-update";
 import { itemTags } from "./tags";
 
 const AI: ItemTags = {
@@ -21,6 +21,8 @@ function row(over: Partial<EditableRow> = {}): EditableRow {
     category: "top",
     status: "active",
     size: null,
+    asking_price_cents: null,
+    condition: null,
     ai_tags: AI,
     user_tags: {},
     ...over,
@@ -114,5 +116,42 @@ describe("needsSize", () => {
     expect(needsSize(old, edit(old, { formality: 4 }))).toBe(false);
     expect(needsSize(old, { status: "passing_on" })).toBe(false);
     expect(needsSize(old, { status: "active" })).toBe(false);
+  });
+});
+
+describe("needsListing", () => {
+  const listed = { askingPriceCents: 1200, condition: "like_new" as const };
+
+  it("asks for a price and a condition when passing an item on", () => {
+    expect(needsListing(row(), { status: "passing_on", size: "M" })).toBe(true);
+    expect(needsListing(row(), { status: "passing_on", size: "M", askingPriceCents: 1200 })).toBe(true);
+    expect(needsListing(row(), { status: "passing_on", size: "M", ...listed })).toBe(false);
+    expect(needsListing(row({ asking_price_cents: 1200, condition: "good" }), { status: "passing_on" })).toBe(false);
+  });
+
+  it("won't take either off an item that is passing on, but lets it change", () => {
+    const passing = row({ status: "passing_on", size: "M", asking_price_cents: 1200, condition: "good" });
+    expect(needsListing(passing, { askingPriceCents: null })).toBe(true);
+    expect(needsListing(passing, { condition: null })).toBe(true);
+    expect(needsListing(passing, { askingPriceCents: 900, condition: "fair" })).toBe(false);
+    expect(needsListing(passing, { status: "active", askingPriceCents: null })).toBe(false);
+  });
+
+  it("lets items passed on before listings existed be edited or kept", () => {
+    const old = row({ status: "passing_on", size: "M" });
+    expect(needsListing(old, { size: "L" })).toBe(false);
+    expect(needsListing(old, { status: "active" })).toBe(false);
+  });
+
+  it("writes only the listing fields that change", () => {
+    const passing = row({ status: "passing_on", size: "M", asking_price_cents: 1200, condition: "good" });
+    expect(itemUpdate(passing, { askingPriceCents: 1200, condition: "good" })).toBeNull();
+    expect(itemUpdate(passing, { askingPriceCents: 950, condition: "good" })).toEqual({ asking_price_cents: 950 });
+    expect(itemUpdate(row(), { status: "passing_on", size: "M", ...listed })).toEqual({
+      status: "passing_on",
+      size: "M",
+      asking_price_cents: 1200,
+      condition: "like_new",
+    });
   });
 });

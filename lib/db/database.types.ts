@@ -79,14 +79,14 @@ isOneToOne: false
                   ]
                 },"items": {
                   Row: {
-                    "ai_tags": Json | null,"brand": string | null,"category": string,"created_at": string,"currency": string | null,"entry_method": string,"id": string,"image_paths": (string)[],"on_model": boolean | null,"price_cents": number | null,"raw_source": Json | null,"retailer": string | null,"size": string | null,"source_url": string | null,"status": string,"title": string,"updated_at": string,"user_id": string,"user_tags": NonNullable<Json>
+                    "ai_tags": Json | null,"asking_price_cents": number | null,"brand": string | null,"category": string,"condition": string | null,"created_at": string,"currency": string | null,"entry_method": string,"id": string,"image_paths": (string)[],"on_model": boolean | null,"price_cents": number | null,"raw_source": Json | null,"retailer": string | null,"size": string | null,"source_url": string | null,"status": string,"title": string,"updated_at": string,"user_id": string,"user_tags": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "ai_tags"?: Json | null,"brand"?: string | null,"category": string,"created_at"?: string,"currency"?: string | null,"entry_method": string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"user_id": string,"user_tags"?: NonNullable<Json>
+                    "ai_tags"?: Json | null,"asking_price_cents"?: number | null,"brand"?: string | null,"category": string,"condition"?: string | null,"created_at"?: string,"currency"?: string | null,"entry_method": string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"user_id": string,"user_tags"?: NonNullable<Json>
                   }
                   Update: {
-                    "ai_tags"?: Json | null,"brand"?: string | null,"category"?: string,"created_at"?: string,"currency"?: string | null,"entry_method"?: string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string,"user_tags"?: NonNullable<Json>
+                    "ai_tags"?: Json | null,"asking_price_cents"?: number | null,"brand"?: string | null,"category"?: string,"condition"?: string | null,"created_at"?: string,"currency"?: string | null,"entry_method"?: string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string,"user_tags"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -269,6 +269,9 @@ isOneToOne: true
                            },
 "orphan_item_images":
 { Args: { "p_before": string,"p_limit": number,"p_prefix"?: string }; Returns: string[]
+                           },
+"rename_email_named_users":
+{ Args: Record<PropertyKey, never>; Returns: number
                            },
 "style_profile_claim":
 { Args: { "p_cooldown": string,"p_hash": string,"p_user": string }; Returns: string

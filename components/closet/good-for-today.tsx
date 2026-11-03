@@ -10,7 +10,7 @@ import { tempUnitFor } from "@/lib/profile/temp-setting";
 import { toUnit } from "@/lib/profile/temp-unit";
 import { shortCity } from "@/lib/weather/location";
 import { ATTRIBUTION } from "@/lib/weather/open-meteo";
-import { todayWeather } from "@/lib/weather/today";
+import { NO_LOCATION, todayWeather } from "@/lib/weather/today";
 import { ClosetGridSkeleton, EmptyCloset, ItemList } from "./closet-grid";
 import { LocationSync } from "./location-sync";
 
@@ -28,11 +28,12 @@ const TODAY_MAX_PHONE = 4;
 export async function GoodForToday() {
   await connection();
   const userId = await currentUserId();
-  const [items, weather, unit] = await Promise.all([
+  const [items, result, unit] = await Promise.all([
     listClosetItems(createServerClient(), userId),
     headers().then((h) => todayWeather(userId, h)),
     tempUnitFor(userId),
   ]);
+  const weather = result === NO_LOCATION ? null : result;
   const good = goodForToday(items, weather && { min: weather.lowF, max: weather.highF });
   // With nothing to pick from, today's weather and the way to the closet
   // only get in the way of adding the first piece.
@@ -54,10 +55,22 @@ export async function GoodForToday() {
       }
     >
       <LocationSync />
-      {!weather && (
+      {result === NO_LOCATION ? (
         <p className="text-sm text-ink-2">
-          Couldn&apos;t get today&apos;s weather, so here&apos;s everything.
+          <Link
+            href="/profile#weather"
+            className="-my-[13px] inline-flex min-h-11 items-center underline underline-offset-4 transition-colors duration-150 hover:text-ink"
+          >
+            Set your city
+          </Link>{" "}
+          to see what&apos;s good for today.
         </p>
+      ) : (
+        !weather && (
+          <p className="text-sm text-ink-2">
+            Couldn&apos;t get today&apos;s weather, so here&apos;s everything.
+          </p>
+        )
       )}
       {good.length > 0 ? (
         <ItemList items={good.slice(0, TODAY_MAX)} grid={TODAY_GRID} phoneLimit={TODAY_MAX_PHONE} />

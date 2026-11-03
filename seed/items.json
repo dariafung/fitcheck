@@ -1317,7 +1317,9 @@
         "fit",
         "tempRangeF"
       ]
-    }
+    },
+    "asking_price_cents": 1200,
+    "condition": "like_new"
   },
   {
     "id": "dc3f7d62-1d76-46cd-9c1f-8a75b9c711f9",
@@ -1395,6 +1397,8 @@
       "lowConfidence": [
         "tempRangeF"
       ]
-    }
+    },
+    "asking_price_cents": 800,
+    "condition": "good"
   }
 ]

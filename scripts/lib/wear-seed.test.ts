@@ -3,7 +3,7 @@ import feelings from "../../seed/feelings.json";
 import items from "../../seed/items.json";
 import persona from "../../seed/persona.json";
 import plan from "../../seed/wear-plan.json";
-import { addDays, SEED_DAYS, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./wear-seed.mjs";
+import { addDays, futureSeedWarning, SEED_DAYS, seedLastDay, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./wear-seed.mjs";
 
 const LAST_DAY = "2026-10-28";
 // Seed pieces the persona's story is about (seed/items.json).
@@ -190,5 +190,39 @@ describe("seedOutfitLog", () => {
     const sport = rows.filter((r) => r.occasion === "sport").map((r) => r.item_ids.join());
     const top = Math.max(...[...new Set(sport)].map((k) => sport.filter((s) => s === k).length));
     expect(top).toBeGreaterThan(sport.length / 2);
+  });
+});
+
+describe("seedLastDay", () => {
+  it("ends yesterday in Chicago by default", () => {
+    // 03:00 UTC on Nov 3 is still Nov 2 in Chicago.
+    expect(seedLastDay(undefined, new Date("2026-11-03T03:00:00Z"))).toBe("2026-11-01");
+    expect(seedLastDay("", new Date("2026-11-03T18:00:00Z"))).toBe("2026-11-02");
+  });
+
+  it("uses SEED_LAST_DAY when given, so the log covers the hackathon", () => {
+    const last = seedLastDay("2026-11-04");
+    expect(last).toBe("2026-11-04");
+    expect(addDays(last, -(SEED_DAYS - 1))).toBe("2026-10-26");
+  });
+
+  it("refuses a value that isn't a real date", () => {
+    for (const bad of ["2026-11-4", "2026-02-30", "2026-13-01", "Nov 4"]) {
+      expect(() => seedLastDay(bad)).toThrow(/SEED_LAST_DAY/);
+    }
+  });
+});
+
+describe("futureSeedWarning", () => {
+  // 18:00 UTC on Nov 2 is Nov 2 in Chicago.
+  const now = new Date("2026-11-02T18:00:00Z");
+
+  it("warns when the log would end after today in Chicago", () => {
+    expect(futureSeedWarning("2026-11-04", now)).toMatch(/after today \(2026-11-02\).*on or after 2026-11-04/);
+  });
+
+  it("stays quiet for today or earlier", () => {
+    expect(futureSeedWarning("2026-11-02", now)).toBeNull();
+    expect(futureSeedWarning("2026-11-01", now)).toBeNull();
   });
 });

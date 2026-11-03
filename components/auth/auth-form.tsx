@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { logIn, signUp, tryDemo, type AuthFormState } from "@/lib/auth/actions";
 import { AUTH_ERROR_FIELD, AUTH_ERRORS, MIN_PASSWORD_LENGTH } from "@/lib/auth/messages";
+import { MAX_NICKNAME_LENGTH, MIN_NICKNAME_LENGTH } from "@/lib/profile/nickname";
 
 const INPUT = "field h-11";
 const LABEL = "text-sm text-ink-2";
@@ -21,12 +22,42 @@ export function AuthForm({ mode }: { mode: keyof typeof MODES }) {
   // An error about one box shows under it, in place of its hint.
   const field = state.error && AUTH_ERROR_FIELD[state.error];
   const message = state.error && AUTH_ERRORS[state.error];
+  const nameBad = field === "name";
   const emailBad = field === "email" || state.error === "bad_login";
   const passwordBad = field === "password";
   const hint = mode === "signup" && !passwordBad;
 
   return (
     <form action={formAction} noValidate className="flex flex-col gap-5">
+      {mode === "signup" && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="name" className={LABEL}>
+            Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="nickname"
+            required
+            minLength={MIN_NICKNAME_LENGTH}
+            maxLength={MAX_NICKNAME_LENGTH}
+            defaultValue={state.name}
+            aria-invalid={nameBad || undefined}
+            aria-describedby={nameBad ? "name-error" : "name-hint"}
+            className={INPUT}
+          />
+          {nameBad ? (
+            <p id="name-error" role="alert" className={ERROR}>
+              {message}
+            </p>
+          ) : (
+            <p id="name-hint" className="text-sm text-ink-2">
+              What others see. Not your email.
+            </p>
+          )}
+        </div>
+      )}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className={LABEL}>
           Email

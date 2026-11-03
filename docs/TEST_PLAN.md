@@ -7,7 +7,7 @@ Test the hosted app in your browser and report anything that doesn't match the e
 - Site: https://fitcheck-chi-eight.vercel.app
 - It deploys from `main`. The commit you tested is the latest one on `main` at the time; put it in every report.
 - AI is **live**: real model calls on the project's Meta key. You don't need a key of your own.
-- The app stops calling the model after **$7 a day** (all users together). Rough cost: a few cents per screenshot, about $0.02 per purchase check, about $0.01 per "Style it with AI". If AI steps start failing with a budget message, stop for the day and note it in an issue.
+- The app stops calling the model after **$15 a day** (all users together). Rough cost: a few cents per screenshot, about $0.02 per purchase check, about $0.01 per "Style it with AI". If AI steps start failing with a budget message, stop for the day and note it in an issue.
 - Use your own email for the account. No confirmation email is sent; you can use it right away.
 - Section 9 (resale) needs a second account. Use another email of yours.
 
@@ -20,7 +20,7 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). 
 | # | Do | Expect |
 | --- | --- | --- |
 | 1.1 | Open the site while signed out | You land on `/login` with "Log in", "Sign up" and "Try the demo account" |
-| 1.2 | "Sign up" with your email and a password of 6+ characters | You land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | You land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
 | 1.3 | Log out, log in again with the same email and password | Back in your (empty) closet |
 | 1.4 | Log in with a wrong password | A short error on the page |
 | 1.5 | Open `/closet` in a private window | Sent to `/login` |
@@ -85,6 +85,7 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 6.2 | Switch units in · lb ↔ cm · kg | Numbers convert; switching back gives the same numbers |
 | 6.3 | Weather: search a city, pick it | Home shows that city's low–high in your Profile's unit |
 | 6.4 | Home | "Good for today" shows clothes whose range fits today's weather; "Change" goes to the weather setting in Profile |
+| 6.5 | In a private window with location blocked and no city picked (e.g. local dev), open home | "Good for today" lists everything under "Set your city to see what's good for today."; the link goes to the weather setting, which reads "Not set" |
 | 6.5 | Profile: pick °C, Save; open home, an item, "Edit details", then a purchase check card | Today's low–high, "Comfortable in" and the temperature boxes are all in whole °C; a box you don't touch saves its old value unchanged |
 | 6.6 | Pick °F again, Save | Everything is back in °F with the same numbers as before |
 | 6.7 | Home with feelings on fewer than 3 items | Under "Your style": "Say how 3 pieces feel and we'll sum up your style." |
@@ -134,14 +135,16 @@ Use two accounts: A (yours from section 1) and B (a second one).
 
 | # | Do | Expect |
 | --- | --- | --- |
-| 9.1 | A: open an item with no size, "Pass it on" | "What size is it?" with a box, "Pass it on" and Cancel |
-| 9.2 | Type a size as on the label (e.g. "S"), "Pass it on" | "Passing on. It's left out of your outfits and buy checks." with "Size S · Edit size"; a "Matching buyers" section below |
+| 9.1 | A: open an item with no size, "Pass it on" | Size, Price (USD) and Condition boxes, "Pass it on" and Cancel; each one empty or wrong says so |
+| 9.2 | Type a size as on the label (e.g. "S"), a price (e.g. 24.50) and a condition, "Pass it on" | "Passing on. It's left out of your outfits and buy checks." with "Size S · Asking $24.50 · Like new · Edit"; a "Matching buyers" section below |
 | 9.3 | Closet → "Passing on" tab | The item is there and not under "Wearing"; it's left out of "Good for today", the calendar's picker and new buy checks |
 | 9.4 | A: "Matching buyers" before anyone else has opted in | "Looking for buyers…", then "No active buyers right now." and "Try the demo account to see how matching works." |
 | 9.5 | B: sign up, fill Profile with sizes that fit A's item, tick "I'd take secondhand clothes", Save; add a few clothes with feelings | Saved |
 | 9.6 | A: reopen the item | Either a line saying how many people would want it, with one identical anonymous avatar per person (at most 5, then "+N"), or "No one's a strong match yet." No names, emails or scores anywhere |
-| 9.7 | A: "Edit size" to a size B doesn't wear | "No buyers in this size right now." |
+| 9.7 | A: "Edit", change the size to one B doesn't wear | "No buyers for this one right now." |
 | 9.8 | A: "Keep wearing it" | The item is back in "Wearing" and in outfits; "Matching buyers" is gone |
+| 9.9 | A: pass the item on again with a size B wears and reopen it; B: home | If B's check scored 60+: "Suits you" with A's item, its size, price and condition, B's reasons and "from" A's name; no email, score, or way to contact A. Otherwise no "Suits you" |
+| 9.10 | A: Profile, change the name, Save; B: reload home | Saved; B's "Suits you" says "from" A's new name. A never sees B's name |
 
 ### 10. Demo account
 
@@ -152,9 +155,10 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.3 | Open an item and Profile | No Edit, Save, Delete, "Pass it on" or voice button; instead "Demo account is read-only. Sign up to add your own." No Resale section in Profile |
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
-| 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers" on each: "N person / people in your size would likely want this." (at least 1), and that many identical anonymous avatars (up to 5); no names or scores |
+| 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
 | 10.7 | Run "Should I buy this?" | Works and shows a score |
 | 10.8 | "Style it with AI" under a sample outfit | Works as in 7.10 |
+| 10.9 | Home | "Suits you" lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Maya" (or Priya, Lena…); nothing to press, no emails or scores |
 
 ## Reporting a bug
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { memoryBudgetStore, recordSpend, setBudgetStore } from "@/lib/ai/budget";
+import { DEFAULT_DAILY_BUDGET_USD, memoryBudgetStore, recordSpend, setBudgetStore } from "@/lib/ai/budget";
 import { AiBudgetError, AiDailyLimitError, AiDemoLimitError, AiOutputError } from "@/lib/ai/errors";
 import { aiErrorResponse } from "@/lib/ai/http";
 import type { SessionUser } from "@/lib/auth/session";
@@ -20,8 +20,8 @@ const session = vi.hoisted(() => ({ user: null as SessionUser | null }));
 vi.mock("@/lib/auth/session", () => ({ sessionUser: async () => session.user }));
 
 const NOON = new Date("2026-10-31T17:00:00Z"); // 12:00 in Chicago
-const user = (id: string): SessionUser => ({ id, email: `${id}@example.com`, readOnly: false, sessionId: `s-${id}` });
-const demo = (sessionId: string | null): SessionUser => ({ id: "demo", email: null, readOnly: true, sessionId });
+const user = (id: string): SessionUser => ({ id, email: `${id}@example.com`, name: null, readOnly: false, sessionId: `s-${id}` });
+const demo = (sessionId: string | null): SessionUser => ({ id: "demo", email: null, name: null, readOnly: true, sessionId });
 
 async function takeTimes(n: number, action: Parameters<typeof takeDaily>[0], now = NOON) {
   for (let i = 0; i < n; i++) await takeDaily(action, now);
@@ -97,14 +97,14 @@ describe("takeDaily", () => {
 
   it("closes live AI to other accounts once only the demo's reserve is left", async () => {
     vi.stubEnv("AI_MODE", "live");
-    await recordSpend(7 - DEMO_RESERVE_USD);
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD - DEMO_RESERVE_USD);
     await expect(takeDaily("read", NOON)).rejects.toBeInstanceOf(AiBudgetError);
     session.user = demo("one");
     await expect(takeDaily("read", NOON)).resolves.toBeDefined();
   });
 
   it("leaves the reserve alone in mock mode, where nothing is spent", async () => {
-    await recordSpend(7);
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD);
     await expect(takeDaily("read", NOON)).resolves.toBeDefined();
   });
 

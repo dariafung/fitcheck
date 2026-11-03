@@ -81,6 +81,8 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
                 <ItemSize
                   itemId={item.id}
                   size={item.size}
+                  askingPriceCents={item.askingPriceCents}
+                  condition={item.condition}
                   readable={item.size !== null && readSize(item.size, item.tags.category) !== null}
                   readOnly={readOnly}
                 />
@@ -112,7 +114,13 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
             {!readOnly && (
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <EditDetailsButton />
-                <PassOnToggle itemId={item.id} status={status} size={item.size} />
+                <PassOnToggle
+                  itemId={item.id}
+                  status={status}
+                  size={item.size}
+                  askingPriceCents={item.askingPriceCents}
+                  condition={item.condition}
+                />
               </div>
             )}
 

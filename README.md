@@ -10,9 +10,9 @@ Built for the Meta Global AI Developer Hackathon (Indie track).
 
 ## Try it
 
-On the login page, click **Try the demo account**. It's a read-only account for a made-up persona with 18 items and 10 days of logged outfits.
+On the login page, click **Try the demo account**. It's a read-only account for a made-up persona, figment, with 18 items and 10 days of logged outfits. figment passes on two pieces (see how many people would want each) and has secondhand pieces from other made-up users under **Suits you** on home. In the demo account, those buyer counts and Suits you come from cached checks in the seed: the other users (seed neighbors) have only a name and sizes, and their scores and reasons were written for the demo, not by the AI.
 
-Or **Sign up** with any email and a password (no confirmation email) and start from an empty closet.
+Or **Sign up** with a name, any email and a password (no confirmation email) and start from an empty closet.
 
 Things to try first:
 
@@ -34,7 +34,7 @@ Things to try first:
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.
 - **Good for today**: clothes that fit today's weather where you are.
 - **Profile**: measurements, body shape, sizes, outfits wanted per occasion, °F / °C.
-- **Resale matching**: pass on an item to see how many people in your size would likely want it.
+- **Resale matching**: pass on an item with its size, asking price and condition to see how many people would likely want it. Buyers see what suits them under **Suits you** on home, with the seller's name and nothing to contact them with.
 
 ## Meta models
 

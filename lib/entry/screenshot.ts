@@ -10,6 +10,11 @@ const MIN_SCREENSHOT_SIDE = 300;
 const MIN_PHOTO_SIDE = 120;
 // Models round; a box a hair past the edge is still fine once clamped.
 const EDGE_SLACK = 0.02;
+// Share of the box's width / height added on each side before cropping. The
+// model's box sometimes cuts a sleeve or a strap; the white page this takes
+// in is trimmed by frameOnWhite, and text or a stray thumbnail is left out
+// there as a smaller piece.
+export const BOX_PAD = 0.08;
 const FORMATS = new Set(["png", "jpeg", "webp"]);
 
 export interface Screenshot {
@@ -66,14 +71,34 @@ export function pixelBox(box: Box | undefined, width: number, height: number): P
   return { left, top, width: right - left, height: bottom - top };
 }
 
-// The product photo cut out of the screenshot as WebP. Without a usable box
-// the whole screenshot stands in, and `cropped` says so.
+// The box grown by BOX_PAD on each side, kept inside the screenshot.
+export function padBox(box: PixelBox, width: number, height: number): PixelBox {
+  const dx = Math.round(box.width * BOX_PAD);
+  const dy = Math.round(box.height * BOX_PAD);
+  const left = Math.max(0, box.left - dx);
+  const top = Math.max(0, box.top - dy);
+  const right = Math.min(width, box.left + box.width + dx);
+  const bottom = Math.min(height, box.top + box.height + dy);
+  return { left, top, width: right - left, height: bottom - top };
+}
+
+// The product photo cut out of the screenshot as WebP, padded by BOX_PAD.
+// `probe` is the model's box alone, for judging the photo's backdrop
+// (needsCutout, frameOriginal): the page and text the padding takes in would
+// break its sides. Without a usable box the whole screenshot stands in for
+// both, and `cropped` says so.
 export async function productPhoto(
   shot: Screenshot,
   box: Box | undefined,
-): Promise<{ webp: Buffer; cropped: boolean }> {
+): Promise<{ webp: Buffer; probe: Buffer; cropped: boolean }> {
   const region = pixelBox(box, shot.width, shot.height);
-  const image = sharp(shot.data).rotate();
-  if (region) image.extract(region);
-  return { webp: await toItemWebp(image), cropped: !!region };
+  if (!region) {
+    const webp = await toItemWebp(sharp(shot.data).rotate());
+    return { webp, probe: webp, cropped: false };
+  }
+  const [webp, probe] = await Promise.all([
+    toItemWebp(sharp(shot.data).rotate().extract(padBox(region, shot.width, shot.height))),
+    toItemWebp(sharp(shot.data).rotate().extract(region)),
+  ]);
+  return { webp, probe, cropped: true };
 }

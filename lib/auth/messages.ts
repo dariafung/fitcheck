@@ -4,6 +4,7 @@ export const DEMO_READ_ONLY = "Demo account is read-only. Sign up to add your ow
 export const DEMO_READ_ONLY_ERROR = "demo_read_only";
 
 export type AuthError =
+  | "bad_name"
   | "missing_email"
   | "missing_password"
   | "bad_login"
@@ -15,6 +16,7 @@ export type AuthError =
   | "failed";
 
 export const AUTH_ERRORS: Record<AuthError, string> = {
+  bad_name: "Pick a name of 2 to 30 characters.",
   missing_email: "Enter your email.",
   missing_password: "Enter a password.",
   bad_login: "Wrong email or password.",
@@ -26,10 +28,12 @@ export const AUTH_ERRORS: Record<AuthError, string> = {
   failed: "Something went wrong. Try again.",
 };
 
-// Which box an error belongs to: it shows under that box. Wrong email or
+// Which box an error belongs to (the name box is sign-up's only): it shows
+// under that box. Wrong email or
 // password marks both boxes and shows under the password. The rest are about
 // the whole form.
-export const AUTH_ERROR_FIELD: Partial<Record<AuthError, "email" | "password">> = {
+export const AUTH_ERROR_FIELD: Partial<Record<AuthError, "name" | "email" | "password">> = {
+  bad_name: "name",
   missing_email: "email",
   bad_email: "email",
   taken: "email",

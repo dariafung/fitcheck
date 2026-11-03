@@ -87,7 +87,7 @@ describe("PATCH /api/items/[id]", () => {
   async function stored() {
     const { data } = await closet.db
       .from("items")
-      .select("title, brand, category, status, size, ai_tags, user_tags")
+      .select("title, brand, category, status, size, asking_price_cents, condition, ai_tags, user_tags")
       .eq("id", closet.itemId)
       .single()
       .throwOnError();
@@ -135,17 +135,25 @@ describe("PATCH /api/items/[id]", () => {
     expect(items[0].tags).toMatchObject({ category: "outerwear", formality: 3, tempRangeF: { min: 40, max: 70 } });
   });
 
+  // Passing an item on takes its asking price and condition along.
+  const LISTING = { askingPriceCents: 1250, condition: "like_new" };
+
   it("passes an item on and keeps it again", async () => {
-    const off = await patch(closet.itemId, { status: "passing_on", size: "M" });
+    const off = await patch(closet.itemId, { status: "passing_on", size: "M", ...LISTING });
     expect(off.status).toBe(200);
-    expect((await off.json()).item).toMatchObject({ status: "passing_on", size: "M" });
+    expect((await off.json()).item).toMatchObject({
+      status: "passing_on",
+      size: "M",
+      askingPriceCents: 1250,
+      condition: "like_new",
+    });
     expect((await stored()).status).toBe("passing_on");
     expect((await loadClosetItems(closet.db, closet.userId)).items).toEqual([]);
 
     const back = await patch(closet.itemId, { status: "active" });
     expect((await back.json()).item.status).toBe("active");
-    // The size stays for next time.
-    expect(await stored()).toMatchObject({ status: "active", size: "M" });
+    // The size and the listing stay for next time.
+    expect(await stored()).toMatchObject({ status: "active", size: "M", asking_price_cents: 1250, condition: "like_new" });
     const again = await patch(closet.itemId, { status: "passing_on" });
     expect((await again.json()).item).toMatchObject({ status: "passing_on", size: "M" });
   });
@@ -157,13 +165,30 @@ describe("PATCH /api/items/[id]", () => {
     expect((await patch(closet.itemId, { status: "passing_on", size: "  " })).status).toBe(400);
     expect(await stored()).toMatchObject({ status: "active", size: null });
 
-    await patch(closet.itemId, { status: "passing_on", size: "W28" });
+    await patch(closet.itemId, { status: "passing_on", size: "W28", ...LISTING });
     const { item } = await (await get(closet.itemId)).json();
     const details = { title: item.title, brand: null, tags: item.tags };
     expect((await patch(closet.itemId, { details, size: null })).status).toBe(400);
     expect((await patch(closet.itemId, { size: "" })).status).toBe(400);
     expect((await patch(closet.itemId, { details, size: "W29" })).status).toBe(200);
     expect(await stored()).toMatchObject({ status: "passing_on", size: "W29" });
+  });
+
+  it("won't pass an item on without a price and a condition, or take them away while it's passing on", async () => {
+    const noListing = await patch(closet.itemId, { status: "passing_on", size: "M" });
+    expect(noListing.status).toBe(400);
+    expect(await noListing.json()).toEqual({ error: "listing_required" });
+    expect((await patch(closet.itemId, { status: "passing_on", size: "M", askingPriceCents: 900 })).status).toBe(400);
+    expect((await patch(closet.itemId, { status: "passing_on", size: "M", askingPriceCents: -1, condition: "good" })).status).toBe(400);
+    expect((await patch(closet.itemId, { status: "passing_on", size: "M", askingPriceCents: 9.5, condition: "good" })).status).toBe(400);
+    expect((await patch(closet.itemId, { status: "passing_on", size: "M", askingPriceCents: 900, condition: "mint" })).status).toBe(400);
+    expect(await stored()).toMatchObject({ status: "active", asking_price_cents: null, condition: null });
+
+    expect((await patch(closet.itemId, { status: "passing_on", size: "M", ...LISTING })).status).toBe(200);
+    expect((await patch(closet.itemId, { askingPriceCents: null })).status).toBe(400);
+    expect((await patch(closet.itemId, { condition: null })).status).toBe(400);
+    const changed = await patch(closet.itemId, { askingPriceCents: 999, condition: "fair" });
+    expect((await changed.json()).item).toMatchObject({ askingPriceCents: 999, condition: "fair" });
   });
 
   it("sets and clears the size of an item still worn", async () => {

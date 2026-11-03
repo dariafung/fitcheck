@@ -1,9 +1,12 @@
 // Loads the fictional demo persona, items, feelings, style card and 10 days
-// of outfits (ending yesterday) into the database, plus the sample buyers its
-// passing-on pieces are matched with. The persona's old items,
-// card, outfits, insights and photos are cleared first, so the persona ends
-// up exactly as seeded. Item photos listed in items.json image_paths are
-// uploaded from seed/images/.
+// of outfits (ending yesterday, or on SEED_LAST_DAY) into the database, plus
+// the seed neighbors: other seed users with just a name and sizes, and a few
+// pieces of their own they pass on. They are the persona's buyers and the
+// sellers in its "Suits you". The resale matches both ways are seeded as
+// cached checks (resale-matches.json), so the demo never checks anyone. The
+// persona's old items, card, outfits, insights and photos are cleared first,
+// so the persona ends up exactly as seeded. Item photos listed in items.json
+// and neighbors.json image_paths are uploaded from seed/images/.
 //
 // Local by default (.env.local) and refuses any other URL. SEED_REMOTE=1
 // seeds the hosted project instead: SUPABASE_URL and SUPABASE_SECRET_KEY come
@@ -17,7 +20,22 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
-import { addDays, SEED_DAYS, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
+import { addDays, futureSeedWarning, SEED_DAYS, seedLastDay, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
+import "./lib/app-imports.mjs";
+
+// The app's own modules, for the seeded matches' fingerprints.
+const { currentMode } = (await import(new URL("../lib/ai/mode.ts", import.meta.url).href)) as typeof import("../lib/ai/mode");
+const { itemTags } = (await import(new URL("../lib/closet/tags.ts", import.meta.url).href)) as typeof import("../lib/closet/tags");
+const { buyerStates, fingerprint } = (await import(new URL("../lib/resale/fingerprint.ts", import.meta.url).href)) as typeof import("../lib/resale/fingerprint");
+
+interface SeedMatch {
+  item_id: string;
+  seller_id: string;
+  buyer_id: string;
+  score: number;
+  highlights: string[];
+  buyer_reasons: string[];
+}
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -37,6 +55,9 @@ const demoPassword = process.env.DEMO_ACCOUNT_PASSWORD;
 if (!demoPassword) {
   throw new Error(remote ? `Set DEMO_ACCOUNT_PASSWORD for ${DEMO_EMAIL}.` : "Run `pnpm env:local` first.");
 }
+// Seeded matches only count as up to date for the AI mode the site runs in
+// (the hosted site: live), so the hosted seed must say which.
+if (remote && !process.env.AI_MODE) throw new Error("Set AI_MODE to the hosted site's (live).");
 if (remote) {
   const ref = /^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/.exec(url)?.[1];
   if (!ref) throw new Error(`Not a hosted Supabase URL: ${url}`);
@@ -49,9 +70,11 @@ if (remote) {
 }
 
 const persona = readJson("persona.json") as { id: string; lifestyle_mix: Record<string, number> };
-// The outfit log ends yesterday (Chicago), leaving today for the demo. Items
-// count as owned since before it starts.
-const lastDay = addDays(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date()), -1);
+// The outfit log ends yesterday (Chicago), leaving today for the demo, or on
+// SEED_LAST_DAY when set. Items count as owned since before it starts.
+const lastDay = seedLastDay(process.env.SEED_LAST_DAY);
+const future = futureSeedWarning(lastDay);
+if (future) console.warn(future);
 const ownedSince = `${addDays(lastDay, -SEED_DAYS)}T12:00:00Z`;
 const items = (readJson("items.json") as (SeedItem & { image_paths?: string[] })[]).map(
   (item) => ({ ...item, user_id: persona.id, created_at: ownedSince }),
@@ -59,7 +82,8 @@ const items = (readJson("items.json") as (SeedItem & { image_paths?: string[] })
 const feelings = (readJson("feelings.json") as SeedFeeling[]).map(
   (feeling) => ({ ...feeling, user_id: persona.id }),
 );
-const imagePaths = items.flatMap((item) => item.image_paths ?? []);
+const neighbors = readJson("neighbors.json") as { users: { id: string }[]; items: { image_paths?: string[] }[] };
+const imagePaths = [...items, ...neighbors.items].flatMap((item) => item.image_paths ?? []);
 
 const db = createClient(url, key, { auth: { persistSession: false } });
 const bucket = db.storage.from(ITEM_IMAGES_BUCKET);
@@ -131,22 +155,64 @@ const { rows: outfits } = seedOutfitLog({
 const logged = await db.from("outfit_logs").insert(outfits);
 if (logged.error) throw logged.error;
 
-// Sample buyers: opted-in seed users with a few clothes and feelings, no
-// photos and no sign-in. Their old clothes go first, taking feelings and
-// pairings with them.
-const buyers = readJson("buyers.json") as { users: { id: string }[]; items: object[]; feelings: object[] };
-const buyerIds = buyers.users.map((u) => u.id);
-const oldBuyerItems = await db.from("items").delete().in("user_id", buyerIds);
-if (oldBuyerItems.error) throw oldBuyerItems.error;
-const buyerUsers = await db.from("users").upsert(buyers.users);
-if (buyerUsers.error) throw buyerUsers.error;
-const buyerItems = await db.from("items").insert(buyers.items);
-if (buyerItems.error) throw buyerItems.error;
-const buyerFeelings = await db.from("item_feelings").insert(buyers.feelings);
-if (buyerFeelings.error) throw buyerFeelings.error;
+// Seed neighbors: opted-in seed users with only a name and sizes, which is
+// all matching needs, and the pieces they pass on. Their old clothes go first,
+// taking feelings, pairings and matches with them; anything an older seed
+// stored about them (measurements, body shape, outfits wanted) is cleared.
+const neighborIds = neighbors.users.map((u) => u.id);
+const oldNeighborItems = await db.from("items").delete().in("user_id", neighborIds);
+if (oldNeighborItems.error) throw oldNeighborItems.error;
+for (const table of ["style_profiles", "outfit_logs", "wear_insights"] as const) {
+  const cleared = await db.from(table).delete().in("user_id", neighborIds);
+  if (cleared.error) throw cleared.error;
+}
+const NO_PROFILE = {
+  height_cm: null,
+  weight_kg: null,
+  bust_cm: null,
+  waist_cm: null,
+  hip_cm: null,
+  inseam_cm: null,
+  body_shape: null,
+  lifestyle_mix: {},
+  temp_unit: null,
+};
+const neighborUsers = await db.from("users").upsert(neighbors.users.map((u) => ({ ...NO_PROFILE, ...u })));
+if (neighborUsers.error) throw neighborUsers.error;
+const neighborItems = await db.from("items").insert(neighbors.items);
+if (neighborItems.error) throw neighborItems.error;
+
+// The cached buy checks both ways, under the fingerprint the app works out
+// for each now: the neighbors' checks for the persona's passing-on pieces
+// (the count the persona sees) and the persona's for theirs ("Suits you").
+// Fresh, so opening either side never runs a check.
+const seededMatches = (readJson("resale-matches.json") as { matches: SeedMatch[] }).matches;
+const [{ data: soldItems, error: soldError }, states] = await Promise.all([
+  db
+    .from("items")
+    .select("id, user_id, title, category, ai_tags, user_tags, image_paths")
+    .in(
+      "id",
+      seededMatches.map((m) => m.item_id),
+    ),
+  buyerStates(db as unknown as Parameters<typeof buyerStates>[0], [...new Set(seededMatches.map((m) => m.buyer_id))]),
+]);
+if (soldError) throw soldError;
+const matchRows = seededMatches.map((m) => {
+  const item = soldItems.find((i) => i.id === m.item_id);
+  const state = states.get(m.buyer_id);
+  if (!item || !state || item.user_id !== m.seller_id) {
+    throw new Error(`Seed match ${m.item_id} × ${m.buyer_id}: item, seller or buyer doesn't match.`);
+  }
+  const sold = { title: item.title, tags: itemTags(item), photoPath: item.image_paths[0] ?? null };
+  return { ...m, fingerprint: fingerprint(sold, state, currentMode()) };
+});
+const matched = await db.from("resale_matches").upsert(matchRows, { onConflict: "item_id,buyer_id" });
+if (matched.error) throw matched.error;
 
 console.log(
   `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card, ` +
-    `${outfits.length} outfits to ${lastDay}, ${imagePaths.length} images and ${buyerIds.length} sample buyers` +
+    `${outfits.length} outfits to ${lastDay}, ${imagePaths.length} images, ${neighborIds.length} seed neighbors ` +
+    `with ${neighbors.items.length} pieces and ${matchRows.length} cached matches` +
     (remote ? " into the hosted project." : "."),
 );

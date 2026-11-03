@@ -285,15 +285,23 @@ test("closet sort: newest, most worn, least worn, kept with the filters", async 
 
 test("pass an item on from its page, then keep wearing it", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
-  // It has no size yet, so it asks for one first.
+  // It has no size, price or condition yet, so it asks for them first.
   await page.getByRole("button", { name: "Pass it on" }).click();
-  const size = page.getByLabel("What size is it?");
+  const size = page.getByLabel("Size", { exact: true });
   await page.getByRole("button", { name: "Pass it on" }).click();
   await expect(page.getByText("Add a size first.")).toBeVisible();
   await size.fill("M");
+  await page.getByLabel("Price (USD)").fill("abc");
+  await page.getByRole("button", { name: "Pass it on" }).click();
+  await expect(page.getByText("Add a price in US dollars, like 25 or 24.50.")).toBeVisible();
+  await page.getByLabel("Price (USD)").fill("24.5");
+  await page.getByRole("button", { name: "Pass it on" }).click();
+  await expect(page.getByText("Pick a condition.")).toBeVisible();
+  await page.getByLabel("Condition").selectOption("Like new");
   await page.getByRole("button", { name: "Pass it on" }).click();
   await expect(page.getByText("Passing on. It's left out of your outfits and buy checks.")).toBeVisible();
   await expect(page.getByText("Size M")).toBeVisible();
+  await expect(page.getByText("Asking $24.50 · Like new")).toBeVisible();
   await expect(page.getByRole("button", { name: "Pass it on" })).toHaveCount(0);
 
   const main = page.getByRole("main");
@@ -309,7 +317,7 @@ test("pass an item on from its page, then keep wearing it", async ({ page }) => 
   await page.goto("/closet");
   await expect(main.getByRole("link", { name: item.title })).toBeVisible();
 
-  // The size stays, so passing it on again is one tap.
+  // The size and listing stay, so passing it on again is one tap.
   await page.goto(`/closet/${item.id}`);
   await page.getByRole("button", { name: "Pass it on" }).click();
   await expect(page.getByText("Size M")).toBeVisible();

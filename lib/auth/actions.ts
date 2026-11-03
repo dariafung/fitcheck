@@ -8,12 +8,14 @@ import { signupIpHash } from "../limits/ip";
 import { createAuthClient } from "./client";
 import { DEMO_EMAIL, demoPassword } from "./config";
 import { authErrorFor } from "./errors";
+import { Nickname } from "../profile/nickname";
 import { MIN_PASSWORD_LENGTH, type AuthError } from "./messages";
 import { ensureUserRow } from "./users";
 
 export interface AuthFormState {
   error?: AuthError;
   email?: string;
+  name?: string;
 }
 
 function credentials(form: FormData) {
@@ -53,19 +55,25 @@ export async function logIn(_prev: AuthFormState, form: FormData): Promise<AuthF
 // trusted); a sign-up that fails gives its count back.
 export async function signUp(_prev: AuthFormState, form: FormData): Promise<AuthFormState> {
   const { email, password } = credentials(form);
+  const typedName = String(form.get("name") ?? "");
+  const parsedName = Nickname.safeParse(typedName);
+  if (!parsedName.success) return { error: "bad_name", email, name: typedName };
+  const name = parsedName.data;
   const empty = missing(email, password);
-  if (empty) return { error: empty, email };
-  if (password.length < MIN_PASSWORD_LENGTH) return { error: "weak_password", email };
+  if (empty) return { error: empty, email, name };
+  if (password.length < MIN_PASSWORD_LENGTH) return { error: "weak_password", email, name };
   const ipHash = await signupIpHash();
   const ticket = ipHash ? await takeSignup(ipHash) : null;
-  if (ipHash && !ticket) return { error: "too_many_signups", email };
+  if (ipHash && !ticket) return { error: "too_many_signups", email, name };
   const auth = await createAuthClient();
-  const { data, error } = await auth.auth.signUp({ email, password });
+  // The name goes in the user's metadata too, so the users row gets it even
+  // when it's made later by currentUserId.
+  const { data, error } = await auth.auth.signUp({ email, password, options: { data: { name } } });
   if (error || !data.session) {
     await ticket?.giveBack();
-    return { error: authErrorFor(error), email };
+    return { error: authErrorFor(error), email, name };
   }
-  await ensureUserRow(createServerClient(), data.session.user.id, email).catch((err: unknown) => {
+  await ensureUserRow(createServerClient(), data.session.user.id, name).catch((err: unknown) => {
     console.error("users row after sign-up", err);
   });
   redirect("/closet");
