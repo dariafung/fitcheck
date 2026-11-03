@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
-import { MAX_UPLOAD_BYTES, pixelBox, productPhoto, readScreenshot } from "./screenshot";
+import { BOX_PAD, MAX_UPLOAD_BYTES, padBox, pixelBox, productPhoto, readScreenshot } from "./screenshot";
 
 function png(width: number, height: number, color = "#ffffff") {
   return sharp({ create: { width, height, channels: 3, background: color } }).png().toBuffer();
@@ -55,7 +55,7 @@ describe("pixelBox", () => {
 });
 
 describe("productPhoto", () => {
-  it("crops the product out of the screenshot", async () => {
+  it("crops the product out of the screenshot, with BOX_PAD of the page around it", async () => {
     // Red product photo on a white page.
     const data = await sharp(await png(1000, 2000))
       .composite([{ input: await png(800, 1000, "#c0392b"), left: 100, top: 240 }])
@@ -65,7 +65,9 @@ describe("productPhoto", () => {
     const photo = await productPhoto(shot, { x: 0.1, y: 0.12, width: 0.8, height: 0.5 });
     expect(photo.cropped).toBe(true);
     const meta = await sharp(photo.webp).metadata();
-    expect(meta).toMatchObject({ format: "webp", width: 800, height: 1000 });
+    // 800 × 1000 box, grown by 8% of each side all round.
+    expect(BOX_PAD).toBe(0.08);
+    expect(meta).toMatchObject({ format: "webp", width: 928, height: 1160 });
     const { dominant } = await sharp(photo.webp).stats();
     expect(dominant.r).toBeGreaterThan(150);
     expect(dominant.g).toBeLessThan(100);
@@ -76,5 +78,25 @@ describe("productPhoto", () => {
     const photo = await productPhoto(shot, { x: 2, y: 0, width: 1, height: 1 });
     expect(photo.cropped).toBe(false);
     expect(await sharp(photo.webp).metadata()).toMatchObject({ height: 1600 });
+  });
+});
+
+describe("padBox", () => {
+  it("grows the box on every side so a cut sleeve is back in", () => {
+    expect(padBox({ left: 200, top: 300, width: 500, height: 1000 }, 1000, 2000)).toEqual({
+      left: 160,
+      top: 220,
+      width: 580,
+      height: 1160,
+    });
+  });
+
+  it("stays inside the screenshot", () => {
+    expect(padBox({ left: 10, top: 0, width: 980, height: 500 }, 1000, 600)).toEqual({
+      left: 0,
+      top: 0,
+      width: 1000,
+      height: 540,
+    });
   });
 });
