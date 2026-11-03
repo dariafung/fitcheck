@@ -1,5 +1,5 @@
 // Loads the fictional demo persona, items, feelings, style card and 10 days
-// of outfits (ending yesterday) into the database, plus the sample buyers its
+// of outfits (ending yesterday, or on SEED_LAST_DAY) into the database, plus the sample buyers its
 // passing-on pieces are matched with. The persona's old items,
 // card, outfits, insights and photos are cleared first, so the persona ends
 // up exactly as seeded. Item photos listed in items.json image_paths are
@@ -17,7 +17,7 @@ import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { createClient } from "@supabase/supabase-js";
 import { DEMO_EMAIL, ensureDemoAuthUser } from "./lib/demo-auth.mjs";
-import { addDays, SEED_DAYS, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
+import { addDays, futureSeedWarning, SEED_DAYS, seedLastDay, seedOutfitLog, type DayPlan, type SeedFeeling, type SeedItem } from "./lib/wear-seed.mjs";
 
 const ITEM_IMAGES_BUCKET = "item-images";
 const IMAGE_TYPES: Record<string, string> = { ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg" };
@@ -49,9 +49,11 @@ if (remote) {
 }
 
 const persona = readJson("persona.json") as { id: string; lifestyle_mix: Record<string, number> };
-// The outfit log ends yesterday (Chicago), leaving today for the demo. Items
-// count as owned since before it starts.
-const lastDay = addDays(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date()), -1);
+// The outfit log ends yesterday (Chicago), leaving today for the demo, or on
+// SEED_LAST_DAY when set. Items count as owned since before it starts.
+const lastDay = seedLastDay(process.env.SEED_LAST_DAY);
+const future = futureSeedWarning(lastDay);
+if (future) console.warn(future);
 const ownedSince = `${addDays(lastDay, -SEED_DAYS)}T12:00:00Z`;
 const items = (readJson("items.json") as (SeedItem & { image_paths?: string[] })[]).map(
   (item) => ({ ...item, user_id: persona.id, created_at: ownedSince }),

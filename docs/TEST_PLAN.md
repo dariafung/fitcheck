@@ -85,6 +85,7 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 6.2 | Switch units in · lb ↔ cm · kg | Numbers convert; switching back gives the same numbers |
 | 6.3 | Weather: search a city, pick it | Home shows that city's low–high in your Profile's unit |
 | 6.4 | Home | "Good for today" shows clothes whose range fits today's weather; "Change" goes to the weather setting in Profile |
+| 6.5 | In a private window with location blocked and no city picked (e.g. local dev), open home | "Good for today" lists everything under "Set your city to see what's good for today."; the link goes to the weather setting, which reads "Not set" |
 | 6.5 | Profile: pick °C, Save; open home, an item, "Edit details", then a purchase check card | Today's low–high, "Comfortable in" and the temperature boxes are all in whole °C; a box you don't touch saves its old value unchanged |
 | 6.6 | Pick °F again, Save | Everything is back in °F with the same numbers as before |
 | 6.7 | Home with feelings on fewer than 3 items | Under "Your style": "Say how 3 pieces feel and we'll sum up your style." |

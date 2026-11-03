@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LOCATION, describeLocation, locationFromHeaders, resolveLocation, shortCity } from "./location";
+import { describeLocation, locationFromHeaders, resolveLocation, shortCity } from "./location";
 import { LOCATION_COOKIE } from "./location-cookie";
 
 describe("locationFromHeaders", () => {
@@ -31,8 +31,8 @@ function cookie(value: unknown): string {
 }
 
 describe("resolveLocation", () => {
-  it("falls back to Madison when nothing else is known", async () => {
-    expect(await resolveLocation("user", new Headers())).toEqual(DEFAULT_LOCATION);
+  it("is null when nothing is known: there is no default city", async () => {
+    expect(await resolveLocation("user", new Headers())).toBeNull();
   });
 
   it("prefers the browser's location cookie over the IP guess", async () => {
@@ -52,7 +52,7 @@ describe("resolveLocation", () => {
 describe("shortCity", () => {
   it("keeps the part before the first comma", () => {
     expect(shortCity("Chicago, Illinois, US")).toBe("Chicago");
-    expect(shortCity("Madison")).toBe("Madison");
+    expect(shortCity("Seattle")).toBe("Seattle");
   });
 });
 
@@ -68,6 +68,6 @@ describe("describeLocation", () => {
       picked: false,
     });
     expect(describeLocation(new Headers(IP))).toEqual({ label: "Seattle (best guess)", picked: false });
-    expect(describeLocation(new Headers())).toEqual({ label: "Madison (default)", picked: false });
+    expect(describeLocation(new Headers())).toEqual({ label: "Not set", picked: false });
   });
 });

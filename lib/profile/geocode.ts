@@ -24,7 +24,7 @@ export interface CityMatch {
 // the network, by label prefix.
 export const FIXED_CITIES: CityMatch[] = [
   { label: "Chicago, Illinois, US", lat: 41.88, lon: -87.63 },
-  { label: "Madison, Wisconsin, US", lat: 43.07, lon: -89.4 },
+  { label: "Seattle, Washington, US", lat: 47.61, lon: -122.33 },
   { label: "Testville", lat: 40, lon: -100 },
 ];
 
