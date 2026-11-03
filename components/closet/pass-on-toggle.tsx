@@ -3,19 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { ItemStatus } from "@/lib/closet/item-patch";
-import { patchItem, SizeForm } from "./size-form";
+import { ListingForm } from "./listing-form";
+import { patchItem } from "./size-form";
 
 // Moves an item between worn (active) and Passing on, and back. No confirm
-// step: it's one tap to undo. An item without a size asks for one first,
-// in place, since buyers are matched by it.
+// step: it's one tap to undo. Passing on asks in place for what's missing of
+// its size (buyers are matched by it), asking price and condition.
 export function PassOnToggle({
   itemId,
   status,
   size,
+  askingPriceCents,
+  condition,
 }: {
   itemId: string;
   status: ItemStatus;
   size: string | null;
+  askingPriceCents: number | null;
+  condition: string | null;
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -26,7 +31,7 @@ export function PassOnToggle({
   const [problem, setProblem] = useState<string | null>(null);
   const next: ItemStatus = status === "passing_on" ? "active" : "passing_on";
 
-  async function send(body: { status: ItemStatus; size?: string }): Promise<string | null> {
+  async function send(body: Parameters<typeof patchItem>[1]): Promise<string | null> {
     const failed = await patchItem(itemId, body);
     if (!failed) {
       startRefresh(() => {
@@ -38,7 +43,7 @@ export function PassOnToggle({
   }
 
   async function toggle() {
-    if (next === "passing_on" && !size) {
+    if (next === "passing_on" && (!size || askingPriceCents === null || !condition)) {
       setProblem(null);
       setAskingSize(true);
       return;
@@ -51,11 +56,11 @@ export function PassOnToggle({
 
   if (askingSize) {
     return (
-      <SizeForm
-        initial=""
+      <ListingForm
+        initial={{ size, askingPriceCents, condition }}
         submitLabel="Pass it on"
         busyLabel="Saving…"
-        onSave={(typed) => send({ status: "passing_on", size: typed })}
+        onSave={(listing) => send({ status: "passing_on", ...listing })}
         onCancel={() => setAskingSize(false)}
       />
     );

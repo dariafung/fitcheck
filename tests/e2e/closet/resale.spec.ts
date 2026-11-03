@@ -27,6 +27,8 @@ test.beforeEach(async () => {
       status: "passing_on",
       // Bigger than any sample buyer.
       size: "XXL",
+      asking_price_cents: 3000,
+      condition: "good",
       ai_tags: {
         category: "outerwear",
         colors: [{ name: "indigo" }],
@@ -45,9 +47,10 @@ test.afterEach(async () => {
   await db.from("items").delete().eq("id", item.id);
 });
 
-test("a passing-on item shows its size, and says when no buyer fits it", async ({ page }) => {
+test("a passing-on item shows its size and listing, and says when no buyer fits it", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
   await expect(page.getByText("Size XXL")).toBeVisible();
+  await expect(page.getByText("Asking $30 · Good")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Matching buyers" })).toBeVisible();
   await expect(page.getByText("No buyers for this one right now.")).toBeVisible();
 });
@@ -65,24 +68,29 @@ test("the persona's baby tee has one strong sample buyer, shown as one avatar", 
   await expect(buyers).not.toContainText(/Sample buyer [A-Z]/);
 });
 
-test("edit the size; one code can't read still saves, with a note", async ({ page }) => {
+test("edit the size and listing; a size code can't read still saves, with a note", async ({ page }) => {
   await page.goto(`/closet/${item.id}`);
-  await page.getByRole("button", { name: "Edit size" }).click();
-  const size = page.getByLabel("What size is it?");
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  const size = page.getByLabel("Size", { exact: true });
   await expect(size).toHaveValue("XXL");
+  await expect(page.getByLabel("Price (USD)")).toHaveValue("30");
+  await expect(page.getByLabel("Condition")).toHaveValue("good");
 
   // A passing-on item can't lose its size.
   await size.fill("");
-  await page.getByRole("button", { name: "Save size" }).click();
+  await page.getByRole("button", { name: "Save listing" }).click();
   await expect(page.getByText("Add a size first.")).toBeVisible();
 
   await size.fill("Large Tall");
-  await page.getByRole("button", { name: "Save size" }).click();
+  await page.getByLabel("Price (USD)").fill("$22");
+  await page.getByLabel("Condition").selectOption("Fair");
+  await page.getByRole("button", { name: "Save listing" }).click();
   await expect(page.getByText("Size Large Tall")).toBeVisible();
+  await expect(page.getByText("Asking $22 · Fair")).toBeVisible();
   await expect(page.getByText("We can't read this size, so buyers aren't filtered by size.")).toBeVisible();
 
   await page.reload();
   await expect(page.getByText("Size Large Tall")).toBeVisible();
-  const { data } = await db.from("items").select("size").eq("id", item.id).single();
-  expect(data?.size).toBe("Large Tall");
+  const { data } = await db.from("items").select("size, asking_price_cents, condition").eq("id", item.id).single();
+  expect(data).toEqual({ size: "Large Tall", asking_price_cents: 2200, condition: "fair" });
 });
