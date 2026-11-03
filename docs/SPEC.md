@@ -103,7 +103,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 - The Meta console has no hard spending cap: the app keeps a daily budget counter and rate-limits by IP
 - Muse Image requests turn off `enable_web_search`, `enable_image_search` and `enable_shell`; a cleaned-up photo replaces the original before the item is saved, and the item being checked is never stored
 - Secrets live only in the keychain, `.env.local` and Vercel environment variables, never in git
-- Weather: Open-Meteo forecast and geocoding (free, no key, credited on the page). Location order: picked city → device location → Vercel IP headers → Madison. The location and the unit choice live in browser cookies, never in the database; automated tests use `WEATHER_MODE=fixed` and never call Open-Meteo
+- Weather: Open-Meteo forecast and geocoding (free, no key, credited on the page). Location order: picked city → device location → Vercel IP headers; with none of them there is no weather and home lists everything (no default city). The location and the unit choice live in browser cookies, never in the database; automated tests use `WEATHER_MODE=fixed` and never call Open-Meteo
 
 ## Data model
 

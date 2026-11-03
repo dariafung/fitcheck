@@ -6,9 +6,6 @@ export interface WeatherLocation {
   city: string | null;
 }
 
-// Used when there is no browser location and no IP location (e.g. local dev).
-export const DEFAULT_LOCATION: WeatherLocation = { lat: 43.07, lon: -89.4, city: "Madison" };
-
 // Vercel's IP geolocation headers. The city is URL-encoded.
 export function locationFromHeaders(headers: Headers): WeatherLocation | null {
   const lat = Number(headers.get("x-vercel-ip-latitude") ?? NaN);
@@ -33,11 +30,12 @@ export function shortCity(city: string): string {
 }
 
 // The browser's location cookie (picked city, then device location) wins
-// over the IP guess. userId is unused while location lives in the browser.
-export async function resolveLocation(userId: string, headers: Headers): Promise<WeatherLocation> {
+// over the IP guess. Null when neither is known (e.g. local dev): there is no
+// default city. userId is unused while location lives in the browser.
+export async function resolveLocation(userId: string, headers: Headers): Promise<WeatherLocation | null> {
   void userId;
   const stored = readLocationCookie(headers);
-  return (stored && toWeatherLocation(stored)) ?? locationFromHeaders(headers) ?? DEFAULT_LOCATION;
+  return (stored && toWeatherLocation(stored)) ?? locationFromHeaders(headers);
 }
 
 // How the profile page describes where the weather is for.
@@ -47,5 +45,5 @@ export function describeLocation(headers: Headers): { label: string; picked: boo
   if (stored) return { label: "Your location", picked: false };
   const ip = locationFromHeaders(headers);
   if (ip) return { label: `${ip.city ?? "Near you"} (best guess)`, picked: false };
-  return { label: `${DEFAULT_LOCATION.city} (default)`, picked: false };
+  return { label: "Not set", picked: false };
 }

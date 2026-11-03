@@ -24,7 +24,7 @@ test("a new visitor picks a city and home's weather follows", async ({ page, con
   await good.getByRole("link", { name: "Change weather location" }).click();
   await expect(page).toHaveURL(/\/profile#weather$/);
   const weather = page.getByRole("region", { name: "Weather location" });
-  await expect(weather.getByTestId("weather-location")).toHaveText("Madison (default)");
+  await expect(weather.getByTestId("weather-location")).toHaveText("Not set");
 
   await weather.getByRole("button", { name: "Change" }).click();
   await weather.getByRole("searchbox", { name: "City" }).fill("Chi");
@@ -56,7 +56,7 @@ test("going back to my location without permission falls back to the guess", asy
 
   await weather.getByRole("button", { name: "Use my location" }).click();
   await expect(weather.getByRole("status")).toHaveText("Couldn't get your location, so we'll guess.");
-  await expect(weather.getByTestId("weather-location")).toHaveText("Madison (default)");
+  await expect(weather.getByTestId("weather-location")).toHaveText("Not set");
   expect(await storedLocation(context)).toBeNull();
 
   await page.goto("/");
@@ -88,14 +88,14 @@ test.describe("with location permission", () => {
     await page.goto("/profile#weather");
     const weather = page.getByRole("region", { name: "Weather location" });
     await weather.getByRole("button", { name: "Change" }).click();
-    await weather.getByRole("searchbox", { name: "City" }).fill("Madison");
+    await weather.getByRole("searchbox", { name: "City" }).fill("Sea");
     await weather.getByRole("button", { name: "Search" }).click();
     await weather.getByRole("button", { name: FIXED_CITIES[1].label }).click();
     await expect(weather.getByTestId("weather-location")).toHaveText(FIXED_CITIES[1].label);
 
     await page.getByRole("navigation").getByRole("link", { name: "fitcheck" }).click();
     const good = page.getByRole("region", { name: "Good for today" });
-    await expect(good).toContainText(`Madison · ${TEMPS}`);
+    await expect(good).toContainText(`Seattle · ${TEMPS}`);
     await page.waitForLoadState("networkidle");
     expect((await storedLocation(context))?.src).toBe("picked");
 

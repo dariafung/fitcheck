@@ -36,6 +36,7 @@ export async function todayWeather(
   if (mode === "off") return null;
 
   const location = await resolveLocation(userId, headers);
+  if (!location) return null;
   const key = `${location.lat.toFixed(2)},${location.lon.toFixed(2)}`;
   const hit = cache.get(key);
   if (hit && now() - hit.at < CACHE_MS) return { ...hit.temps, city: location.city };

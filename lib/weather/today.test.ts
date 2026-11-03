@@ -25,29 +25,38 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
+// Vercel's IP guess, so live mode has a location to ask about.
+const here = () =>
+  new Headers({ "x-vercel-ip-latitude": "47.61", "x-vercel-ip-longitude": "-122.33", "x-vercel-ip-city": "Seattle" });
+
 describe("todayWeather", () => {
-  it("returns today's temps for the default city and caches them for an hour", async () => {
+  it("returns today's temps for the guessed city and caches them for an hour", async () => {
     let now = 0;
     const opts = { fetchImpl, now: () => now };
-    expect(await todayWeather("u", new Headers(), opts)).toEqual({
+    expect(await todayWeather("u", here(), opts)).toEqual({
       date: "2026-10-26",
       lowF: 40,
       highF: 55,
-      city: "Madison",
+      city: "Seattle",
     });
     now = CACHE_MS - 1;
-    await todayWeather("u", new Headers(), opts);
+    await todayWeather("u", here(), opts);
     expect(calls).toBe(1);
     now = CACHE_MS;
-    await todayWeather("u", new Headers(), opts);
+    await todayWeather("u", here(), opts);
     expect(calls).toBe(2);
+  });
+
+  it("is null without any location, and asks nobody", async () => {
+    expect(await todayWeather("u", new Headers(), { fetchImpl })).toBeNull();
+    expect(calls).toBe(0);
   });
 
   it("is null when Open-Meteo cannot be reached, and tries again next time", async () => {
     failing = true;
-    expect(await todayWeather("u", new Headers(), { fetchImpl })).toBeNull();
+    expect(await todayWeather("u", here(), { fetchImpl })).toBeNull();
     failing = false;
-    expect(await todayWeather("u", new Headers(), { fetchImpl })).not.toBeNull();
+    expect(await todayWeather("u", here(), { fetchImpl })).not.toBeNull();
     expect(calls).toBe(2);
   });
 
