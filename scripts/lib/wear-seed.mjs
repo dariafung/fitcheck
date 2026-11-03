@@ -56,6 +56,23 @@ export function addDays(date, days) {
   return new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
 }
 
+/**
+ * The log's last day: `override` (SEED_LAST_DAY, YYYY-MM-DD) when given,
+ * e.g. to pin the hosted demo's log to the hackathon's dates; otherwise
+ * yesterday in Chicago, leaving today for the demo.
+ * @param {string | undefined} override @param {Date} [now]
+ */
+export function seedLastDay(override, now = new Date()) {
+  if (override) {
+    const time = Date.parse(`${override}T00:00:00Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(override) || Number.isNaN(time) || new Date(time).toISOString().slice(0, 10) !== override) {
+      throw new Error(`SEED_LAST_DAY must be a date as YYYY-MM-DD, got "${override}"`);
+    }
+    return override;
+  }
+  return addDays(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(now), -1);
+}
+
 /** @param {SeedFeeling["structured"] | undefined} f */
 const praises = (f) => !!f && f.liked === "yes" && f.flattering !== "no";
 /** @param {SeedFeeling["structured"] | undefined} f */
