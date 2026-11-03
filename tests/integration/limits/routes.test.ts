@@ -9,7 +9,7 @@ import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
 import { POST as extractPOST } from "@/app/api/items/extract/route";
 import { POST as pairingsPOST } from "@/app/api/pairings/route";
 import * as ai from "@/lib/ai";
-import { memoryBudgetStore, recordSpend, setBudgetStore, today } from "@/lib/ai/budget";
+import { DEFAULT_DAILY_BUDGET_USD, memoryBudgetStore, recordSpend, setBudgetStore, today } from "@/lib/ai/budget";
 import type { ItemTags } from "@/lib/ai/schemas/common";
 import { DEMO_USER_ID } from "@/lib/db/demo-user";
 import { createServerClient } from "@/lib/db/server";
@@ -203,7 +203,7 @@ describe("the demo's reserve", () => {
     vi.stubEnv("AI_MODE", "live");
     // The model is never reached: only the checks before it run.
     vi.mocked(ai.extractItem).mockRejectedValue(new ai.AiError("not in this test", "extractItem", 500));
-    await recordSpend(7 - DEMO_RESERVE_USD);
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD - DEMO_RESERVE_USD);
     const res = await checkExtractPOST(uploadRequest(await shot()));
     expect(res.status).toBe(429);
     expect((await res.json()).error).toBe("AiBudgetError");

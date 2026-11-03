@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { memoryBudgetStore, recordSpend, setBudgetStore } from "@/lib/ai/budget";
+import { DEFAULT_DAILY_BUDGET_USD, memoryBudgetStore, recordSpend, setBudgetStore } from "@/lib/ai/budget";
 import { AiBudgetError, AiDailyLimitError, AiDemoLimitError, AiOutputError } from "@/lib/ai/errors";
 import { aiErrorResponse } from "@/lib/ai/http";
 import type { SessionUser } from "@/lib/auth/session";
@@ -97,14 +97,14 @@ describe("takeDaily", () => {
 
   it("closes live AI to other accounts once only the demo's reserve is left", async () => {
     vi.stubEnv("AI_MODE", "live");
-    await recordSpend(7 - DEMO_RESERVE_USD);
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD - DEMO_RESERVE_USD);
     await expect(takeDaily("read", NOON)).rejects.toBeInstanceOf(AiBudgetError);
     session.user = demo("one");
     await expect(takeDaily("read", NOON)).resolves.toBeDefined();
   });
 
   it("leaves the reserve alone in mock mode, where nothing is spent", async () => {
-    await recordSpend(7);
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD);
     await expect(takeDaily("read", NOON)).resolves.toBeDefined();
   });
 

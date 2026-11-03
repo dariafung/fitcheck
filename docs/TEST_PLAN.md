@@ -7,7 +7,7 @@ Test the hosted app in your browser and report anything that doesn't match the e
 - Site: https://fitcheck-chi-eight.vercel.app
 - It deploys from `main`. The commit you tested is the latest one on `main` at the time; put it in every report.
 - AI is **live**: real model calls on the project's Meta key. You don't need a key of your own.
-- The app stops calling the model after **$7 a day** (all users together). Rough cost: a few cents per screenshot, about $0.02 per purchase check, about $0.01 per "Style it with AI". If AI steps start failing with a budget message, stop for the day and note it in an issue.
+- The app stops calling the model after **$15 a day** (all users together). Rough cost: a few cents per screenshot, about $0.02 per purchase check, about $0.01 per "Style it with AI". If AI steps start failing with a budget message, stop for the day and note it in an issue.
 - Use your own email for the account. No confirmation email is sent; you can use it right away.
 - Section 9 (resale) needs a second account. Use another email of yours.
 
