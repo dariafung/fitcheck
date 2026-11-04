@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { AI_BUDGET_NOTICE, aiNotice } from "@/lib/ai/notices";
 import type { ItemTags } from "@/lib/ai/schemas/common";
-import { STYLE_FAILED, STYLE_IT, STYLING } from "@/lib/check/reasons";
+import { AiWait } from "@/components/entry/ai-wait";
+import { STYLE_FAILED, STYLE_IT } from "@/lib/check/reasons";
 import { OutfitBoard, ownedLine, type BoardPiece } from "./OutfitBoard";
 
 export interface StyleCandidate {
@@ -101,7 +102,7 @@ export function StyledOutfit({
       )}
       {owned && <p className="text-sm text-ink-2">{owned}</p>}
       {busy ? (
-        <p className="text-sm text-ink-2">{STYLING}</p>
+        <AiWait name="style" />
       ) : image ? (
         <button type="button" className="btn-text" onClick={() => styleIt.toggle(outfitId)}>
           {styleIt.showing[outfitId] ? "Show photos" : "Show styled look"}

@@ -99,6 +99,7 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | --- | --- | --- |
 | 7.1 | Home → "Should I buy this?" (the banner at the top), upload a product screenshot | "Reading…", then a "Look right?" card like in 3.1 (clean name, brand suggestions, a cut-out for an on-model photo) |
 | 7.2 | "Check it" | "Checking…", then the photo, a score like "47.5 / 100" and a one-line summary |
+| 7.2a | While a screenshot is read and while the check runs | A line says what's happening and changes every few seconds, with a thin bar moving under it |
 | 7.3 | Look at the five parts | Suits you /40, Outfits /20, Revives /15, Fills a gap /15, Not a repeat /10; they add up to the total |
 | 7.4 | Read every reason, open "Why" under Suits you | Short, plain, about this item and your closet; no made-up items |
 | 7.5 | Check an item close to one you own (same type and color) | "Not a repeat" is low and names that item |
