@@ -7,7 +7,7 @@ Test the hosted app in your browser and report anything that doesn't match the e
 - Site: https://fitcheck-chi-eight.vercel.app
 - It deploys from `main`. The commit you tested is the latest one on `main` at the time; put it in every report.
 - AI is **live**: real model calls on the project's Meta key. You don't need a key of your own.
-- The app stops calling the model after **$15 a day** (all users together). Rough cost: a few cents per screenshot, about $0.02 per purchase check, about $0.01 per "Style it with AI". If AI steps start failing with a budget message, stop for the day and note it in an issue.
+- The app stops calling the model after **$15 a day** (all users together). Rough cost: a few cents per screenshot, about $0.02 per purchase check. If AI steps start failing with a budget message, stop for the day and note it in an issue.
 - Use your own email for the account. No confirmation email is sent; you can use it right away.
 - Section 9 (resale) needs a second account. Use another email of yours.
 
@@ -107,11 +107,7 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.7 | Check an item that you've written about in a feeling (e.g. the color you love, the fit you hate) | "Suits you" reasons refer to those feelings |
 | 7.8 | Check shoes when your closet has no shoes, or a top when it has no bottoms | A note that says what's missing to make an outfit |
 | 7.9 | Under "You could wear it like this" | Sample outfits laid out as flat-lay boards of the real photos on white, the checked piece marked "New"; no person |
-| 7.10 | "Style it with AI" under one board | "AI is styling this outfit…" for about 15 s, then one picture of the whole outfit on white, tagged "AI-generated", no person; the pieces are recognizable |
-| 7.11 | While it's styling, look at the other boards | Their "Style it with AI" can't be clicked until this one is done |
-| 7.12 | "Show real photos", then "Show AI look" | Switches between the board and the AI picture without asking again |
-| 7.13 | "Check another" or reload, then check the same item | The AI picture is gone; "Style it with AI" is back |
-| 7.14 | Go to the closet afterwards | The checked item was **not** added |
+| 7.10 | Go to the closet afterwards | The checked item was **not** added |
 
 ### 8. Outfit calendar
 
@@ -158,8 +154,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
 | 10.7 | Run "Should I buy this?" | Works and shows a score |
-| 10.8 | "Style it with AI" under a sample outfit | Works as in 7.10 |
-| 10.9 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
+| 10.8 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
 
 ## Reporting a bug
 

@@ -47,9 +47,9 @@ describe("dbUsageStore", () => {
     expect(await count("read")).toBe(1);
     await store.giveBack(subject, day, "read");
     await store.giveBack(subject, day, "read");
-    await store.giveBack(subject, day, "style");
+    await store.giveBack(subject, day, "check");
     expect(await count("read")).toBe(0);
-    expect(await count("style")).toBe(0);
+    expect(await count("check")).toBe(0);
   });
 
   it("counts each action on its own", async () => {

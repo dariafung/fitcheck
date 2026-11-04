@@ -60,7 +60,7 @@ describe("takeDaily", () => {
 
   it("keeps accounts, actions and days apart", async () => {
     await takeTimes(DAILY_LIMITS.check, "check");
-    await expect(takeDaily("style", NOON)).resolves.toBeDefined();
+    await expect(takeDaily("read", NOON)).resolves.toBeDefined();
     await expect(takeDaily("check", new Date("2026-11-01T17:00:00Z"))).resolves.toBeDefined();
     session.user = user("b");
     await expect(takeDaily("check", NOON)).resolves.toBeDefined();

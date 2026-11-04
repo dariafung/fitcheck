@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST as boardPOST } from "@/app/api/checks/board/route";
 import { POST as checkCutoutPOST } from "@/app/api/checks/cutout/route";
 import { POST as checkPOST } from "@/app/api/checks/route";
-import { POST as stylePOST } from "@/app/api/checks/style/route";
 import { DELETE as itemDELETE, PATCH as itemPATCH } from "@/app/api/items/[id]/route";
 import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
 import { POST as voicePOST } from "@/app/api/items/[id]/feelings/voice/route";
@@ -226,9 +225,6 @@ describe("the demo account is read-only", () => {
     expect(cutout.status).toBe(200);
     const board = await boardPOST(jsonRequest("/api/checks/board", { candidate: { photo, onModel: false }, itemIds: [itemId] }));
     expect(board.status).toBe(200);
-    // Style it with AI stores nothing either; it spends the shared budget.
-    const style = await stylePOST(jsonRequest("/api/checks/style", { candidate: { photo, title: "Black loafers", tags }, itemIds: [itemId] }));
-    expect(style.status).toBe(200);
     // Insights are a cache like pairings: the demo may fill it, never the log.
     expect((await insightsPOST()).status).toBe(200);
 

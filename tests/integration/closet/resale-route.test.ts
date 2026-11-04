@@ -19,7 +19,6 @@ vi.mock("@/lib/ai", async (importOriginal) => {
     judgePairing: vi.fn(actual.judgePairing),
     judgeRepeat: vi.fn(actual.judgeRepeat),
     scorePurchase: vi.fn(actual.scorePurchase),
-    renderOutfit: vi.fn(actual.renderOutfit),
     segmentGarment: vi.fn(actual.segmentGarment),
   };
 });
@@ -291,7 +290,6 @@ describe("POST /api/items/[id]/buyers", () => {
     const before = await snapshot();
     await open();
     expect(await snapshot()).toEqual(before);
-    expect(ai.renderOutfit).not.toHaveBeenCalled();
     expect(ai.segmentGarment).not.toHaveBeenCalled();
   });
 

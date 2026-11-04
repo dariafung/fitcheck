@@ -8,8 +8,6 @@ export const DAILY_LIMITS = {
   cutout: 20,
   // Scoring a buy check (Try again counts too).
   check: 10,
-  // Style it with AI.
-  style: 10,
   // Voice notes turned into text.
   voice: 20,
   // Saved feelings read into fields.
@@ -30,7 +28,6 @@ export const DEMO_DAILY_LIMITS: Partial<Record<DailyAction, number>> = {
   read: 80,
   cutout: 80,
   check: 50,
-  style: 50,
 };
 
 // The last part of the day's budget only the demo account may spend, so

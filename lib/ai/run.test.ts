@@ -61,10 +61,6 @@ describe("mock mode", () => {
           questions: [{ id: "fit", text: "Is the fit like the flattering pieces?" }],
         }),
       () =>
-        ai.renderOutfit({
-          items: [ITEM, OTHER, ITEM].map((i) => ({ id: i.id, image: IMAGE, category: i.tags.category, description: i.title })),
-        }),
-      () =>
         ai.buildProfile({
           items: [ITEM, OTHER],
           feelings: [{ itemId: ITEM.id, flattering: "yes", liked: "yes", occasions: [], mood: [], summary: "" }],
