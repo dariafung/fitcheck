@@ -11,6 +11,13 @@ export function authRequired(): boolean {
 // DEMO_ACCOUNT_PASSWORD on the server only.
 export const DEMO_EMAIL = "demo@example.com";
 
+// DEMO_WRITABLE=1 lifts the demo account's read-only lock for a while (say,
+// to record the demo video in it). Re-seed afterwards: the seed puts the
+// persona back exactly as it was.
+export function demoLocked(): boolean {
+  return process.env.DEMO_WRITABLE !== "1";
+}
+
 const AuthEnv = z.object({
   SUPABASE_URL: z.url(),
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1),

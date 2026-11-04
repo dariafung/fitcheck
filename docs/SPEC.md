@@ -146,7 +146,7 @@ First version of all P0 done by 10/30. At the 10/31 checkpoint, if the purchase 
 | Purchase check results unstable | Outfits, revives and gaps counted in code; the model only gives integer scores (0–8, 0–10) with reasons; caching; 10/31 checkpoint |
 | Charges go to the card once credits run out | In-app daily budget + rate limits; watch usage |
 | Supabase free project pauses after a week idle | Daily scheduled ping |
-| Judges break the demo data | Demo account is read-only on the server; everyone else gets their own account |
+| Judges break the demo data | Demo account is read-only on the server (`DEMO_WRITABLE=1` lifts it for a while, e.g. to record the video; re-seed afterwards); everyone else gets their own account |
 | Screenshot content | Only the cropped product photo is kept, shown only to that user |
 
 **Open items**
