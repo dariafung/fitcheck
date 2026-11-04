@@ -4,7 +4,8 @@ import Image from "next/image";
 import { use, useEffect, useRef, useState } from "react";
 import { ItemCard, type EditedItem } from "@/components/entry/ItemCard";
 import { CleanedNote } from "@/components/entry/CleanedNote";
-import { CUTTING_OUT, extractErrorMessage, OFFLINE } from "@/components/entry/messages";
+import { AiWait } from "@/components/entry/ai-wait";
+import { extractErrorMessage, OFFLINE } from "@/components/entry/messages";
 import { shrinkScreenshot } from "@/components/entry/shrink";
 import { aiNotice } from "@/lib/ai/notices";
 import type { Category, ItemTags } from "@/lib/ai/schemas/common";
@@ -153,8 +154,8 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
             {problem}
           </p>
         )}
-        {step.kind === "loading" && <p className="text-sm text-ink-2">Reading your screenshot…</p>}
-        {step.kind === "cutting" && <p className="text-sm text-ink-2">{CUTTING_OUT}</p>}
+        {step.kind === "loading" && <AiWait name="read" />}
+        {step.kind === "cutting" && <AiWait name="cutOut" />}
       </div>
 
       {step.kind === "idle" && (
@@ -230,13 +231,9 @@ export function BuyCheck({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
           }
           actions={
             <>
-              <p role="status" aria-live="polite" className="text-sm empty:hidden">
-                {step.checking ? (
-                  <span className="text-ink-2">Checking it against your closet…</span>
-                ) : (
-                  problem && <span className="font-medium">{problem}</span>
-                )}
-              </p>
+              <div role="status" aria-live="polite" className="w-full text-sm empty:hidden">
+                {step.checking ? <AiWait name="check" /> : problem && <span className="font-medium">{problem}</span>}
+              </div>
               {retry && !step.checking && (
                 <button
                   type="button"

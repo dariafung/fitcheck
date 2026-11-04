@@ -50,6 +50,10 @@ Every AI call goes through the Meta Model API.
 
 Next.js 16 (App Router) · Supabase (Postgres + Storage) · Vercel · `openai` SDK pointed at the Meta Model API · zod · sharp · Open-Meteo for weather
 
+## Image credits
+
+The product photos in `seed/images/` and `fixtures/images/` belong to their brands (ZARA, HOLLISTER, lululemon, ASICS, Aritzia). They are used only to demo and test this hackathon project, and fitcheck isn't affiliated with these brands.
+
 ## Run it locally
 
 You need Node 24, Docker (for local Supabase) and pnpm 12.

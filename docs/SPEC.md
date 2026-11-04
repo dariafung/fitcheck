@@ -99,6 +99,7 @@ We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M,
 **Engineering conventions**
 
 - The AI layer has three modes: mock (fake data), live (real calls) and replay (real responses recorded and replayed by input hash, so development costs nothing and the demo has a safety net)
+- Long model calls (reading a screenshot, the cut-out, the check, "See it styled") show what's happening and a thin bar. Both go by time, since the calls report no progress: the bar slows down and never finishes by itself
 - Stable results come from caching, code-counted parts and narrow integer model scores, not from tuning temperature
 - The Meta console has no hard spending cap: the app keeps a daily budget counter and rate-limits by IP
 - Muse Image requests turn off `enable_web_search`, `enable_image_search` and `enable_shell`; a cleaned-up photo replaces the original before the item is saved, and the item being checked is never stored

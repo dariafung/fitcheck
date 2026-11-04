@@ -8,6 +8,7 @@ import type { ItemDraft, SaveItemRequest } from "@/lib/entry/draft";
 import type { TempUnit } from "@/lib/profile/temp-unit";
 import { CleanedNote } from "./CleanedNote";
 import { ItemCard, type EditedItem } from "./ItemCard";
+import { AiWait } from "./ai-wait";
 import { ACCESSORY_NOT_ADDED, CUTTING_OUT, extractErrorMessage, OFFLINE, SAVE_FAILED } from "./messages";
 import { shrinkScreenshot } from "./shrink";
 
@@ -224,6 +225,8 @@ export function AddByScreenshot({ tempUnit }: { tempUnit: Promise<TempUnit> }) {
         </div>
       )}
 
+      {step.kind === "loading" && <AiWait name="read" />}
+      {step.kind === "cutting" && <AiWait name="cutOut" />}
       {step.kind === "loading" && <LoadingCard preview={step.preview} />}
       {step.kind === "cutting" && step.draft.imageUrls[0] && <LoadingCard preview={step.draft.imageUrls[0]} />}
       {draft && (
