@@ -43,25 +43,27 @@
       "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
       "status": "passing_on",
       "entry_method": "screenshot",
-      "title": "High-Waisted Wide-Leg Trousers",
-      "brand": null,
-      "size": "S",
-      "asking_price_cents": 2200,
+      "title": "The Effortless Pant - Eversential",
+      "brand": "Aritzia",
+      "size": "6",
+      "asking_price_cents": 8500,
       "condition": "like_new",
       "category": "bottom",
       "ai_tags": {
         "category": "bottom",
-        "subcategory": "trousers",
+        "subcategory": "wide-leg pants",
         "colors": [
           {
             "name": "Black"
           }
         ],
         "colorFamily": "black",
+        "pattern": "solid",
         "materials": [
           "polyester",
           "viscose"
         ],
+        "fit": "relaxed",
         "formality": 3,
         "occasions": [
           "school",
@@ -70,57 +72,26 @@
         "tempRangeF": {
           "min": 45,
           "max": 80
-        },
-        "pattern": "solid",
-        "fit": "relaxed"
+        }
       },
       "user_tags": {},
-      "on_model": false,
-      "image_paths": [],
+      "on_model": true,
+      "image_paths": [
+        "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b/af2c734c-3125-4536-a8ac-ed56d3277652.webp"
+      ],
       "raw_source": {
-        "placeholder": "Replaced by the real product once its screenshot is framed"
-      }
-    },
-    {
-      "id": "e3b74be4-6a77-4db8-a17b-40d87043b14c",
-      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
-      "status": "passing_on",
-      "entry_method": "screenshot",
-      "title": "Ribbed Knit Cardigan",
-      "brand": null,
-      "size": "S",
-      "asking_price_cents": 1800,
-      "condition": "good",
-      "category": "top",
-      "ai_tags": {
-        "category": "top",
-        "subcategory": "cardigan",
-        "colors": [
-          {
-            "name": "Cream"
-          }
-        ],
-        "colorFamily": "white",
-        "materials": [
-          "cotton"
-        ],
-        "formality": 2,
-        "occasions": [
-          "school",
-          "social"
-        ],
-        "tempRangeF": {
-          "min": 45,
-          "max": 70
+        "cropped": true,
+        "productBox": {
+          "x": 0.0,
+          "y": 0.0699,
+          "width": 0.2824,
+          "height": 0.8217
         },
-        "pattern": "solid",
-        "fit": "regular"
-      },
-      "user_tags": {},
-      "on_model": false,
-      "image_paths": [],
-      "raw_source": {
-        "placeholder": "Replaced by the real product once its screenshot is framed"
+        "screenshot": {
+          "mime": "image/png",
+          "width": 1218,
+          "height": 572
+        }
       }
     },
     {
@@ -128,80 +99,55 @@
       "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
       "status": "passing_on",
       "entry_method": "screenshot",
-      "title": "Satin Midi Skirt",
-      "brand": null,
-      "size": "M",
-      "asking_price_cents": 2000,
-      "condition": "like_new",
-      "category": "bottom",
-      "ai_tags": {
-        "category": "bottom",
-        "subcategory": "midi skirt",
-        "colors": [
-          {
-            "name": "Chocolate"
-          }
-        ],
-        "colorFamily": "brown",
-        "materials": [
-          "satin"
-        ],
-        "formality": 3,
-        "occasions": [
-          "social"
-        ],
-        "tempRangeF": {
-          "min": 55,
-          "max": 85
-        },
-        "pattern": "solid"
-      },
-      "user_tags": {},
-      "on_model": false,
-      "image_paths": [],
-      "raw_source": {
-        "placeholder": "Replaced by the real product once its screenshot is framed"
-      }
-    },
-    {
-      "id": "40f0e480-42f5-4ae2-8eee-df79ba6b1183",
-      "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
-      "status": "passing_on",
-      "entry_method": "screenshot",
-      "title": "Square-Toe Ballet Flats",
-      "brand": null,
-      "size": "W7.5",
-      "asking_price_cents": 2500,
+      "title": "Smooth Matter Ginger Top - Unlined",
+      "brand": "Aritzia",
+      "size": "S",
+      "asking_price_cents": 3000,
       "condition": "good",
-      "category": "shoes",
+      "category": "top",
       "ai_tags": {
-        "category": "shoes",
-        "subcategory": "flats",
+        "category": "top",
+        "subcategory": "cape-sleeve top",
         "colors": [
           {
             "name": "Black"
           }
         ],
         "colorFamily": "black",
+        "pattern": "solid",
         "materials": [
-          "leather"
+          "polyester",
+          "elastane"
         ],
+        "fit": "slim",
         "formality": 3,
         "occasions": [
-          "school",
-          "social"
+          "social",
+          "school"
         ],
         "tempRangeF": {
-          "min": 45,
-          "max": 90
-        },
-        "pattern": "solid"
+          "min": 55,
+          "max": 85
+        }
       },
       "user_tags": {},
-      "on_model": false,
-      "image_paths": [],
+      "on_model": true,
+      "image_paths": [
+        "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49/b592daa9-a10d-4564-b9c3-ed6770fd002d.webp"
+      ],
       "raw_source": {
-        "placeholder": "Replaced by the real product once its screenshot is framed"
+        "cropped": true,
+        "productBox": {
+          "x": 0.0222,
+          "y": 0.0625,
+          "width": 0.2722,
+          "height": 0.8902
+        },
+        "screenshot": {
+          "mime": "image/png",
+          "width": 1264,
+          "height": 528
+        }
       }
     },
     {
@@ -209,41 +155,54 @@
       "user_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
       "status": "passing_on",
       "entry_method": "screenshot",
-      "title": "Cropped Denim Jacket",
-      "brand": null,
-      "size": "S",
-      "asking_price_cents": 3000,
-      "condition": "good",
-      "category": "outerwear",
+      "title": "Proxy Dress - Eversential",
+      "brand": "Aritzia",
+      "size": "4",
+      "asking_price_cents": 9500,
+      "condition": "like_new",
+      "category": "one_piece",
       "ai_tags": {
-        "category": "outerwear",
-        "subcategory": "jacket",
+        "category": "one_piece",
+        "subcategory": "fit-and-flare mini dress",
         "colors": [
           {
-            "name": "Mid Blue"
+            "name": "Black"
           }
         ],
-        "colorFamily": "blue",
+        "colorFamily": "black",
+        "pattern": "solid",
         "materials": [
-          "denim"
+          "polyester",
+          "viscose"
         ],
-        "formality": 2,
+        "fit": "slim",
+        "formality": 3,
         "occasions": [
-          "school",
           "social"
         ],
         "tempRangeF": {
-          "min": 50,
-          "max": 72
-        },
-        "pattern": "solid",
-        "fit": "regular"
+          "min": 60,
+          "max": 90
+        }
       },
       "user_tags": {},
-      "on_model": false,
-      "image_paths": [],
+      "on_model": true,
+      "image_paths": [
+        "92f2448f-6eba-42b4-8e73-174647b45f93/c1708d91-6dc8-4a63-bae4-09aaf9d90908.webp"
+      ],
       "raw_source": {
-        "placeholder": "Replaced by the real product once its screenshot is framed"
+        "cropped": true,
+        "productBox": {
+          "x": 0.025,
+          "y": 0.1413,
+          "width": 0.2871,
+          "height": 0.7739
+        },
+        "screenshot": {
+          "mime": "image/png",
+          "width": 1198,
+          "height": 566
+        }
       }
     }
   ]

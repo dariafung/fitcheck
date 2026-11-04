@@ -37,12 +37,14 @@ describe("seed data", () => {
     expect([persona.top_size, persona.bottom_size, persona.shoe_size]).toEqual(["S", "S", "W7.5"]);
   });
 
-  it("has one photo per item in the persona's folder, and no others", () => {
+  it("has one photo per item in the persona's folder, the neighbors' pieces' photos, and no others", () => {
     const paths = items.flatMap((i) => i.image_paths);
     expect(paths).toHaveLength(items.length);
     for (const p of paths) expect(path.dirname(p)).toBe(persona.id);
     const files = readdirSync(path.join(import.meta.dirname, "images"));
-    expect(files.sort()).toEqual(paths.map((p) => path.basename(p)).sort());
+    // The seed neighbors' pieces have a photo here too.
+    const neighborFiles = neighbors.items.flatMap((i) => i.image_paths).map((p) => path.basename(p));
+    expect(files.sort()).toEqual([...paths.map((p) => path.basename(p)), ...neighborFiles].sort());
   });
 
   it("has a size on every piece being passed on", () => {
@@ -147,8 +149,7 @@ describe("seed neighbors", () => {
       expect(parsed.category).not.toBe("accessory");
       expect(ids.has(parsed.user_id)).toBe(true);
     }
-    expect(neighbors.items.length).toBeGreaterThanOrEqual(4);
-    expect(neighbors.items.length).toBeLessThanOrEqual(6);
+    expect(neighbors.items).toHaveLength(3);
   });
 });
 

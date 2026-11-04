@@ -104,27 +104,13 @@
         "outfits"
       ],
       "buyer_reasons": [
-        "A high waist and wide leg are what you say flatters you, and black goes with everything you own.",
-        "Makes 9 outfits with your closet, like your Supima Long Sleeve T-Shirt and Soft Ruched Loafers.",
-        "You want 2 social outfits and have 1. This adds 1."
+        "A wide leg balances your hips, the way you said your other wide-leg pants do.",
+        "Black goes with the tees and the loafers you already wear, and you're short on bottoms for class."
       ]
     },
     {
-      "item_id": "e3b74be4-6a77-4db8-a17b-40d87043b14c",
-      "seller_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
-      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
-      "score": 68,
-      "highlights": [
-        "outfits"
-      ],
-      "buyer_reasons": [
-        "A light layer over your V-neck tees; cream sits well with your gray and pink pieces.",
-        "Makes 6 outfits with your closet."
-      ]
-    },
-    {
-      "item_id": "b592daa9-a10d-4564-b9c3-ed6770fd002d",
-      "seller_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
+      "item_id": "c1708d91-6dc8-4a63-bae4-09aaf9d90908",
+      "seller_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
       "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
       "score": 72,
       "highlights": [
@@ -132,36 +118,21 @@
         "outfits"
       ],
       "buyer_reasons": [
-        "A dressier piece for going out, which your closet is short on.",
-        "You want 2 social outfits and have 1. This adds 1.",
-        "Makes 4 outfits with your closet."
+        "The fitted waist and full skirt shape you the way you like.",
+        "You want 2 outfits for going out and are short of them. This adds one."
       ]
     },
     {
-      "item_id": "40f0e480-42f5-4ae2-8eee-df79ba6b1183",
+      "item_id": "b592daa9-a10d-4564-b9c3-ed6770fd002d",
       "seller_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
       "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
-      "score": 64,
-      "highlights": [
-        "outfits",
-        "revives"
-      ],
-      "buyer_reasons": [
-        "An easy flat that dresses up your jeans and wide-leg pants.",
-        "1 piece that had no outfit now has one: Softstreme High-Rise Pant."
-      ]
-    },
-    {
-      "item_id": "c1708d91-6dc8-4a63-bae4-09aaf9d90908",
-      "seller_id": "92f2448f-6eba-42b4-8e73-174647b45f93",
-      "buyer_id": "f97fc346-9acc-4404-bc52-9a6ba86a9bce",
-      "score": 70,
+      "score": 68,
       "highlights": [
         "outfits"
       ],
       "buyer_reasons": [
-        "A cropped jacket keeps your waist in view, which you like.",
-        "Makes 7 outfits with your closet."
+        "Fitted at the waist, not boxy in the shoulders like the jacket you complained about.",
+        "Dresses up the jeans you wear most."
       ]
     }
   ]
