@@ -4,9 +4,9 @@ Before you buy a piece of clothing, fitcheck tells you if it suits you, how many
 
 **Live app: https://fitcheck-chi-eight.vercel.app**
 
-Demo video: _coming soon_
+Demo video: https://youtu.be/xe8aQe6iH_k
 
-Built for the Meta Global AI Developer Hackathon (Indie track).
+Built from scratch during the Meta Global AI Developer Hackathon (Indie track), October 26 to November 4, 2026. There is no earlier codebase.
 
 ## Try it
 
@@ -18,7 +18,8 @@ Things to try first:
 
 1. **Should I buy this?** (top of home): upload a screenshot of a product page. You get a score out of 100 with a one-line verdict, split into five parts, each with a short reason, and the closest piece you already own beside it.
 2. **Calendar** (top bar): see what was worn, which items sit idle, and a few AI insights.
-3. **Profile** (your own account; the demo Profile is read-only): switch to °C and see every temperature on the site change.
+3. **Suits you** (top bar): secondhand pieces other people are passing on that suit you, and why.
+4. **Profile** (your own account; the demo Profile is read-only): switch to °C and see every temperature on the site change.
 
 ## What it does
 
@@ -48,6 +49,13 @@ Every AI call goes through the Meta Model API.
 ## Tech stack
 
 Next.js 16 (App Router) · Supabase (Postgres + Storage) · Vercel · `openai` SDK pointed at the Meta Model API · zod · sharp · Open-Meteo for weather
+
+## Team
+
+Team V&F:
+
+- **Yuxin Feng** ([@dariafung](https://github.com/dariafung)): product, AI layer, purchase check, backend, demo video
+- **Zheheng Zeng** ([@BlizzardsFan](https://github.com/BlizzardsFan)): UI design, front-end polish, testing
 
 ## Image credits
 
