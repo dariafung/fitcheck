@@ -54,8 +54,8 @@ Next.js 16 (App Router) · Supabase (Postgres + Storage) · Vercel · `openai` S
 
 Team V&F:
 
-- **Yuxin Feng** ([@dariafung](https://github.com/dariafung)): product, AI layer, purchase check, backend, demo video
-- **Zheheng Zeng** ([@BlizzardsFan](https://github.com/BlizzardsFan)): UI design, front-end polish, testing
+- **Yuxin Feng** ([@dariafung](https://github.com/dariafung)): Product, Architecture, AI Layer, Purchase Check, Backend, Demo Video
+- **Zheheng Zeng** ([@BlizzardsFan](https://github.com/BlizzardsFan)): UI Design, Front-End Polish, Testing
 
 ## Image credits
 
