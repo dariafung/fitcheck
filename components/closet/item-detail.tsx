@@ -39,7 +39,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
     <ItemEditor itemId={item.id} details={details} tempUnit={unit}>
       <div className="grid gap-x-4 gap-y-10 md:grid-cols-12">
         <div className="flex flex-col gap-4 md:col-span-6 lg:col-span-6">
-          {/* Edge to edge on a phone, as on the brands' product pages. */}
+          {/* Edge to edge on a phone. */}
           <div className="-mx-4 md:mx-0">
             <ItemImage
               src={cover ?? null}
@@ -67,7 +67,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
           )}
         </div>
 
-        {/* The Row's product column: narrow, quiet, held in view while the photo scrolls. */}
+        {/* The product column: narrow, quiet, held in view while the photo scrolls. */}
         <div className="flex flex-col gap-16 md:col-span-6 md:col-start-7 lg:col-span-4 lg:col-start-8 md:sticky md:top-10 md:self-start">
           <div className="flex flex-col gap-8">
             <div>

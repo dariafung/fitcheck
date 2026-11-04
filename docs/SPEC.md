@@ -77,7 +77,7 @@ All AI goes through the Meta Model API (`https://api.meta.ai/v1`). No contributo
 3. Code checks that box, grows it by 8% on every side so a sleeve or strap the model cut off is back in, and crops the product photo (WebP in storage); a box that is off falls back to the whole screenshot and is flagged for the user to check. Whether the background is plain enough to make white is judged on the model's own box (the padding may take in page text). Code swaps a plain light background for white and frames it on the white 4:5 canvas, centered on the garment: the biggest piece of non-white pixels and any piece at least a quarter its size, leaving out the product name, badges and the edge of a neighbouring photo. The purchase check frames its photo the same way; an on-model photo, or one on a backdrop code can't make white, is cut out by Muse Image first
 4. The user confirms or edits the card, then saves
 
-We don't fetch store pages: large retailers block it (tested: Zara, Uniqlo, H&M, ASOS, Shein, lululemon), and data-center IPs after deploy fare even worse. All demo items are preloaded.
+We don't fetch store pages: large retailers block it, and data-center IPs after deploy fare even worse. All demo items are preloaded.
 
 **AI layer**: every model call goes through one module with fixed JSON inputs and outputs (enforced with Spark structured output). Start with a mock implementation to get the UI working, then switch to real models.
 
