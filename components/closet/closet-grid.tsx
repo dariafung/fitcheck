@@ -25,7 +25,7 @@ import { ItemImage } from "./item-image";
 
 // The shelf: 4:5 tiles. Four across on a desktop, 16px apart, 48px between
 // rows. On a phone two across, 4px apart, pulled out to 8px from the screen
-// edge so each tile is about half the screen, as on The Row, H&M, Everlane.
+// edge so each tile is about half the screen.
 export const SHELF =
   "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4 lg:grid-cols-4 lg:gap-y-12";
 
