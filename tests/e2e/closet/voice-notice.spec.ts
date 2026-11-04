@@ -58,6 +58,20 @@ async function recordAndFail(page: import("@playwright/test").Page, err: AiError
   return feeling;
 }
 
+test("the button stays readable while it records under the pointer", async ({ page }) => {
+  await page.goto(`/closet/${await seededItemId()}`);
+  const feeling = page.getByRole("region", { name: "How it feels" });
+  const edit = feeling.getByRole("button", { name: "Edit note", exact: true });
+  if (await edit.isVisible()) await edit.click();
+  await feeling.getByRole("button", { name: "Hold to talk" }).hover();
+  await page.mouse.down();
+  const talk = feeling.getByRole("button", { name: "Release when done" });
+  await expect(talk).toBeVisible();
+  await expect(talk).toHaveCSS("background-color", "rgb(17, 17, 17)");
+  await expect(talk).toHaveCSS("color", "rgb(255, 255, 255)");
+  await page.mouse.up();
+});
+
 test("when the day's AI budget is spent, voice says so", async ({ page }) => {
   const feeling = await recordAndFail(page, new AiBudgetError("transcribe"));
   await expect(feeling.getByRole("alert")).toHaveText(AI_BUDGET_NOTICE);

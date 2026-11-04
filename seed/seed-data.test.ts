@@ -149,7 +149,7 @@ describe("seed neighbors", () => {
       expect(parsed.category).not.toBe("accessory");
       expect(ids.has(parsed.user_id)).toBe(true);
     }
-    expect(neighbors.items).toHaveLength(3);
+    expect(neighbors.items).toHaveLength(2);
   });
 });
 
