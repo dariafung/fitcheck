@@ -67,7 +67,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
           )}
         </div>
 
-        {/* The Row's product column: narrow, quiet, held in view while the photo scrolls. */}
+        {/* The product column: narrow, quiet, held in view while the photo scrolls. */}
         <div className="flex flex-col gap-16 md:col-span-6 md:col-start-7 lg:col-span-4 lg:col-start-8 md:sticky md:top-10 md:self-start">
           <div className="flex flex-col gap-8">
             <div>
