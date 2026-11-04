@@ -39,62 +39,6 @@
   ],
   "items": [
     {
-      "id": "af2c734c-3125-4536-a8ac-ed56d3277652",
-      "user_id": "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b",
-      "status": "passing_on",
-      "entry_method": "screenshot",
-      "title": "The Effortless Pant - Eversential",
-      "brand": "Aritzia",
-      "size": "6",
-      "asking_price_cents": 8500,
-      "condition": "like_new",
-      "category": "bottom",
-      "ai_tags": {
-        "category": "bottom",
-        "subcategory": "wide-leg pants",
-        "colors": [
-          {
-            "name": "Black"
-          }
-        ],
-        "colorFamily": "black",
-        "pattern": "solid",
-        "materials": [
-          "polyester",
-          "viscose"
-        ],
-        "fit": "relaxed",
-        "formality": 3,
-        "occasions": [
-          "school",
-          "social"
-        ],
-        "tempRangeF": {
-          "min": 45,
-          "max": 80
-        }
-      },
-      "user_tags": {},
-      "on_model": true,
-      "image_paths": [
-        "bcd0aa7c-75a0-430f-8c42-2f83eaa4754b/af2c734c-3125-4536-a8ac-ed56d3277652.webp"
-      ],
-      "raw_source": {
-        "cropped": true,
-        "productBox": {
-          "x": 0.0,
-          "y": 0.0699,
-          "width": 0.2824,
-          "height": 0.8217
-        },
-        "screenshot": {
-          "mime": "image/png",
-          "width": 1218,
-          "height": 572
-        }
-      }
-    },
-    {
       "id": "b592daa9-a10d-4564-b9c3-ed6770fd002d",
       "user_id": "73c3ba7b-4ddd-407e-a1b7-e94bb50f1f49",
       "status": "passing_on",

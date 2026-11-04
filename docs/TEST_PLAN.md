@@ -159,7 +159,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
 | 10.7 | Run "Should I buy this?" | Works and shows a score |
 | 10.8 | "Style it with AI" under a sample outfit | Works as in 7.10 |
-| 10.9 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Maya" (or Priya, Lena…); nothing to press, no emails or scores |
+| 10.9 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
 
 ## Reporting a bug
 
