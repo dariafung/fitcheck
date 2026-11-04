@@ -4,7 +4,7 @@ Before you buy a piece of clothing, fitcheck tells you if it suits you, how many
 
 **Live app: https://fitcheck-chi-eight.vercel.app**
 
-Demo video: _coming soon_
+Demo video: https://youtu.be/xe8aQe6iH_k
 
 Built for the Meta Global AI Developer Hackathon (Indie track).
 
