@@ -1,13 +1,14 @@
 // "Suits you": what other people are passing on that the buy check, run from
 // this user's side, scored high for them. Read only from the cached checks
-// (resale_matches); opening home never runs a check. Of the seller, only the
+// (resale_matches); opening the page never runs a check. Of the seller, only the
 // name they picked (users.display_name) is read: never their email, closet
 // or anything else. (The seller never learns who the buyers are.)
+import { cache } from "react";
 import type { AiMode } from "@/lib/ai/mode";
 import { Category } from "@/lib/ai/schemas/common";
 import { imageUrls } from "@/lib/closet/images";
 import { swatchHex } from "@/lib/closet/swatch";
-import type { Db } from "@/lib/db/server";
+import { createServerClient, type Db } from "@/lib/db/server";
 import { toSellerItem } from "./buyers";
 import { nicknameOrDefault } from "@/lib/profile/nickname";
 import { buyerStates, fingerprint } from "./fingerprint";
@@ -31,12 +32,21 @@ export interface FeedPiece {
   sellerName: string;
 }
 
+// Whether the user takes part in resale matching (Profile). Off hides Suits
+// you everywhere. False when there's no users row yet.
+export async function resaleOptedIn(db: Db, userId: string): Promise<boolean> {
+  const { data } = await db.from("users").select("resale_opt_in").eq("id", userId).maybeSingle().throwOnError();
+  return data?.resale_opt_in ?? false;
+}
+
+// Read once per request: the nav and the page both ask.
+export const resaleOptedInFor = cache((userId: string) => resaleOptedIn(createServerClient(), userId));
+
 // The user's strong matches, best first: still passing on, not an accessory,
 // and checked on what this user's closet, profile and card are now (the same
 // fingerprint the seller's count goes by). Empty for anyone not opted in.
 export async function suitsYou(db: Db, userId: string, mode: AiMode): Promise<FeedPiece[]> {
-  const { data: user } = await db.from("users").select("resale_opt_in").eq("id", userId).maybeSingle().throwOnError();
-  if (!user?.resale_opt_in) return [];
+  if (!(await resaleOptedIn(db, userId))) return [];
   const { data: matches } = await db
     .from("resale_matches")
     .select("item_id, fingerprint, score, buyer_reasons")

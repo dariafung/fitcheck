@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { DEMO_USER_ID } from "../db/demo-user";
 import { createAuthClient } from "./client";
-import { authRequired } from "./config";
+import { authRequired, demoLocked } from "./config";
 
 export interface SessionUser {
   id: string;
@@ -25,7 +25,7 @@ export const sessionUser = cache(async (): Promise<SessionUser | null> => {
     id: claims.sub,
     email: typeof claims.email === "string" ? claims.email : null,
     name: metadataName(claims.user_metadata),
-    readOnly: claims.sub === DEMO_USER_ID,
+    readOnly: claims.sub === DEMO_USER_ID && demoLocked(),
     sessionId: typeof claims.session_id === "string" ? claims.session_id : null,
   };
 });

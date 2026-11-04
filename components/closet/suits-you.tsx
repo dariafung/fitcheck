@@ -1,30 +1,29 @@
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { currentMode } from "@/lib/ai/mode";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
-import { suitsYou } from "@/lib/resale/feed";
+import { resaleOptedInFor, suitsYou } from "@/lib/resale/feed";
 import { listingText } from "@/lib/resale/listing";
 import { sizeLabel } from "@/lib/resale/size";
 import { ItemImage } from "./item-image";
 
 const GRID = "-mx-2 grid grid-cols-2 gap-x-1 gap-y-10 md:mx-0 md:grid-cols-3 md:gap-x-4";
 
-// Home's pick from what other people are passing on: pieces whose buy check,
-// run from this user's side, scored high. Look only: the seller's picked name,
-// no way to contact them.
-// Not shown at all when there's nothing to show.
+// The Suits you tab: what other people are passing on whose buy check, run
+// from this user's side, scored high. Look only: the seller's picked name, no
+// way to contact them. There is no such page for anyone who turned resale
+// matching off in Profile.
 export async function SuitsYou() {
   await connection();
-  const pieces = await suitsYou(createServerClient(), await currentUserId(), currentMode());
-  if (pieces.length === 0) return null;
+  const userId = await currentUserId();
+  if (!(await resaleOptedInFor(userId))) notFound();
+  const pieces = await suitsYou(createServerClient(), userId, currentMode());
+  if (pieces.length === 0) {
+    return <p className="text-sm text-ink-2">Nothing yet. Pieces other people pass on that suit you show up here.</p>;
+  }
   return (
-    <section aria-labelledby="suits-you" className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line pb-3">
-        <h2 id="suits-you" className="text-lg leading-none font-medium">
-          Suits you
-        </h2>
-        <span className="text-sm text-ink-2">Secondhand, from other people&apos;s closets</span>
-      </div>
+    <section aria-label="Pieces that suit you">
       <ul className={GRID}>
         {pieces.map((piece) => {
           const listing = listingText(piece.askingPriceCents, piece.condition);
@@ -56,5 +55,15 @@ export async function SuitsYou() {
         })}
       </ul>
     </section>
+  );
+}
+
+export function SuitsYouSkeleton() {
+  return (
+    <div className={GRID}>
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="aspect-[4/5] bg-tile motion-safe:animate-pulse" />
+      ))}
+    </div>
   );
 }

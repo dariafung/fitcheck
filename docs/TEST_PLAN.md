@@ -143,8 +143,8 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 9.6 | A: reopen the item | Either a line saying how many people would want it, with one identical anonymous avatar per person (at most 5, then "+N"), or "No one's a strong match yet." No names, emails or scores anywhere |
 | 9.7 | A: "Edit", change the size to one B doesn't wear | "No buyers for this one right now." |
 | 9.8 | A: "Keep wearing it" | The item is back in "Wearing" and in outfits; "Matching buyers" is gone |
-| 9.9 | A: pass the item on again with a size B wears and reopen it; B: home | If B's check scored 60+: "Suits you" with A's item, its size, price and condition, B's reasons and "from" A's name; no email, score, or way to contact A. Otherwise no "Suits you" |
-| 9.10 | A: Profile, change the name, Save; B: reload home | Saved; B's "Suits you" says "from" A's new name. A never sees B's name |
+| 9.9 | A: pass the item on again with a size B wears and reopen it; B: Profile, resale matching on, then the "Suits you" tab | If B's check scored 60+: A's item, its size, price and condition, B's reasons and "from" A's name; no email, score, or way to contact A. Otherwise "Nothing yet." B turns resale matching off: the tab is gone and /suits-you says "Page not found" |
+| 9.10 | A: Profile, change the name, Save; B: reload "Suits you" | Saved; B's card says "from" A's new name. A never sees B's name |
 
 ### 10. Demo account
 
@@ -158,7 +158,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
 | 10.7 | Run "Should I buy this?" | Works and shows a score |
 | 10.8 | "Style it with AI" under a sample outfit | Works as in 7.10 |
-| 10.9 | Home | "Suits you" lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Maya" (or Priya, Lena…); nothing to press, no emails or scores |
+| 10.9 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Maya" (or Priya, Lena…); nothing to press, no emails or scores |
 
 ## Reporting a bug
 

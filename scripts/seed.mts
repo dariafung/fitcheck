@@ -166,6 +166,16 @@ for (const table of ["style_profiles", "outfit_logs", "wear_insights"] as const)
   const cleared = await db.from(table).delete().in("user_id", neighborIds);
   if (cleared.error) throw cleared.error;
 }
+// Seed users no longer in the seed (a neighbor dropped from neighbors.json,
+// or an older seed's sample buyer) go too, with everything they own.
+const keptSeedIds = [persona.id, ...neighborIds];
+const staleSeedUsers = await db
+  .from("users")
+  .delete()
+  .eq("is_seed", true)
+  .not("id", "in", `(${keptSeedIds.join(",")})`)
+  .select("id");
+if (staleSeedUsers.error) throw staleSeedUsers.error;
 const NO_PROFILE = {
   height_cm: null,
   weight_kg: null,
@@ -214,5 +224,6 @@ console.log(
   `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card, ` +
     `${outfits.length} outfits to ${lastDay}, ${imagePaths.length} images, ${neighborIds.length} seed neighbors ` +
     `with ${neighbors.items.length} pieces and ${matchRows.length} cached matches` +
+    (staleSeedUsers.data.length > 0 ? `, ${staleSeedUsers.data.length} old seed users removed` : "") +
     (remote ? " into the hosted project." : "."),
 );
