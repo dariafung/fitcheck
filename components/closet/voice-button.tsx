@@ -124,7 +124,7 @@ export function VoiceButton({ itemId, onText }: { itemId: string; onText: (text:
         onKeyUp={(e) => {
           if (e.key === " " || e.key === "Enter") release();
         }}
-        className="btn-secondary touch-none select-none [-webkit-touch-callout:none] data-[state=recording]:bg-ink data-[state=recording]:text-paper"
+        className="btn-secondary touch-none select-none [-webkit-touch-callout:none] data-[state=recording]:bg-ink data-[state=recording]:text-paper data-[state=recording]:hover:bg-ink data-[state=recording]:hover:text-paper"
         data-state={state}
       >
         <span
