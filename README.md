@@ -17,9 +17,8 @@ Or **Sign up** with a name, any email and a password (no confirmation email) and
 Things to try first:
 
 1. **Should I buy this?** (top of home): upload a screenshot of a product page. You get a score out of 100 with a one-line verdict, split into five parts, each with a short reason, and the closest piece you already own beside it.
-2. **Style it with AI**: under a sample outfit in the result, have Muse Image draw the outfit as one board.
-3. **Calendar** (top bar): see what was worn, which items sit idle, and a few AI insights.
-4. **Profile** (your own account; the demo Profile is read-only): switch to °C and see every temperature on the site change.
+2. **Calendar** (top bar): see what was worn, which items sit idle, and a few AI insights.
+3. **Profile** (your own account; the demo Profile is read-only): switch to °C and see every temperature on the site change.
 
 ## What it does
 
@@ -43,7 +42,7 @@ Every AI call goes through the Meta Model API.
 | Model | Used for |
 | --- | --- |
 | Muse Spark 1.3 | Reading product screenshots (with web search), turning feelings into structured notes, judging which items pair, scoring the purchase check, spotting repeats, the style card, outfit calendar insights |
-| Muse Image | Cutting an on-model product photo down to the garment on white; drawing a whole outfit board for "Style it with AI" |
+| Muse Image | Cutting an on-model product photo down to the garment on white |
 | Muse Voice Transcribe | Turning voice feelings into text |
 
 ## Tech stack

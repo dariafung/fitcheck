@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { STYLING } from "@/lib/check/reasons";
 import { CUTTING_OUT } from "./messages";
 
 // What a model call is doing, for the waits people sit through. `seconds` is
@@ -33,13 +32,6 @@ export const AI_WAITS = {
       { at: 4, text: "Working out which outfits it makes…" },
       { at: 8, text: "Comparing it with how your clothes feel…" },
       { at: 22, text: "Taking longer than usual, still working…" },
-    ],
-  },
-  style: {
-    seconds: 14,
-    steps: [
-      { at: 0, text: STYLING },
-      { at: 25, text: "Taking longer than usual, still working…" },
     ],
   },
 } as const;

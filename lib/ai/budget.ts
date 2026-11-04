@@ -26,7 +26,6 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   transcribe: 0.01,
   scorePurchase: 0.05,
   // One Muse Image picture.
-  renderOutfit: PRICE_PER_IMAGE,
   buildProfile: 0.03,
   // One Muse Image picture.
   segmentGarment: PRICE_PER_IMAGE,

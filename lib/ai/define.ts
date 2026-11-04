@@ -8,7 +8,6 @@ export type AiFunctionName =
   | "judgePairing"
   | "judgeRepeat"
   | "scorePurchase"
-  | "renderOutfit"
   | "buildProfile"
   | "segmentGarment"
   | "summarizeWear";

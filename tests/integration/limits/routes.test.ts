@@ -4,7 +4,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { POST as cutoutPOST } from "@/app/api/checks/cutout/route";
 import { POST as checkExtractPOST } from "@/app/api/checks/extract/route";
 import { POST as checkPOST } from "@/app/api/checks/route";
-import { POST as stylePOST } from "@/app/api/checks/style/route";
 import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
 import { POST as extractPOST } from "@/app/api/items/extract/route";
 import { POST as pairingsPOST } from "@/app/api/pairings/route";
@@ -36,7 +35,6 @@ vi.mock("@/lib/ai", async (importOriginal) => {
     ...actual,
     extractItem: vi.fn(actual.extractItem),
     segmentGarment: vi.fn(actual.segmentGarment),
-    renderOutfit: vi.fn(actual.renderOutfit),
     parseFeeling: vi.fn(actual.parseFeeling),
   };
 });
@@ -126,13 +124,6 @@ describe("an account over its daily limit", () => {
     await expectLimit(await extractPOST(uploadRequest(await shot())), "AiDailyLimitError");
     await expectLimit(await checkExtractPOST(uploadRequest(await shot())), "AiDailyLimitError");
     expect(ai.extractItem).not.toHaveBeenCalled();
-  });
-
-  it("gets 429 for Style it", async () => {
-    await fill(`user:${userId}`, "style", DAILY_LIMITS.style);
-    const body = { candidate: { photo: await photo(), title: "Loafers", tags: tags("shoes") }, itemIds: [shirtId] };
-    await expectLimit(await stylePOST(jsonRequest("/api/checks/style", body)), "AiDailyLimitError");
-    expect(ai.renderOutfit).not.toHaveBeenCalled();
   });
 
   it("keeps the original photo instead of cutting it out", async () => {
