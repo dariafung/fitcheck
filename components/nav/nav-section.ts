@@ -1,9 +1,9 @@
 // Which top-bar link a page belongs to. Sub-pages count as their parent
 // (an item page is Closet); anything else, like the purchase check or the
 // login page, belongs to none.
-export type NavSection = "/" | "/closet" | "/calendar" | "/profile";
+export type NavSection = "/" | "/closet" | "/calendar" | "/suits-you" | "/profile";
 
-const SECTIONS = ["/closet", "/calendar", "/profile"] as const;
+const SECTIONS = ["/closet", "/calendar", "/suits-you", "/profile"] as const;
 
 export function navSection(pathname: string): NavSection | null {
   if (pathname === "/") return "/";

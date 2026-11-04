@@ -3,13 +3,10 @@ import { Suspense } from "react";
 import { GoodForToday, GoodForTodaySkeleton } from "@/components/closet/good-for-today";
 import { StyleCard } from "@/components/closet/style-card";
 import { StyleCardSkeleton } from "@/components/closet/style-card-view";
-import { SuitsYou } from "@/components/closet/suits-you";
 
 // Home opens with the way into the purchase check.
 // Under it is what you own: the style card in the left column, today's pick
-// beside it, then (for buyers with strong matches) what others are passing on
-// that suits you. Phone order follows the markup: the check, today, Suits you,
-// then the card.
+// beside it. Phone order follows the markup: the check, today, then the card.
 export default function Home() {
   return (
     <div className="grid gap-x-4 gap-y-16 lg:grid-cols-4">
@@ -17,11 +14,6 @@ export default function Home() {
       <div className="min-w-0 lg:col-span-3 lg:col-start-2 lg:row-start-2">
         <Suspense fallback={<GoodForTodaySkeleton />}>
           <GoodForToday />
-        </Suspense>
-      </div>
-      <div className="min-w-0 empty:hidden lg:col-span-3 lg:col-start-2 lg:row-start-3">
-        <Suspense fallback={null}>
-          <SuitsYou />
         </Suspense>
       </div>
       <div className="min-w-0 lg:col-start-1 lg:row-start-2">

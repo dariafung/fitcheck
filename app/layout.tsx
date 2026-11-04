@@ -6,6 +6,7 @@ import { SignedInOnly } from "@/components/auth/signed-in-only";
 import { CalendarNavLink } from "@/components/calendar/calendar-nav-link";
 import { NAV_LINK } from "@/components/nav/nav-class";
 import { NavLink } from "@/components/nav/nav-link";
+import { SuitsYouNavLink } from "@/components/closet/suits-you-nav-link";
 import "./globals.css";
 
 // Interface, headings and numbers: a news grotesque with a little more
@@ -49,6 +50,13 @@ const CALENDAR_SLOT = (
   </span>
 );
 
+// Likewise Suits you (off for anyone who turned resale matching off).
+const SUITS_YOU_SLOT = (
+  <span aria-hidden className={`${NAV_LINK} invisible`}>
+    Suits you
+  </span>
+);
+
 // Likewise Log out on a desktop, the usual case on the hosted site; Profile
 // stays put when it streams in.
 const ACCOUNT_SLOT = (
@@ -73,6 +81,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Suspense>
             <Suspense fallback={CALENDAR_SLOT}>
               <CalendarNavLink className={NAV_LINK} />
+            </Suspense>
+            <Suspense fallback={SUITS_YOU_SLOT}>
+              <SuitsYouNavLink className={NAV_LINK} />
             </Suspense>
             <div className="ml-auto flex items-center gap-4 text-sm md:gap-5">
               <Suspense fallback={PROFILE}>

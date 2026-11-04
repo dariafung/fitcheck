@@ -11,6 +11,7 @@ describe("navSection", () => {
     expect(navSection("/closet/add")).toBe("/closet");
     expect(navSection("/closet/3f1c2a")).toBe("/closet");
     expect(navSection("/calendar")).toBe("/calendar");
+    expect(navSection("/suits-you")).toBe("/suits-you");
     expect(navSection("/calendar/2026-10-31")).toBe("/calendar");
     expect(navSection("/profile")).toBe("/profile");
     expect(navSection("/profile/anything")).toBe("/profile");

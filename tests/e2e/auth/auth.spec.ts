@@ -95,6 +95,15 @@ test("sign up and land on an empty closet", async ({ page }) => {
   await expect(page.getByText(SEED_ITEM.title)).toBeHidden();
 });
 
+test("with resale matching off there is no Suits you tab or page", async ({ page }) => {
+  // New accounts start with it off.
+  await signUp(page);
+  await expect(page.getByRole("navigation").getByRole("link", { name: "Closet" })).toBeVisible();
+  await expect(page.getByRole("navigation").getByRole("link", { name: "Suits you" })).toHaveCount(0);
+  await page.goto("/suits-you");
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+});
+
 test("a new account can add its first item", async ({ page }) => {
   await signUp(page);
   await page.getByRole("link", { name: /add/i }).first().click();

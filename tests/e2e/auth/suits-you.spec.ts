@@ -5,17 +5,19 @@ import { sizeLabel } from "../../../lib/resale/size";
 import { expect, test } from "../fixtures";
 import type { Page } from "@playwright/test";
 
-// The demo account's home with sign-in on: "Suits you" lists what the seed
+// The demo account with sign-in on: the "Suits you" tab lists what the seed
 // neighbors pass on, from the seeded cached checks (pnpm seed). Only read.
 async function tryDemo(page: Page) {
   await page.goto("/login");
   await page.getByRole("button", { name: "Try the demo account" }).click();
   await expect(page).toHaveURL("/");
+  await page.getByRole("navigation").getByRole("link", { name: "Suits you" }).click();
+  await expect(page).toHaveURL("/suits-you");
 }
 
 test("Suits you shows the neighbors' pieces with their listing, reasons and seller's name only", async ({ page }) => {
   await tryDemo(page);
-  const suits = page.getByRole("region", { name: "Suits you" });
+  const suits = page.getByRole("region", { name: "Pieces that suit you" });
   for (const piece of neighbors.items) {
     const card = suits.getByRole("listitem").filter({ hasText: piece.title });
     const seller = neighbors.users.find((u) => u.id === piece.user_id)!;
@@ -35,7 +37,9 @@ test.describe("on a phone", () => {
 
   test("Suits you fits the screen", async ({ page }) => {
     await tryDemo(page);
-    await expect(page.getByRole("region", { name: "Suits you" }).getByText(neighbors.items[0].title)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Pieces that suit you" }).getByText(neighbors.items[0].title)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    // The top bar still fits with the extra tab.
+    await expect(page.getByRole("navigation").getByRole("link", { name: "Profile" })).toBeInViewport({ ratio: 1 });
   });
 });
