@@ -30,6 +30,7 @@ export const MAX_COST_USD: Record<AiFunctionName, number> = {
   // One Muse Image picture.
   segmentGarment: PRICE_PER_IMAGE,
   summarizeWear: 0.02,
+  pickFixOutfit: 0.02,
 };
 
 export interface TokenUsage {

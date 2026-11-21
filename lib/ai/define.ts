@@ -10,7 +10,8 @@ export type AiFunctionName =
   | "scorePurchase"
   | "buildProfile"
   | "segmentGarment"
-  | "summarizeWear";
+  | "summarizeWear"
+  | "pickFixOutfit";
 
 export interface AiFunctionDef<I extends z.ZodType, O extends z.ZodType> {
   name: AiFunctionName;
