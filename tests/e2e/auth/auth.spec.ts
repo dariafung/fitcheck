@@ -86,9 +86,20 @@ test("login and sign-up errors sit under the box they're about", async ({ page }
   await expect(page.getByText("At least 6 characters.", { exact: true })).toHaveCount(0);
 });
 
+test("sign-up says where to start: the 5 pieces you wear most", async ({ page }) => {
+  await page.goto("/signup");
+  await expect(page.getByText("Start with the 5 pieces you wear most. Add the rest whenever.")).toBeVisible();
+});
+
 test("sign up and land on an empty closet", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Your closet is empty.")).toBeVisible();
+  // The empty closet asks for 5 pieces and counts from none.
+  const progress = page.getByTestId("starter-progress");
+  await expect(progress).toContainText("Start with the 5 pieces you wear most.");
+  await expect(progress).toContainText("0 of 5");
+  await page.goto("/");
+  await expect(page.getByTestId("starter-progress")).toContainText("0 of 5");
   // Named as typed, never after the email.
   const { data } = await db.from("users").select("display_name").eq("id", created.at(-1)!).single();
   expect(data?.display_name).toBe("E2E tester");
@@ -120,6 +131,9 @@ test("a new account can add its first item", async ({ page }) => {
 
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: "First tee" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toContainText("1 of 5");
+  await page.goto("/");
+  await expect(page.getByTestId("starter-progress")).toContainText("1 of 5");
   await page.goto("/closet?tab=passing-on");
   await expect(page.getByText("Nothing to pass on.")).toBeVisible();
 });
@@ -161,8 +175,12 @@ test("Try the demo account opens the persona's closet", async ({ page }) => {
   const nav = page.getByRole("navigation");
   await expect(nav.getByRole("button", { name: "Log out" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Sign up" })).toHaveCount(0);
+  // The persona is well past 5 pieces: no starter count, on home or the closet.
+  await expect(page.getByRole("heading", { name: "Good for today" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
   // Signed in, /login leads home. /signup stays open to the demo account, so
   // the read-only notes' "Sign up" links work.
   await page.goto("/login");

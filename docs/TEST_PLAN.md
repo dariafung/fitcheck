@@ -20,7 +20,8 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). 
 | # | Do | Expect |
 | --- | --- | --- |
 | 1.1 | Open the site while signed out | You land on `/login` with "Log in", "Sign up" and "Try the demo account" |
-| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | You land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | The sign-up page says "Start with the 5 pieces you wear most. Add the rest whenever."; you land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2a | Look at the empty closet, then at home | Both say "Start with the 5 pieces you wear most." with "0 of 5" over a thin bar and "Add your first piece"; nothing is locked: Calendar, Profile and "Should I buy this?" all open |
 | 1.3 | Log out, log in again with the same email and password | Back in your (empty) closet |
 | 1.4 | Log in with a wrong password | A short error on the page |
 | 1.5 | Open `/closet` in a private window | Sent to `/login` |
@@ -108,6 +109,8 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.8 | Check shoes when your closet has no shoes, or a top when it has no bottoms | A note that says what's missing to make an outfit |
 | 7.9 | Under "You could wear it like this" | Sample outfits laid out as flat-lay boards of the real photos on white, the checked piece marked "New"; no person |
 | 7.10 | Go to the closet afterwards | The checked item was **not** added |
+| 7.11 | With a new account that has 1–4 pieces, run a check | The score and the five parts show, but no verdict words: instead "Based on 3 pieces. Add more for a verdict." (with your number) |
+| 7.12 | Add pieces until you have 5, check again | The verdict (e.g. "A GOOD ADD") is back under the score |
 
 ### 8. Outfit calendar
 
@@ -153,7 +156,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
-| 10.7 | Run "Should I buy this?" | Works and shows a score |
+| 10.7 | Run "Should I buy this?" | Works and shows a score and a verdict. No "… of 5" count anywhere in the demo account |
 | 10.8 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
 
 ## Reporting a bug

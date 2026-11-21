@@ -12,7 +12,7 @@ Built from scratch during the Meta Global AI Developer Hackathon (Indie track), 
 
 On the login page, click **Try the demo account**. It's a read-only account for a made-up persona, figment, with 18 items and 10 days of logged outfits. figment passes on two pieces (see how many people would want each) and has secondhand pieces from other made-up users under the **Suits you** tab. In the demo account, those buyer counts and Suits you come from cached checks in the seed: the other users (seed neighbors) have only a name and sizes, and their scores and reasons were written for the demo, not by the AI.
 
-Or **Sign up** with a name, any email and a password (no confirmation email) and start from an empty closet.
+Or **Sign up** with a name, any email and a password (no confirmation email) and start from an empty closet. It asks for the 5 pieces you wear most first; everything works with fewer.
 
 Things to try first:
 
@@ -28,7 +28,7 @@ Things to try first:
 - **Voice feelings**: hold to talk, up to 3 minutes, English.
 - **Closet**: a grid of everything you own, on phone and desktop, with quick filters (not worn lately, top occasions) and a sort by newest or by how often you wore each piece.
 - **Pairing**: rules plus Spark decide which pieces go together; code builds full outfits from that.
-- **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10), with a verdict from Worth buying to Skip this one. The item you check is never saved.
+- **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10), with a verdict from Worth buying to Skip this one (the verdict waits until you have 5 pieces to compare with). The item you check is never saved.
 - **Outfit boards**: sample outfits shown as a flat lay of your own item photos. On-model photos are cleaned up to the garment alone by Muse Image.
 - **Style card**: one card on home that sums up what works for you and what to skip.
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.

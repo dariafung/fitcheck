@@ -223,4 +223,40 @@ test("with nothing in the closet to compare, there's no score, only a way to add
   await expect(result.getByTestId("verdict")).toHaveCount(0);
   await expect(result.getByRole("link", { name: "Add clothes" })).toHaveAttribute("href", "/closet/add");
   await expect(result.getByRole("button", { name: "Check another" })).toBeVisible();
+  await expect(result.getByTestId("small-closet")).toHaveCount(0);
+});
+
+test("against fewer than 5 pieces, the score and its parts show but no verdict", async ({ page }) => {
+  // The persona's closet is bigger; answer as the route would for one of 3.
+  await page.route("**/api/checks", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { result: { ...json.result, closetSize: 3 } } });
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("score")).toHaveText(/^\d{1,3}(\.\d)?$/);
+  await expect(result.getByTestId("small-closet")).toHaveText("Based on 3 pieces. Add more for a verdict.");
+  await expect(result.getByTestId("verdict")).toHaveCount(0);
+  for (const part of ["Suits you", "Outfits", "Revives", "Fills a gap", "Not a repeat"]) {
+    await expect(result.getByText(part, { exact: true })).toBeVisible();
+  }
+});
+
+test("at 5 pieces the verdict is back", async ({ page }) => {
+  await page.route("**/api/checks", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { result: { ...json.result, closetSize: 5 } } });
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("verdict")).toHaveText(new RegExp(`^(${Object.values(VERDICTS).join("|")})$`));
+  await expect(result.getByTestId("small-closet")).toHaveCount(0);
 });
