@@ -85,6 +85,16 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 5.4 | Hold "Hold to talk", say a sentence in English, release | The words appear in the feelings box for you to edit; Save keeps them |
 | 5.5 | Delete → Cancel | Back to "Delete", item still there |
 | 5.6 | Delete → Delete | Back in the closet, the item is gone; the browser Back button doesn't reopen it |
+| 5.7 | Tap the fourth star under the item's name; reload; tap the fourth star again; reload | Four stars filled and kept after the reload; then no stars, also kept |
+| 5.8 | With a top, a bottom and shoes in the closet, write a feeling with a complaint on the top ("Goes with everything, but it's a little see-through"), Save | Within a few seconds, under the feelings box: "Try it like this", one outfit board made of your own pieces (this one included, no person): a top, a bottom and shoes, maybe a layer, never two of a kind; and one short sentence saying how the outfit helps with the complaint |
+| 5.9 | Reload the page twice | The same outfit and sentence each time, shown at once |
+| 5.10 | On a piece with no feeling, or only good things said: tap the second star | "Try it like this" appears with an outfit; the sentence says why the outfit works and doesn't make up a fault |
+| 5.11 | On that piece tap the first star, reload; then tap the fourth star | Going from 2 stars to 1 keeps the same outfit and sentence; at 4 stars "Try it like this" is gone |
+| 5.12 | "Save outfit"; open another piece of that outfit | The first page shows "Saved" and "Remove"; the other piece's page lists the outfit under "Saved outfits" |
+| 5.13 | "Remove" on the other piece's page; go back to the first | The outfit is gone from "Saved outfits"; the first page offers "Save outfit" again |
+| 5.14 | Open an item with no feeling and no low rating, one with only good things said, and one you're passing on (even rated 1) | No "Try it like this" on any of them |
+| 5.15 | In a closet with no shoes, rate a top 1 star | "Nothing in your closet fixes this yet." and no board |
+| 5.16 | Demo account: open "Supima Long Sleeve T-Shirt", then the gray "Feel Good Oversized Hoodie" | Each shows its stars (not tappable), an outfit board and a sentence (the see-through fabric; why the hoodie outfit works), and "Demo account is read-only." where Save would be |
 
 ### 6. Profile and home
 

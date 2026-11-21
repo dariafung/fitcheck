@@ -90,7 +90,7 @@ const bucket = db.storage.from(ITEM_IMAGES_BUCKET);
 
 // The seed is the whole persona: pieces from an older seed, or added by
 // hand or by tests, go first. Items take their feelings and pairings with them.
-for (const table of ["items", "style_profiles", "outfit_logs", "wear_insights"] as const) {
+for (const table of ["items", "style_profiles", "outfit_logs", "wear_insights", "saved_outfits"] as const) {
   const cleared = await db.from(table).delete().eq("user_id", persona.id);
   if (cleared.error) throw cleared.error;
 }
@@ -116,6 +116,22 @@ const upserted = await db.from("items").upsert(items);
 if (upserted.error) throw upserted.error;
 const felt = await db.from("item_feelings").upsert(feelings);
 if (felt.error) throw felt.error;
+// The outfit for each piece the persona is unhappy with (rated 1 or 2 in
+// items.json, or with a complaint in its feeling), with reasons written by
+// hand (a null outfit: nothing helps). The persona's item pages show these
+// and never ask the model; the old rows went with the items above.
+const fixes = (readJson("fix-outfits.json") as { item_id: string; outfit_item_ids: string[] | null; reason: string | null }[]).map(
+  (fix) => ({
+    item_id: fix.item_id,
+    user_id: persona.id,
+    input_hash: "seed",
+    prompt_version: "seed",
+    outfit_item_ids: fix.outfit_item_ids && [...fix.outfit_item_ids].sort(),
+    reason: fix.reason,
+  }),
+);
+const fixed = await db.from("item_fix_outfits").upsert(fixes);
+if (fixed.error) throw fixed.error;
 // The persona's style card; a placeholder until a real one is recorded.
 const card = readJson("style-profile.json") as {
   promptVersion: string;
@@ -221,7 +237,7 @@ const matched = await db.from("resale_matches").upsert(matchRows, { onConflict: 
 if (matched.error) throw matched.error;
 
 console.log(
-  `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, 1 style card, ` +
+  `Seeded 1 persona, ${items.length} items, ${feelings.length} feelings, ${fixes.length} fix outfits, 1 style card, ` +
     `${outfits.length} outfits to ${lastDay}, ${imagePaths.length} images, ${neighborIds.length} seed neighbors ` +
     `with ${neighbors.items.length} pieces and ${matchRows.length} cached matches` +
     (staleSeedUsers.data.length > 0 ? `, ${staleSeedUsers.data.length} old seed users removed` : "") +

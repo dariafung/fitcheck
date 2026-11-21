@@ -13,6 +13,7 @@ export interface EditableRow {
   size: string | null;
   asking_price_cents: number | null;
   condition: string | null;
+  rating?: number | null;
   ai_tags: unknown;
   user_tags: unknown;
 }
@@ -25,6 +26,7 @@ export interface ItemRowUpdate {
   size?: string | null;
   asking_price_cents?: number | null;
   condition?: string | null;
+  rating?: number | null;
   user_tags?: { [key: string]: Json };
 }
 
@@ -65,6 +67,7 @@ export function itemUpdate(row: EditableRow, patch: ItemPatch): ItemRowUpdate | 
     next.asking_price_cents = patch.askingPriceCents;
   }
   if (patch.condition !== undefined && patch.condition !== row.condition) next.condition = patch.condition;
+  if (patch.rating !== undefined && patch.rating !== (row.rating ?? null)) next.rating = patch.rating;
 
   const details = patch.details;
   if (details) {
