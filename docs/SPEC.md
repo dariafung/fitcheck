@@ -118,6 +118,7 @@ We don't fetch store pages: large retailers block it, and data-center IPs after 
 | `wear_insights` | One per user: insights about the outfit log, input hash, generated at | P1 |
 | `resale_matches` | Passing-on item × buyer: buy check score, what the seller may see, the buyer's own reasons, fingerprint, checked at | P1 |
 | `resale_buyers` | Unused: buyers are opted-in users | P1 |
+| `api_tokens` | Personal tokens for the iOS Shortcut (P1-6): user, SHA-256 hash of the token (never the token), label, created at, last used at | P1 |
 
 ## Schedule
 
