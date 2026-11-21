@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Category } from "@/lib/ai/schemas/common";
 import type { OwnedPiece } from "@/lib/check/board-pieces";
 import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
 import { verdictFor } from "@/lib/check/verdict";
+import { smallClosetNote } from "@/lib/closet/starter";
 import { Icon } from "@/components/ui/icon";
 import { OutfitBoard, ownedLine, type BoardPiece } from "./OutfitBoard";
 
@@ -109,6 +110,7 @@ export function BuyResult({
   onModel,
   result,
   onCheckAnother,
+  more,
 }: {
   title: string;
   photo: string | null;
@@ -116,11 +118,14 @@ export function BuyResult({
   onModel: boolean;
   result: BuyCheckResult;
   onCheckAnother: () => void;
+  // Shown after Check another, e.g. "I bought it".
+  more?: ReactNode;
 }) {
   const { parts } = result;
   // Nothing in the closet to compare with: no number, no verdict, just
   // what to do first.
   const empty = result.closetSize === 0;
+  const smallCloset = smallClosetNote(result.closetSize);
   const cutouts = useCutouts(result.sampleOutfits, photo, onModel);
   return (
     <section
@@ -157,10 +162,17 @@ export function BuyResult({
               </span>
               <span className="text-sm text-ink-2"> / 100</span>
             </p>
-            {/* In ink: only the number is red. */}
-            <p data-testid="verdict" className="text-title font-medium uppercase md:text-2xl">
-              {verdictFor(result.score)}
-            </p>
+            {/* In ink: only the number is red. Under the starter target there
+                is too little to go on for a verdict; a note says so instead. */}
+            {smallCloset ? (
+              <p data-testid="small-closet" className="text-base text-ink-2">
+                {smallCloset}
+              </p>
+            ) : (
+              <p data-testid="verdict" className="text-title font-medium uppercase md:text-2xl">
+                {verdictFor(result.score)}
+              </p>
+            )}
           </>
         )}
       </header>
@@ -292,9 +304,12 @@ export function BuyResult({
           </>
         )}
 
-        <button type="button" onClick={onCheckAnother} className={`${empty ? "btn-secondary" : "btn-primary"} self-start`}>
-          Check another
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" onClick={onCheckAnother} className={empty ? "btn-secondary" : "btn-primary"}>
+            Check another
+          </button>
+          {more}
+        </div>
       </div>
     </section>
   );

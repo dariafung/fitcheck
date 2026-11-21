@@ -86,9 +86,20 @@ test("login and sign-up errors sit under the box they're about", async ({ page }
   await expect(page.getByText("At least 6 characters.", { exact: true })).toHaveCount(0);
 });
 
+test("sign-up says where to start: the 5 pieces you wear most", async ({ page }) => {
+  await page.goto("/signup");
+  await expect(page.getByText("Start with the 5 pieces you wear most. Add the rest whenever.")).toBeVisible();
+});
+
 test("sign up and land on an empty closet", async ({ page }) => {
   await signUp(page);
   await expect(page.getByText("Your closet is empty.")).toBeVisible();
+  // The empty closet asks for 5 pieces and counts from none.
+  const progress = page.getByTestId("starter-progress");
+  await expect(progress).toContainText("Start with the 5 pieces you wear most.");
+  await expect(progress).toContainText("0 of 5");
+  await page.goto("/");
+  await expect(page.getByTestId("starter-progress")).toContainText("0 of 5");
   // Named as typed, never after the email.
   const { data } = await db.from("users").select("display_name").eq("id", created.at(-1)!).single();
   expect(data?.display_name).toBe("E2E tester");
@@ -116,12 +127,78 @@ test("a new account can add its first item", async ({ page }) => {
   const card = page.getByRole("form", { name: "Item details" });
   await card.getByLabel("Name").fill("First tee");
   await card.getByRole("button", { name: "Save to closet" }).click();
-  await expect(page.getByRole("status")).toContainText("First tee is in your closet.");
+  const status = page.getByRole("status");
+  await expect(status).toContainText("First tee is in your closet.");
+  // How many are left to 5, and a nudge (not a step) to say how it feels.
+  await expect(status.getByTestId("starter-left")).toHaveText("4 more to go for your first 5.");
+  await expect(status.getByRole("link", { name: "say how it feels" })).toHaveAttribute("href", /^\/closet\/[0-9a-f-]{36}$/);
+  await expect(status.getByRole("link", { name: "Check something you want to buy" })).toHaveCount(0);
 
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: "First tee" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toContainText("1 of 5");
+  await page.goto("/");
+  await expect(page.getByTestId("starter-progress")).toContainText("1 of 5");
   await page.goto("/closet?tab=passing-on");
   await expect(page.getByText("Nothing to pass on.")).toBeVisible();
+});
+
+test("the fifth piece ends the count and points to the purchase check", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/closet/add");
+  // Five screenshots at once: read one after another, each confirmed.
+  const shot = await fakeScreenshot();
+  await page.getByLabel("Choose a screenshot").setInputFiles(
+    Array.from({ length: 5 }, (_, i) => ({ name: `piece-${i + 1}.png`, mimeType: "image/png", buffer: shot })),
+  );
+  const card = page.getByRole("form", { name: "Item details" });
+  const status = page.getByRole("status");
+  for (let i = 1; i <= 5; i++) {
+    await expect(page.getByTestId("queue-position")).toHaveText(`Screenshot ${i} of 5`);
+    await card.getByLabel("Name").fill(`Piece ${i}`);
+    await card.getByRole("button", { name: "Save to closet" }).click();
+    await expect(status).toContainText(`Piece ${i} is in your closet.`);
+    if (i < 5) await expect(status.getByTestId("starter-left")).toHaveText(`${5 - i} more to go for your first 5.`);
+  }
+  await expect(status.getByTestId("starter-left")).toContainText("That's your first 5.");
+  await expect(status.getByRole("link", { name: "Check something you want to buy" })).toHaveAttribute("href", "/check");
+  await expect(status.getByTestId("queue-summary")).toHaveText("5 added.");
+
+  // At 5 the count is gone, from the closet and from home.
+  await page.goto("/closet");
+  await expect(page.getByRole("link", { name: "Piece 5" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Good for today" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
+});
+
+test("a check against fewer than 5 pieces shows the score without a verdict", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/closet/add");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "tee.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const card = page.getByRole("form", { name: "Item details" });
+  await card.getByLabel("Name").fill("Only tee");
+  await card.getByRole("button", { name: "Save to closet" }).click();
+  await expect(page.getByRole("status")).toContainText("Only tee is in your closet.");
+
+  await page.goto("/check");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("score")).toBeVisible();
+  await expect(result.getByTestId("small-closet")).toHaveText("Based on 1 piece. Add more for a verdict.");
+  await expect(result.getByTestId("verdict")).toHaveCount(0);
+  await expect(result.getByText("Suits you", { exact: true })).toBeVisible();
 });
 
 test("log in with the account you made, then log out", async ({ page }) => {
@@ -161,8 +238,12 @@ test("Try the demo account opens the persona's closet", async ({ page }) => {
   const nav = page.getByRole("navigation");
   await expect(nav.getByRole("button", { name: "Log out" })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Sign up" })).toHaveCount(0);
+  // The persona is well past 5 pieces: no starter count, on home or the closet.
+  await expect(page.getByRole("heading", { name: "Good for today" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: SEED_ITEM.title })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
   // Signed in, /login leads home. /signup stays open to the demo account, so
   // the read-only notes' "Sign up" links work.
   await page.goto("/login");
@@ -191,6 +272,24 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await page.goto("/closet/add");
   await expect(page.getByText(DEMO_READ_ONLY)).toBeVisible();
   await expect(page.getByRole("button", { name: "Choose a screenshot" })).toBeHidden();
+
+  // A purchase check still runs, but its result can't be added to the closet.
+  await page.goto("/check");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const card = page.getByRole("form", { name: "Item details" });
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("score")).toBeVisible();
+  await expect(result.getByText(DEMO_READ_ONLY)).toBeVisible();
+  await expect(result.getByRole("button", { name: /I bought it/ })).toHaveCount(0);
+  const photo = `data:image/png;base64,${(await fakeScreenshot()).toString("base64")}`;
+  const kept = await page.request.post("/api/checks/photo", { data: { photo } });
+  expect(kept.status()).toBe(403);
 
   await page.goto("/profile");
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();

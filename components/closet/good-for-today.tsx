@@ -13,6 +13,7 @@ import { ATTRIBUTION } from "@/lib/weather/open-meteo";
 import { NO_LOCATION, todayWeather } from "@/lib/weather/today";
 import { ClosetGridSkeleton, EmptyCloset, ItemList } from "./closet-grid";
 import { LocationSync } from "./location-sync";
+import { StarterNudge } from "./starter-progress";
 
 // Three across next to the style card on a desktop, so each slot lines up
 // with the closet's four-across shelf.
@@ -55,6 +56,7 @@ export async function GoodForToday() {
       }
     >
       <LocationSync />
+      <StarterNudge activeCount={items.filter((item) => item.status === "active").length} />
       {result === NO_LOCATION ? (
         <p className="text-sm text-ink-2">
           <Link

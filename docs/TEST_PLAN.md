@@ -20,7 +20,8 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). 
 | # | Do | Expect |
 | --- | --- | --- |
 | 1.1 | Open the site while signed out | You land on `/login` with "Log in", "Sign up" and "Try the demo account" |
-| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | You land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | The sign-up page says "Start with the 5 pieces you wear most. Add the rest whenever."; you land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2a | Look at the empty closet, then at home | Both say "Start with the 5 pieces you wear most." with "0 of 5" over a thin bar and "Add your first piece"; nothing is locked: Calendar, Profile and "Should I buy this?" all open |
 | 1.3 | Log out, log in again with the same email and password | Back in your (empty) closet |
 | 1.4 | Log in with a wrong password | A short error on the page |
 | 1.5 | Open `/closet` in a private window | Sent to `/login` |
@@ -48,7 +49,15 @@ Take screenshots of real product pages from different stores (one screen: produc
 | 3.5 | Upload a screenshot where the product is worn by a model | "AI is cutting out the photo…", then the piece alone on white, no person; "Photo cleaned up by AI." with "Use original photo" |
 | 3.6 | "Use original photo" | The store's photo, framed on white, replaces the cut-out |
 | 3.7 | Fix a field, "Save to closet" | "<name> is in your closet." with "See closet" and "Add another"; the item shows in the closet grid |
+| 3.7a | Read the note after your first save, then open the closet and home | "4 more to go for your first 5." and "If you like, say how it feels." (a link to the item; skipping it is fine); the closet and home show "1 of 5" |
 | 3.8 | Add 5–8 items: tops, bottoms, shoes, one outerwear | Each one saves; the closet grid shows them all, every photo on white |
+| 3.8a | Watch the note on the save that makes 5 pieces, then open the closet and home | "That's your first 5." with a "Check something you want to buy" link to the purchase check; the "… of 5" count is gone from the closet and home, and later saves say nothing about 5 |
+| 3.8b | "Choose a screenshot" and pick 3 screenshots at once (or drop 3) | They are read one at a time: "Screenshot 1 of 3" with its "Look right?" card; "Save to closet" shows "<name> is in your closet." and reads the next by itself |
+| 3.8c | In a queue, press "Skip this one" on a card | Nothing is saved for it; the next screenshot is read. After the last one: a line like "2 added, 1 skipped." and the drop area is back |
+| 3.8d | Pick 3 files at once where the second isn't a product page (or isn't a picture) | "Screenshot 2 of 3: …" says what was wrong and the third is still read; the others are not lost |
+| 3.8e | Pick 12 screenshots at once | "That's more than 10. We took the first 10; add the other 2 after."; the queue says "… of 10" |
+| 3.8f | Pick a single screenshot | Exactly as 3.1–3.7: no "Screenshot 1 of 1", "Use another screenshot" instead of "Skip this one" |
+| 3.8g | (Only if you reach it) read more than 40 screenshots in one day, part of them in a queue | "That's your AI limit for today. Try again tomorrow."; the queue stops there and nothing more is read |
 | 3.9 | Upload a screenshot with no product in it | "Couldn't spot a product there. Try another screenshot?" and nothing saved |
 | 3.10 | Upload a screenshot of a bag, belt or hat | "We only do clothes and shoes for now." and nothing saved |
 | 3.11 | Drop or paste a file that isn't an image | A short message, nothing saved |
@@ -108,6 +117,9 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.8 | Check shoes when your closet has no shoes, or a top when it has no bottoms | A note that says what's missing to make an outfit |
 | 7.9 | Under "You could wear it like this" | Sample outfits laid out as flat-lay boards of the real photos on white, the checked piece marked "New"; no person |
 | 7.10 | Go to the closet afterwards | The checked item was **not** added |
+| 7.11 | Check an item, then press "I bought it — add to closet" under the result | "Adding…", then "<name> is in your closet." with "See it"; no second card to confirm. "See it" opens the new item with the same photo; it is in the closet grid |
+| 7.12 | With a new account that has 1–4 pieces, run a check | The score and the five parts show, but no verdict words: instead "Based on 3 pieces. Add more for a verdict." (with your number) |
+| 7.13 | Add pieces until you have 5, check again | The verdict (e.g. "A GOOD ADD") is back under the score |
 
 ### 8. Outfit calendar
 
@@ -153,7 +165,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
-| 10.7 | Run "Should I buy this?" | Works and shows a score |
+| 10.7 | Run "Should I buy this?" | Works and shows a score and a verdict; where "I bought it" would be: "Demo account is read-only. Sign up to add your own." No "… of 5" count anywhere in the demo account |
 | 10.8 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
 
 ## Reporting a bug

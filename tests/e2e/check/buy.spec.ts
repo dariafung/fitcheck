@@ -223,4 +223,95 @@ test("with nothing in the closet to compare, there's no score, only a way to add
   await expect(result.getByTestId("verdict")).toHaveCount(0);
   await expect(result.getByRole("link", { name: "Add clothes" })).toHaveAttribute("href", "/closet/add");
   await expect(result.getByRole("button", { name: "Check another" })).toBeVisible();
+  await expect(result.getByTestId("small-closet")).toHaveCount(0);
+});
+
+test("against fewer than 5 pieces, the score and its parts show but no verdict", async ({ page }) => {
+  // The persona's closet is bigger; answer as the route would for one of 3.
+  await page.route("**/api/checks", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { result: { ...json.result, closetSize: 3 } } });
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("score")).toHaveText(/^\d{1,3}(\.\d)?$/);
+  await expect(result.getByTestId("small-closet")).toHaveText("Based on 3 pieces. Add more for a verdict.");
+  await expect(result.getByTestId("verdict")).toHaveCount(0);
+  for (const part of ["Suits you", "Outfits", "Revives", "Fills a gap", "Not a repeat"]) {
+    await expect(result.getByText(part, { exact: true })).toBeVisible();
+  }
+});
+
+test("at 5 pieces the verdict is back", async ({ page }) => {
+  await page.route("**/api/checks", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    await route.fulfill({ response: res, json: { result: { ...json.result, closetSize: 5 } } });
+  });
+  await page.goto("/check");
+  const card = await upload(page);
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("verdict")).toHaveText(new RegExp(`^(${Object.values(VERDICTS).join("|")})$`));
+  await expect(result.getByTestId("small-closet")).toHaveCount(0);
+});
+
+test("I bought it: a failed save says so, then the checked piece lands in the closet", async ({ page }) => {
+  // The photos stored and the item saved, removed again at the end.
+  const paths: string[] = [];
+  page.on("response", async (res) => {
+    if (new URL(res.url()).pathname !== "/api/checks/photo") return;
+    const json = await res.json().catch(() => null);
+    if (json?.path) paths.push(json.path);
+  });
+  const title = `Bought loafers ${Date.now().toString(36)}`;
+  try {
+    await page.goto("/check");
+    const card = await upload(page);
+    await card.getByLabel("Name").fill(title);
+    await card.getByLabel("Type").selectOption("shoes");
+    await card.getByRole("button", { name: "Check it" }).click();
+    const result = page.getByRole("region", { name: "Result" });
+    // Check another stays the main action.
+    await expect(result.getByRole("button", { name: "Check another" })).toHaveClass(/btn-primary/);
+    const keep = result.getByRole("button", { name: "I bought it — add to closet" });
+    await expect(keep).toHaveClass(/btn-secondary/);
+    // Nothing is stored until the tap.
+    expect(await itemsTitled(title)).toEqual([]);
+    expect(paths).toEqual([]);
+
+    await page.route("**/api/items", (route) => route.fulfill({ status: 500, json: { error: "db" } }));
+    await keep.click();
+    await expect(result.getByRole("status")).toHaveText("Couldn't save. Try again.");
+    expect(await itemsTitled(title)).toEqual([]);
+
+    // One tap, no second card to confirm.
+    await page.unroute("**/api/items");
+    await keep.click();
+    await expect(result.getByText(`${title} is in your closet.`)).toBeVisible();
+    await expect(page.getByRole("form", { name: "Item details" })).toHaveCount(0);
+    const [saved] = await itemsTitled(title);
+    const { data: row } = await db
+      .from("items")
+      .select("status, category, image_paths, raw_source")
+      .eq("id", saved.id)
+      .single()
+      .throwOnError();
+    expect(row).toMatchObject({ status: "active", category: "shoes", raw_source: { fromCheck: true } });
+    // Saved with the photo stored on the second tap.
+    expect(row.image_paths).toHaveLength(1);
+    await expect.poll(() => paths).toContain(row.image_paths[0]);
+    await expect(result.getByRole("link", { name: "See it" })).toHaveAttribute("href", `/closet/${saved.id}`);
+    await result.getByRole("link", { name: "See it" }).click();
+    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  } finally {
+    const ids = (await itemsTitled(title)).map((i) => i.id);
+    if (ids.length) await db.from("items").delete().in("id", ids).throwOnError();
+    if (paths.length) await db.storage.from("item-images").remove(paths);
+  }
 });
