@@ -2,6 +2,7 @@ import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { PhoneLogOut } from "@/components/auth/account-nav";
+import { tokenInfo } from "@/lib/auth/api-token";
 import { isReadOnly } from "@/lib/auth/session";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
@@ -11,6 +12,7 @@ import { wearLogEnabledFor } from "@/lib/wear/settings";
 import { describeLocation } from "@/lib/weather/location";
 import { LocationPicker } from "./location-picker";
 import { ProfileForm } from "./profile-form";
+import { ShortcutToken } from "./shortcut-token";
 import { WearLogSetting } from "./wear-log-setting";
 
 export default function ProfilePage() {
@@ -25,6 +27,9 @@ export default function ProfilePage() {
       </Suspense>
       <Suspense>
         <WearLog />
+      </Suspense>
+      <Suspense>
+        <Shortcut />
       </Suspense>
       <Suspense>
         <PhoneLogOut />
@@ -58,6 +63,13 @@ async function WearLog() {
   await connection();
   const [enabled, readOnly] = await Promise.all([currentUserId().then(wearLogEnabledFor), isReadOnly()]);
   return <WearLogSetting initial={enabled} readOnly={readOnly} />;
+}
+
+// The token for the iOS Shortcut; the read-only demo account can't have one.
+async function Shortcut() {
+  await connection();
+  if (await isReadOnly()) return null;
+  return <ShortcutToken initial={await tokenInfo(createServerClient(), await currentUserId())} />;
 }
 
 function FormSkeleton() {

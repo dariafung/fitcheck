@@ -8,7 +8,7 @@ import { dailyBudgetUsd, spentTodayUsd, today } from "@/lib/ai/budget";
 import { AiBudgetError, AiDailyLimitError, AiDemoLimitError, AiError } from "@/lib/ai/errors";
 import { currentMode } from "@/lib/ai/mode";
 import { authRequired } from "@/lib/auth/config";
-import { sessionUser } from "@/lib/auth/session";
+import { sessionUser, type SessionUser } from "@/lib/auth/session";
 import { DAILY_LIMITS, DEMO_DAILY_LIMITS, DEMO_RESERVE_USD, SIGNUPS_PER_IP_PER_DAY, type DailyAction } from "./limits";
 import { usageStore } from "./usage-store";
 
@@ -68,13 +68,19 @@ async function takeAll(holds: Hold[], day: string, action: string, over: () => E
   };
 }
 
-// Takes one count of `action` for the current caller. Throws
+// Who a count is taken for. Routes behind the session cookie leave it out;
+// a route that signs its caller in another way (a personal token,
+// lib/auth/api-token.ts) names them, so they share the account's counts.
+export type DailyCaller = Pick<SessionUser, "id" | "readOnly" | "sessionId">;
+
+// Takes one count of `action` for the current caller: `caller` when given,
+// else the session's user. Throws
 // AiDailyLimitError (AiDemoLimitError for the demo account) when it's used
 // up, or AiBudgetError when another account would dip into the demo's
 // reserve. Signed out there is no one to count; the route refuses anyway.
-export async function takeDaily(action: DailyAction, now = new Date()): Promise<DailyTicket> {
+export async function takeDaily(action: DailyAction, now = new Date(), caller?: DailyCaller): Promise<DailyTicket> {
   if (!authRequired()) return UNLIMITED;
-  const user = await sessionUser();
+  const user = caller ?? (await sessionUser());
   if (!user) return UNLIMITED;
   const day = today(now);
   const limit = DAILY_LIMITS[action];
@@ -115,8 +121,13 @@ export interface GiveBackWhen<T> {
 
 // Runs one counted action: takes the count, runs it, and gives the count
 // back when it failed on our side (the model failed, the budget ran out).
-export async function withDaily<T>(action: DailyAction, run: () => Promise<T>, when: GiveBackWhen<T> = {}): Promise<T> {
-  const ticket = await takeDaily(action);
+export async function withDaily<T>(
+  action: DailyAction,
+  run: () => Promise<T>,
+  when: GiveBackWhen<T> = {},
+  caller?: DailyCaller,
+): Promise<T> {
+  const ticket = await takeDaily(action, undefined, caller);
   let result: T;
   try {
     result = await run();

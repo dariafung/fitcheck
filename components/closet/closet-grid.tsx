@@ -22,6 +22,7 @@ import { loadWearLog } from "@/lib/wear/log";
 import { wearLogEnabledFor } from "@/lib/wear/settings";
 import { ClosetFilters, FILTER } from "./closet-filters";
 import { ItemImage } from "./item-image";
+import { StarterProgress } from "./starter-progress";
 
 // The shelf: 4:5 tiles. Four across on a desktop, 16px apart, 48px between
 // rows. On a phone two across, 4px apart, pulled out to 8px from the screen
@@ -52,6 +53,8 @@ export async function ClosetGrid({ view: viewParam }: { view: Promise<ClosetView
   const shown = sortItems(inCategory(inTag(tabItems, view.tag, notWorn), view.cat), view.sort, wear);
   return (
     <div className="flex flex-col gap-10">
+      {/* Under the starter target only; the demo account never is. */}
+      {!readOnly && <StarterProgress activeCount={inTab(items, "wearing").length} />}
       <ClosetFilters items={items} view={view} notWorn={notWorn} sorts={sorts} />
       {shown.length > 0 ? (
         <ItemList items={shown} addSlot={view.tab === "wearing" && !readOnly} />
@@ -114,7 +117,8 @@ export function EmptyCloset() {
   return (
     <EmptySlot empty>
       <p className="text-lg font-medium">Your closet is empty.</p>
-      <p className="text-sm text-ink-2">Add a few things you own to get started.</p>
+      <StarterProgress activeCount={0} />
+      <p className="text-sm text-ink-2">A screenshot of each is enough. Add the rest whenever.</p>
       <Link href="/closet/add" className="btn-primary mt-4">
         Add your first piece
       </Link>

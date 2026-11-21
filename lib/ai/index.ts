@@ -5,6 +5,7 @@ import { liveExtractItem } from "./live/extract-item";
 import { liveJudgePairing } from "./live/judge-pairing";
 import { liveJudgeRepeat } from "./live/judge-repeat";
 import { liveParseFeeling } from "./live/parse-feeling";
+import { livePickFixOutfit } from "./live/pick-fix-outfit";
 import { liveScorePurchase } from "./live/score-purchase";
 import { liveSegmentGarment } from "./live/segment-garment";
 import { liveSummarizeWear } from "./live/summarize-wear";
@@ -14,6 +15,7 @@ import { mockExtractItem } from "./mock/extract-item";
 import { mockJudgePairing } from "./mock/judge-pairing";
 import { mockJudgeRepeat } from "./mock/judge-repeat";
 import { mockParseFeeling } from "./mock/parse-feeling";
+import { mockPickFixOutfit } from "./mock/pick-fix-outfit";
 import { mockScorePurchase } from "./mock/score-purchase";
 import { mockSegmentGarment } from "./mock/segment-garment";
 import { mockSummarizeWear } from "./mock/summarize-wear";
@@ -23,6 +25,7 @@ import * as extractItemSchema from "./schemas/extract-item";
 import * as judgePairingSchema from "./schemas/judge-pairing";
 import * as judgeRepeatSchema from "./schemas/judge-repeat";
 import * as parseFeelingSchema from "./schemas/parse-feeling";
+import * as pickFixOutfitSchema from "./schemas/pick-fix-outfit";
 import * as scorePurchaseSchema from "./schemas/score-purchase";
 import * as segmentGarmentSchema from "./schemas/segment-garment";
 import * as summarizeWearSchema from "./schemas/summarize-wear";
@@ -114,6 +117,15 @@ export const summarizeWear = defineAiFunction({
   live: liveSummarizeWear,
 });
 
+export const pickFixOutfit = defineAiFunction({
+  name: "pickFixOutfit",
+  promptVersion: pickFixOutfitSchema.PROMPT_VERSION,
+  input: pickFixOutfitSchema.PickFixOutfitInput,
+  output: pickFixOutfitSchema.PickFixOutfitOutput,
+  mock: mockPickFixOutfit,
+  live: livePickFixOutfit,
+});
+
 export { AiError } from "./errors";
 export { aiErrorResponse } from "./http";
 export { currentMode, type AiMode } from "./mode";
@@ -124,6 +136,7 @@ export type { ExtractItemInput, ExtractItemOutput } from "./schemas/extract-item
 export type { JudgePairingInput, JudgePairingOutput } from "./schemas/judge-pairing";
 export type { JudgeRepeatInput, JudgeRepeatOutput } from "./schemas/judge-repeat";
 export type { ParseFeelingInput, ParseFeelingOutput } from "./schemas/parse-feeling";
+export type { PickFixOutfitInput, PickFixOutfitOutput } from "./schemas/pick-fix-outfit";
 export type { ScorePurchaseInput, ScorePurchaseOutput } from "./schemas/score-purchase";
 export type { SegmentGarmentInput, SegmentGarmentOutput } from "./schemas/segment-garment";
 export type { SummarizeWearInput, SummarizeWearOutput } from "./schemas/summarize-wear";

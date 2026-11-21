@@ -8,6 +8,10 @@ import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 export const ItemStatus = z.enum(["active", "passing_on"]);
 export type ItemStatus = z.infer<typeof ItemStatus>;
 
+// How much the owner likes a piece, in stars.
+export const MAX_RATING = 5;
+export const ItemRating = z.int().min(1).max(MAX_RATING);
+
 // Everything the entry card edits, sent whole: name and brand go to their
 // columns, tags are stored as the differences from the AI's (user_tags).
 // Same limits as saving a new item.
@@ -28,6 +32,7 @@ export type ItemDetails = z.infer<typeof ItemDetails>;
 // asking price (US cents) and condition, or any of them together. The size is
 // as typed (M, 28, US 8); null or empty clears it, which an item on its way
 // out can't do. Passing an item on also needs a price and a condition.
+// The rating is 1 to 5 stars; null clears it.
 // Unknown keys are rejected so other fields are not silently ignored.
 export const ItemPatch = z
   .strictObject({
@@ -42,6 +47,7 @@ export const ItemPatch = z
       .optional(),
     askingPriceCents: AskingPriceCents.nullable().optional(),
     condition: Condition.nullable().optional(),
+    rating: ItemRating.nullable().optional(),
   })
   .refine(
     (p) =>
@@ -49,7 +55,8 @@ export const ItemPatch = z
       p.status !== undefined ||
       p.size !== undefined ||
       p.askingPriceCents !== undefined ||
-      p.condition !== undefined,
-    { message: "Send details, a status, a size, a price or a condition." },
+      p.condition !== undefined ||
+      p.rating !== undefined,
+    { message: "Send details, a status, a size, a price, a condition or a rating." },
   );
 export type ItemPatch = z.infer<typeof ItemPatch>;

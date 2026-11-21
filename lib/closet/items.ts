@@ -37,6 +37,8 @@ export interface ClosetItem {
   // The listing while passing_on: US cents and a CONDITIONS value.
   askingPriceCents: number | null;
   condition: string | null;
+  // 1 to 5 stars, or null when not rated.
+  rating: number | null;
   tags: ItemTags;
   tempRangeF: TempRangeF | null;
   swatch: string;
@@ -105,7 +107,7 @@ export async function getClosetItem(
   const { data } = await db
     .from("items")
     .select(
-      "id, title, brand, retailer, source_url, category, status, size, asking_price_cents, condition, image_paths, ai_tags, user_tags",
+      "id, title, brand, retailer, source_url, category, status, size, asking_price_cents, condition, rating, image_paths, ai_tags, user_tags",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -128,6 +130,7 @@ export async function getClosetItem(
     size: data.size,
     askingPriceCents: data.asking_price_cents,
     condition: data.condition,
+    rating: data.rating,
     tags: itemTags(data),
     tempRangeF: itemTempRange(data),
     swatch: swatchHex(data),
@@ -137,7 +140,8 @@ export async function getClosetItem(
 }
 
 // Applies a PATCH to one of the user's items: new details (name, brand, tags
-// as user corrections), a new status, size, asking price and/or condition.
+// as user corrections), a new status, size, asking price, condition and/or
+// rating.
 // "not_found" when it is not theirs; "size_required" when it would be passing
 // on without a size; "listing_required" without a price and a condition.
 // Changing tags bumps updated_at, which marks its cached pairings stale.
@@ -150,7 +154,7 @@ export async function updateClosetItem(
   if (!isItemId(id)) return "not_found";
   const { data } = await db
     .from("items")
-    .select("title, brand, category, status, size, asking_price_cents, condition, ai_tags, user_tags")
+    .select("title, brand, category, status, size, asking_price_cents, condition, rating, ai_tags, user_tags")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle()

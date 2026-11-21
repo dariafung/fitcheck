@@ -3,7 +3,7 @@
 // Each account, and each login session of the demo account, per Chicago day.
 export const DAILY_LIMITS = {
   // Reading a screenshot or photo: adding an item, or a buy check.
-  read: 20,
+  read: 40,
   // Cutting an on-model photo out onto white.
   cutout: 20,
   // Scoring a buy check (Try again counts too).
@@ -18,6 +18,8 @@ export const DAILY_LIMITS = {
   buyers: 5,
   // POST /api/pairings calls that ask the model.
   pairings: 10,
+  // Item-page outfits picked to offset a complaint, when the model is asked.
+  fix: 20,
 } as const;
 
 export type DailyAction = keyof typeof DAILY_LIMITS;

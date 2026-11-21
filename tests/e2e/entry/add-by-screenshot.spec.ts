@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
-import { AiBudgetError } from "../../../lib/ai/errors";
+import { AiBudgetError, AiDailyLimitError } from "../../../lib/ai/errors";
 import { aiErrorResponse } from "../../../lib/ai/http";
-import { AI_BUDGET_NOTICE } from "../../../lib/ai/notices";
+import { AI_BUDGET_NOTICE, DAILY_LIMIT_NOTICE } from "../../../lib/ai/notices";
 import { ACCESSORY_NOT_ADDED, SAVE_FAILED } from "../../../components/entry/messages";
 import { fakeScreenshot } from "../../../lib/entry/fake-screenshot";
 import { readLocalSupabase } from "../../../scripts/lib/local-supabase.mjs";
@@ -270,4 +270,135 @@ test("accessories are turned away, and the card doesn't offer them", async ({ pa
   await expect(page.getByRole("status")).toContainText(ACCESSORY_NOT_ADDED);
   await expect(card).toBeHidden();
   await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
+});
+
+test("several screenshots are read one after another, each with its own card", async ({ page }) => {
+  // How many reads are under way at once, and how many there were in all.
+  let reading = 0;
+  let most = 0;
+  let reads = 0;
+  await page.route("**/api/items/extract", async (route) => {
+    reads++;
+    most = Math.max(most, ++reading);
+    try {
+      await route.fulfill({ response: await route.fetch() });
+    } finally {
+      reading--;
+    }
+  });
+  await page.goto("/closet/add");
+  const good = await fakeScreenshot();
+  await page.getByLabel("Choose a screenshot").setInputFiles([
+    { name: "one.png", mimeType: "image/png", buffer: good },
+    { name: "two.png", mimeType: "image/png", buffer: Buffer.from("not really a picture") },
+    { name: "three.png", mimeType: "image/png", buffer: good },
+    { name: "four.png", mimeType: "image/png", buffer: good },
+  ]);
+
+  const card = page.getByRole("form", { name: "Item details" });
+  const position = page.getByTestId("queue-position");
+  const status = page.getByRole("status");
+  await expect(position).toHaveText("Screenshot 1 of 4");
+  await expect(card.getByLabel("Name")).toHaveValue("Mock item");
+  // In a queue the way out of a card is to skip it, not to start over.
+  await expect(page.getByRole("button", { name: "Use another screenshot" })).toHaveCount(0);
+  expect(reads).toBe(1);
+
+  await card.getByLabel("Name").fill("Queued tee");
+  const saved = page.waitForResponse((res) => res.url().endsWith("/api/items") && res.request().method() === "POST");
+  await card.getByRole("button", { name: "Save to closet" }).click();
+  const { item } = await (await saved).json();
+  created.push({ id: item.id, paths: [] });
+  await expect(status).toContainText("Queued tee is in your closet.");
+
+  // The second can't be read: it is noted and the queue moves on by itself.
+  await expect(position).toHaveText("Screenshot 3 of 4");
+  await expect(status).toContainText("Screenshot 2 of 4: That file isn't a picture. Try a PNG or JPG.");
+  await expect(card.getByLabel("Name")).toHaveValue("Mock item");
+
+  // Skipping saves nothing and reads the next.
+  await page.getByRole("button", { name: "Skip this one" }).click();
+  await expect(position).toHaveText("Screenshot 4 of 4");
+  await expect(card.getByLabel("Name")).toHaveValue("Mock item");
+  await page.getByRole("button", { name: "Skip this one" }).click();
+
+  // Done: back at the drop area, with what happened in one line.
+  await expect(card).toBeHidden();
+  await expect(position).toHaveCount(0);
+  await expect(page.getByTestId("queue-summary")).toHaveText("1 added, 2 skipped, 1 couldn't be read.");
+  await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
+  expect(reads).toBe(4);
+  expect(most).toBe(1);
+  const { data: rows } = await db.from("items").select("title").eq("id", item.id).throwOnError();
+  expect(rows).toEqual([{ title: "Queued tee" }]);
+});
+
+test("the last screenshot of a queue ends on the saved note", async ({ page }) => {
+  await page.goto("/closet/add");
+  const good = await fakeScreenshot();
+  await page.getByLabel("Choose a screenshot").setInputFiles([
+    { name: "one.png", mimeType: "image/png", buffer: good },
+    { name: "two.png", mimeType: "image/png", buffer: good },
+  ]);
+  const card = page.getByRole("form", { name: "Item details" });
+  for (const [i, name] of ["Queued skirt", "Queued coat"].entries()) {
+    await expect(page.getByTestId("queue-position")).toHaveText(`Screenshot ${i + 1} of 2`);
+    await card.getByLabel("Name").fill(name);
+    const saved = page.waitForResponse((res) => res.url().endsWith("/api/items") && res.request().method() === "POST");
+    await card.getByRole("button", { name: "Save to closet" }).click();
+    created.push({ id: (await (await saved).json()).item.id, paths: [] });
+    await expect(page.getByRole("status")).toContainText(`${name} is in your closet.`);
+  }
+  await expect(page.getByTestId("queue-summary")).toHaveText("2 added.");
+  await expect(page.getByRole("link", { name: "See closet" })).toBeVisible();
+  // The persona is past 5 pieces: nothing about the first 5.
+  await expect(page.getByTestId("starter-left")).toHaveCount(0);
+  await page.getByRole("button", { name: "Add another" }).click();
+  await expect(page.getByLabel("Choose a screenshot")).toBeFocused();
+  await expect(page.getByTestId("queue-summary")).toHaveCount(0);
+});
+
+test("at most 10 screenshots are taken at once", async ({ page }) => {
+  // No screenshot here is a product: the queue runs through them all.
+  let reads = 0;
+  await page.route("**/api/items/extract", (route) => {
+    reads++;
+    return route.fulfill({ json: { error: "unrecognized" } });
+  });
+  await page.goto("/closet/add");
+  const shot = await fakeScreenshot();
+  await page.getByLabel("Choose a screenshot").setInputFiles(
+    Array.from({ length: 12 }, (_, i) => ({ name: `shot-${i + 1}.png`, mimeType: "image/png", buffer: shot })),
+  );
+  await expect(page.getByTestId("queue-summary")).toHaveText("0 added, 10 couldn't be read.");
+  await expect(page.getByRole("status")).toContainText("Screenshot 10 of 10: Couldn't spot a product there.");
+  expect(reads).toBe(10);
+});
+
+test("the daily limit stops a queue with the usual message", async ({ page }) => {
+  // The first read goes through; the second answers as the route does once
+  // the account's reads for the day are used up.
+  const over = aiErrorResponse(new AiDailyLimitError("read", 3600));
+  const body = await over.text();
+  let reads = 0;
+  await page.route("**/api/items/extract", (route) =>
+    ++reads === 1 ? route.fallback() : route.fulfill({ status: over.status, contentType: "application/json", body }),
+  );
+  await page.goto("/closet/add");
+  const good = await fakeScreenshot();
+  await page.getByLabel("Choose a screenshot").setInputFiles(
+    Array.from({ length: 3 }, (_, i) => ({ name: `shot-${i + 1}.png`, mimeType: "image/png", buffer: good })),
+  );
+  const card = page.getByRole("form", { name: "Item details" });
+  await expect(page.getByTestId("queue-position")).toHaveText("Screenshot 1 of 3");
+  await expect(card.getByLabel("Name")).toHaveValue("Mock item");
+  await page.getByRole("button", { name: "Skip this one" }).click();
+
+  await expect(page.getByRole("status")).toContainText(DAILY_LIMIT_NOTICE);
+  await expect(card).toBeHidden();
+  // Stopped for the day: the third is never sent, and nothing offers to go on.
+  await expect(page.getByTestId("queue-position")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Keep going/ })).toHaveCount(0);
+  await expect(page.getByLabel("Choose a screenshot")).toBeEnabled();
+  expect(reads).toBe(2);
 });

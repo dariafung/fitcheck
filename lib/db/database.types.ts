@@ -51,6 +51,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"api_tokens": {
+                  Row: {
+                    "created_at": string,"id": string,"label": string,"last_used_at": string | null,"token_hash": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"label": string,"last_used_at"?: string | null,"token_hash": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"label"?: string,"last_used_at"?: string | null,"token_hash"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "api_tokens_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"item_feelings": {
                   Row: {
                     "audio_path": string | null,"created_at": string,"id": string,"item_id": string,"parsed_at": string | null,"raw_text": string,"source": string,"structured": Json | null,"user_id": string
@@ -77,16 +97,42 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"items": {
+                },"item_fix_outfits": {
                   Row: {
-                    "ai_tags": Json | null,"asking_price_cents": number | null,"brand": string | null,"category": string,"condition": string | null,"created_at": string,"currency": string | null,"entry_method": string,"id": string,"image_paths": (string)[],"on_model": boolean | null,"price_cents": number | null,"raw_source": Json | null,"retailer": string | null,"size": string | null,"source_url": string | null,"status": string,"title": string,"updated_at": string,"user_id": string,"user_tags": NonNullable<Json>
+                    "generated_at": string,"input_hash": string,"item_id": string,"outfit_item_ids": (string)[] | null,"prompt_version": string,"reason": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ai_tags"?: Json | null,"asking_price_cents"?: number | null,"brand"?: string | null,"category": string,"condition"?: string | null,"created_at"?: string,"currency"?: string | null,"entry_method": string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"user_id": string,"user_tags"?: NonNullable<Json>
+                    "generated_at"?: string,"input_hash": string,"item_id": string,"outfit_item_ids"?: (string)[] | null,"prompt_version": string,"reason"?: string | null,"user_id": string
                   }
                   Update: {
-                    "ai_tags"?: Json | null,"asking_price_cents"?: number | null,"brand"?: string | null,"category"?: string,"condition"?: string | null,"created_at"?: string,"currency"?: string | null,"entry_method"?: string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string,"user_tags"?: NonNullable<Json>
+                    "generated_at"?: string,"input_hash"?: string,"item_id"?: string,"outfit_item_ids"?: (string)[] | null,"prompt_version"?: string,"reason"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "item_fix_outfits_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: true
+      referencedRelation: "items"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "item_fix_outfits_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"items": {
+                  Row: {
+                    "ai_tags": Json | null,"asking_price_cents": number | null,"brand": string | null,"category": string,"condition": string | null,"created_at": string,"currency": string | null,"entry_method": string,"id": string,"image_paths": (string)[],"on_model": boolean | null,"price_cents": number | null,"rating": number | null,"raw_source": Json | null,"retailer": string | null,"size": string | null,"source_url": string | null,"status": string,"title": string,"updated_at": string,"user_id": string,"user_tags": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ai_tags"?: Json | null,"asking_price_cents"?: number | null,"brand"?: string | null,"category": string,"condition"?: string | null,"created_at"?: string,"currency"?: string | null,"entry_method": string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"rating"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"user_id": string,"user_tags"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "ai_tags"?: Json | null,"asking_price_cents"?: number | null,"brand"?: string | null,"category"?: string,"condition"?: string | null,"created_at"?: string,"currency"?: string | null,"entry_method"?: string,"id"?: string,"image_paths"?: (string)[],"on_model"?: boolean | null,"price_cents"?: number | null,"rating"?: number | null,"raw_source"?: Json | null,"retailer"?: string | null,"size"?: string | null,"source_url"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string,"user_tags"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -190,6 +236,26 @@ isOneToOne: false
     },{
       foreignKeyName: "resale_matches_seller_id_fkey"
       columns: ["seller_id"]
+isOneToOne: false
+      referencedRelation: "users"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"saved_outfits": {
+                  Row: {
+                    "created_at": string,"id": string,"item_ids": (string)[],"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"item_ids": (string)[],"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"item_ids"?: (string)[],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "saved_outfits_user_id_fkey"
+      columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "users"
       referencedColumns: ["id"]

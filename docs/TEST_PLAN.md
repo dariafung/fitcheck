@@ -1,6 +1,6 @@
 # Manual test plan
 
-Test the hosted app in your browser and report anything that doesn't match the expected result as a GitHub issue (see the last section). Nothing to install.
+Test the hosted app in your browser and report anything that doesn't match the expected result as a GitHub issue (see "Reporting a bug"). Nothing to install.
 
 ## What to test
 
@@ -20,7 +20,8 @@ Test in Chrome on desktop and at phone width (DevTools device toolbar, 390 px). 
 | # | Do | Expect |
 | --- | --- | --- |
 | 1.1 | Open the site while signed out | You land on `/login` with "Log in", "Sign up" and "Try the demo account" |
-| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | You land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2 | "Sign up" with a name (2–30 characters), your email and a password of 6+ characters; try once with no name first | The sign-up page says "Start with the 5 pieces you wear most. Add the rest whenever."; you land on an empty closet: "Your closet is empty."; "Log out" top right (on a phone, at the bottom of Profile) |
+| 1.2a | Look at the empty closet, then at home | Both say "Start with the 5 pieces you wear most." with "0 of 5" over a thin bar and "Add your first piece"; nothing is locked: Calendar, Profile and "Should I buy this?" all open |
 | 1.3 | Log out, log in again with the same email and password | Back in your (empty) closet |
 | 1.4 | Log in with a wrong password | A short error on the page |
 | 1.5 | Open `/closet` in a private window | Sent to `/login` |
@@ -48,7 +49,15 @@ Take screenshots of real product pages from different stores (one screen: produc
 | 3.5 | Upload a screenshot where the product is worn by a model | "AI is cutting out the photo…", then the piece alone on white, no person; "Photo cleaned up by AI." with "Use original photo" |
 | 3.6 | "Use original photo" | The store's photo, framed on white, replaces the cut-out |
 | 3.7 | Fix a field, "Save to closet" | "<name> is in your closet." with "See closet" and "Add another"; the item shows in the closet grid |
+| 3.7a | Read the note after your first save, then open the closet and home | "4 more to go for your first 5." and "If you like, say how it feels." (a link to the item; skipping it is fine); the closet and home show "1 of 5" |
 | 3.8 | Add 5–8 items: tops, bottoms, shoes, one outerwear | Each one saves; the closet grid shows them all, every photo on white |
+| 3.8a | Watch the note on the save that makes 5 pieces, then open the closet and home | "That's your first 5." with a "Check something you want to buy" link to the purchase check; the "… of 5" count is gone from the closet and home, and later saves say nothing about 5 |
+| 3.8b | "Choose a screenshot" and pick 3 screenshots at once (or drop 3) | They are read one at a time: "Screenshot 1 of 3" with its "Look right?" card; "Save to closet" shows "<name> is in your closet." and reads the next by itself |
+| 3.8c | In a queue, press "Skip this one" on a card | Nothing is saved for it; the next screenshot is read. After the last one: a line like "2 added, 1 skipped." and the drop area is back |
+| 3.8d | Pick 3 files at once where the second isn't a product page (or isn't a picture) | "Screenshot 2 of 3: …" says what was wrong and the third is still read; the others are not lost |
+| 3.8e | Pick 12 screenshots at once | "That's more than 10. We took the first 10; add the other 2 after."; the queue says "… of 10" |
+| 3.8f | Pick a single screenshot | Exactly as 3.1–3.7: no "Screenshot 1 of 1", "Use another screenshot" instead of "Skip this one" |
+| 3.8g | (Only if you reach it) read more than 40 screenshots in one day, part of them in a queue | "That's your AI limit for today. Try again tomorrow."; the queue stops there and nothing more is read |
 | 3.9 | Upload a screenshot with no product in it | "Couldn't spot a product there. Try another screenshot?" and nothing saved |
 | 3.10 | Upload a screenshot of a bag, belt or hat | "We only do clothes and shoes for now." and nothing saved |
 | 3.11 | Drop or paste a file that isn't an image | A short message, nothing saved |
@@ -76,6 +85,16 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 5.4 | Hold "Hold to talk", say a sentence in English, release | The words appear in the feelings box for you to edit; Save keeps them |
 | 5.5 | Delete → Cancel | Back to "Delete", item still there |
 | 5.6 | Delete → Delete | Back in the closet, the item is gone; the browser Back button doesn't reopen it |
+| 5.7 | Tap the fourth star under the item's name; reload; tap the fourth star again; reload | Four stars filled and kept after the reload; then no stars, also kept |
+| 5.8 | With a top, a bottom and shoes in the closet, write a feeling with a complaint on the top ("Goes with everything, but it's a little see-through"), Save | Within a few seconds, under the feelings box: "Try it like this", one outfit board made of your own pieces (this one included, no person): a top, a bottom and shoes, maybe a layer, never two of a kind; and one short sentence saying how the outfit helps with the complaint |
+| 5.9 | Reload the page twice | The same outfit and sentence each time, shown at once |
+| 5.10 | On a piece with no feeling, or only good things said: tap the second star | "Try it like this" appears with an outfit; the sentence says why the outfit works and doesn't make up a fault |
+| 5.11 | On that piece tap the first star, reload; then tap the fourth star | Going from 2 stars to 1 keeps the same outfit and sentence; at 4 stars "Try it like this" is gone |
+| 5.12 | "Save outfit"; open another piece of that outfit | The first page shows "Saved" and "Remove"; the other piece's page lists the outfit under "Saved outfits" |
+| 5.13 | "Remove" on the other piece's page; go back to the first | The outfit is gone from "Saved outfits"; the first page offers "Save outfit" again |
+| 5.14 | Open an item with no feeling and no low rating, one with only good things said, and one you're passing on (even rated 1) | No "Try it like this" on any of them |
+| 5.15 | In a closet with no shoes, rate a top 1 star | "Nothing in your closet fixes this yet." and no board |
+| 5.16 | Demo account: open "Supima Long Sleeve T-Shirt", then the gray "Feel Good Oversized Hoodie" | Each shows its stars (not tappable), an outfit board and a sentence (the see-through fabric; why the hoodie outfit works), and "Demo account is read-only." where Save would be |
 
 ### 6. Profile and home
 
@@ -108,6 +127,9 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.8 | Check shoes when your closet has no shoes, or a top when it has no bottoms | A note that says what's missing to make an outfit |
 | 7.9 | Under "You could wear it like this" | Sample outfits laid out as flat-lay boards of the real photos on white, the checked piece marked "New"; no person |
 | 7.10 | Go to the closet afterwards | The checked item was **not** added |
+| 7.11 | Check an item, then press "I bought it — add to closet" under the result | "Adding…", then "<name> is in your closet." with "See it"; no second card to confirm. "See it" opens the new item with the same photo; it is in the closet grid |
+| 7.12 | With a new account that has 1–4 pieces, run a check | The score and the five parts show, but no verdict words: instead "Based on 3 pieces. Add more for a verdict." (with your number) |
+| 7.13 | Add pieces until you have 5, check again | The verdict (e.g. "A GOOD ADD") is back under the score |
 
 ### 8. Outfit calendar
 
@@ -153,7 +175,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
-| 10.7 | Run "Should I buy this?" | Works and shows a score |
+| 10.7 | Run "Should I buy this?" | Works and shows a score and a verdict; where "I bought it" would be: "Demo account is read-only. Sign up to add your own." No "… of 5" count anywhere in the demo account |
 | 10.8 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
 
 ## Reporting a bug
@@ -169,3 +191,26 @@ Open a GitHub issue in dariafung/fitcheck, one bug per issue:
 - **Account**: your own or the demo
 
 Never paste a password or key into an issue.
+
+## Shortcut check (on an iPhone)
+
+Needs an iPhone and your own account with a few clothes in it (sections 1–5). Build the Shortcut first by following [SHORTCUT.md](SHORTCUT.md); every line there marked "to check on device" is a question for this section. Note your iOS version and phone model in any report.
+
+| # | Do | Expect |
+| --- | --- | --- |
+| S.1 | Profile, in your own account | A "Shortcut" block with "No token yet.", a "Create token" button and a "How to set up the Shortcut" link that opens the setup steps |
+| S.2 | Tap "Create token", then "Copy" | A token starting with `fc_` shows once with "Copy it now: it won't be shown again."; "Copied" after the tap |
+| S.3 | Reload Profile | "Token made (today). Not used yet."; the token itself is nowhere on the page; "Make a new token" and "Revoke" |
+| S.4 | Build the Shortcut as in SHORTCUT.md with that token. For each "to check on device" line there, note what you actually had to do | The five actions exist under those names; say so if a name, a setting or a menu path differs |
+| S.5 | Open a product page for a top or a pair of shoes in Safari, run the Shortcut from the Shortcuts app | iOS asks once to allow the connection; then a few lines: the product's name and type, "NN/100 · VERDICT", five part lines, and a gap line only if it makes no outfit. Note how long it took |
+| S.6 | Check the same page on the site ("Should I buy this?") | The same name and type; a score in the same range (the AI parts vary a little between runs) |
+| S.7 | Bind the Shortcut to Back Tap (and the Action Button if the phone has one), open a product page in a store's app, trigger it | The screenshot is of the store's app, not of Shortcuts; the result shows on top without leaving the app |
+| S.8 | Run it on a page with no product (a home screen, a news article) | "Couldn't spot a product there. Try another screenshot." |
+| S.9 | Run it on a bag or a piece of jewelry | The name with "(accessory)" and "We only check clothes and shoes." |
+| S.10 | Run it on a long, photo-heavy page | A normal answer, not "That screenshot is too big"; if it is too big, note the JPEG quality you used |
+| S.11 | Profile → "Make a new token"; run the Shortcut with the old token still in it | "That token doesn't work. Make a new one in Profile and paste it into the Shortcut."; say so if the Shortcut shows its own error instead |
+| S.12 | Paste the new token into the Shortcut, run it, reload Profile | It works again; Profile says "Last used (today)." |
+| S.13 | Profile → "Revoke"; run the Shortcut | "No token yet." in Profile; the Shortcut shows the same "That token doesn't work…" line |
+| S.14 | Log in to the demo account, open Profile | No "Shortcut" block |
+| S.15 | With a new account and an empty closet, make a token and run the Shortcut | The name and type, then "Nothing in your closet to compare it with yet. Add a few pieces you wear, then check again."; no score |
+| S.16 | Closet, after all of the above | Nothing was added: the Shortcut never saves the item |

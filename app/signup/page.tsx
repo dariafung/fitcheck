@@ -9,7 +9,7 @@ export default function SignupPage() {
     <div className="mx-auto flex w-full max-w-[360px] flex-col gap-10 md:pt-10">
       <div className="flex flex-col gap-3">
         <h1 className="text-xl font-medium">Sign up</h1>
-        <p className="text-base text-ink-2">Start with an empty closet and add what you own.</p>
+        <p className="text-base text-ink-2">Start with the 5 pieces you wear most. Add the rest whenever.</p>
       </div>
       <AuthForm mode="signup" />
       <p className="text-sm text-ink-2">
