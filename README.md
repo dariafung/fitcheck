@@ -23,7 +23,7 @@ Things to try first:
 
 ## What it does
 
-- **Add clothes from a screenshot**: Spark reads the product page, crops out the product photo and fills in brand, type, colors, material and size.
+- **Add clothes from a screenshot**: Spark reads the product page, crops out the product photo and fills in brand, type, colors, material and size. Pick up to 10 screenshots at once; they are read one by one and you confirm or skip each.
 - **Feelings**: write or say how a piece feels on you ("love the color, tight at the shoulders"). Spark turns it into structured notes you never have to fill in.
 - **Voice feelings**: hold to talk, up to 3 minutes, English.
 - **Closet**: a grid of everything you own, on phone and desktop, with quick filters (not worn lately, top occasions) and a sort by newest or by how often you wore each piece.

@@ -3,7 +3,7 @@
 // Each account, and each login session of the demo account, per Chicago day.
 export const DAILY_LIMITS = {
   // Reading a screenshot or photo: adding an item, or a buy check.
-  read: 20,
+  read: 40,
   // Cutting an on-model photo out onto white.
   cutout: 20,
   // Scoring a buy check (Try again counts too).

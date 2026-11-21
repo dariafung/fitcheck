@@ -127,7 +127,12 @@ test("a new account can add its first item", async ({ page }) => {
   const card = page.getByRole("form", { name: "Item details" });
   await card.getByLabel("Name").fill("First tee");
   await card.getByRole("button", { name: "Save to closet" }).click();
-  await expect(page.getByRole("status")).toContainText("First tee is in your closet.");
+  const status = page.getByRole("status");
+  await expect(status).toContainText("First tee is in your closet.");
+  // How many are left to 5, and a nudge (not a step) to say how it feels.
+  await expect(status.getByTestId("starter-left")).toHaveText("4 more to go for your first 5.");
+  await expect(status.getByRole("link", { name: "say how it feels" })).toHaveAttribute("href", /^\/closet\/[0-9a-f-]{36}$/);
+  await expect(status.getByRole("link", { name: "Check something you want to buy" })).toHaveCount(0);
 
   await page.goto("/closet");
   await expect(page.getByRole("link", { name: "First tee" })).toBeVisible();
@@ -136,6 +141,64 @@ test("a new account can add its first item", async ({ page }) => {
   await expect(page.getByTestId("starter-progress")).toContainText("1 of 5");
   await page.goto("/closet?tab=passing-on");
   await expect(page.getByText("Nothing to pass on.")).toBeVisible();
+});
+
+test("the fifth piece ends the count and points to the purchase check", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/closet/add");
+  // Five screenshots at once: read one after another, each confirmed.
+  const shot = await fakeScreenshot();
+  await page.getByLabel("Choose a screenshot").setInputFiles(
+    Array.from({ length: 5 }, (_, i) => ({ name: `piece-${i + 1}.png`, mimeType: "image/png", buffer: shot })),
+  );
+  const card = page.getByRole("form", { name: "Item details" });
+  const status = page.getByRole("status");
+  for (let i = 1; i <= 5; i++) {
+    await expect(page.getByTestId("queue-position")).toHaveText(`Screenshot ${i} of 5`);
+    await card.getByLabel("Name").fill(`Piece ${i}`);
+    await card.getByRole("button", { name: "Save to closet" }).click();
+    await expect(status).toContainText(`Piece ${i} is in your closet.`);
+    if (i < 5) await expect(status.getByTestId("starter-left")).toHaveText(`${5 - i} more to go for your first 5.`);
+  }
+  await expect(status.getByTestId("starter-left")).toContainText("That's your first 5.");
+  await expect(status.getByRole("link", { name: "Check something you want to buy" })).toHaveAttribute("href", "/check");
+  await expect(status.getByTestId("queue-summary")).toHaveText("5 added.");
+
+  // At 5 the count is gone, from the closet and from home.
+  await page.goto("/closet");
+  await expect(page.getByRole("link", { name: "Piece 5" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Good for today" })).toBeVisible();
+  await expect(page.getByTestId("starter-progress")).toHaveCount(0);
+});
+
+test("a check against fewer than 5 pieces shows the score without a verdict", async ({ page }) => {
+  await signUp(page);
+  await page.goto("/closet/add");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "tee.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const card = page.getByRole("form", { name: "Item details" });
+  await card.getByLabel("Name").fill("Only tee");
+  await card.getByRole("button", { name: "Save to closet" }).click();
+  await expect(page.getByRole("status")).toContainText("Only tee is in your closet.");
+
+  await page.goto("/check");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("score")).toBeVisible();
+  await expect(result.getByTestId("small-closet")).toHaveText("Based on 1 piece. Add more for a verdict.");
+  await expect(result.getByTestId("verdict")).toHaveCount(0);
+  await expect(result.getByText("Suits you", { exact: true })).toBeVisible();
 });
 
 test("log in with the account you made, then log out", async ({ page }) => {

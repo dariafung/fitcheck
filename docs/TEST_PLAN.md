@@ -49,7 +49,15 @@ Take screenshots of real product pages from different stores (one screen: produc
 | 3.5 | Upload a screenshot where the product is worn by a model | "AI is cutting out the photo…", then the piece alone on white, no person; "Photo cleaned up by AI." with "Use original photo" |
 | 3.6 | "Use original photo" | The store's photo, framed on white, replaces the cut-out |
 | 3.7 | Fix a field, "Save to closet" | "<name> is in your closet." with "See closet" and "Add another"; the item shows in the closet grid |
+| 3.7a | Read the note after your first save, then open the closet and home | "4 more to go for your first 5." and "If you like, say how it feels." (a link to the item; skipping it is fine); the closet and home show "1 of 5" |
 | 3.8 | Add 5–8 items: tops, bottoms, shoes, one outerwear | Each one saves; the closet grid shows them all, every photo on white |
+| 3.8a | Watch the note on the save that makes 5 pieces, then open the closet and home | "That's your first 5." with a "Check something you want to buy" link to the purchase check; the "… of 5" count is gone from the closet and home, and later saves say nothing about 5 |
+| 3.8b | "Choose a screenshot" and pick 3 screenshots at once (or drop 3) | They are read one at a time: "Screenshot 1 of 3" with its "Look right?" card; "Save to closet" shows "<name> is in your closet." and reads the next by itself |
+| 3.8c | In a queue, press "Skip this one" on a card | Nothing is saved for it; the next screenshot is read. After the last one: a line like "2 added, 1 skipped." and the drop area is back |
+| 3.8d | Pick 3 files at once where the second isn't a product page (or isn't a picture) | "Screenshot 2 of 3: …" says what was wrong and the third is still read; the others are not lost |
+| 3.8e | Pick 12 screenshots at once | "That's more than 10. We took the first 10; add the other 2 after."; the queue says "… of 10" |
+| 3.8f | Pick a single screenshot | Exactly as 3.1–3.7: no "Screenshot 1 of 1", "Use another screenshot" instead of "Skip this one" |
+| 3.8g | (Only if you reach it) read more than 40 screenshots in one day, part of them in a queue | "That's your AI limit for today. Try again tomorrow."; the queue stops there and nothing more is read |
 | 3.9 | Upload a screenshot with no product in it | "Couldn't spot a product there. Try another screenshot?" and nothing saved |
 | 3.10 | Upload a screenshot of a bag, belt or hat | "We only do clothes and shoes for now." and nothing saved |
 | 3.11 | Drop or paste a file that isn't an image | A short message, nothing saved |
