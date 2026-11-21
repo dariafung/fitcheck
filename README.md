@@ -29,6 +29,7 @@ Things to try first:
 - **Closet**: a grid of everything you own, on phone and desktop, with quick filters (not worn lately, top occasions) and a sort by newest or by how often you wore each piece.
 - **Pairing**: rules plus Spark decide which pieces go together; code builds full outfits from that.
 - **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10), with a verdict from Worth buying to Skip this one. The item you check is never saved.
+- **One-tap check on iPhone**: an iOS Shortcut screenshots the product page you're on, sends it with your personal token (made in Profile) and shows the score and verdict in a few lines. Setup: [docs/SHORTCUT.md](docs/SHORTCUT.md).
 - **Outfit boards**: sample outfits shown as a flat lay of your own item photos. On-model photos are cleaned up to the garment alone by Muse Image.
 - **Style card**: one card on home that sums up what works for you and what to skip.
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.
