@@ -117,8 +117,9 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.8 | Check shoes when your closet has no shoes, or a top when it has no bottoms | A note that says what's missing to make an outfit |
 | 7.9 | Under "You could wear it like this" | Sample outfits laid out as flat-lay boards of the real photos on white, the checked piece marked "New"; no person |
 | 7.10 | Go to the closet afterwards | The checked item was **not** added |
-| 7.11 | With a new account that has 1–4 pieces, run a check | The score and the five parts show, but no verdict words: instead "Based on 3 pieces. Add more for a verdict." (with your number) |
-| 7.12 | Add pieces until you have 5, check again | The verdict (e.g. "A GOOD ADD") is back under the score |
+| 7.11 | Check an item, then press "I bought it — add to closet" under the result | "Adding…", then "<name> is in your closet." with "See it"; no second card to confirm. "See it" opens the new item with the same photo; it is in the closet grid |
+| 7.12 | With a new account that has 1–4 pieces, run a check | The score and the five parts show, but no verdict words: instead "Based on 3 pieces. Add more for a verdict." (with your number) |
+| 7.13 | Add pieces until you have 5, check again | The verdict (e.g. "A GOOD ADD") is back under the score |
 
 ### 8. Outfit calendar
 
@@ -164,7 +165,7 @@ Use two accounts: A (yours from section 1) and B (a second one).
 | 10.4 | Home | "Your style" card filled in |
 | 10.5 | Calendar | Opens on the month with the persona's 10 logged days; the stats are filled in; "What we noticed" shows up to 3 insights; picking a day shows its outfits and the read-only note, no "Log an outfit" |
 | 10.6 | Open the gray tee, then the gray fleece shorts | "Matching buyers": "3 people would likely want this." on the tee and "2 people would likely want this." on the shorts and that many identical anonymous avatars; no names or scores |
-| 10.7 | Run "Should I buy this?" | Works and shows a score and a verdict. No "… of 5" count anywhere in the demo account |
+| 10.7 | Run "Should I buy this?" | Works and shows a score and a verdict; where "I bought it" would be: "Demo account is read-only. Sign up to add your own." No "… of 5" count anywhere in the demo account |
 | 10.8 | "Suits you" in the top bar | It lists the other made-up users' pieces: photo, name, size, price and condition, reasons, and "from Priya" or "from Lena"; nothing to press, no emails or scores |
 
 ## Reporting a bug

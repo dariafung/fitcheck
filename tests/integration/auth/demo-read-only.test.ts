@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST as boardPOST } from "@/app/api/checks/board/route";
 import { POST as checkCutoutPOST } from "@/app/api/checks/cutout/route";
+import { POST as checkPhotoPOST } from "@/app/api/checks/photo/route";
 import { POST as checkPOST } from "@/app/api/checks/route";
 import { DELETE as itemDELETE, PATCH as itemPATCH } from "@/app/api/items/[id]/route";
 import { POST as feelingPOST } from "@/app/api/items/[id]/feelings/route";
@@ -161,6 +162,16 @@ const WRITES: [string, () => Promise<Response>][] = [
   [
     "POST /api/items/extract",
     async () => extractPOST(uploadRequest(new Blob([new Uint8Array(await fakeScreenshot())], { type: "image/png" }))),
+  ],
+  [
+    // "I bought it" on a check result: the one part of the check that stores.
+    "POST /api/checks/photo",
+    async () =>
+      checkPhotoPOST(
+        jsonRequest("/api/checks/photo", {
+          photo: `data:image/png;base64,${(await fakeScreenshot()).toString("base64")}`,
+        }),
+      ),
   ],
   [
     "POST /api/wear/outfits",

@@ -273,6 +273,24 @@ test("the demo account can look but not change anything", async ({ page }) => {
   await expect(page.getByText(DEMO_READ_ONLY)).toBeVisible();
   await expect(page.getByRole("button", { name: "Choose a screenshot" })).toBeHidden();
 
+  // A purchase check still runs, but its result can't be added to the closet.
+  await page.goto("/check");
+  await page.getByLabel("Choose a screenshot").setInputFiles({
+    name: "loafers.png",
+    mimeType: "image/png",
+    buffer: await fakeScreenshot(),
+  });
+  const card = page.getByRole("form", { name: "Item details" });
+  await card.getByLabel("Type").selectOption("shoes");
+  await card.getByRole("button", { name: "Check it" }).click();
+  const result = page.getByRole("region", { name: "Result" });
+  await expect(result.getByTestId("score")).toBeVisible();
+  await expect(result.getByText(DEMO_READ_ONLY)).toBeVisible();
+  await expect(result.getByRole("button", { name: /I bought it/ })).toHaveCount(0);
+  const photo = `data:image/png;base64,${(await fakeScreenshot()).toString("base64")}`;
+  const kept = await page.request.post("/api/checks/photo", { data: { photo } });
+  expect(kept.status()).toBe(403);
+
   await page.goto("/profile");
   await expect(page.getByText(DEMO_READ_ONLY).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Save" })).toHaveCount(0);

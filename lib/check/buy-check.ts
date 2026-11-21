@@ -1,7 +1,9 @@
 // "Should I buy this?" for one candidate: compare the closet's outfits with
 // and without it, have the model score the fit questions and how much it
 // repeats the closet, add it all up in code.
-// The candidate is never stored: not in items, not in pairings, not cached.
+// The check itself stores nothing about the candidate: not in items, not in
+// pairings, not cached. It is stored only if the user adds it to the closet
+// afterwards ("I bought it", components/check/KeepIt.tsx).
 import {
   FeelingStructured,
   LifestyleMix,
