@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import { ReadOnlyNote } from "@/components/auth/read-only-note";
 import { ItemWearRow } from "@/components/calendar/item-wear-row";
 import { isReadOnly } from "@/lib/auth/session";
+import { isLowRating } from "@/lib/closet/fix-outfit";
+import { fixTrigger } from "@/lib/closet/fix-outfit-store";
 import { getClosetItem } from "@/lib/closet/items";
 import { categoryLabel, tagGroups } from "@/lib/closet/tags";
 import { currentUserId } from "@/lib/db/current-user";
@@ -14,6 +16,7 @@ import { DeleteItem } from "./delete-item";
 import { FeelingForm } from "./feeling-form";
 import { EditDetailsButton, ItemEditor } from "./item-editor";
 import { ItemImage } from "./item-image";
+import { ItemOutfits } from "./item-outfits";
 import { ItemRating } from "./item-rating";
 import { ItemSize } from "./item-size";
 import { PassOnToggle } from "./pass-on-toggle";
@@ -28,6 +31,8 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
     tempUnitFor(userId),
   ]);
   if (!item) notFound();
+  // Only an active piece the owner is unhappy with gets an outfit for it.
+  const fix = item.status === "active" ? await fixTrigger(createServerClient(), userId, item.id, item.rating) : "off";
 
   const [cover, ...more] = item.imageUrls;
   const byline = [item.brand, categoryLabel(item.category)].filter(Boolean).join(" · ");
@@ -147,6 +152,14 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
           ) : (
             <FeelingForm itemId={item.id} initialText={item.feeling?.text ?? null} />
           )}
+
+          {/* Remounts when the note or a low rating changes, so the new one is asked about. */}
+          <ItemOutfits
+            key={`${fix}:${isLowRating(item.rating)}:${item.feeling?.text ?? ""}`}
+            itemId={item.id}
+            fix={fix}
+            readOnly={readOnly}
+          />
 
           {!readOnly && (
             <div className="border-t border-line pt-4">

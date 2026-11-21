@@ -31,6 +31,7 @@ Things to try first:
 - **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10), with a verdict from Worth buying to Skip this one. The item you check is never saved.
 - **Outfit boards**: sample outfits shown as a flat lay of your own item photos. On-model photos are cleaned up to the garment alone by Muse Image.
 - **Ratings**: give any piece 1 to 5 stars with one tap.
+- **Fix outfits**: rate a piece 1 or 2 stars, or say what bugs you about it ("a little see-through"), and its page shows one outfit from your own closet that makes it work, with the reason in a line. Save the ones you like; each shows on the page of every piece in it.
 - **Style card**: one card on home that sums up what works for you and what to skip.
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.
 - **Good for today**: clothes that fit today's weather where you are.
