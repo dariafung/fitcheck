@@ -76,6 +76,7 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 5.4 | Hold "Hold to talk", say a sentence in English, release | The words appear in the feelings box for you to edit; Save keeps them |
 | 5.5 | Delete → Cancel | Back to "Delete", item still there |
 | 5.6 | Delete → Delete | Back in the closet, the item is gone; the browser Back button doesn't reopen it |
+| 5.7 | Tap the fourth star under the item's name; reload; tap the fourth star again; reload | Four stars filled and kept after the reload; then no stars, also kept |
 
 ### 6. Profile and home
 

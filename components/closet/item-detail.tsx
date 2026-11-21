@@ -14,6 +14,7 @@ import { DeleteItem } from "./delete-item";
 import { FeelingForm } from "./feeling-form";
 import { EditDetailsButton, ItemEditor } from "./item-editor";
 import { ItemImage } from "./item-image";
+import { ItemRating } from "./item-rating";
 import { ItemSize } from "./item-size";
 import { PassOnToggle } from "./pass-on-toggle";
 
@@ -73,6 +74,7 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
             <div>
               <h1 className="text-title font-medium">{item.title}</h1>
               <p className="mt-2 text-sm text-ink-2">{byline}</p>
+              <ItemRating itemId={item.id} rating={item.rating} readOnly={readOnly} />
             </div>
 
             {status === "passing_on" && (

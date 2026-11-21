@@ -30,6 +30,7 @@ Things to try first:
 - **Pairing**: rules plus Spark decide which pieces go together; code builds full outfits from that.
 - **Purchase check**: a 0–100 score = suits you (40) + outfits it makes (20) + items it brings back into use (15) + fills a gap (15) + not a repeat (10), with a verdict from Worth buying to Skip this one. The item you check is never saved.
 - **Outfit boards**: sample outfits shown as a flat lay of your own item photos. On-model photos are cleaned up to the garment alone by Muse Image.
+- **Ratings**: give any piece 1 to 5 stars with one tap.
 - **Style card**: one card on home that sums up what works for you and what to skip.
 - **Outfit calendar**: log what you wore; see wear counts, idle items and what you say vs. what you wear.
 - **Good for today**: clothes that fit today's weather where you are.
