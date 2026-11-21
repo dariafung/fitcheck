@@ -1,6 +1,6 @@
 # Manual test plan
 
-Test the hosted app in your browser and report anything that doesn't match the expected result as a GitHub issue (see the last section). Nothing to install.
+Test the hosted app in your browser and report anything that doesn't match the expected result as a GitHub issue (see "Reporting a bug"). Nothing to install.
 
 ## What to test
 
@@ -169,3 +169,26 @@ Open a GitHub issue in dariafung/fitcheck, one bug per issue:
 - **Account**: your own or the demo
 
 Never paste a password or key into an issue.
+
+## Shortcut check (on an iPhone)
+
+Needs an iPhone and your own account with a few clothes in it (sections 1–5). Build the Shortcut first by following [SHORTCUT.md](SHORTCUT.md); every line there marked "to check on device" is a question for this section. Note your iOS version and phone model in any report.
+
+| # | Do | Expect |
+| --- | --- | --- |
+| S.1 | Profile, in your own account | A "Shortcut" block with "No token yet.", a "Create token" button and a "How to set up the Shortcut" link that opens the setup steps |
+| S.2 | Tap "Create token", then "Copy" | A token starting with `fc_` shows once with "Copy it now: it won't be shown again."; "Copied" after the tap |
+| S.3 | Reload Profile | "Token made (today). Not used yet."; the token itself is nowhere on the page; "Make a new token" and "Revoke" |
+| S.4 | Build the Shortcut as in SHORTCUT.md with that token. For each "to check on device" line there, note what you actually had to do | The five actions exist under those names; say so if a name, a setting or a menu path differs |
+| S.5 | Open a product page for a top or a pair of shoes in Safari, run the Shortcut from the Shortcuts app | iOS asks once to allow the connection; then a few lines: the product's name and type, "NN/100 · VERDICT", five part lines, and a gap line only if it makes no outfit. Note how long it took |
+| S.6 | Check the same page on the site ("Should I buy this?") | The same name and type; a score in the same range (the AI parts vary a little between runs) |
+| S.7 | Bind the Shortcut to Back Tap (and the Action Button if the phone has one), open a product page in a store's app, trigger it | The screenshot is of the store's app, not of Shortcuts; the result shows on top without leaving the app |
+| S.8 | Run it on a page with no product (a home screen, a news article) | "Couldn't spot a product there. Try another screenshot." |
+| S.9 | Run it on a bag or a piece of jewelry | The name with "(accessory)" and "We only check clothes and shoes." |
+| S.10 | Run it on a long, photo-heavy page | A normal answer, not "That screenshot is too big"; if it is too big, note the JPEG quality you used |
+| S.11 | Profile → "Make a new token"; run the Shortcut with the old token still in it | "That token doesn't work. Make a new one in Profile and paste it into the Shortcut."; say so if the Shortcut shows its own error instead |
+| S.12 | Paste the new token into the Shortcut, run it, reload Profile | It works again; Profile says "Last used (today)." |
+| S.13 | Profile → "Revoke"; run the Shortcut | "No token yet." in Profile; the Shortcut shows the same "That token doesn't work…" line |
+| S.14 | Log in to the demo account, open Profile | No "Shortcut" block |
+| S.15 | With a new account and an empty closet, make a token and run the Shortcut | The name and type, then "Nothing in your closet to compare it with yet. Add a few pieces you wear, then check again."; no score |
+| S.16 | Closet, after all of the above | Nothing was added: the Shortcut never saves the item |
