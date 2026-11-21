@@ -118,6 +118,52 @@ describe("takeDaily", () => {
   });
 });
 
+describe("takeDaily for a named caller", () => {
+  // A personal token: no session cookie at all.
+  const viaToken = (id: string) => ({ id, readOnly: false, sessionId: null });
+
+  beforeEach(() => {
+    session.user = null;
+  });
+
+  it("still counts no one when there is no session and no caller", async () => {
+    await expect(takeTimes(DAILY_LIMITS.check + 5, "check")).resolves.toBeUndefined();
+  });
+
+  it("stops the caller at the account's daily limit", async () => {
+    for (let i = 0; i < DAILY_LIMITS.check; i++) await takeDaily("check", NOON, viaToken("a"));
+    const err = await takeDaily("check", NOON, viaToken("a")).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(AiDailyLimitError);
+    expect(err).not.toBeInstanceOf(AiDemoLimitError);
+    await expect(takeDaily("check", NOON, viaToken("b"))).resolves.toBeDefined();
+  });
+
+  it("shares one count with the same account's browser session", async () => {
+    await takeDaily("read", NOON, viaToken("a"));
+    session.user = user("a");
+    await takeTimes(DAILY_LIMITS.read - 1, "read");
+    await expect(takeDaily("read", NOON)).rejects.toBeInstanceOf(AiDailyLimitError);
+    await expect(takeDaily("read", NOON, viaToken("a"))).rejects.toBeInstanceOf(AiDailyLimitError);
+  });
+
+  it("goes by the caller, not by whoever's session is around", async () => {
+    session.user = user("b");
+    for (let i = 0; i < DAILY_LIMITS.check; i++) await takeDaily("check", NOON, viaToken("a"));
+    await expect(takeDaily("check", NOON)).resolves.toBeDefined();
+  });
+
+  it("counts nothing with sign-in off", async () => {
+    vi.stubEnv("AUTH_REQUIRED", "");
+    for (let i = 0; i < DAILY_LIMITS.check + 5; i++) await takeDaily("check", NOON, viaToken("a"));
+  });
+
+  it("keeps the app-wide budget's reserve closed to it", async () => {
+    vi.stubEnv("AI_MODE", "live");
+    await recordSpend(DEFAULT_DAILY_BUDGET_USD - DEMO_RESERVE_USD);
+    await expect(takeDaily("read", NOON, viaToken("a"))).rejects.toBeInstanceOf(AiBudgetError);
+  });
+});
+
 describe("tryTakeDaily", () => {
   it("is null instead of throwing when the count is used up", async () => {
     await takeTimes(DAILY_LIMITS.cutout, "cutout");
@@ -145,6 +191,29 @@ describe("withDaily", () => {
       await withDaily("pairings", async () => ({ calls: 0 }), { result: (r) => r.calls === 0 });
     }
     await expect(withDaily("pairings", async () => ({ calls: 1 }))).resolves.toEqual({ calls: 1 });
+  });
+});
+
+describe("withDaily for a named caller", () => {
+  const caller = { id: "a", readOnly: false, sessionId: null };
+
+  beforeEach(() => {
+    session.user = null;
+  });
+
+  it("takes the count from that caller", async () => {
+    for (let i = 0; i < DAILY_LIMITS.check; i++) await withDaily("check", async () => "ok", {}, caller);
+    await expect(withDaily("check", async () => "ok", {}, caller)).rejects.toBeInstanceOf(AiDailyLimitError);
+    // Without a caller it is the session's user again: here, no one.
+    await expect(withDaily("check", async () => "ok")).resolves.toBe("ok");
+  });
+
+  it("gives it back the same way", async () => {
+    for (let i = 0; i < DAILY_LIMITS.check + 3; i++) {
+      const failed = withDaily("check", () => Promise.reject(new AiOutputError("scorePurchase", [])), {}, caller);
+      await expect(failed).rejects.toThrow();
+    }
+    await expect(withDaily("check", async () => "ok", {}, caller)).resolves.toBe("ok");
   });
 });
 
