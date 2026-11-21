@@ -118,6 +118,8 @@ We don't fetch store pages: large retailers block it, and data-center IPs after 
 | `outfit_logs` | One row per outfit (several a day): date, items (sorted, unique per day), occasion | P1 |
 | `wear_insights` | One per user: insights about the outfit log, input hash, generated at | P1 |
 | `resale_matches` | Passing-on item × buyer: buy check score, what the seller may see, the buyer's own reasons, fingerprint, checked at | P1 |
+| `item_fix_outfits` | One per item: the outfit suggested for a piece the owner is unhappy with (item ids, sorted; null when nothing helps), the reason, input hash, prompt version, generated at | P1 |
+| `saved_outfits` | One row per saved outfit: user, item ids (sorted, unique per user) | P1 |
 | `resale_buyers` | Unused: buyers are opted-in users | P1 |
 
 ## Schedule
