@@ -18,6 +18,8 @@ export const DAILY_LIMITS = {
   buyers: 5,
   // POST /api/pairings calls that ask the model.
   pairings: 10,
+  // Item-page outfits picked to offset a complaint, when the model is asked.
+  fix: 20,
 } as const;
 
 export type DailyAction = keyof typeof DAILY_LIMITS;
