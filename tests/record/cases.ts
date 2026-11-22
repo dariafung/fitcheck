@@ -7,11 +7,12 @@ import type { FeelingStructured, ItemSummary, MediaRef } from "@/lib/ai/schemas/
 import type { JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import type { JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
 import type { ParseFeelingInput } from "@/lib/ai/schemas/parse-feeling";
+import type { PickFixOutfitInput } from "@/lib/ai/schemas/pick-fix-outfit";
 import { MAX_FELT_PHOTOS, type FeltFeeling, type ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
 import { readFileSync } from "node:fs";
 import judgeTwenty from "./judge-pairing-20.json";
 import photoCloset from "./score-photo-closet.json";
-import { personaProfileInput, personaWearInput } from "./persona";
+import { personaFixInput, personaProfileInput, personaWearInput } from "./persona";
 
 // The seed persona's three items (seed/items.json).
 export const SHIRT: ItemSummary = {
@@ -540,4 +541,12 @@ export const PHOTO_SCORE_CASES: { name: string; input: ScorePurchaseInput }[] = 
   { name: "persona with photos, gray cropped baby tee", input: photoCase(1, false) },
   { name: "persona with photos and a style card, pink fitted tech tee", input: photoCase(0, true) },
   { name: "persona with photos and a style card, gray cropped baby tee", input: photoCase(1, true) },
+];
+
+// Persona pieces it is unhappy with (seed/items.json, seed/feelings.json): a
+// complaint alone, a low rating with a complaint, and a low rating alone.
+export const FIX_CASES: { name: string; input: PickFixOutfitInput }[] = [
+  { name: "persona V-neck, neckline too deep", input: personaFixInput("0d20089b-caf5-426f-8f27-5cd4b6dfaeca", false) },
+  { name: "persona beige V-neck, 2 stars, washes out", input: personaFixInput("8e169881-6d10-4f5e-93b1-c00a1e1efe69", true) },
+  { name: "persona gray hoodie, 2 stars, no note", input: personaFixInput("f4678e3e-ef86-4510-87ba-7fa834cc08d6", true, true) },
 ];

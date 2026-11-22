@@ -1,0 +1,15 @@
+{
+  "fn": "pickFixOutfit",
+  "promptVersion": "pick-fix-outfit@1",
+  "inputHash": "1abf75b472dcc138f62e7c351298c568b08e773ea6c7b183c0f50178f5ae8f47",
+  "inputPreview": "{\"closet\":[{\"id\":\"5e8bd85a-3e3a-40fc-9028-bb7d2695596c\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"black\",\"colors\":[{\"name\":\"Black\"}],\"fit\":\"relaxed\",\"formality\":1,\"materials\":[\"polyester\",\"elastane\",\"nylon\"],\"notes\":\"High-rise 4\\\" running shorts with built-in liner and Swift lightweight sweat-wicki",
+  "output": {
+    "itemIds": [
+      "d54193d3-7afa-4da9-9af7-efc08b13427a",
+      "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+      "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
+    ],
+    "reason": "The toffee jacket zips up to cover the deep V while the jeans keep you school-ready."
+  },
+  "recordedAt": "2026-11-22T03:51:31.379Z"
+}

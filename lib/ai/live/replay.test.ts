@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FEELING_CASES,
+  FIX_CASES,
   PAIRING_CASES,
   PHOTO_SCORE_CASES,
   PROFILE_CASES,
@@ -13,8 +14,11 @@ import {
   WEAR_CASES,
 } from "@/tests/record/cases";
 import { BuildProfileInput, HEADLINE_MAX_WORDS, profileFacts, STATEMENT_MAX_WORDS } from "../schemas/build-profile";
+import { pickedOutfit } from "@/lib/closet/fix-outfit";
+import { toClosetItem, type ClosetItem } from "@/lib/check/types";
+import { FIX_REASON_MAX_WORDS, PickFixOutfitInput } from "../schemas/pick-fix-outfit";
 import { INSIGHT_MAX_WORDS, SummarizeWearInput } from "../schemas/summarize-wear";
-import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase, summarizeWear } from "../index";
+import { buildProfile, judgePairing, judgeRepeat, parseFeeling, pickFixOutfit, scorePurchase, summarizeWear } from "../index";
 
 const REPLAY = { mode: "replay" } as const;
 const feeling = (name: string) => {
@@ -246,6 +250,22 @@ describe("summarizeWear recordings", () => {
         expect(insight.text).not.toMatch(/\b(she|her|hers|he|him|his)\b|%|\bI\d/i);
         for (const id of insight.itemIds) expect(ids.has(id)).toBe(true);
       }
+    },
+  );
+});
+
+describe("pickFixOutfit recordings", () => {
+  const closetItem = (i: { id: string; title: string; tags: unknown }) => toClosetItem(i.id, i.title, i.tags) as ClosetItem;
+
+  it.each(FIX_CASES.map((c) => [c.name, PickFixOutfitInput.parse(c.input)] as const))(
+    "%s: one complete outfit from the listed pieces, with a short reason",
+    async (_, input) => {
+      const out = await pickFixOutfit(input, REPLAY);
+      const picked = pickedOutfit(out, closetItem(input.item), input.closet.map(closetItem));
+      expect(picked).not.toBeNull();
+      expect(picked!.itemIds).toContain(input.item.id);
+      expect(words(out.reason)).toBeLessThanOrEqual(FIX_REASON_MAX_WORDS);
+      expect(out.reason).not.toMatch(/\b(she|her|hers|he|him|his)\b/i);
     },
   );
 });
