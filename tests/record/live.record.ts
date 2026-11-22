@@ -1,13 +1,13 @@
 // Paid: sends the cases in cases.ts to the real model and records the answers
 // under fixtures/ai/. Cases that already have a recording are skipped; set
-// RERECORD=parseFeeling,judgePairing,judgeRepeat,scorePurchase,buildProfile,summarizeWear (or "all") to record them again. Run by
+// RERECORD=parseFeeling,judgePairing,judgeRepeat,scorePurchase,buildProfile,summarizeWear,pickFixOutfit (or "all") to record them again. Run by
 // hand, within the day's budget:
 //   npx -y pnpm@12.15.0 exec vitest run --project record
 // Token counts, cost and raw answers go to test-results/ai-record.log.
 import { appendFileSync, mkdirSync } from "node:fs";
 import type { Response } from "openai/resources/responses/responses";
 import { describe, expect, it, vi } from "vitest";
-import { buildProfile, judgePairing, judgeRepeat, parseFeeling, scorePurchase, summarizeWear } from "@/lib/ai";
+import { buildProfile, judgePairing, judgeRepeat, parseFeeling, pickFixOutfit, scorePurchase, summarizeWear } from "@/lib/ai";
 import { costUsd, MAX_COST_USD, memoryBudgetStore, setBudgetStore, spentTodayUsd } from "@/lib/ai/budget";
 import type { AiFunctionName } from "@/lib/ai/define";
 import { inputHash } from "@/lib/ai/hash";
@@ -18,10 +18,12 @@ import { BuildProfileInput, PROMPT_VERSION as PROFILE_VERSION } from "@/lib/ai/s
 import { PROMPT_VERSION as FEELING_VERSION, ParseFeelingInput } from "@/lib/ai/schemas/parse-feeling";
 import { PROMPT_VERSION as PAIRING_VERSION, JudgePairingInput } from "@/lib/ai/schemas/judge-pairing";
 import { PROMPT_VERSION as REPEAT_VERSION, JudgeRepeatInput } from "@/lib/ai/schemas/judge-repeat";
+import { PROMPT_VERSION as FIX_VERSION, PickFixOutfitInput } from "@/lib/ai/schemas/pick-fix-outfit";
 import { PROMPT_VERSION as SCORE_VERSION, ScorePurchaseInput } from "@/lib/ai/schemas/score-purchase";
 import { PROMPT_VERSION as WEAR_VERSION, SummarizeWearInput } from "@/lib/ai/schemas/summarize-wear";
 import {
   FEELING_CASES,
+  FIX_CASES,
   PAIRING_CASES,
   PHOTO_SCORE_CASES,
   PROFILE_CASES,
@@ -144,6 +146,16 @@ describe("summarizeWear", () => {
       const hash = inputHash("summarizeWear", WEAR_VERSION, SummarizeWearInput.parse(input));
       const output = await recorded("summarizeWear", name, hash, () => summarizeWear(input, LIVE));
       if (output) expect(output.insights.length).toBeGreaterThan(0);
+    });
+  }
+});
+
+describe("pickFixOutfit", () => {
+  for (const { name, input } of FIX_CASES) {
+    it(name, async () => {
+      const hash = inputHash("pickFixOutfit", FIX_VERSION, PickFixOutfitInput.parse(input));
+      const output = await recorded("pickFixOutfit", name, hash, () => pickFixOutfit(input, LIVE));
+      if (output) expect(output.itemIds.length).toBeGreaterThan(0);
     });
   }
 });

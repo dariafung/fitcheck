@@ -1,11 +1,14 @@
-// The persona as the seed writes it, for recording its style card and its
-// outfit log insights: the same inputs home and the calendar build from the
+// The persona as the seed writes it, for recording its style card, its
+// outfit log insights and outfits for pieces it is unhappy with: the same inputs home and the calendar build from the
 // seeded database. seed/style-profile.json is copied from the card recorded
 // here; the insights stay a runtime cache.
 import type { BuildProfileInput } from "@/lib/ai/schemas/build-profile";
 import { FeelingStructured, type LifestyleMix } from "@/lib/ai/schemas/common";
+import type { PickFixOutfitInput } from "@/lib/ai/schemas/pick-fix-outfit";
 import type { SummarizeWearInput } from "@/lib/ai/schemas/summarize-wear";
+import { fixCloset, fixInput, negativeAspects } from "@/lib/closet/fix-outfit";
 import { itemTags } from "@/lib/closet/tags";
+import { toClosetItem, type ClosetItem } from "@/lib/check/types";
 import { profileInput } from "@/lib/closet/style-profile";
 import { chicagoDay } from "@/lib/wear/day";
 import { wearInput } from "@/lib/wear/insights";
@@ -62,4 +65,19 @@ export function personaWearInput(): SummarizeWearInput {
   const input = wearInput({ items: logItems, outfits, stats });
   if (!input) throw new Error("the persona has too short a log for insights");
   return input;
+}
+
+// What the item page sends pickFixOutfit for one of the persona's active
+// pieces, as text: its feeling's complaints (none with `noNote`) and the
+// rest of the active closet, as fix-outfit-store.ts lists it.
+export function personaFixInput(itemId: string, lowRating: boolean, noNote = false): PickFixOutfitInput {
+  const closet = items
+    .filter((i) => i.status === "active")
+    .map((i) => toClosetItem(i.id, i.title, itemTags(i)))
+    .filter((i): i is ClosetItem => i !== null)
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const self = closet.find((i) => i.id === itemId);
+  if (!self) throw new Error(`no active persona item ${itemId}`);
+  const complaints = noNote ? [] : negativeAspects(feelings.find((f) => f.item_id === itemId)?.structured);
+  return fixInput(self, complaints, lowRating, fixCloset(self, closet));
 }

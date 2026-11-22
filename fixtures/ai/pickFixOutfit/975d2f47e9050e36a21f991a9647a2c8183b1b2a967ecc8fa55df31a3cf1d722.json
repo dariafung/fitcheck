@@ -1,0 +1,14 @@
+{
+  "fn": "pickFixOutfit",
+  "promptVersion": "pick-fix-outfit@1",
+  "inputHash": "975d2f47e9050e36a21f991a9647a2c8183b1b2a967ecc8fa55df31a3cf1d722",
+  "inputPreview": "{\"closet\":[{\"id\":\"5e8bd85a-3e3a-40fc-9028-bb7d2695596c\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"black\",\"colors\":[{\"name\":\"Black\"}],\"fit\":\"relaxed\",\"formality\":1,\"materials\":[\"polyester\",\"elastane\",\"nylon\"],\"notes\":\"High-rise 4\\\" running shorts with built-in liner and Swift lightweight sweat-wicki",
+  "output": {
+    "itemIds": [
+      "d54193d3-7afa-4da9-9af7-efc08b13427a",
+      "c46dd4ac-4545-4190-a86c-b37eb2dbec09"
+    ],
+    "reason": "The blue jeans and black sneakers turn your cozy hoodie into an easy everyday outfit."
+  },
+  "recordedAt": "2026-11-22T03:51:52.012Z"
+}

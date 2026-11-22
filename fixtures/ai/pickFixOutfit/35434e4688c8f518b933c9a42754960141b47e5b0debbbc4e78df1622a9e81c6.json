@@ -1,0 +1,15 @@
+{
+  "fn": "pickFixOutfit",
+  "promptVersion": "pick-fix-outfit@1",
+  "inputHash": "35434e4688c8f518b933c9a42754960141b47e5b0debbbc4e78df1622a9e81c6",
+  "inputPreview": "{\"closet\":[{\"id\":\"5e8bd85a-3e3a-40fc-9028-bb7d2695596c\",\"tags\":{\"category\":\"bottom\",\"colorFamily\":\"black\",\"colors\":[{\"name\":\"Black\"}],\"fit\":\"relaxed\",\"formality\":1,\"materials\":[\"polyester\",\"elastane\",\"nylon\"],\"notes\":\"High-rise 4\\\" running shorts with built-in liner and Swift lightweight sweat-wicki",
+  "output": {
+    "itemIds": [
+      "d54193d3-7afa-4da9-9af7-efc08b13427a",
+      "c46dd4ac-4545-4190-a86c-b37eb2dbec09",
+      "2262ce87-2107-4b70-8e85-33f8ecb2b8bb"
+    ],
+    "reason": "The toffee jacket covers most of the beige and adds warm contrast to keep you glowing."
+  },
+  "recordedAt": "2026-11-22T03:51:46.686Z"
+}
