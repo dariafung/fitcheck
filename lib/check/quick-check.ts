@@ -84,7 +84,12 @@ export async function runQuickCheck(
     // the model, and a model that failed is on us.
     const check = await counted(
       "check",
-      () => runBuyCheck(db, userId, { title: read.title, tags: extracted.tags, photo }, ai),
+      () => runBuyCheck(db, userId, {
+          title: read.title,
+          tags: extracted.tags,
+          photo,
+          page: { brand: extracted.brand, size: extracted.size, shopperFit: extracted.shopperFit },
+        }, ai),
       { result: (c) => !c || "unsupported" in c, error: (err) => err instanceof AiError || isIncomplete(err) },
     );
     if (!check) return { kind: "no_user" };
@@ -140,7 +145,8 @@ function readLine({ title, category }: Read): string {
 }
 
 // The text the Shortcut shows for a finished check: what was read, score and
-// verdict, one line per part, and the gap line when the item makes no outfit.
+// verdict, one line per part, the gap line when the item makes no outfit, and the
+// size advice when there is any.
 export function summaryText(read: Read, result: BuyCheckResult): string {
   if (result.closetSize === 0) return [readLine(read), EMPTY_CLOSET_TEXT].join("\n");
   return [
@@ -148,6 +154,7 @@ export function summaryText(read: Read, result: BuyCheckResult): string {
     `${result.score}/100 · ${verdictFor(result.score)}`,
     ...PARTS.map(([key, label]) => `${label} ${result.parts[key].points}/${result.parts[key].max}`),
     ...(result.gap ? [result.gap.reason] : []),
+    ...(result.size ? [`Size: ${result.size.text}`] : []),
   ].join("\n");
 }
 

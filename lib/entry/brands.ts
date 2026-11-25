@@ -179,6 +179,11 @@ function group(key: string): string {
   return BUILT_IN.get(key)?.name ?? key;
 }
 
+// The same for every spelling of one brand; empty when there is nothing to go by.
+export function brandGroup(brand: string): string {
+  return group(brandKey(brand));
+}
+
 export interface SavedBrand {
   brand: string;
   // When the item was saved (ISO); breaks ties between spellings.

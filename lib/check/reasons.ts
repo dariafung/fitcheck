@@ -3,7 +3,7 @@ import type { Category, Occasion } from "../ai/schemas/common";
 import { SLOTS_NEEDED, type GapKind, type MissingSlot, type OccasionChange, type OccasionGapTier } from "./gaps";
 import { NO_DATA_POINTS, POINTS_PER_QUESTION } from "./score";
 
-const PLURAL: Record<Category, string> = {
+export const CATEGORY_PLURALS: Record<Category, string> = {
   top: "tops",
   bottom: "bottoms",
   one_piece: "one-pieces",
@@ -118,8 +118,8 @@ function toAdd(slots: MissingSlot[]): string {
 }
 
 function whatsMissing(slots: MissingSlot[]): string {
-  const none = slots.filter((s) => !s.owned).map((s) => PLURAL[s.category]);
-  const unmatched = slots.filter((s) => s.owned).map((s) => PLURAL[s.category]);
+  const none = slots.filter((s) => !s.owned).map((s) => CATEGORY_PLURALS[s.category]);
+  const unmatched = slots.filter((s) => s.owned).map((s) => CATEGORY_PLURALS[s.category]);
   return [
     ...(none.length > 0 ? [`you have no ${list(none)}`] : []),
     ...(unmatched.length > 0 ? [`none of your ${list(unmatched)} go with it`] : []),
@@ -152,8 +152,8 @@ export function gapReason(options: MissingSlot[][], kind: GapKind, candidate: Ca
     if (have.length === 0 && covered.every((c) => c !== null)) {
       return `Nothing in your closet to wear ${it} with yet. ${add}`;
     }
-    const yours = have.length > 0 ? `Your ${list(have.map((c) => PLURAL[c]))}` : "Some of your clothes";
-    const none = [...new Set(unique.flat().map((s) => s.category))].map((c) => PLURAL[c]);
+    const yours = have.length > 0 ? `Your ${list(have.map((c) => CATEGORY_PLURALS[c]))}` : "Some of your clothes";
+    const none = [...new Set(unique.flat().map((s) => s.category))].map((c) => CATEGORY_PLURALS[c]);
     const sentence = `${yours} could go with ${it}, but you have no ${list(none, "or")} yet.`;
     // One missing piece per option already says what to add.
     return unique.every((o) => o.length === 1) ? sentence : `${sentence} ${add}`;

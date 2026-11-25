@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { AiError, aiErrorResponse, judgePairing, judgeRepeat, scorePurchase } from "@/lib/ai";
 import { ItemTags } from "@/lib/ai/schemas/common";
+import { ShopperFit } from "@/lib/ai/schemas/extract-item";
 import { decodeDataUrl } from "@/lib/check/board-pieces";
 import { isIncomplete, runBuyCheck } from "@/lib/check/buy-check";
 import { INCOMPLETE_ERROR, INCOMPLETE_NOTICE } from "@/lib/check/reasons";
 import { currentUserId } from "@/lib/db/current-user";
 import { createServerClient } from "@/lib/db/server";
 import { withDaily } from "@/lib/limits/daily";
+import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 
 // Vercel caps request bodies at 4.5 MB.
 const MAX_PHOTO_LENGTH = 4_000_000;
@@ -14,12 +16,16 @@ const MAX_PHOTO_LENGTH = 4_000_000;
 const CheckRequest = z.object({
   title: z.string().trim().min(1).max(200),
   tags: ItemTags,
+  // For the size advice only; none of it reaches a model.
+  brand: z.string().trim().max(120).optional(),
+  size: z.string().trim().max(MAX_ITEM_SIZE_LENGTH).optional(),
+  shopperFit: ShopperFit.optional(),
   // The item's photo as a data URL; one that's too big or unreadable is
   // ignored and the check goes by the tags.
   photo: z.string().optional(),
 });
 
-// POST { title, tags, photo? } → { result }, { unsupported, message } or, when the
+// POST { title, tags, brand?, size?, shopperFit?, photo? } → { result }, { unsupported, message } or, when the
 // model never finished scoring, { error: "incomplete", message }. Checks one
 // item against the current user's closet. Nothing about the item is stored
 // or cached, so every call asks the model again; the score itself is
@@ -30,7 +36,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid item", issues: parsed.error.issues }, { status: 400 });
   }
   try {
-    const { title, tags, photo } = parsed.data;
+    const { title, tags, brand, size, shopperFit, photo } = parsed.data;
     const image = photo && photo.length <= MAX_PHOTO_LENGTH ? decodeDataUrl(photo) : null;
     const userId = await currentUserId();
     // An accessory or a missing user never reaches the model; a model that
@@ -38,7 +44,7 @@ export async function POST(request: Request) {
     const check = await withDaily(
       "check",
       () =>
-        runBuyCheck(createServerClient(), userId, { title, tags, photo: image }, {
+        runBuyCheck(createServerClient(), userId, { title, tags, photo: image, page: { brand, size, shopperFit } }, {
           judge: judgePairing,
           score: scorePurchase,
           repeat: judgeRepeat,

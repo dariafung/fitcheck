@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PATCH } from "@/app/api/items/[id]/route";
+import { loadSizeHistory } from "@/lib/sizing/history";
 import { createTestCloset } from "./helpers";
 
 const user = vi.hoisted(() => ({ id: "" }));
@@ -43,5 +44,13 @@ describe("PATCH /api/items/[id] sizeFit", () => {
 
   it("turns away other answers", async () => {
     expect((await patch({ sizeFit: "tight" })).status).toBe(400);
+  });
+
+  it("counts in the size history only with a size, passed on or not", async () => {
+    await patch({ sizeFit: "small" });
+    await closet.db.from("items").update({ size: null }).eq("id", closet.itemId).throwOnError();
+    expect((await loadSizeHistory(closet.db, closet.userId)).worn).toEqual([]);
+    await closet.db.from("items").update({ size: "XS", status: "passing_on" }).eq("id", closet.itemId).throwOnError();
+    expect((await loadSizeHistory(closet.db, closet.userId)).worn).toMatchObject([{ size: "XS", sizeFit: "small" }]);
   });
 });

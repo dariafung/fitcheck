@@ -42,6 +42,8 @@ export function KeepIt({ bought, readOnly }: { bought: Bought; readOnly: boolean
         entryMethod: "screenshot",
         title: edited.title,
         brand: edited.brand,
+        // The size picked on the page, as read; Edit details can fix it.
+        size: draft.size,
         priceCents: draft.priceCents,
         currency: draft.currency,
         imagePaths: [path],
@@ -68,14 +70,17 @@ export function KeepIt({ bought, readOnly }: { bought: Bought; readOnly: boolean
 
   if (state.kind === "saved") {
     return (
-      <p role="status" className="flex flex-wrap items-center gap-x-3 text-base">
-        <span>
-          <span className="font-medium">{bought.edited.title}</span> is in your closet.
-        </span>
-        <Link href={`/closet/${state.id}`} className="btn-text">
-          See it
-        </Link>
-      </p>
+      <div role="status" className="flex flex-col gap-1">
+        <p className="flex flex-wrap items-center gap-x-3 text-base">
+          <span>
+            <span className="font-medium">{bought.edited.title}</span> is in your closet.
+          </span>
+          <Link href={`/closet/${state.id}`} className="btn-text">
+            See it
+          </Link>
+        </p>
+        <p className="text-sm text-ink-2">Once you&apos;ve tried it on, say how the size fit on its page.</p>
+      </div>
     );
   }
   return (
