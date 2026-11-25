@@ -94,6 +94,8 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 5.13 | "Remove" on the other piece's page; go back to the first | The outfit is gone from "Saved outfits"; the first page offers "Save outfit" again |
 | 5.14 | Open an item with no feeling and no low rating, one with only good things said, and one you're passing on (even rated 1) | No "Try it like this" on any of them |
 | 5.15 | In a closet with no shoes, rate a top 1 star | "Nothing in your closet fixes this yet." and no board |
+| 5.15a | On an item with a size, tap "Too small" under "How did this size fit?"; reload; tap it again; reload | Marked and kept; then cleared, also kept |
+| 5.15b | On an item with no size, tap "Just right" | Saved, with "Add its size in Edit details so this counts in your next check." |
 | 5.16 | Demo account: open "Supima Long Sleeve T-Shirt", then the gray "Feel Good Oversized Hoodie" | Each shows its stars (not tappable), an outfit board and a sentence (the see-through fabric; why the hoodie outfit works), and "Demo account is read-only." where Save would be |
 
 ### 6. Profile and home

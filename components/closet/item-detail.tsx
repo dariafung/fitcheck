@@ -19,6 +19,7 @@ import { ItemImage } from "./item-image";
 import { ItemOutfits } from "./item-outfits";
 import { ItemRating } from "./item-rating";
 import { ItemSize } from "./item-size";
+import { ItemSizeFit } from "./item-size-fit";
 import { PassOnToggle } from "./pass-on-toggle";
 
 export async function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -117,6 +118,10 @@ export async function ItemDetail({ params }: { params: Promise<{ id: string }> }
               )}
               <ItemWearRow itemId={item.id} />
             </dl>
+
+            {item.category !== "accessory" && (
+              <ItemSizeFit itemId={item.id} sizeFit={item.sizeFit} hasSize={item.size !== null} readOnly={readOnly} />
+            )}
 
             {!readOnly && (
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">

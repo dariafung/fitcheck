@@ -113,7 +113,7 @@ We don't fetch store pages: large retailers block it, and data-center IPs after 
 | Table | Main fields | Priority |
 | --- | --- | --- |
 | `users` | Name others see (display_name), measurements, body shape, lifestyle mix, sizes (top and bottom XS–XXL, shoe as W7.5 / M9), resale opt-in, outfit calendar on / off | P0 |
-| `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / passing on), size as typed, rating (1–5 stars, optional) | P0 |
+| `items` | Source URL, entry method, images, AI tags, user-corrected tags, on-model flag, status (active / passing on), size as typed, rating (1–5 stars, optional), size fit (small / right / large, optional) | P0 |
 | `item_feelings` | Raw text, source (typed / voice), structured fields | P0 |
 | `pairings` | Item A, item B, pairs or not, reason, source (rule / AI) | P0 |
 | `style_profiles` | One per user: headline, suits, avoid (each with topic and source items), input hash, generated at | P1 |

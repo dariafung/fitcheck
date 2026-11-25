@@ -36,7 +36,7 @@ if (userId === persona.id) throw new Error("That is the persona itself; export a
 
 const { data: items } = await db
   .from("items")
-  .select("id, image_paths, status, entry_method, title, brand, size, price_cents, currency, category, ai_tags, user_tags, on_model, raw_source, rating")
+  .select("id, image_paths, status, entry_method, title, brand, size, price_cents, currency, category, ai_tags, user_tags, on_model, raw_source, rating, size_fit")
   .eq("user_id", userId)
   .order("created_at")
   .throwOnError();
