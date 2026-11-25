@@ -2,6 +2,7 @@
 // No server-only imports here: the client bundles this file.
 import { z } from "zod";
 import { ItemTags } from "@/lib/ai/schemas/common";
+import { ShopperFit } from "@/lib/ai/schemas/extract-item";
 import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 
 const WebSource = z.object({ field: z.string(), url: z.url() });
@@ -15,6 +16,8 @@ export const ItemDraft = z.object({
   currency: z.string().max(8).optional(),
   // The size read off the screenshot, for the card to start from.
   size: z.string().max(MAX_ITEM_SIZE_LENGTH).optional(),
+  // Shopper feedback on fit read off the screenshot; for a purchase check.
+  shopperFit: ShopperFit.optional(),
   tags: ItemTags,
   onModel: z.boolean(),
   // The photo goes to the model to be cut out before the card shows: it is

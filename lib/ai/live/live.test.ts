@@ -155,6 +155,7 @@ describe("extractItem", () => {
     price: 49.9,
     currency: "usd",
     size: " Size: S ",
+    shopperFit: null,
     tags: {
       category: "top",
       subcategory: null,

@@ -4,7 +4,17 @@ import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
 import { TempRangeF } from "@/lib/temperature";
 import { ItemTags, MediaRef } from "./common";
 
-export const PROMPT_VERSION = "extract-item@7";
+export const PROMPT_VERSION = "extract-item@8";
+
+// What shoppers say about the fit, as far as the screenshot shows it.
+export const MAX_FIT_QUOTES = 3;
+export const MAX_FIT_QUOTE_LENGTH = 160;
+export const ShopperFit = z.object({
+  runs: z.enum(["small", "true", "large", "mixed"]),
+  // Copied as written.
+  quotes: z.array(z.string().trim().min(1).max(MAX_FIT_QUOTE_LENGTH)).max(MAX_FIT_QUOTES),
+});
+export type ShopperFit = z.infer<typeof ShopperFit>;
 
 export const ExtractItemInput = z.object({
   sourceUrl: z.url().optional(),
@@ -31,6 +41,8 @@ export const ExtractItemOutput = z.object({
   // The size chosen on the screenshot, as written (S, 27, 7.5); none when
   // it shows no choice.
   size: z.string().trim().min(1).max(MAX_ITEM_SIZE_LENGTH).optional(),
+  // None when the screenshot shows no shopper feedback on fit.
+  shopperFit: ShopperFit.optional(),
   // Extraction always gives a color family and a temperature range (estimated
   // from type and material); older items may lack them.
   tags: ItemTags.extend({ colorFamily: z.enum(COLOR_FAMILIES), tempRangeF: TempRangeF }),

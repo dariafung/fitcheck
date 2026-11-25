@@ -10,7 +10,12 @@ import { MAX_ITEM_SIZE_LENGTH, sizeText } from "@/lib/resale/size";
 import { TEMP_F_MAX, TEMP_F_MIN } from "@/lib/temperature";
 import { AiNotConfiguredError } from "../errors";
 import { Category, Fit, Occasion, type MediaRef } from "../schemas/common";
-import type { ExtractItemInput, ExtractItemOutput } from "../schemas/extract-item";
+import {
+  MAX_FIT_QUOTE_LENGTH,
+  MAX_FIT_QUOTES,
+  type ExtractItemInput,
+  type ExtractItemOutput,
+} from "../schemas/extract-item";
 import { respondStructured } from "./respond";
 
 const TempF = z.int().min(TEMP_F_MIN).max(TEMP_F_MAX);
@@ -27,6 +32,9 @@ export const ExtractWire = z.strictObject({
   price: z.number().nullable(),
   currency: z.string().nullable(),
   size: z.string().nullable(),
+  shopperFit: z
+    .strictObject({ runs: z.enum(["small", "true", "large", "mixed"]), quotes: z.array(z.string()) })
+    .nullable(),
   tags: z.strictObject({
     category: Category,
     subcategory: z.string().nullable(),
@@ -56,6 +64,7 @@ Rules:
 - title: the product name as the store shows it, with three fixes: drop store notes after an asterisk ("*Updated", "*Regular", "*Waist Length") and ® ™ © signs; drop the brand when the name starts with it ("Hollister Feel Good Oversized Hoodie" → "Feel Good Oversized Hoodie"); write an all-caps name in title case but keep real acronyms ("FAUX SUEDE BELTED JACKET" → "Faux Suede Belted Jacket", "ZW COLLECTION" → "ZW Collection"). Keep every other word as shown: do not shorten, reword or complete it.
 - brand, price (number in the store's currency, e.g. 49.9) and currency (ISO code like USD) only if visible or found by search, else null.
 - size: the size chosen for this item, copied as written: a selected size button, or the size printed next to the product in a cart, order or bag line (e.g. "S" from "S | WHITE", "27 (US 4)", "XS", "7½"). Only the size, not the color. null when no size is chosen or the page only lists the sizes on offer. Never guess it from search.
+- shopperFit: what shoppers say about how the size fits, only as printed in the screenshot (a fit meter or summary such as "Customers say: True to size", or review lines about size). Never from search, the size chart, the model's own size or the store's description of the cut. runs: small (shoppers find it small or size up), true, large (they find it big or size down), or mixed when they disagree. quotes: up to 3 short ones, copied as written, no names. null when the screenshot shows none.
 - Known facts, when given, are true. Do not contradict them.
 - tags.category: one of top, bottom, one_piece (dresses, jumpsuits), shoes, outerwear, accessory.
 - tags.colors: the store's own color names. tags.colorFamily: the single closest family from the fixed list.
@@ -165,6 +174,15 @@ export function toSize(size: string | null): string | undefined {
   return text && text.length <= MAX_ITEM_SIZE_LENGTH ? text : undefined;
 }
 
+// Quotes trimmed to one line; none left means there is nothing to show for it.
+export function toShopperFit(fit: ExtractWire["shopperFit"]): ExtractItemOutput["shopperFit"] {
+  const quotes = (fit?.quotes ?? [])
+    .map((q) => q.replace(/\s+/g, " ").trim())
+    .filter((q) => q && q.length <= MAX_FIT_QUOTE_LENGTH)
+    .slice(0, MAX_FIT_QUOTES);
+  return fit && quotes.length > 0 ? { runs: fit.runs, quotes } : undefined;
+}
+
 const HEX = /^#[0-9a-f]{6}$/i;
 const CURRENCY = /^[A-Z]{3}$/;
 
@@ -181,6 +199,7 @@ export function toExtractOutput(
     priceCents: wire.price != null && wire.price >= 0 ? Math.round(wire.price * 100) : undefined,
     currency: currency && CURRENCY.test(currency) ? currency : undefined,
     size: toSize(wire.size),
+    shopperFit: toShopperFit(wire.shopperFit),
     tags: {
       category: tags.category,
       subcategory: tags.subcategory ?? undefined,

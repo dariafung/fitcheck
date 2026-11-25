@@ -52,6 +52,7 @@ export async function POST(request: Request) {
     brand: alignBrand(extracted.brand, await savedBrands(createServerClient(), await currentUserId())),
     priceCents: extracted.priceCents,
     currency: extracted.currency,
+    shopperFit: extracted.shopperFit,
     tags: extracted.tags,
     onModel: extracted.onModel,
     lowConfidence: photo.cropped ? extracted.lowConfidence : [...extracted.lowConfidence, "image"],

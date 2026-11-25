@@ -3,7 +3,8 @@
 // stripped) through the live parsing, mapping and both validation layers.
 // The model wrote two plain-text commentary messages before its JSON.
 // "size": null was added to that JSON by hand for extract-item@5, which
-// asks for a size; this recording predates it.
+// asks for a size; this recording predates it. "shopperFit": null was added
+// to both recordings the same way for extract-item@8.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { beforeEach, expect, it, vi } from "vitest";

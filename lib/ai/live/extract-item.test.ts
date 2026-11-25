@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readSize } from "@/lib/resale/size";
-import { toSize } from "./extract-item";
+import { toSize, toShopperFit } from "./extract-item";
 
 describe("toSize", () => {
   it("keeps the size as written, on one line", () => {
@@ -29,5 +29,17 @@ describe("toSize", () => {
     expect(toSize("  ")).toBeUndefined();
     expect(toSize("Size:")).toBeUndefined();
     expect(toSize("x".repeat(21))).toBeUndefined();
+  });
+});
+
+describe("toShopperFit", () => {
+  it("keeps up to 3 one-line quotes", () => {
+    const quotes = ["True to\n size.", " ", "x".repeat(200), "Runs small", "Size up", "Fits big"];
+    expect(toShopperFit({ runs: "mixed", quotes })).toEqual({ runs: "mixed", quotes: ["True to size.", "Runs small", "Size up"] });
+  });
+
+  it("is nothing without a quote to back it", () => {
+    expect(toShopperFit({ runs: "small", quotes: [] })).toBeUndefined();
+    expect(toShopperFit(null)).toBeUndefined();
   });
 });

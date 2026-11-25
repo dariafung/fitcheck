@@ -85,7 +85,7 @@ We don't fetch store pages: large retailers block it, and data-center IPs after 
 
 | Function | Input → output | Model |
 | --- | --- | --- |
-| `extractItem` | Product data / page text / screenshot + images (may call web_search) → normalized tags + on-model flag | Spark 1.3 |
+| `extractItem` | Product data / page text / screenshot + images (may call web_search) → normalized tags + on-model flag + shopper feedback on fit | Spark 1.3 |
 | `parseFeeling` | Free text → structured feelings | Spark 1.3 |
 | `transcribe` | Recording → text | Voice Transcribe |
 | `judgePairing` | Two items → pairs or not + reason | Spark 1.3 |
