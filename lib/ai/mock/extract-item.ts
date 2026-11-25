@@ -29,6 +29,7 @@ export function mockExtractItem(
     priceCents,
     currency,
     size: "S",
+    shopperFit: input.screenshot ? { runs: "true", quotes: ["True to size"] } : undefined,
     tags: {
       colors: [{ name: "black" }],
       materials: ["cotton"],

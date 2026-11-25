@@ -22,6 +22,8 @@ import {
 import { imageUrls } from "../closet/images";
 import { loadStyleCardForScoring } from "../closet/style-profile";
 import type { Db } from "../db/server";
+import { sizeAdvice, type PageSizing, type SizeAdvice } from "../sizing/advice";
+import { loadSizeHistory } from "../sizing/history";
 import {
   FIT_QUESTIONS,
   fitAnswers,
@@ -104,6 +106,8 @@ export interface BuyCheckResult {
   // `slots` holds what's missing for each way to build an outfit around it.
   gap: { kind: GapKind; slots: MissingSlot[][]; reason: string } | null;
   sampleOutfits: SampleOutfit[];
+  // What the owner's sizes in this brand and type say; not part of the score.
+  size: SizeAdvice | null;
   // Owned items the check compared against; 0 means there was nothing to
   // compare, and the page shows no score.
   closetSize: number;
@@ -125,6 +129,8 @@ export interface Candidate {
   tags: ItemTags;
   // From the page, never stored; without it the model goes by the tags.
   photo?: Buffer | null;
+  // For size advice; without it (resale matching) there is none.
+  page?: PageSizing;
 }
 
 interface Profile {
@@ -283,9 +289,10 @@ export async function runBuyCheck(
   const closetIds = closet.map((i) => i.id);
   // The style card helps the fit questions, stale or not; without one the
   // model gets the same request as before cards existed.
-  const [feelings, styleProfile] = await Promise.all([
+  const [feelings, styleProfile, sizes] = await Promise.all([
     loadFeelings(db, userId, new Set(closetIds)),
     loadStyleCardForScoring(db, userId, new Set([...closetIds, ...skippedItemIds])),
+    input.page ? loadSizeHistory(db, userId) : null,
   ]);
 
   // The model never sees the gap numbers, so all the calls can run at once.
@@ -350,6 +357,7 @@ export async function runBuyCheck(
       parts,
       gap: slots && gapNotice(slots, categoryOf(candidate)),
       sampleOutfits: sampleOutfits(withCandidate, titles, images),
+      size: input.page && sizes ? sizeAdvice({ tags: candidate.tags, page: input.page }, sizes.worn, sizes.usual) : null,
       closetSize: closet.length,
       stats: comparison.stats,
     },

@@ -94,6 +94,8 @@ Skip this section until photo entry is on `main`. Take photos of 2–3 clothes y
 | 5.13 | "Remove" on the other piece's page; go back to the first | The outfit is gone from "Saved outfits"; the first page offers "Save outfit" again |
 | 5.14 | Open an item with no feeling and no low rating, one with only good things said, and one you're passing on (even rated 1) | No "Try it like this" on any of them |
 | 5.15 | In a closet with no shoes, rate a top 1 star | "Nothing in your closet fixes this yet." and no board |
+| 5.15a | On an item with a size, tap "Too small" under "How did this size fit?"; reload; tap it again; reload | Marked and kept; then cleared, also kept |
+| 5.15b | On an item with no size, tap "Just right" | Saved, with "Add its size in Edit details so this counts in your next check." |
 | 5.16 | Demo account: open "Supima Long Sleeve T-Shirt", then the gray "Feel Good Oversized Hoodie" | Each shows its stars (not tappable), an outfit board and a sentence (the see-through fabric; why the hoodie outfit works), and "Demo account is read-only." where Save would be |
 
 ### 6. Profile and home
@@ -130,6 +132,10 @@ Do this after sections 3, 5 and 6, so there is a closet, feelings and a profile 
 | 7.11 | Check an item, then press "I bought it — add to closet" under the result | "Adding…", then "<name> is in your closet." with "See it"; no second card to confirm. "See it" opens the new item with the same photo; it is in the closet grid |
 | 7.12 | With a new account that has 1–4 pieces, run a check | The score and the five parts show, but no verdict words: instead "Based on 3 pieces. Add more for a verdict." (with your number) |
 | 7.13 | Add pieces until you have 5, check again | The verdict (e.g. "A GOOD ADD") is back under the score |
+| 7.14 | Mark a top (with a size) "Too small", then check another top of that brand | A "Size." line under the summary: "<size> is too small on you in <brand> tops. Skip <size>." and "Based on 1 piece you marked."; the score is not changed by it |
+| 7.15 | Check a bottom or a jacket of that brand | "No size history with <brand> bottoms yet." (or jackets): the top's answer is not used |
+| 7.16 | Check a brand you own nothing of, with a screenshot that shows shopper feedback on fit ("True to size", "Runs small") | "Shoppers say …" with the quote as printed; no size to buy is named |
+| 7.17 | After "I bought it", open the item | It has the size that was picked on the page, if one was |
 
 ### 8. Outfit calendar
 

@@ -32,6 +32,7 @@ function result(over: Partial<BuyCheckResult> = {}): BuyCheckResult {
     },
     gap: null,
     sampleOutfits: [],
+    size: null,
     closetSize: 12,
     stats: {} as BuyCheckResult["stats"],
     ...over,
@@ -79,6 +80,14 @@ describe("summaryText", () => {
     const lines = summaryText(LOAFERS, result()).split("\n");
     expect(lines.length).toBeLessThanOrEqual(8);
     for (const line of lines) expect(line.length).toBeLessThanOrEqual(40);
+  });
+});
+
+describe("size advice in the text", () => {
+  it("adds one line when there is advice and nothing without", () => {
+    const size = { kind: "avoid" as const, text: "XS is too small on you in HOLLISTER tops. Skip XS.", notes: ["Based on 1 piece you marked."] };
+    expect(summaryText(LOAFERS, result({ size })).split("\n").at(-1)).toBe(`Size: ${size.text}`);
+    expect(summaryText(LOAFERS, result())).not.toContain("Size:");
   });
 });
 

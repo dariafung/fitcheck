@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ItemTags } from "@/lib/ai/schemas/common";
 import { AskingPriceCents, Condition } from "@/lib/resale/listing";
 import { MAX_ITEM_SIZE_LENGTH } from "@/lib/resale/size";
+import { SizeFit } from "@/lib/sizing/fit";
 
 // Worn (active) or on its way out (passing_on). Only active items count as
 // owned in outfits, buy checks and Good for today.
@@ -32,7 +33,8 @@ export type ItemDetails = z.infer<typeof ItemDetails>;
 // asking price (US cents) and condition, or any of them together. The size is
 // as typed (M, 28, US 8); null or empty clears it, which an item on its way
 // out can't do. Passing an item on also needs a price and a condition.
-// The rating is 1 to 5 stars; null clears it.
+// The rating is 1 to 5 stars and the size fit is how its size turned out; null
+// clears either.
 // Unknown keys are rejected so other fields are not silently ignored.
 export const ItemPatch = z
   .strictObject({
@@ -48,6 +50,7 @@ export const ItemPatch = z
     askingPriceCents: AskingPriceCents.nullable().optional(),
     condition: Condition.nullable().optional(),
     rating: ItemRating.nullable().optional(),
+    sizeFit: SizeFit.nullable().optional(),
   })
   .refine(
     (p) =>
@@ -56,7 +59,8 @@ export const ItemPatch = z
       p.size !== undefined ||
       p.askingPriceCents !== undefined ||
       p.condition !== undefined ||
-      p.rating !== undefined,
-    { message: "Send details, a status, a size, a price, a condition or a rating." },
+      p.rating !== undefined ||
+      p.sizeFit !== undefined,
+    { message: "Send details, a status, a size, a price, a condition, a rating or a size fit." },
   );
 export type ItemPatch = z.infer<typeof ItemPatch>;

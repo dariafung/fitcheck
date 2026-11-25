@@ -14,7 +14,8 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/items/[id]">) {
 }
 
 // Edits the item's details (name, brand, tags), its status (active or
-// passing_on), its size, asking price, condition and/or star rating. Returns the item as
+// passing_on), its size, asking price, condition, star rating and/or
+// size fit. Returns the item as
 // GET does, with the edit applied. An item can't be passed on without a size,
 // a price and a condition.
 export async function PATCH(req: Request, ctx: RouteContext<"/api/items/[id]">) {

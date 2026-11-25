@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ItemSummary, ItemTags } from "@/lib/ai/schemas/common";
 import type { Db } from "@/lib/db/server";
 import { latestFeeling } from "./feelings";
+import { SizeFit } from "@/lib/sizing/fit";
 import type { TempRangeF } from "@/lib/temperature";
 import { itemTempRange } from "./fit-today";
 import { ITEM_IMAGES_BUCKET, imageUrls, isExternalUrl } from "./images";
@@ -39,6 +40,8 @@ export interface ClosetItem {
   condition: string | null;
   // 1 to 5 stars, or null when not rated.
   rating: number | null;
+  // How its size turned out on the owner, or null when not said.
+  sizeFit: SizeFit | null;
   tags: ItemTags;
   tempRangeF: TempRangeF | null;
   swatch: string;
@@ -107,7 +110,7 @@ export async function getClosetItem(
   const { data } = await db
     .from("items")
     .select(
-      "id, title, brand, retailer, source_url, category, status, size, asking_price_cents, condition, rating, image_paths, ai_tags, user_tags",
+      "id, title, brand, retailer, source_url, category, status, size, asking_price_cents, condition, rating, size_fit, image_paths, ai_tags, user_tags",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -131,6 +134,7 @@ export async function getClosetItem(
     askingPriceCents: data.asking_price_cents,
     condition: data.condition,
     rating: data.rating,
+    sizeFit: SizeFit.safeParse(data.size_fit).data ?? null,
     tags: itemTags(data),
     tempRangeF: itemTempRange(data),
     swatch: swatchHex(data),
@@ -140,8 +144,8 @@ export async function getClosetItem(
 }
 
 // Applies a PATCH to one of the user's items: new details (name, brand, tags
-// as user corrections), a new status, size, asking price, condition and/or
-// rating.
+// as user corrections), a new status, size, asking price, condition,
+// rating and/or size fit.
 // "not_found" when it is not theirs; "size_required" when it would be passing
 // on without a size; "listing_required" without a price and a condition.
 // Changing tags bumps updated_at, which marks its cached pairings stale.
@@ -154,7 +158,7 @@ export async function updateClosetItem(
   if (!isItemId(id)) return "not_found";
   const { data } = await db
     .from("items")
-    .select("title, brand, category, status, size, asking_price_cents, condition, rating, ai_tags, user_tags")
+    .select("title, brand, category, status, size, asking_price_cents, condition, rating, size_fit, ai_tags, user_tags")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle()

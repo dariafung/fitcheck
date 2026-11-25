@@ -9,6 +9,7 @@ import type { BuyCheckResult, SampleOutfit } from "@/lib/check/buy-check";
 import { NO_LIFESTYLE_PARTS, NO_LIFESTYLE_REASON, NO_NOTES_ANSWER, PROFILE_MIX_HREF } from "@/lib/check/reasons";
 import { verdictFor } from "@/lib/check/verdict";
 import { smallClosetNote } from "@/lib/closet/starter";
+import type { SizeAdvice } from "@/lib/sizing/advice";
 import { Icon } from "@/components/ui/icon";
 import { OutfitBoard, ownedLine, type BoardPiece } from "./OutfitBoard";
 
@@ -99,6 +100,22 @@ function useCutouts(outfits: SampleOutfit[], photo: string | null, onModel: bool
     return () => controller.abort();
   }, [outfits, photo, onModel]);
   return cutouts;
+}
+
+// The size advice: one line and what it's based on. Never part of the score.
+function SizeLine({ advice }: { advice: SizeAdvice }) {
+  return (
+    <div data-testid="size-advice" data-kind={advice.kind} className="flex flex-col gap-1 border-l-2 border-ink pl-4">
+      <p className="text-base">
+        <span className="font-medium">Size.</span> {advice.text}
+      </p>
+      {advice.notes.map((note) => (
+        <p key={note} className="text-sm text-ink-2">
+          {note}
+        </p>
+      ))}
+    </div>
+  );
 }
 
 // The verdict page. Photo left, verdict right, held in view on a desktop:
@@ -199,6 +216,7 @@ export function BuyResult({
                   {result.gap.reason}
                 </p>
               )}
+              {result.size && <SizeLine advice={result.size} />}
             </div>
 
             <ul className="border-t border-ink">
