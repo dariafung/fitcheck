@@ -85,4 +85,6 @@ The AI layer has three modes, set with `AI_MODE` in `.env.local`:
 
 Tests: `pnpm test` (unit), `pnpm test:integration` (needs local Supabase), `pnpm test:e2e` (run `pnpm build` first).
 
+CI (GitHub Actions, `.github/workflows/ci.yml`) runs on every pull request and every push to `main`: lint, typecheck, unit tests and the build, and in a second job the integration tests against a fresh local Supabase with every migration and the seed. It uses mock AI and no secrets. e2e is not in CI; run it locally before merging.
+
 More detail: [docs/SPEC.md](docs/SPEC.md) · Manual test plan: [docs/TEST_PLAN.md](docs/TEST_PLAN.md)
