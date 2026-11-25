@@ -1,3 +1,9 @@
 {
-  "warningAllowlist": []
+  "warningAllowlist": [
+    {
+      "scope": "build",
+      "match": "No build cache found",
+      "reason": "CI starts from a clean checkout every run, so Next.js has no build cache there; it only makes the build slower."
+    }
+  ]
 }
